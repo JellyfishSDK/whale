@@ -1,3 +1,6 @@
+[![CI](https://github.com/DeFiCh/whale/actions/workflows/ci.yml/badge.svg)](https://github.com/DeFiCh/whale/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/DeFiCh/whale/branch/main/graph/badge.svg?token=kBCC9qSRrA)](https://codecov.io/gh/DeFiCh/whale)
+[![Maintainability](https://api.codeclimate.com/v1/badges/593ffda9c1d91261a37b/maintainability)](https://codeclimate.com/github/DeFiCh/whale/maintainability)
 [![TS-Standard](https://badgen.net/badge/code%20style/ts-standard/blue?icon=typescript)](https://github.com/standard/ts-standard)
 
 # DeFi Whale
@@ -25,8 +28,8 @@ convenience with basic toolchain setup but use of IntelliJ is totally optional.
 
 ### Security issues
 
-If you discover a security vulnerability in `DeFi Whale`
-, [please see submit it privately](https://github.com/DeFiCh/.github/blob/main/SECURITY.md).
+If you discover a security vulnerability in `DeFi Whale`,
+[please see submit it privately](https://github.com/DeFiCh/.github/blob/main/SECURITY.md).
 
 ## License & Disclaimer
 
