@@ -1,0 +1,31 @@
+# IntelliJ
+.idea/*
+!.idea/inspectionProfiles/
+!.idea/dictionaries/
+!.idea/codeStyles/
+!.idea/modules.xml
+!.idea/*.iml
+!.idea/README.md
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+parcel-bundle-reports
+
+# node_modules
+node_modules
+
+# dist & pack
+dist
+*.tgz
+
+coverage
