@@ -1,21 +1,8 @@
 {
   "private": true,
-  "license": "MIT",
-  "contributors": [
-    {
-      "name": "DeFiChain Foundation",
-      "email": "engineering@defichain.com",
-      "url": "https://defichain.com/"
-    },
-    {
-      "name": "DeFi Blockchain Contributors"
-    },
-    {
-      "name": "DeFi Whale Contributors"
-    }
-  ],
   "workspaces": [
-    "./packages/*"
+    "./modules/*",
+    "./whale-server"
   ],
   "scripts": {
     "prepare": "husky install",
