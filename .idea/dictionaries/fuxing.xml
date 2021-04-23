@@ -56,6 +56,7 @@
       <w>getnetworkhashps</w>
       <w>getnewaddress</w>
       <w>getreceivedbyaddress</w>
+      <w>gettoken</w>
       <w>gettransaction</w>
       <w>gettxout</w>
       <w>getunconfirmedbalance</w>
@@ -83,6 +84,9 @@
       <w>libevent</w>
       <w>listaccounts</w>
       <w>listaddressgroupings</w>
+      <w>listpoolpairs</w>
+      <w>listpoolshares</w>
+      <w>listtokens</w>
       <w>listunspent</w>
       <w>locktime</w>
       <w>logtimemicros</w>
@@ -109,6 +113,7 @@
       <w>numnotequal</w>
       <w>paytxfee</w>
       <w>pooledtx</w>
+      <w>poolpair</w>
       <w>previousblockhash</w>
       <w>prevout</w>
       <w>prevouts</w>
