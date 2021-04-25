@@ -38,7 +38,9 @@ async function createTestingModule (container: MasterNodeRegTestContainer): Prom
 export async function createTestingApp (container: MasterNodeRegTestContainer): Promise<NestFastifyApplication> {
   const module = await createTestingModule(container)
   const app = module.createNestApplication<NestFastifyApplication>(
-    newFastifyAdapter()
+    newFastifyAdapter({
+      logger: false
+    })
   )
   await app.init()
   return app

@@ -1,13 +1,17 @@
 import { FastifyAdapter } from '@nestjs/platform-fastify'
 import { JellyfishJSON } from '@defichain/jellyfish-json'
 
+interface AdapterOptions {
+  logger: boolean
+}
+
 /**
  * Creates a new FastifyAdapter that uses JellyfishJSON for JSON stringify and parse.
  */
-export function newFastifyAdapter (): FastifyAdapter {
-  const adapter = new FastifyAdapter({
-    logger: true
-  })
+export function newFastifyAdapter (options: AdapterOptions = {
+  logger: true
+}): FastifyAdapter {
+  const adapter = new FastifyAdapter(options)
   setupJellyfishJSON(adapter)
   return adapter
 }
