@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { AppModule } from '@src/module.app'
-import { newFastifyAdapter } from '@src/fastify.adapter'
+import { newFastifyAdapter } from '@src/adapter.fastify'
 
 /**
  * Bootstrap AppModule and start on port 3000

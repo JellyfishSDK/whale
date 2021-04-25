@@ -16,6 +16,9 @@ export function newFastifyAdapter (options: AdapterOptions = {
   return adapter
 }
 
+/**
+ * @param {FastifyAdapter} adapter to setup and use JellyfishJSON for setReplySerializer & addContentTypeParser
+ */
 function setupJellyfishJSON (adapter: FastifyAdapter): void {
   adapter.getInstance().setReplySerializer(payload => {
     return JellyfishJSON.stringify(payload)
