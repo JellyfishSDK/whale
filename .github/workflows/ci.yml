@@ -41,4 +41,4 @@ jobs:
         with:
           node-version: '15'
 
-      - run: npx ts-standard
+      - run: npx ts-standard --fix
