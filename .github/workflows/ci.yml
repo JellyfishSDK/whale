@@ -33,7 +33,7 @@ jobs:
       - run: npx codecov
 
   lint:
-    name: Lint - Standard
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
