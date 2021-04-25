@@ -13,8 +13,7 @@
     "start:prod": "node dist/app.main",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:ci": "jest --ci --coverage",
-    "test:e2e": "jest --config __e2e__/jest.config.js"
+    "test:ci": "jest --ci --coverage"
   },
   "dependencies": {
     "@defichain/jellyfish-api-core": "next",
