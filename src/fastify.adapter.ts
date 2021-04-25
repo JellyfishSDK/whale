@@ -5,10 +5,18 @@ import { JellyfishJSON } from '@defichain/jellyfish-json'
  * Creates a new FastifyAdapter that uses JellyfishJSON for JSON stringify and parse.
  */
 export function newFastifyAdapter (): FastifyAdapter {
-  const adapter = new FastifyAdapter()
+  const adapter = new FastifyAdapter({
+    logger: true
+  })
+  setupJellyfishJSON(adapter)
+  return adapter
+}
+
+function setupJellyfishJSON (adapter: FastifyAdapter): void {
   adapter.getInstance().setReplySerializer(payload => {
     return JellyfishJSON.stringify(payload)
   })
+
   adapter.getInstance().addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {
     try {
       const json = JellyfishJSON.parse(body as string, 'lossless')
@@ -18,5 +26,4 @@ export function newFastifyAdapter (): FastifyAdapter {
       done(err, undefined)
     }
   })
-  return adapter
 }

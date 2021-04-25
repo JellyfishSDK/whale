@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable, NotFoundException } from '@nestjs/common'
 import { Observable } from 'rxjs'
-import { Request } from 'express'
 import { ConfigService } from '@nestjs/config'
 
 /**
@@ -28,9 +27,9 @@ export class NetworkGuard implements CanActivate {
   }
 
   canActivate (context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    const request: Request = context.switchToHttp().getRequest()
+    const request = context.switchToHttp().getRequest()
     if (request.params.network !== this.network) {
-      throw new NotFoundException()
+      throw new NotFoundException('Network not found')
     }
     return true
   }
