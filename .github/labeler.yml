@@ -6,7 +6,17 @@ labels:
     matcher:
       files: ".github/**"
 
-  - label: area/whale-server
+  - label: area/module-actor
     sync: true
     matcher:
-      files: "packages/whale-server/**"
+      files: "packages/module-actor/**"
+
+  - label: area/module-api
+    sync: true
+    matcher:
+      files: "packages/module-api/**"
+
+  - label: area/module-database
+    sync: true
+    matcher:
+      files: "packages/module-database/**"
