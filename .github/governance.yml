@@ -32,7 +32,9 @@ issue:
       list:
         - core
         - workflow
-        - whale-server
+        - module-actor
+        - module-api
+        - module-database
       multiple: true
       needs:
         comment: |

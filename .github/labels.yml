@@ -55,7 +55,11 @@
 - color: fbca04
   name: area/workflow
 - color: fbca04
-  name: area/whale-server
+  name: area/module-actor
+- color: fbca04
+  name: area/module-api
+- color: fbca04
+  name: area/module-database
 
 # Priority
 - color: d93f0b

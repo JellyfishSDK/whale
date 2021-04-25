@@ -9,7 +9,10 @@
 
 /website/                                       @fuxingloh
 
-/packages/whale-server/                         @fuxingloh
+/src/                                           @fuxingloh
+/src/module-actor/                              @fuxingloh
+/src/module-api/                                @fuxingloh
+/src/module-database/                           @fuxingloh
 
 lerna.json                                      @fuxingloh
 tsconfig.json                                   @fuxingloh
