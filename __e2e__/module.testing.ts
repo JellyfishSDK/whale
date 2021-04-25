@@ -2,7 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { AppModule } from '@src/module.app'
 import { ConfigService } from '@nestjs/config'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { INestApplication } from '@nestjs/common'
+import { newFastifyAdapter } from '@src/fastify.adapter'
+import { NestFastifyApplication } from '@nestjs/platform-fastify'
 
 class TestConfigService extends ConfigService {
   constructor (rpcUrl: string) {
@@ -34,9 +35,11 @@ async function createTestingModule (container: MasterNodeRegTestContainer): Prom
  * @param {MasterNodeRegTestContainer} container to connect TestingModule to
  * @return Promise<INestApplication> that is initialized
  */
-export async function createTestingApp (container: MasterNodeRegTestContainer): Promise<INestApplication> {
-  const moduleFixture = await createTestingModule(container)
-  const app = moduleFixture.createNestApplication()
+export async function createTestingApp (container: MasterNodeRegTestContainer): Promise<NestFastifyApplication> {
+  const module = await createTestingModule(container)
+  const app = module.createNestApplication<NestFastifyApplication>(
+    newFastifyAdapter()
+  )
   await app.init()
   return app
 }
