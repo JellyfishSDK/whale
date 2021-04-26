@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { AppModule } from '@src/module.app'
+import { AppModule } from '@src/app.module'
 import { ConfigService } from '@nestjs/config'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { newFastifyAdapter } from '@src/adapter.fastify'
+import { newFastifyAdapter } from '@src/fastify'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 
 class TestConfigService extends ConfigService {
