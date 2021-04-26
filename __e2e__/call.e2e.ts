@@ -19,7 +19,7 @@ afterAll(async () => {
 it('should 404 with invalid network', async () => {
   const res = await app.inject({
     method: 'POST',
-    url: '/v1.0/mainnet/call/getblockchaininfo'
+    url: '/v1/mainnet/call/getblockchaininfo'
   })
 
   expect(res.statusCode).toBe(404)
@@ -33,7 +33,7 @@ it('should 404 with invalid network', async () => {
 it('should 403 with non whitelisted method', async () => {
   const res = await app.inject({
     method: 'POST',
-    url: '/v1.0/regtest/call/getbalance'
+    url: '/v1/regtest/call/getbalance'
   })
 
   expect(res.statusCode).toBe(403)
@@ -47,7 +47,7 @@ it('should 403 with non whitelisted method', async () => {
 it('should 400 with invalid post body params', async () => {
   const res = await app.inject({
     method: 'POST',
-    url: '/v1.0/regtest/call/getblock',
+    url: '/v1/regtest/call/getblock',
     payload: {
       params: {
         block: 1
@@ -64,10 +64,10 @@ it('should 400 with invalid post body params', async () => {
 })
 
 describe('whitelisted rpc methods', () => {
-  it('should 200 POST: /v1.0/regtest/call/getblockchaininfo', async () => {
+  it('should 200 POST: /v1/regtest/call/getblockchaininfo', async () => {
     const res = await app.inject({
       method: 'POST',
-      url: '/v1.0/regtest/call/getblockchaininfo'
+      url: '/v1/regtest/call/getblockchaininfo'
     })
 
     expect(res.statusCode).toBe(200)
@@ -78,10 +78,10 @@ describe('whitelisted rpc methods', () => {
     expect(typeof data.blocks).toBe('number')
   })
 
-  it('should 200 POST: /v1.0/regtest/call/getblockcount', async () => {
+  it('should 200 POST: /v1/regtest/call/getblockcount', async () => {
     const res = await app.inject({
       method: 'POST',
-      url: '/v1.0/regtest/call/getblockcount'
+      url: '/v1/regtest/call/getblockcount'
     })
 
     expect(res.statusCode).toBe(200)
@@ -91,7 +91,7 @@ describe('whitelisted rpc methods', () => {
     expect(typeof data).toBe('number')
   })
 
-  it('should 200 POST: /v1.0/regtest/call/getblockhash', async () => {
+  it('should 200 POST: /v1/regtest/call/getblockhash', async () => {
     await waitForExpect(async () => {
       const count = await container.call('getblockcount')
       await expect(count).toBeGreaterThan(1)
@@ -99,7 +99,7 @@ describe('whitelisted rpc methods', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v1.0/regtest/call/getblockhash',
+      url: '/v1/regtest/call/getblockhash',
       payload: {
         params: [1]
       }
@@ -112,7 +112,7 @@ describe('whitelisted rpc methods', () => {
     expect(data.length).toBe(64)
   })
 
-  it('should 200 POST: /v1.0/regtest/call/getblock', async () => {
+  it('should 200 POST: /v1/regtest/call/getblock', async () => {
     await waitForExpect(async () => {
       const count = await container.call('getblockcount')
       await expect(count).toBeGreaterThan(1)
@@ -121,7 +121,7 @@ describe('whitelisted rpc methods', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v1.0/regtest/call/getblock',
+      url: '/v1/regtest/call/getblock',
       payload: {
         params: [hash]
       }

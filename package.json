@@ -10,7 +10,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/app.main",
+    "start:prod": "node dist/main",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci --coverage"
@@ -25,6 +25,8 @@
     "@nestjs/cqrs": "^7.0.1",
     "@nestjs/platform-fastify": "^7.6.15",
     "@nestjs/schedule": "^0.4.3",
+    "@nestjs/terminus": "^7.1.2",
+    "bignumber.js": "^9.0.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.6"
