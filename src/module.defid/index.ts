@@ -8,7 +8,7 @@ const JsonRpcClientFactory: FactoryProvider = {
   useFactory: (configService: ConfigService) => {
     const url = configService.get<string>('defid.url')
     if (url === undefined) {
-      throw new Error('bootstrapping error: missing config in configuration.ts - defid.url is not configured')
+      throw new Error('bootstrapping error: missing config in app.configuration.ts - defid.url is not configured')
     }
     return new JsonRpcClient(url)
   },
