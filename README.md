@@ -34,3 +34,6 @@ If you discover a security vulnerability in `DeFi Whale`,
 ## License & Disclaimer
 
 By using `DeFi Whale` (this repo), you (the user) agree to be bound by [the terms of this license](LICENSE).
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FDeFiCh%2Fwhale.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FDeFiCh%2Fwhale?ref=badge_large)
