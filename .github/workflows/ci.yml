@@ -65,6 +65,14 @@ jobs:
           tags: |
             ghcr.io/defich/whale:latest
 
-# TODO(fuxingloh): Setup docker-compose and wait for POST: v1/call/getblockchaininfo to return regtest
-#      - name: Docker up
-#        run: docker-compose up -d
+      - uses: actions/checkout@v2
+
+      - name: Setup docker containers and wait
+        run: |
+          docker-compose -f __sanity__/docker-compose.yml up -d --no-build
+          ./__sanity__/wait-for.sh http://localhost:3000/_health/probes/liveness
+
+      - name: Sanity testing
+        uses: matt-ball/newman-action@0659e9b8d056c0d03d94e1dbfce380512088b566
+        with:
+          collection: __sanity__/postman_collection.json
