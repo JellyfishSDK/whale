@@ -65,8 +65,6 @@ jobs:
           tags: |
             ghcr.io/defich/whale:latest
 
-      - name: Docker up
-        run: docker-compose up -d
-
-      # TODO(fuxingloh): wait for
-      # TODO(fuxingloh): getblockchaininfo is regtest
+# TODO(fuxingloh): Setup docker-compose and wait for POST: v1/call/getblockchaininfo to return regtest
+#      - name: Docker up
+#        run: docker-compose up -d
