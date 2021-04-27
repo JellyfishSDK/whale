@@ -9,14 +9,24 @@ labels:
   - label: area/module-actor
     sync: true
     matcher:
-      files: "packages/module-actor/**"
+      files: "packages/module.actor/**"
 
   - label: area/module-api
     sync: true
     matcher:
-      files: "packages/module-api/**"
+      files: "packages/module.api/**"
 
   - label: area/module-database
     sync: true
     matcher:
-      files: "packages/module-database/**"
+      files: "packages/module.database/**"
+
+  - label: area/module-defid
+    sync: true
+    matcher:
+      files: "packages/module.defid/**"
+
+  - label: area/module-health
+    sync: true
+    matcher:
+      files: "packages/module.health/**"

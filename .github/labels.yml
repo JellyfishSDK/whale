@@ -60,6 +60,10 @@
   name: area/module-api
 - color: fbca04
   name: area/module-database
+- color: fbca04
+  name: area/module-defid
+- color: fbca04
+  name: area/module-health
 
 # Priority
 - color: d93f0b

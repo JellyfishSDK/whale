@@ -35,6 +35,8 @@ issue:
         - module-actor
         - module-api
         - module-database
+        - module-defid
+        - module-health
       multiple: true
       needs:
         comment: |

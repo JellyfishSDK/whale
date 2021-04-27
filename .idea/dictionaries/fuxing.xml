@@ -53,6 +53,7 @@
       <w>getblockchaininfo</w>
       <w>getblockcount</w>
       <w>getblockhash</w>
+      <w>getconnectioncount</w>
       <w>getmintinginfo</w>
       <w>getnetworkhashps</w>
       <w>getnewaddress</w>
@@ -89,6 +90,7 @@
       <w>listpoolshares</w>
       <w>listtokens</w>
       <w>listunspent</w>
+      <w>liveness</w>
       <w>locktime</w>
       <w>logtimemicros</w>
       <w>lshift</w>
