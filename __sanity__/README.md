@@ -2,7 +2,7 @@
 
 On top of end-to-end testing, sanity testing is done after the docker image is build. This kind of testing is performed
 to ascertain the possibility of bugs within the workflow that generate the builds. To identify and determine whether a
-build artifact (docker) should be rejected.
+build artifact (docker) should be rejected. This is only done on CI and you are not expected to perform them manually.
 
 ## The setup
 
