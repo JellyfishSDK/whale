@@ -11,7 +11,10 @@ class TestConfigService extends ConfigService {
       defid: {
         url: rpcUrl
       },
-      network: 'regtest'
+      network: 'regtest',
+      database: {
+        provider: 'memory'
+      }
     })
   }
 }
