@@ -35,3 +35,4 @@ services:
     environment:
       WHALE_DEFID_URL: http://whale-rpcuser:whale-rpcpassword@defi-blockchain:19554
       WHALE_NETWORK: regtest
+      WHALE_DATABASE_PROVIDER: memory
