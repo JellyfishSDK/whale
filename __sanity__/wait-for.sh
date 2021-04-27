@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TIMEOUT=30
+TIMEOUT=60
 
 wait_for() {
   for _ in $(seq $TIMEOUT); do
