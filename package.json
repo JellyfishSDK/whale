@@ -33,6 +33,7 @@
     "rxjs": "^6.6.6"
   },
   "devDependencies": {
+    "@defichain/jellyfish-crypto": "next",
     "@defichain/testcontainers": "next",
     "@nestjs/cli": "^7.6.0",
     "@nestjs/schematics": "^7.3.0",
