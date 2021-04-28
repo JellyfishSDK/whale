@@ -36,7 +36,7 @@ async function createTestingModule (container: MasterNodeRegTestContainer): Prom
  * Returns a INestApplication that is initialized and ready for e2e testing.
  *
  * @param {MasterNodeRegTestContainer} container to connect TestingModule to
- * @return Promise<INestApplication> that is initialized
+ * @return Promise<NestFastifyApplication> that is initialized
  */
 export async function createTestingApp (container: MasterNodeRegTestContainer): Promise<NestFastifyApplication> {
   const module = await createTestingModule(container)
