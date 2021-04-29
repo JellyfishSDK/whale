@@ -3,6 +3,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  HttpCode,
   Post,
   UseGuards,
   UseInterceptors,
@@ -12,13 +13,14 @@ import { NetworkGuard } from '@src/module.api/commons/network.guard'
 import { TransformInterceptor } from '@src/module.api/commons/transform.interceptor'
 import { ExceptionInterceptor } from '@src/module.api/commons/exception.interceptor'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { IsHexadecimal, IsNotEmpty, IsNumber, Min } from 'class-validator'
+import { IsHexadecimal, IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator'
 
 class RawTxDto {
   @IsNotEmpty()
   @IsHexadecimal()
   hex!: string
 
+  @IsOptional()
   @IsNumber()
   @Min(0)
   maxFeeRate?: number
@@ -61,6 +63,7 @@ export class TransactionsController {
    * @throws {BadRequestException} if tx fail mempool acceptance
    */
   @Post('/test')
+  @HttpCode(200)
   async test (@Body(ValidationPipe) tx: RawTxDto): Promise<void> {
     const maxFeeRate = this.getMaxFeeRate(tx)
     try {
