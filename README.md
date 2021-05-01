@@ -1,7 +1,7 @@
 [![CI](https://github.com/DeFiCh/whale/actions/workflows/ci.yml/badge.svg)](https://github.com/DeFiCh/whale/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/DeFiCh/whale/branch/main/graph/badge.svg?token=kBCC9qSRrA)](https://codecov.io/gh/DeFiCh/whale)
 [![Maintainability](https://api.codeclimate.com/v1/badges/593ffda9c1d91261a37b/maintainability)](https://codeclimate.com/github/DeFiCh/whale/maintainability)
-[![TS-Standard](https://badgen.net/badge/code%20style/ts-standard/blue?icon=typescript)](https://github.com/standard/ts-standard)
+[![TS-Standard](https://badgen.net/badge/code%20style/ts-standard)](https://github.com/standard/ts-standard)
 
 # DeFi Whale
 
