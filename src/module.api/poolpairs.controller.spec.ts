@@ -23,8 +23,6 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  await container.waitForWalletBalanceGTE(11)
-
   const app: TestingModule = await Test.createTestingModule({
     imports: [ConfigModule.forRoot({
       load: [() => ({ network: 'regtest' })]
@@ -294,7 +292,7 @@ describe('controller.create()', () => {
     const payload = {
       metadata: {
         tokenA: 'DFI',
-        tokenB: 'DABC',
+        tokenB: 'DDD',
         commission: 0,
         status: true,
         ownerAddress: address
@@ -354,7 +352,7 @@ describe('controller.create()', () => {
     expect(assertions).toBe(1)
   })
 
-  it('should throw BadRequestExeception due to token \'DFI-DBTC\' already exists!', async () => {
+  it('should throw BadRequestExeception due to pool pair \'DFI-DBTC\' already exists!', async () => {
     const address = await container.call('getnewaddress')
     const payload = {
       metadata: {

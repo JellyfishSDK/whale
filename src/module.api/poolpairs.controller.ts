@@ -27,19 +27,19 @@ class PoolLiquidityDto {
 
 class PoolPairsQuery {
   @IsOptional()
-  start?: number
+  start?: string
 
   @IsOptional()
-  including_start?: boolean
+  including_start?: string
 
   @IsOptional()
-  limit?: number
+  limit?: string
 
   @IsOptional()
-  verbose?: boolean
+  verbose?: string
 
   @IsOptional()
-  isMineOnly?: boolean
+  isMineOnly?: string
 }
 
 @Controller('/v1/:network/poolpairs')
@@ -49,6 +49,10 @@ export class PoolPairsController {
   constructor (private readonly client: JsonRpcClient) {
   }
 
+  /**
+   * @param {PoolPairDto} body to create pool pair
+   * @return {Promise<string>} hashes of string
+   */
   @Post()
   async create (@Body() body: PoolPairDto): Promise<string> {
     try {
@@ -58,6 +62,10 @@ export class PoolPairsController {
     }
   }
 
+  /**
+   * @param {PoolPairsQuery} query filter of listing pool pairs
+   * @return {PoolPairResult}
+   */
   @Get()
   async list (@Query() query?: PoolPairsQuery): Promise<PoolPairResult> {
     try {
@@ -68,6 +76,11 @@ export class PoolPairsController {
     }
   }
 
+  /**
+   * @param {string} symbol token's symbol
+   * @param {PoolPairsQuery} query pool pair filter
+   * @return {PoolPairResult}
+   */
   @Get(':symbol')
   async get (@Param('symbol') symbol: string, @Query() query?: PoolPairsQuery): Promise<PoolPairResult> {
     try {
@@ -101,15 +114,15 @@ export class PoolPairsController {
 
 function remap (query: PoolPairsQuery): PoolPairsFilter {
   const pagination: PoolPairPagination = {
-    start: query?.start ?? 0,
-    including_start: query?.including_start ?? true,
-    limit: query?.limit ?? 100
+    start: Number(query?.start) ?? 0,
+    including_start: Boolean(query?.including_start) ?? true,
+    limit: Number(query?.limit) ?? 100
   }
 
-  const verbose = query?.verbose ?? true
+  const verbose = Boolean(query?.verbose) ?? true
 
   const options: PoolPairsOptions = {
-    isMineOnly: query?.isMineOnly ?? true
+    isMineOnly: Boolean(query?.isMineOnly) ?? true
   }
 
   return {

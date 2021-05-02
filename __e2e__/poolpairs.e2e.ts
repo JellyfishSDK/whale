@@ -21,10 +21,6 @@ afterAll(async () => {
   await container.stop()
 })
 
-beforeEach(async () => {
-  await container.waitForWalletBalanceGTE(15)
-})
-
 async function createToken (symbol: string): Promise<void> {
   const address = await container.call('getnewaddress')
   const metadata = {
@@ -88,6 +84,7 @@ describe('POST: /v1/regtest/poolpairs/liquidity', () => {
       payload
     })
 
+    expect(res.statusCode).toBe(201)
     expect(typeof res.json().data).toBe('string')
   })
 
@@ -113,6 +110,7 @@ describe('POST: /v1/regtest/poolpairs/liquidity', () => {
       payload
     })
 
+    expect(res.statusCode).toBe(201)
     expect(typeof res.json().data).toBe('string')
   })
 
@@ -155,6 +153,7 @@ describe('POST: /v1/regtest/poolpairs/liquidity', () => {
       payload
     })
 
+    expect(res.statusCode).toBe(201)
     expect(typeof res.json().data).toBe('string')
   })
 
@@ -191,8 +190,7 @@ describe('POST: /v1/regtest/poolpairs/liquidity', () => {
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
       statusCode: 400,
-      message: ['tx must have at least one input from account owner'],
-      error: 'Bad Request'
+      message: 'Bad Request'
     })
   })
 })
@@ -223,28 +221,35 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
 
   it('should listPoolShares', async () => {
     const res = await app.inject({
-      method: 'POST',
+      method: 'GET',
       url: 'v1/regtest/poolpairs/shares'
     })
 
+    expect(res.statusCode).toBe(200)
     const poolShares = res.json().data
 
     for (const k in poolShares) {
       const data = poolShares[k]
       expect(typeof data.poolID).toBe('string')
       expect(typeof data.owner).toBe('string')
-      expect(data['%'] instanceof BigNumber).toBe(true)
-      expect(data.amount instanceof BigNumber).toBe(true)
-      expect(data.totalLiquidity instanceof BigNumber).toBe(true)
+      expect(typeof data['%']).toBe('number')
+      expect(typeof data.amount).toBe('number')
+      expect(typeof data.totalLiquidity).toBe('number')
     }
   })
 
   it('should listPoolShares with pagination and return an empty object as out of range', async () => {
     const res = await app.inject({
-      method: 'POST',
-      url: 'v1/regtest/poolpairs/shares?start=300&including_start=true&limit=100'
+      method: 'GET',
+      url: 'v1/regtest/poolpairs/shares',
+      query: {
+        start: '300',
+        including_start: 'true',
+        limit: '100'
+      }
     })
 
+    expect(res.statusCode).toBe(200)
     const poolShares = res.json().data
 
     expect(Object.keys(poolShares).length).toBe(0)
@@ -252,10 +257,16 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
 
   it('should listPoolShares with pagination limit', async () => {
     const res = await app.inject({
-      method: 'POST',
-      url: 'v1/regtest/poolpairs/shares?start=0&including_start=true&limit=2'
+      method: 'GET',
+      url: 'v1/regtest/poolpairs/shares',
+      query: {
+        start: '0',
+        including_start: 'true',
+        limit: '2'
+      }
     })
 
+    expect(res.statusCode).toBe(200)
     const poolShares = res.json().data
 
     expect(Object.keys(poolShares).length).toBe(2)
@@ -263,35 +274,50 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
 
   it('should listPoolPairs with verbose false', async () => {
     const res = await app.inject({
-      method: 'POST',
-      url: 'v1/regtest/poolpairs/shares?start=0&including_start=true&limit=100&verbose=false'
+      method: 'GET',
+      url: 'v1/regtest/poolpairs/shares',
+      query: {
+        start: '0',
+        including_start: 'true',
+        limit: '100',
+        verbose: 'false'
+      }
     })
 
+    expect(res.statusCode).toBe(200)
     const poolShares = res.json().data
 
     for (const k in poolShares) {
       const data = poolShares[k]
       expect(typeof data.poolID).toBe('string')
       expect(typeof data.owner).toBe('string')
-      expect(data['%'] instanceof BigNumber).toBe(true)
+      expect(typeof data['%']).toBe('number')
     }
   })
 
   it('should listPoolPairs with isMineOnly true', async () => {
     const res = await app.inject({
-      method: 'POST',
-      url: 'v1/regtest/poolpairs/shares?start=0&including_start=true&limit=100&verbose=true&isMineOnly=true'
+      method: 'GET',
+      url: 'v1/regtest/poolpairs/shares',
+      query: {
+        start: '0',
+        including_start: 'true',
+        limit: '100',
+        verbose: 'true',
+        isMineOnly: 'true'
+      }
     })
 
+    expect(res.statusCode).toBe(200)
     const poolShares = res.json().data
 
     for (const k in poolShares) {
       const data = poolShares[k]
       expect(typeof data.poolID).toBe('string')
       expect(typeof data.owner).toBe('string')
-      expect(data['%'] instanceof BigNumber).toBe(true)
-      expect(data.amount instanceof BigNumber).toBe(true)
-      expect(data.totalLiquidity instanceof BigNumber).toBe(true)
+      expect(typeof data['%']).toBe('number')
+      expect(typeof data.amount).toBe('number')
+      expect(typeof data.totalLiquidity).toBe('number')
     }
   })
 })
@@ -318,11 +344,9 @@ describe('POST: /v1/regtest/poolpairs', () => {
       payload
     })
 
-    expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
-      statusCode: 400,
-      message: ['TokenB was not found'],
-      error: 'Bad Request'
+      statusCode: 500,
+      message: 'Internal server error' // 'TokenB was not found'
     })
   })
 
@@ -344,11 +368,11 @@ describe('POST: /v1/regtest/poolpairs', () => {
       payload
     })
 
-    expect(res.statusCode).toBe(200)
+    expect(res.statusCode).toBe(201)
     expect(typeof res.json().data).toEqual('string')
   })
 
-  it('should throw BadRequestExeception due to token \'DFI-DBTC\' already exists!', async () => {
+  it('should throw BadRequestExeception due to pool pair \'DFI-DBTC\' already exists!', async () => {
     const address = await container.call('getnewaddress')
     const payload = {
       metadata: {
@@ -366,13 +390,9 @@ describe('POST: /v1/regtest/poolpairs', () => {
       payload
     })
 
-    expect(res.statusCode).toBe(400)
-    expect(typeof res.json().data).toEqual('string')
-
     expect(res.json()).toEqual({
-      statusCode: 400,
-      message: ['token \'DFI-DBTC\' already exists!'],
-      error: 'Bad Request'
+      statusCode: 500,
+      message: 'Internal server error' // token 'DFI-DBTC' already exists!
     })
   })
 })
@@ -395,6 +415,7 @@ describe('GET: /v1/regtest/poolpairs', () => {
       url: 'v1/regtest/poolpairs'
     })
 
+    expect(res.statusCode).toBe(200)
     const poolpairs = res.json().data
 
     for (const k in poolpairs) {
@@ -410,25 +431,25 @@ describe('GET: /v1/regtest/poolpairs', () => {
       if (poolpair.symbol === 'DFI-DXRP') {
         expect(poolpair.name).toBe('Default Defi token-DXRP')
         expect(poolpair.status).toBe(true)
-        expect(poolpair.commission.toString()).toBe(new BigNumber(0.003).toString())
+        expect(poolpair.commission).toBe(0.003)
         assertions += 1
       }
 
       if (poolpair.symbol === 'DFI-DUSD') {
         expect(poolpair.name).toBe('Default Defi token-DUSDT')
         expect(poolpair.status).toBe(false)
-        expect(poolpair.commission.toString()).toBe(new BigNumber(0).toString())
+        expect(poolpair.commission).toBe(0)
         assertions += 1
       }
 
-      expect(poolpair.totalLiquidity instanceof BigNumber).toBe(true)
+      expect(typeof poolpair.totalLiquidity).toBe('number')
       expect(typeof poolpair.ownerAddress).toBe('string')
       expect(typeof poolpair.idTokenA).toBe('string')
       expect(typeof poolpair.idTokenB).toBe('string')
-      expect(poolpair.reserveA instanceof BigNumber).toBe(true)
-      expect(poolpair.reserveB instanceof BigNumber).toBe(true)
+      expect(typeof poolpair.reserveA).toBe('number')
+      expect(typeof poolpair.reserveB).toBe('number')
 
-      if (poolpair['reserveA/reserveB'] instanceof BigNumber && poolpair['reserveB/reserveA'] instanceof BigNumber) {
+      if (typeof poolpair['reserveA/reserveB'] === 'number' && typeof poolpair['reserveB/reserveA'] === 'number') {
         expect(poolpair.tradeEnabled).toBe(true)
       } else {
         expect(poolpair['reserveA/reserveB']).toBe('0')
@@ -436,11 +457,11 @@ describe('GET: /v1/regtest/poolpairs', () => {
         expect(poolpair.tradeEnabled).toBe(false)
       }
 
-      expect(poolpair.blockCommissionA instanceof BigNumber).toBe(true)
-      expect(poolpair.blockCommissionB instanceof BigNumber).toBe(true)
-      expect(poolpair.rewardPct instanceof BigNumber).toBe(true)
+      expect(typeof poolpair.blockCommissionA).toBe('number')
+      expect(typeof poolpair.blockCommissionB).toBe('number')
+      expect(typeof poolpair.rewardPct).toBe('number')
+      expect(typeof poolpair.creationHeight).toBe('number')
       expect(typeof poolpair.creationTx).toBe('string')
-      expect(poolpair.creationHeight instanceof BigNumber).toBe(true)
     }
 
     expect(assertions).toBe(3)
@@ -449,9 +470,15 @@ describe('GET: /v1/regtest/poolpairs', () => {
   it('should listPoolPairs with pagination and return an empty object as out of range', async () => {
     const res = await app.inject({
       method: 'GET',
-      url: 'v1/regtest/poolpairs?start=300&including_start=true&limit=100'
+      url: 'v1/regtest/poolpairs',
+      query: {
+        start: '300',
+        including_start: 'true',
+        limit: '100'
+      }
     })
 
+    expect(res.statusCode).toBe(200)
     const poolpairs = res.json().data
 
     expect(Object.keys(poolpairs).length).toBe(0)
@@ -460,9 +487,15 @@ describe('GET: /v1/regtest/poolpairs', () => {
   it('should listPoolPairs with pagination limit', async () => {
     const res = await app.inject({
       method: 'GET',
-      url: 'v1/regtest/poolpairs?start=0&including_start=true&limit=2'
+      url: 'v1/regtest/poolpairs',
+      query: {
+        start: '0',
+        including_start: 'true',
+        limit: '2'
+      }
     })
 
+    expect(res.statusCode).toBe(200)
     const poolpairs = res.json().data
 
     expect(Object.keys(poolpairs).length).toBe(2)
@@ -471,9 +504,16 @@ describe('GET: /v1/regtest/poolpairs', () => {
   it('should listPoolPairs with verbose false', async () => {
     const res = await app.inject({
       method: 'GET',
-      url: 'v1/regtest/poolpairs?start=0&including_start=true&limit=100&verbose=false'
+      url: 'v1/regtest/poolpairs',
+      query: {
+        start: '0',
+        including_start: 'true',
+        limit: '100',
+        verbose: 'false'
+      }
     })
 
+    expect(res.statusCode).toBe(200)
     const poolpairs = res.json().data
 
     for (const k in poolpairs) {
@@ -500,6 +540,7 @@ describe('GET: /v1/regtest/poolpairs/:symbol', () => {
       url: 'v1/regtest/poolpairs/DFI-DBCH'
     })
 
+    expect(res.statusCode).toBe(200)
     const poolpair = res.json().data
 
     for (const k in poolpair) {
@@ -509,25 +550,29 @@ describe('GET: /v1/regtest/poolpairs/:symbol', () => {
       expect(data.status).toBe(true)
       expect(typeof data.idTokenA).toBe('string')
       expect(typeof data.idTokenB).toBe('string')
-      expect(data.reserveA instanceof BigNumber).toBe(true)
-      expect(data.reserveB instanceof BigNumber).toBe(true)
+      expect(typeof data.reserveA).toBe('number')
+      expect(typeof data.reserveB).toBe('number')
       expect(typeof data['reserveA/reserveB']).toBe('string')
       expect(typeof data['reserveB/reserveA']).toBe('string')
       expect(data.tradeEnabled).toBe(false)
-      expect(data.blockCommissionA instanceof BigNumber).toBe(true)
-      expect(data.blockCommissionB instanceof BigNumber).toBe(true)
-      expect(data.rewardPct instanceof BigNumber).toBe(true)
+      expect(typeof data.blockCommissionA).toBe('number')
+      expect(typeof data.blockCommissionB).toBe('number')
+      expect(typeof data.rewardPct).toBe('number')
       expect(typeof data.creationTx).toBe('string')
-      expect(data.creationHeight instanceof BigNumber).toBe(true)
+      expect(typeof data.creationHeight).toBe('number')
     }
   })
 
   it('should getPoolPair with verbose false', async () => {
     const res = await app.inject({
       method: 'GET',
-      url: 'v1/regtest/poolpairs/DFI-DBCH?verbose=false'
+      url: 'v1/regtest/poolpairs/DFI-DBCH',
+      query: {
+        verbose: 'false'
+      }
     })
 
+    expect(res.statusCode).toBe(200)
     const poolpair = res.json().data
 
     for (const k in poolpair) {
@@ -546,13 +591,9 @@ describe('GET: /v1/regtest/poolpairs/:symbol', () => {
       url: 'v1/regtest/poolpairs/DFI-NONEXIST'
     })
 
-    expect(res.statusCode).toBe(400)
-    expect(typeof res.json().data).toEqual('string')
-
     expect(res.json()).toEqual({
       statusCode: 400,
-      message: ['token \'DFI-NONEXIST\' is not exists!'],
-      error: 'Bad Request'
+      message: 'Bad Request'
     })
   })
 })
