@@ -22,6 +22,20 @@ afterAll(async () => {
   await container.stop()
 })
 
+beforeEach(async () => {
+  await container.waitForWalletBalanceGTE(11)
+
+  const app: TestingModule = await Test.createTestingModule({
+    imports: [ConfigModule.forRoot({
+      load: [() => ({ network: 'regtest' })]
+    })],
+    controllers: [PoolPairsController],
+    providers: [{ provide: JsonRpcClient, useValue: client }]
+  }).compile()
+
+  controller = app.get<PoolPairsController>(PoolPairsController)
+})
+
 async function createToken (symbol: string): Promise<void> {
   const address = await container.call('getnewaddress')
   const metadata = {
@@ -59,20 +73,6 @@ async function mintTokens (symbol: string): Promise<void> {
 
   await container.generate(25)
 }
-
-beforeEach(async () => {
-  await container.waitForWalletBalanceGTE(11)
-
-  const app: TestingModule = await Test.createTestingModule({
-    imports: [ConfigModule.forRoot({
-      load: [() => ({ network: 'regtest' })]
-    })],
-    controllers: [PoolPairsController],
-    providers: [{ provide: JsonRpcClient, useValue: client }]
-  }).compile()
-
-  controller = app.get<PoolPairsController>(PoolPairsController)
-})
 
 describe('controller.addPoolLiquidity()', () => {
   beforeAll(async () => {
@@ -224,11 +224,9 @@ describe('controller.listPoolShares()', () => {
 
   it('should listPoolShares with pagination and return an empty object as out of range', async () => {
     const query = {
-      pagination: {
-        start: 300,
-        including_start: true,
-        limit: 100
-      }
+      start: 300,
+      including_start: true,
+      limit: 100
     }
     const poolShares = await controller.listPoolShares(query)
 
@@ -237,11 +235,9 @@ describe('controller.listPoolShares()', () => {
 
   it('should listPoolShares with pagination limit', async () => {
     const query = {
-      pagination: {
-        start: 0,
-        including_start: true,
-        limit: 2
-      }
+      start: 0,
+      including_start: true,
+      limit: 2
     }
     const poolShares = await controller.listPoolShares(query)
 
@@ -269,18 +265,13 @@ describe('controller.listPoolShares()', () => {
 
   it('should listPoolPairs with isMineOnly true', async () => {
     const query = {
-      pagination: {
-        start: 0,
-        including_start: true,
-        limit: 100
-      },
+      start: 0,
+      including_start: true,
+      limit: 100,
       verbose: true,
-      options: {
-        isMineOnly: true
-      }
+      isMineOnly: true
     }
     const poolShares = await controller.listPoolShares(query)
-    console.log('poolShares: ', poolShares)
 
     for (const k in poolShares) {
       const data = poolShares[k]
@@ -294,12 +285,16 @@ describe('controller.listPoolShares()', () => {
 })
 
 describe('controller.create()', () => {
+  beforeAll(async () => {
+    await createToken('DBTC')
+  })
+
   it('should throw BadRequestExeception due to tokenB is not exists', async () => {
     const address = await container.call('getnewaddress')
     const payload = {
       metadata: {
         tokenA: 'DFI',
-        tokenB: 'DBTC',
+        tokenB: 'DABC',
         commission: 0,
         status: true,
         ownerAddress: address
@@ -310,8 +305,6 @@ describe('controller.create()', () => {
   })
 
   it('should create pool pair', async () => {
-    await createToken('DBTC')
-
     let assertions = 0
     const poolpairsBefore = await controller.list()
     const poolpairsLengthBefore = Object.keys(poolpairsBefore).length
@@ -443,11 +436,9 @@ describe('controller.list()', () => {
 
   it('should listPoolPairs with pagination and return an empty object as out of range', async () => {
     const query = {
-      pagination: {
-        start: 300,
-        including_start: true,
-        limit: 100
-      }
+      start: 300,
+      including_start: true,
+      limit: 100
     }
     const poolpairs = await controller.list(query)
 
@@ -456,11 +447,9 @@ describe('controller.list()', () => {
 
   it('should listPoolPairs with pagination limit', async () => {
     const query = {
-      pagination: {
-        start: 0,
-        including_start: true,
-        limit: 2
-      }
+      start: 0,
+      including_start: true,
+      limit: 2
     }
     const poolpairs = await controller.list(query)
 
@@ -469,11 +458,9 @@ describe('controller.list()', () => {
 
   it('should listPoolPairs with verbose false', async () => {
     const query = {
-      pagination: {
-        start: 0,
-        including_start: true,
-        limit: 100
-      },
+      start: 0,
+      including_start: true,
+      limit: 100,
       verbose: false
     }
     const poolpairs = await controller.list(query)

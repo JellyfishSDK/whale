@@ -25,6 +25,23 @@ class PoolLiquidityDto {
   options?: AddPoolLiquidityOptions
 }
 
+class PoolPairsQuery {
+  @IsOptional()
+  start?: number
+
+  @IsOptional()
+  including_start?: boolean
+
+  @IsOptional()
+  limit?: number
+
+  @IsOptional()
+  verbose?: boolean
+
+  @IsOptional()
+  isMineOnly?: boolean
+}
+
 @Controller('/v1/:network/poolpairs')
 @UseGuards(NetworkGuard)
 @UseInterceptors(TransformInterceptor, ExceptionInterceptor)
@@ -42,40 +59,63 @@ export class PoolPairsController {
   }
 
   @Get()
-  async list (@Query() query?: ListPoolPairQuery): Promise<PoolPairResult> {
+  async list (@Query() query?: PoolPairsQuery): Promise<PoolPairResult> {
     try {
-      return await this.client.poolpair.listPoolPairs(query?.pagination, query?.verbose)
+      const filter = query !== undefined ? remap(query) : undefined
+      return await this.client.poolpair.listPoolPairs(filter?.pagination, filter?.verbose)
     } catch (e) {
       throw new BadRequestException()
     }
   }
 
   @Get(':symbol')
-  async get (@Param('symbol') symbol: string, @Query() query?: GetPoolPairQuery): Promise<PoolPairResult> {
+  async get (@Param('symbol') symbol: string, @Query() query?: PoolPairsQuery): Promise<PoolPairResult> {
     try {
-      return await this.client.poolpair.getPoolPair(symbol, query?.verbose)
+      const filter = query !== undefined ? remap(query) : undefined
+      return await this.client.poolpair.getPoolPair(symbol, filter?.verbose)
     } catch (e) {
       throw new BadRequestException()
     }
   }
 
   @Get()
-  async listPoolShares (@Query() query?: ListPoolShareQuery): Promise<PoolShareResult> {
+  async listPoolShares (@Query() query?: PoolPairsQuery): Promise<PoolShareResult> {
     try {
-      return await this.client.poolpair.listPoolShares(query?.pagination, query?.verbose, query?.options)
+      const filter = query !== undefined ? remap(query) : undefined
+      return await this.client.poolpair.listPoolShares(filter?.pagination, filter?.verbose, filter?.options)
     } catch (e) {
       throw new BadRequestException()
     }
   }
 
   @Post()
-  async addPoolLiquidity (@Body() body: PoolLiquidityDto): Promise<any> {
+  async addPoolLiquidity (@Body() body: PoolLiquidityDto): Promise<string> {
     try {
       const { from, shareAddress, options } = body
       return await this.client.poolpair.addPoolLiquidity(from, shareAddress, options)
     } catch (e) {
       throw new BadRequestException()
     }
+  }
+}
+
+function remap (query: PoolPairsQuery): PoolPairsFilter {
+  const pagination: PoolPairPagination = {
+    start: query?.start ?? 0,
+    including_start: query?.including_start ?? true,
+    limit: query?.limit ?? 100
+  }
+
+  const verbose = query?.verbose ?? true
+
+  const options: PoolPairsOptions = {
+    isMineOnly: query?.isMineOnly ?? true
+  }
+
+  return {
+    pagination,
+    verbose,
+    options
   }
 }
 
@@ -120,15 +160,6 @@ export interface PoolPairInfo {
   creationHeight: BigNumber
 }
 
-export interface ListPoolPairQuery {
-  pagination?: PoolPairPagination
-  verbose?: boolean
-}
-
-export interface GetPoolPairQuery {
-  verbose?: boolean
-}
-
 export interface PoolPairPagination {
   start: number
   including_start: boolean
@@ -147,12 +178,6 @@ export interface PoolShareInfo {
   totalLiquidity: BigNumber
 }
 
-export interface ListPoolShareQuery {
-  pagination?: PoolPairPagination
-  verbose?: boolean
-  options?: PoolShareOptions
-}
-
 export interface AddPoolLiquidityOptions {
   utxos?: AddPoolLiquidityUTXO[]
 }
@@ -166,6 +191,12 @@ export interface AddPoolLiquidityUTXO {
   vout: number
 }
 
-export interface PoolShareOptions {
+export interface PoolPairsFilter {
+  pagination?: PoolPairPagination
+  verbose?: boolean
+  options?: PoolPairsOptions
+}
+
+export interface PoolPairsOptions {
   isMineOnly?: boolean
 }
