@@ -222,9 +222,9 @@ describe('controller.listPoolShares()', () => {
 
   it('should listPoolShares with pagination and return an empty object as out of range', async () => {
     const query = {
-      start: 300,
-      including_start: true,
-      limit: 100
+      start: '300',
+      including_start: 'true',
+      limit: '100'
     }
     const poolShares = await controller.listPoolShares(query)
 
@@ -233,9 +233,9 @@ describe('controller.listPoolShares()', () => {
 
   it('should listPoolShares with pagination limit', async () => {
     const query = {
-      start: 0,
-      including_start: true,
-      limit: 2
+      start: '0',
+      including_start: 'true',
+      limit: '2'
     }
     const poolShares = await controller.listPoolShares(query)
 
@@ -244,12 +244,10 @@ describe('controller.listPoolShares()', () => {
 
   it('should listPoolPairs with verbose false', async () => {
     const query = {
-      pagination: {
-        start: 0,
-        including_start: true,
-        limit: 100
-      },
-      verbose: false
+      start: '0',
+      including_start: 'true',
+      limit: '100',
+      verbose: 'false'
     }
     const poolShares = await controller.listPoolShares(query)
 
@@ -263,11 +261,11 @@ describe('controller.listPoolShares()', () => {
 
   it('should listPoolPairs with isMineOnly true', async () => {
     const query = {
-      start: 0,
-      including_start: true,
-      limit: 100,
-      verbose: true,
-      isMineOnly: true
+      start: '0',
+      including_start: 'true',
+      limit: '100',
+      verbose: 'true',
+      isMineOnly: 'true'
     }
     const poolShares = await controller.listPoolShares(query)
 
@@ -434,9 +432,9 @@ describe('controller.list()', () => {
 
   it('should listPoolPairs with pagination and return an empty object as out of range', async () => {
     const query = {
-      start: 300,
-      including_start: true,
-      limit: 100
+      start: '300',
+      including_start: 'true',
+      limit: '100'
     }
     const poolpairs = await controller.list(query)
 
@@ -445,9 +443,9 @@ describe('controller.list()', () => {
 
   it('should listPoolPairs with pagination limit', async () => {
     const query = {
-      start: 0,
-      including_start: true,
-      limit: 2
+      start: '0',
+      including_start: 'true',
+      limit: '2'
     }
     const poolpairs = await controller.list(query)
 
@@ -456,10 +454,10 @@ describe('controller.list()', () => {
 
   it('should listPoolPairs with verbose false', async () => {
     const query = {
-      start: 0,
-      including_start: true,
-      limit: 100,
-      verbose: false
+      start: '0',
+      including_start: 'true',
+      limit: '100',
+      verbose: 'false'
     }
     const poolpairs = await controller.list(query)
 
@@ -505,7 +503,7 @@ describe('controller.get()', () => {
   })
 
   it('should getPoolPair with verbose false', async () => {
-    const poolpair = await controller.get('DFI-DBCH', { verbose: false })
+    const poolpair = await controller.get('DFI-DBCH', { verbose: 'false' })
 
     for (const k in poolpair) {
       const data = poolpair[k]
