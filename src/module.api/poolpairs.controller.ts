@@ -114,15 +114,15 @@ export class PoolPairsController {
 
 function remap (query: PoolPairsQuery): PoolPairsFilter {
   const pagination: PoolPairPagination = {
-    start: Number(query?.start) ?? 0,
-    including_start: Boolean(query?.including_start) ?? true,
-    limit: Number(query?.limit) ?? 100
+    start: Number(query.start) ?? 0,
+    including_start: query.including_start?.toLowerCase() !== 'false',
+    limit: Number(query.limit) ?? 100
   }
 
-  const verbose = Boolean(query?.verbose) ?? true
+  const verbose = query.verbose?.toLowerCase() !== 'false'
 
   const options: PoolPairsOptions = {
-    isMineOnly: Boolean(query?.isMineOnly) ?? true
+    isMineOnly: query.isMineOnly?.toLowerCase() !== 'false'
   }
 
   return {
