@@ -1,21 +1,20 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { ConfigModule } from '@nestjs/config'
-import { PoolPairsController } from '@src/module.api/poolpairs.controller'
-import { BadRequestException } from '@nestjs/common'
+import { createTestingApp } from './module.testing'
+import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import BigNumber from 'bignumber.js'
+import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 
 const container = new MasterNodeRegTestContainer()
+let app: NestFastifyApplication
 let client: JsonRpcClient
-let controller: PoolPairsController
 
 beforeAll(async () => {
   await container.start()
   await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
   await container.waitForWalletBalanceGTE(200)
-  client = new JsonRpcClient(await container.getCachedRpcUrl())
+  app = await createTestingApp(container)
+  client = app.get(JsonRpcClient)
 })
 
 afterAll(async () => {
@@ -23,17 +22,7 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  await container.waitForWalletBalanceGTE(11)
-
-  const app: TestingModule = await Test.createTestingModule({
-    imports: [ConfigModule.forRoot({
-      load: [() => ({ network: 'regtest' })]
-    })],
-    controllers: [PoolPairsController],
-    providers: [{ provide: JsonRpcClient, useValue: client }]
-  }).compile()
-
-  controller = app.get<PoolPairsController>(PoolPairsController)
+  await container.waitForWalletBalanceGTE(15)
 })
 
 async function createToken (symbol: string): Promise<void> {
@@ -74,7 +63,7 @@ async function mintTokens (symbol: string): Promise<void> {
   await container.generate(25)
 }
 
-describe('controller.addPoolLiquidity()', () => {
+describe('POST: /v1/regtest/poolpairs/liquidity', () => {
   beforeAll(async () => {
     await createToken('DDAI')
 
@@ -86,15 +75,20 @@ describe('controller.addPoolLiquidity()', () => {
   it('should addPoolLiquidity', async () => {
     const shareAddress = await container.call('getnewaddress')
 
-    const body = {
+    const payload = {
       from: {
         '*': ['10@DFI', '200@DDAI']
       },
       shareAddress
     }
-    const data = await controller.addPoolLiquidity(body)
 
-    expect(typeof data).toBe('string')
+    const res = await app.inject({
+      method: 'POST',
+      url: 'v1/regtest/poolpairs/liquidity',
+      payload
+    })
+
+    expect(typeof res.json().data).toBe('string')
   })
 
   it('should addPoolLiquidity with specific input token address', async () => {
@@ -106,16 +100,20 @@ describe('controller.addPoolLiquidity()', () => {
 
     const shareAddress = await container.call('getnewaddress')
 
-    const body = {
+    const payload = {
       from: {
         [tokenAAddress]: '5@DFI',
         [tokenBAddress]: '100@DDAI'
       },
       shareAddress
     }
-    const data = await controller.addPoolLiquidity(body)
+    const res = await app.inject({
+      method: 'POST',
+      url: 'v1/regtest/poolpairs/liquidity',
+      payload
+    })
 
-    expect(typeof data).toBe('string')
+    expect(typeof res.json().data).toBe('string')
   })
 
   it('should addPoolLiquidity with utxos', async () => {
@@ -140,7 +138,7 @@ describe('controller.addPoolLiquidity()', () => {
       }
     })
 
-    const body = {
+    const payload = {
       from: {
         [tokenAAddress]: '5@DFI',
         [tokenBAddress]: '100@DDAI'
@@ -151,9 +149,13 @@ describe('controller.addPoolLiquidity()', () => {
       }
     }
 
-    const data = await controller.addPoolLiquidity(body)
+    const res = await app.inject({
+      method: 'POST',
+      url: 'v1/regtest/poolpairs/liquidity',
+      payload
+    })
 
-    expect(typeof data).toBe('string')
+    expect(typeof res.json().data).toBe('string')
   })
 
   it('should throw BadRequestException due to the utxos which does not include account owner', async () => {
@@ -169,7 +171,7 @@ describe('controller.addPoolLiquidity()', () => {
       }
     })
 
-    const body = {
+    const payload = {
       from: {
         [tokenAAddress]: '5@DFI',
         [tokenBAddress]: '100@DDAI'
@@ -180,12 +182,22 @@ describe('controller.addPoolLiquidity()', () => {
       }
     }
 
-    const promise = controller.addPoolLiquidity(body)
-    await expect(promise).rejects.toThrow(BadRequestException)
+    const res = await app.inject({
+      method: 'POST',
+      url: 'v1/regtest/poolpairs/liquidity',
+      payload
+    })
+
+    expect(res.statusCode).toBe(400)
+    expect(res.json()).toEqual({
+      statusCode: 400,
+      message: ['tx must have at least one input from account owner'],
+      error: 'Bad Request'
+    })
   })
 })
 
-describe('controller.listPoolShares()', () => {
+describe('GET: /v1/regtest/poolpairs/shares', () => {
   async function addPoolLiquidity (): Promise<void> {
     const shareAddress = await container.call('getnewaddress')
     const data = await client.poolpair.addPoolLiquidity({
@@ -210,7 +222,12 @@ describe('controller.listPoolShares()', () => {
   })
 
   it('should listPoolShares', async () => {
-    const poolShares = await controller.listPoolShares()
+    const res = await app.inject({
+      method: 'POST',
+      url: 'v1/regtest/poolpairs/shares'
+    })
+
+    const poolShares = res.json().data
 
     for (const k in poolShares) {
       const data = poolShares[k]
@@ -223,37 +240,34 @@ describe('controller.listPoolShares()', () => {
   })
 
   it('should listPoolShares with pagination and return an empty object as out of range', async () => {
-    const query = {
-      start: 300,
-      including_start: true,
-      limit: 100
-    }
-    const poolShares = await controller.listPoolShares(query)
+    const res = await app.inject({
+      method: 'POST',
+      url: 'v1/regtest/poolpairs/shares?start=300&including_start=true&limit=100'
+    })
+
+    const poolShares = res.json().data
 
     expect(Object.keys(poolShares).length).toBe(0)
   })
 
   it('should listPoolShares with pagination limit', async () => {
-    const query = {
-      start: 0,
-      including_start: true,
-      limit: 2
-    }
-    const poolShares = await controller.listPoolShares(query)
+    const res = await app.inject({
+      method: 'POST',
+      url: 'v1/regtest/poolpairs/shares?start=0&including_start=true&limit=2'
+    })
+
+    const poolShares = res.json().data
 
     expect(Object.keys(poolShares).length).toBe(2)
   })
 
   it('should listPoolPairs with verbose false', async () => {
-    const query = {
-      pagination: {
-        start: 0,
-        including_start: true,
-        limit: 100
-      },
-      verbose: false
-    }
-    const poolShares = await controller.listPoolShares(query)
+    const res = await app.inject({
+      method: 'POST',
+      url: 'v1/regtest/poolpairs/shares?start=0&including_start=true&limit=100&verbose=false'
+    })
+
+    const poolShares = res.json().data
 
     for (const k in poolShares) {
       const data = poolShares[k]
@@ -264,14 +278,12 @@ describe('controller.listPoolShares()', () => {
   })
 
   it('should listPoolPairs with isMineOnly true', async () => {
-    const query = {
-      start: 0,
-      including_start: true,
-      limit: 100,
-      verbose: true,
-      isMineOnly: true
-    }
-    const poolShares = await controller.listPoolShares(query)
+    const res = await app.inject({
+      method: 'POST',
+      url: 'v1/regtest/poolpairs/shares?start=0&including_start=true&limit=100&verbose=true&isMineOnly=true'
+    })
+
+    const poolShares = res.json().data
 
     for (const k in poolShares) {
       const data = poolShares[k]
@@ -284,7 +296,7 @@ describe('controller.listPoolShares()', () => {
   })
 })
 
-describe('controller.create()', () => {
+describe('POST: /v1/regtest/poolpairs', () => {
   beforeAll(async () => {
     await createToken('DBTC')
   })
@@ -294,21 +306,27 @@ describe('controller.create()', () => {
     const payload = {
       metadata: {
         tokenA: 'DFI',
-        tokenB: 'DABC',
+        tokenB: 'DDD',
         commission: 0,
         status: true,
         ownerAddress: address
       }
     }
+    const res = await app.inject({
+      method: 'POST',
+      url: 'v1/regtest/poolpairs',
+      payload
+    })
 
-    await expect(controller.create(payload)).rejects.toThrow(BadRequestException)
+    expect(res.statusCode).toBe(400)
+    expect(res.json()).toEqual({
+      statusCode: 400,
+      message: ['TokenB was not found'],
+      error: 'Bad Request'
+    })
   })
 
   it('should create pool pair', async () => {
-    let assertions = 0
-    const poolpairsBefore = await controller.list()
-    const poolpairsLengthBefore = Object.keys(poolpairsBefore).length
-
     const address = await container.call('getnewaddress')
     const payload = {
       metadata: {
@@ -319,39 +337,15 @@ describe('controller.create()', () => {
         ownerAddress: address
       }
     }
-    const hashed = await controller.create(payload)
-    expect(typeof hashed).toBe('string')
 
-    await container.generate(1)
+    const res = await app.inject({
+      method: 'POST',
+      url: 'v1/regtest/poolpairs',
+      payload
+    })
 
-    const poolpairsAfter = await controller.list()
-    expect(Object.keys(poolpairsAfter).length).toBe(poolpairsLengthBefore + 1)
-
-    const { metadata } = payload
-    for (const k in poolpairsAfter) {
-      const poolpair = poolpairsAfter[k]
-      if (poolpair.name === 'Default Defi token-DBTC') {
-        expect(poolpair.symbol).toBe(`${metadata.tokenA}-${metadata.tokenB}`)
-        expect(poolpair.status).toBe(metadata.status)
-        expect(poolpair.commission.toString()).toBe(new BigNumber(metadata.commission).toString())
-        expect(poolpair.ownerAddress).toBe(metadata.ownerAddress)
-        expect(poolpair.totalLiquidity instanceof BigNumber).toBe(true)
-        expect(typeof poolpair.idTokenA).toBe('string')
-        expect(typeof poolpair.idTokenB).toBe('string')
-        expect(poolpair.reserveA instanceof BigNumber).toBe(true)
-        expect(poolpair.reserveB instanceof BigNumber).toBe(true)
-        expect(typeof poolpair['reserveA/reserveB']).toBe('string')
-        expect(typeof poolpair['reserveB/reserveA']).toBe('string')
-        expect(poolpair.tradeEnabled).toBe(false)
-        expect(poolpair.blockCommissionA instanceof BigNumber).toBe(true)
-        expect(poolpair.blockCommissionB instanceof BigNumber).toBe(true)
-        expect(poolpair.rewardPct instanceof BigNumber).toBe(true)
-        expect(typeof poolpair.creationTx).toBe('string')
-        expect(poolpair.creationHeight instanceof BigNumber).toBe(true)
-        assertions += 1
-      }
-    }
-    expect(assertions).toBe(1)
+    expect(res.statusCode).toBe(200)
+    expect(typeof res.json().data).toEqual('string')
   })
 
   it('should throw BadRequestExeception due to token \'DFI-DBTC\' already exists!', async () => {
@@ -366,11 +360,24 @@ describe('controller.create()', () => {
       }
     }
 
-    await expect(controller.create(payload)).rejects.toThrow(BadRequestException)
+    const res = await app.inject({
+      method: 'POST',
+      url: 'v1/regtest/poolpairs',
+      payload
+    })
+
+    expect(res.statusCode).toBe(400)
+    expect(typeof res.json().data).toEqual('string')
+
+    expect(res.json()).toEqual({
+      statusCode: 400,
+      message: ['token \'DFI-DBTC\' already exists!'],
+      error: 'Bad Request'
+    })
   })
 })
 
-describe('controller.list()', () => {
+describe('GET: /v1/regtest/poolpairs', () => {
   beforeAll(async () => {
     await createToken('DETH')
     await createToken('DXRP')
@@ -383,7 +390,12 @@ describe('controller.list()', () => {
 
   it('should listPoolPairs', async () => {
     let assertions = 0
-    const poolpairs = await controller.list()
+    const res = await app.inject({
+      method: 'GET',
+      url: 'v1/regtest/poolpairs'
+    })
+
+    const poolpairs = res.json().data
 
     for (const k in poolpairs) {
       const poolpair = poolpairs[k]
@@ -435,35 +447,34 @@ describe('controller.list()', () => {
   })
 
   it('should listPoolPairs with pagination and return an empty object as out of range', async () => {
-    const query = {
-      start: 300,
-      including_start: true,
-      limit: 100
-    }
-    const poolpairs = await controller.list(query)
+    const res = await app.inject({
+      method: 'GET',
+      url: 'v1/regtest/poolpairs?start=300&including_start=true&limit=100'
+    })
+
+    const poolpairs = res.json().data
 
     expect(Object.keys(poolpairs).length).toBe(0)
   })
 
   it('should listPoolPairs with pagination limit', async () => {
-    const query = {
-      start: 0,
-      including_start: true,
-      limit: 2
-    }
-    const poolpairs = await controller.list(query)
+    const res = await app.inject({
+      method: 'GET',
+      url: 'v1/regtest/poolpairs?start=0&including_start=true&limit=2'
+    })
+
+    const poolpairs = res.json().data
 
     expect(Object.keys(poolpairs).length).toBe(2)
   })
 
   it('should listPoolPairs with verbose false', async () => {
-    const query = {
-      start: 0,
-      including_start: true,
-      limit: 100,
-      verbose: false
-    }
-    const poolpairs = await controller.list(query)
+    const res = await app.inject({
+      method: 'GET',
+      url: 'v1/regtest/poolpairs?start=0&including_start=true&limit=100&verbose=false'
+    })
+
+    const poolpairs = res.json().data
 
     for (const k in poolpairs) {
       const poolpair = poolpairs[k]
@@ -477,14 +488,19 @@ describe('controller.list()', () => {
   })
 })
 
-describe('controller.get()', () => {
+describe('GET: /v1/regtest/poolpairs/:symbol', () => {
   beforeAll(async () => {
     await createToken('DBCH')
     await createPoolPair('DBCH')
   })
 
   it('should getPoolPair', async () => {
-    const poolpair = await controller.get('DFI-DBCH')
+    const res = await app.inject({
+      method: 'GET',
+      url: 'v1/regtest/poolpairs/DFI-DBCH'
+    })
+
+    const poolpair = res.json().data
 
     for (const k in poolpair) {
       const data = poolpair[k]
@@ -507,7 +523,12 @@ describe('controller.get()', () => {
   })
 
   it('should getPoolPair with verbose false', async () => {
-    const poolpair = await controller.get('DFI-DBCH', { verbose: false })
+    const res = await app.inject({
+      method: 'GET',
+      url: 'v1/regtest/poolpairs/DFI-DBCH?verbose=false'
+    })
+
+    const poolpair = res.json().data
 
     for (const k in poolpair) {
       const data = poolpair[k]
@@ -520,6 +541,18 @@ describe('controller.get()', () => {
   })
 
   it('should throw BadRequestException due to getting non-existent pair', async () => {
-    await expect(controller.get('DFI-NONEXIST')).rejects.toThrow(BadRequestException)
+    const res = await app.inject({
+      method: 'GET',
+      url: 'v1/regtest/poolpairs/DFI-NONEXIST'
+    })
+
+    expect(res.statusCode).toBe(400)
+    expect(typeof res.json().data).toEqual('string')
+
+    expect(res.json()).toEqual({
+      statusCode: 400,
+      message: ['token \'DFI-NONEXIST\' is not exists!'],
+      error: 'Bad Request'
+    })
   })
 })

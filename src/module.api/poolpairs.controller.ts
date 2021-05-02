@@ -78,7 +78,7 @@ export class PoolPairsController {
     }
   }
 
-  @Get()
+  @Get('/shares')
   async listPoolShares (@Query() query?: PoolPairsQuery): Promise<PoolShareResult> {
     try {
       const filter = query !== undefined ? remap(query) : undefined
@@ -88,7 +88,7 @@ export class PoolPairsController {
     }
   }
 
-  @Post()
+  @Post('/liquidity')
   async addPoolLiquidity (@Body() body: PoolLiquidityDto): Promise<string> {
     try {
       const { from, shareAddress, options } = body
