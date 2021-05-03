@@ -42,12 +42,8 @@ export class PoolPairsController {
    */
   @Get()
   async list (@Query() query?: PoolPairsQuery): Promise<PoolPairResult> {
-    try {
-      const filter = query !== undefined ? remap(query) : undefined
-      return await this.client.poolpair.listPoolPairs(filter?.pagination, filter?.verbose)
-    } catch (e) {
-      throw new BadRequestException()
-    }
+    const filter = query !== undefined ? remap(query) : undefined
+    return await this.client.poolpair.listPoolPairs(filter?.pagination, filter?.verbose)
   }
 
   /**
@@ -67,12 +63,8 @@ export class PoolPairsController {
 
   @Get('/shares')
   async listPoolShares (@Query() query?: PoolPairsQuery): Promise<PoolShareResult> {
-    try {
-      const filter = query !== undefined ? remap(query) : undefined
-      return await this.client.poolpair.listPoolShares(filter?.pagination, filter?.verbose, filter?.options)
-    } catch (e) {
-      throw new BadRequestException()
-    }
+    const filter = query !== undefined ? remap(query) : undefined
+    return await this.client.poolpair.listPoolShares(filter?.pagination, filter?.verbose, filter?.options)
   }
 }
 
@@ -94,21 +86,6 @@ function remap (query: PoolPairsQuery): PoolPairsFilter {
     verbose,
     options
   }
-}
-
-export interface CreatePoolPairMetadata {
-  tokenA: string
-  tokenB: string
-  commission: number
-  status: boolean
-  ownerAddress: string
-  customRewards?: string
-  pairSymbol?: string
-}
-
-export interface CreatePoolPairUTXO {
-  txid: string
-  vout: number
 }
 
 export interface PoolPairResult {
