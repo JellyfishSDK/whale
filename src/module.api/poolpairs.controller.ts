@@ -1,44 +1,30 @@
 import BigNumber from 'bignumber.js'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { BadRequestException, Body, Controller, Get, Param, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common'
-import { IsNotEmpty, IsOptional } from 'class-validator'
+import { BadRequestException, Controller, Get, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common'
+import { IsOptional, IsNumberString, IsBooleanString } from 'class-validator'
 import { ExceptionInterceptor } from './commons/exception.interceptor'
 import { NetworkGuard } from './commons/network.guard'
 import { TransformInterceptor } from './commons/transform.interceptor'
 
-class PoolPairDto {
-  @IsNotEmpty()
-  metadata!: CreatePoolPairMetadata
-
-  @IsOptional()
-  utxos?: CreatePoolPairUTXO[]
-}
-
-class PoolLiquidityDto {
-  @IsNotEmpty()
-  from!: AddPoolLiquiditySource
-
-  @IsNotEmpty()
-  shareAddress!: string
-
-  @IsOptional()
-  options?: AddPoolLiquidityOptions
-}
-
 class PoolPairsQuery {
   @IsOptional()
+  @IsNumberString()
   start?: string
 
   @IsOptional()
+  @IsBooleanString()
   including_start?: string
 
   @IsOptional()
+  @IsNumberString()
   limit?: string
 
   @IsOptional()
+  @IsBooleanString()
   verbose?: string
 
   @IsOptional()
+  @IsBooleanString()
   isMineOnly?: string
 }
 
@@ -50,26 +36,17 @@ export class PoolPairsController {
   }
 
   /**
-   * @param {PoolPairDto} body to create pool pair
-   * @return {Promise<string>} hashes of string
-   */
-  @Post()
-  async create (@Body() body: PoolPairDto): Promise<string> {
-    try {
-      return await this.client.poolpair.createPoolPair(body.metadata, body?.utxos)
-    } catch (e) {
-      throw new BadRequestException(e)
-    }
-  }
-
-  /**
    * @param {PoolPairsQuery} query filter of listing pool pairs
    * @return {PoolPairResult}
    */
   @Get()
   async list (@Query() query?: PoolPairsQuery): Promise<PoolPairResult> {
-    const filter = query !== undefined ? remap(query) : undefined
-    return await this.client.poolpair.listPoolPairs(filter?.pagination, filter?.verbose)
+    try {
+      const filter = query !== undefined ? remap(query) : undefined
+      return await this.client.poolpair.listPoolPairs(filter?.pagination, filter?.verbose)
+    } catch (e) {
+      throw new BadRequestException()
+    }
   }
 
   /**
@@ -77,7 +54,7 @@ export class PoolPairsController {
    * @param {PoolPairsQuery} query pool pair filter
    * @return {PoolPairResult}
    */
-  @Get(':symbol')
+  @Get('/:symbol')
   async get (@Param('symbol') symbol: string, @Query() query?: PoolPairsQuery): Promise<PoolPairResult> {
     try {
       const filter = query !== undefined ? remap(query) : undefined
@@ -89,15 +66,9 @@ export class PoolPairsController {
 
   @Get('/shares')
   async listPoolShares (@Query() query?: PoolPairsQuery): Promise<PoolShareResult> {
-    const filter = query !== undefined ? remap(query) : undefined
-    return await this.client.poolpair.listPoolShares(filter?.pagination, filter?.verbose, filter?.options)
-  }
-
-  @Post('/liquidity')
-  async addPoolLiquidity (@Body() body: PoolLiquidityDto): Promise<string> {
     try {
-      const { from, shareAddress, options } = body
-      return await this.client.poolpair.addPoolLiquidity(from, shareAddress, options)
+      const filter = query !== undefined ? remap(query) : undefined
+      return await this.client.poolpair.listPoolShares(filter?.pagination, filter?.verbose, filter?.options)
     } catch (e) {
       throw new BadRequestException()
     }

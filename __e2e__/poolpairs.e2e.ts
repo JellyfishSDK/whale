@@ -59,142 +59,6 @@ async function mintTokens (symbol: string): Promise<void> {
   await container.generate(25)
 }
 
-describe('POST: /v1/regtest/poolpairs/liquidity', () => {
-  beforeAll(async () => {
-    await createToken('DDAI')
-
-    await mintTokens('DDAI')
-
-    await createPoolPair('DDAI')
-  })
-
-  it('should addPoolLiquidity', async () => {
-    const shareAddress = await container.call('getnewaddress')
-
-    const payload = {
-      from: {
-        '*': ['10@DFI', '200@DDAI']
-      },
-      shareAddress
-    }
-
-    const res = await app.inject({
-      method: 'POST',
-      url: 'v1/regtest/poolpairs/liquidity',
-      payload
-    })
-
-    expect(res.statusCode).toBe(201)
-    expect(typeof res.json().data).toBe('string')
-  })
-
-  it('should addPoolLiquidity with specific input token address', async () => {
-    const tokenAAddress = await container.call('getnewaddress')
-    const tokenBAddress = await container.call('getnewaddress')
-    await container.call('sendtokenstoaddress', [{}, { [tokenAAddress]: ['10@DFI'] }])
-    await container.call('sendtokenstoaddress', [{}, { [tokenBAddress]: ['200@DDAI'] }])
-    await container.generate(25)
-
-    const shareAddress = await container.call('getnewaddress')
-
-    const payload = {
-      from: {
-        [tokenAAddress]: '5@DFI',
-        [tokenBAddress]: '100@DDAI'
-      },
-      shareAddress
-    }
-    const res = await app.inject({
-      method: 'POST',
-      url: 'v1/regtest/poolpairs/liquidity',
-      payload
-    })
-
-    expect(res.statusCode).toBe(201)
-    expect(typeof res.json().data).toBe('string')
-  })
-
-  it('should addPoolLiquidity with utxos', async () => {
-    const shareAddress = await container.call('getnewaddress')
-    const tokenAAddress = await container.call('getnewaddress')
-    const tokenBAddress = await container.call('getnewaddress')
-    await container.call('sendtokenstoaddress', [{}, { [tokenAAddress]: ['10@DFI'] }])
-    await container.call('sendtokenstoaddress', [{}, { [tokenBAddress]: ['200@DDAI'] }])
-    await container.generate(25)
-
-    const txid = await container.call('sendmany', ['', {
-      [tokenAAddress]: 10,
-      [tokenBAddress]: 20
-    }])
-    await container.generate(2)
-
-    const utxos = await container.call('listunspent')
-    const inputs = utxos.filter((utxo: any) => utxo.txid === txid).map((utxo: any) => {
-      return {
-        txid: utxo.txid,
-        vout: utxo.vout
-      }
-    })
-
-    const payload = {
-      from: {
-        [tokenAAddress]: '5@DFI',
-        [tokenBAddress]: '100@DDAI'
-      },
-      shareAddress,
-      options: {
-        utxos: inputs
-      }
-    }
-
-    const res = await app.inject({
-      method: 'POST',
-      url: 'v1/regtest/poolpairs/liquidity',
-      payload
-    })
-
-    expect(res.statusCode).toBe(201)
-    expect(typeof res.json().data).toBe('string')
-  })
-
-  it('should throw BadRequestException due to the utxos which does not include account owner', async () => {
-    const shareAddress = await container.call('getnewaddress')
-    const tokenAAddress = await container.call('getnewaddress')
-    const tokenBAddress = await container.call('getnewaddress')
-
-    const utxos = await container.call('listunspent')
-    const inputs = utxos.map((utxo: any) => {
-      return {
-        txid: utxo.txid,
-        vout: utxo.vout
-      }
-    })
-
-    const payload = {
-      from: {
-        [tokenAAddress]: '5@DFI',
-        [tokenBAddress]: '100@DDAI'
-      },
-      shareAddress,
-      options: {
-        utxos: inputs
-      }
-    }
-
-    const res = await app.inject({
-      method: 'POST',
-      url: 'v1/regtest/poolpairs/liquidity',
-      payload
-    })
-
-    expect(res.statusCode).toBe(400)
-    expect(res.json()).toEqual({
-      statusCode: 400,
-      message: 'Bad Request'
-    })
-  })
-})
-
 describe('GET: /v1/regtest/poolpairs/shares', () => {
   async function addPoolLiquidity (): Promise<void> {
     const shareAddress = await container.call('getnewaddress')
@@ -217,6 +81,27 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
     await addPoolLiquidity()
     await addPoolLiquidity()
     await addPoolLiquidity()
+  })
+
+  it('should fail due to invalid query type', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: 'v1/regtest/poolpairs/shares',
+      query: {
+        start: 'invalid',
+        including_start: 'yes',
+        limit: '100'
+      }
+    })
+
+    expect(res.json()).toEqual({
+      statusCode: 400,
+      message: [
+        'start must be a number string',
+        'including_start must be a boolean string'
+      ],
+      error: 'Bad Request'
+    })
   })
 
   it('should listPoolShares', async () => {
@@ -322,81 +207,6 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
   })
 })
 
-describe('POST: /v1/regtest/poolpairs', () => {
-  beforeAll(async () => {
-    await createToken('DBTC')
-  })
-
-  it('should throw BadRequestExeception due to tokenB is not exists', async () => {
-    const address = await container.call('getnewaddress')
-    const payload = {
-      metadata: {
-        tokenA: 'DFI',
-        tokenB: 'DDD',
-        commission: 0,
-        status: true,
-        ownerAddress: address
-      }
-    }
-    const res = await app.inject({
-      method: 'POST',
-      url: 'v1/regtest/poolpairs',
-      payload
-    })
-
-    expect(res.json()).toEqual({
-      statusCode: 500,
-      message: 'Internal server error' // 'TokenB was not found'
-    })
-  })
-
-  it('should create pool pair', async () => {
-    const address = await container.call('getnewaddress')
-    const payload = {
-      metadata: {
-        tokenA: 'DFI',
-        tokenB: 'DBTC',
-        commission: 0,
-        status: true,
-        ownerAddress: address
-      }
-    }
-
-    const res = await app.inject({
-      method: 'POST',
-      url: 'v1/regtest/poolpairs',
-      payload
-    })
-
-    expect(res.statusCode).toBe(201)
-    expect(typeof res.json().data).toEqual('string')
-  })
-
-  it('should throw BadRequestExeception due to pool pair \'DFI-DBTC\' already exists!', async () => {
-    const address = await container.call('getnewaddress')
-    const payload = {
-      metadata: {
-        tokenA: 'DFI',
-        tokenB: 'DBTC',
-        commission: 0,
-        status: true,
-        ownerAddress: address
-      }
-    }
-
-    const res = await app.inject({
-      method: 'POST',
-      url: 'v1/regtest/poolpairs',
-      payload
-    })
-
-    expect(res.json()).toEqual({
-      statusCode: 500,
-      message: 'Internal server error' // token 'DFI-DBTC' already exists!
-    })
-  })
-})
-
 describe('GET: /v1/regtest/poolpairs', () => {
   beforeAll(async () => {
     await createToken('DETH')
@@ -406,6 +216,27 @@ describe('GET: /v1/regtest/poolpairs', () => {
     await createPoolPair('DETH', { commission: 0.001 })
     await createPoolPair('DXRP', { commission: 0.003 })
     await createPoolPair('DUSDT', { status: false })
+  })
+
+  it('should fail due to invalid query type', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: 'v1/regtest/poolpairs',
+      query: {
+        start: 'invalid',
+        including_start: 'yes',
+        limit: '100'
+      }
+    })
+
+    expect(res.json()).toEqual({
+      statusCode: 400,
+      message: [
+        'start must be a number string',
+        'including_start must be a boolean string'
+      ],
+      error: 'Bad Request'
+    })
   })
 
   it('should listPoolPairs', async () => {
