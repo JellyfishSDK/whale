@@ -1,14 +1,15 @@
 import BigNumber from 'bignumber.js'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { BadRequestException, Controller, Get, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common'
-import { IsOptional, IsNumberString, IsBooleanString } from 'class-validator'
+import { IsOptional, IsBooleanString } from 'class-validator'
 import { ExceptionInterceptor } from './commons/exception.interceptor'
 import { NetworkGuard } from './commons/network.guard'
 import { TransformInterceptor } from './commons/transform.interceptor'
+import { IsPositiveNumberString } from './custom.validations'
 
 class PoolPairsQuery {
   @IsOptional()
-  @IsNumberString()
+  @IsPositiveNumberString()
   start?: string
 
   @IsOptional()
@@ -16,7 +17,7 @@ class PoolPairsQuery {
   including_start?: string
 
   @IsOptional()
-  @IsNumberString()
+  @IsPositiveNumberString()
   limit?: string
 
   @IsOptional()

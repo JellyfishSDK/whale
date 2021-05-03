@@ -90,15 +90,16 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
       query: {
         start: 'invalid',
         including_start: 'yes',
-        limit: '100'
+        limit: '-2'
       }
     })
 
     expect(res.json()).toEqual({
       statusCode: 400,
       message: [
-        'start must be a number string',
-        'including_start must be a boolean string'
+        'start must be a positive number string',
+        'including_start must be a boolean string',
+        'limit must be a positive number string'
       ],
       error: 'Bad Request'
     })
@@ -232,7 +233,7 @@ describe('GET: /v1/regtest/poolpairs', () => {
     expect(res.json()).toEqual({
       statusCode: 400,
       message: [
-        'start must be a number string',
+        'start must be a positive number string',
         'including_start must be a boolean string'
       ],
       error: 'Bad Request'
