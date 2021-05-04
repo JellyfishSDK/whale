@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config'
 import { PoolPairsController } from '@src/module.api/poolpairs.controller'
 import { BadRequestException } from '@nestjs/common'
 import BigNumber from 'bignumber.js'
+import { PoolPairsFilter } from '../module.api/poolpairs.controller'
 
 const container = new MasterNodeRegTestContainer()
 let client: JsonRpcClient
@@ -110,35 +111,40 @@ describe('controller.listPoolShares()', () => {
   })
 
   it('should listPoolShares with pagination and return an empty object as out of range', async () => {
-    const query = {
-      start: '300',
-      including_start: 'true',
-      limit: '100'
+    const filter = new PoolPairsFilter()
+    filter.pagination = {
+      start: 300,
+      including_start: true,
+      limit: 100
     }
-    const poolShares = await controller.listPoolShares(query)
+
+    const poolShares = await controller.listPoolShares(filter)
 
     expect(Object.keys(poolShares).length).toBe(0)
   })
 
   it('should listPoolShares with pagination limit', async () => {
-    const query = {
-      start: '0',
-      including_start: 'true',
-      limit: '2'
+    const filter = new PoolPairsFilter()
+    filter.pagination = {
+      start: 0,
+      including_start: true,
+      limit: 2
     }
-    const poolShares = await controller.listPoolShares(query)
+    const poolShares = await controller.listPoolShares(filter)
 
     expect(Object.keys(poolShares).length).toBe(2)
   })
 
   it('should listPoolPairs with verbose false', async () => {
-    const query = {
-      start: '0',
-      including_start: 'true',
-      limit: '100',
-      verbose: 'false'
+    const filter = new PoolPairsFilter()
+    filter.pagination = {
+      start: 0,
+      including_start: true,
+      limit: 100
     }
-    const poolShares = await controller.listPoolShares(query)
+    filter.verbose = false
+
+    const poolShares = await controller.listPoolShares(filter)
 
     for (const k in poolShares) {
       const data = poolShares[k]
@@ -149,14 +155,18 @@ describe('controller.listPoolShares()', () => {
   })
 
   it('should listPoolPairs with isMineOnly true', async () => {
-    const query = {
-      start: '0',
-      including_start: 'true',
-      limit: '100',
-      verbose: 'true',
-      isMineOnly: 'true'
+    const filter = new PoolPairsFilter()
+    filter.pagination = {
+      start: 0,
+      including_start: true,
+      limit: 100
     }
-    const poolShares = await controller.listPoolShares(query)
+    filter.verbose = true
+    filter.options = {
+      isMineOnly: true
+    }
+
+    const poolShares = await controller.listPoolShares(filter)
 
     for (const k in poolShares) {
       const data = poolShares[k]
@@ -234,35 +244,39 @@ describe('controller.list()', () => {
   })
 
   it('should listPoolPairs with pagination and return an empty object as out of range', async () => {
-    const query = {
-      start: '300',
-      including_start: 'true',
-      limit: '100'
+    const filter = new PoolPairsFilter()
+    filter.pagination = {
+      start: 300,
+      including_start: true,
+      limit: 100
     }
-    const poolpairs = await controller.list(query)
+
+    const poolpairs = await controller.list(filter)
 
     expect(Object.keys(poolpairs).length).toBe(0)
   })
 
   it('should listPoolPairs with pagination limit', async () => {
-    const query = {
-      start: '0',
-      including_start: 'true',
-      limit: '2'
+    const filter = new PoolPairsFilter()
+    filter.pagination = {
+      start: 0,
+      including_start: true,
+      limit: 2
     }
-    const poolpairs = await controller.list(query)
+    const poolpairs = await controller.list(filter)
 
     expect(Object.keys(poolpairs).length).toBe(2)
   })
 
   it('should listPoolPairs with verbose false', async () => {
-    const query = {
-      start: '0',
-      including_start: 'true',
-      limit: '100',
-      verbose: 'false'
+    const filter = new PoolPairsFilter()
+    filter.pagination = {
+      start: 0,
+      including_start: true,
+      limit: 100
     }
-    const poolpairs = await controller.list(query)
+    filter.verbose = false
+    const poolpairs = await controller.list(filter)
 
     for (const k in poolpairs) {
       const poolpair = poolpairs[k]
@@ -306,7 +320,10 @@ describe('controller.get()', () => {
   })
 
   it('should getPoolPair with verbose false', async () => {
-    const poolpair = await controller.get('DFI-DBCH', { verbose: 'false' })
+    const filter = new PoolPairsFilter()
+    filter.verbose = false
+
+    const poolpair = await controller.get('DFI-DBCH', filter)
 
     for (const k in poolpair) {
       const data = poolpair[k]

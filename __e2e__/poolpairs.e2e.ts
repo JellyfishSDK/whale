@@ -319,8 +319,6 @@ describe('GET: /v1/regtest/poolpairs', () => {
   it('should listPoolPairs with pagination limit', async () => {
     const res = await app.inject({
       method: 'GET',
-      // NOTE(canonbrother): put query with url in one line is working as well
-      // url: 'v1/regtest/poolpairs?start=0&including_start=true&limit=2',
       url: 'v1/regtest/poolpairs',
       query: {
         start: '0',
@@ -333,6 +331,17 @@ describe('GET: /v1/regtest/poolpairs', () => {
     const poolpairs = res.json().data
 
     expect(Object.keys(poolpairs).length).toBe(2)
+
+    // test putting query with url should be working as well
+    const res1 = await app.inject({
+      method: 'GET',
+      url: 'v1/regtest/poolpairs?start=0&including_start=true&limit=1'
+    })
+
+    expect(res1.statusCode).toBe(200)
+    const poolpairs1 = res1.json().data
+
+    expect(Object.keys(poolpairs1).length).toBe(1)
   })
 
   it('should listPoolPairs with verbose false', async () => {

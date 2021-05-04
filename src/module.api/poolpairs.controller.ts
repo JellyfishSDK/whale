@@ -30,7 +30,7 @@ class PoolPairsQuery {
   isMineOnly?: string
 }
 
-class PoolPairsFilter {
+export class PoolPairsFilter {
   @IsOptional()
   pagination?: PoolPairPagination
 
