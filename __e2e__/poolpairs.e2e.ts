@@ -319,6 +319,8 @@ describe('GET: /v1/regtest/poolpairs', () => {
   it('should listPoolPairs with pagination limit', async () => {
     const res = await app.inject({
       method: 'GET',
+      // NOTE(canonbrother): put query with url in one line is working as well
+      // url: 'v1/regtest/poolpairs?start=0&including_start=true&limit=2',
       url: 'v1/regtest/poolpairs',
       query: {
         start: '0',

@@ -1,11 +1,12 @@
 import BigNumber from 'bignumber.js'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { BadRequestException, Controller, Get, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common'
-import { IsOptional, IsBooleanString } from 'class-validator'
+import { BadRequestException, Controller, Get, Param, Query, UseGuards, UseInterceptors, PipeTransform, ArgumentMetadata } from '@nestjs/common'
+import { IsOptional, IsBooleanString, validate } from 'class-validator'
 import { ExceptionInterceptor } from './commons/exception.interceptor'
 import { NetworkGuard } from './commons/network.guard'
 import { TransformInterceptor } from './commons/transform.interceptor'
 import { IsPositiveNumberString } from './custom.validations'
+import { plainToClass } from 'class-transformer'
 
 class PoolPairsQuery {
   @IsOptional()
@@ -29,6 +30,60 @@ class PoolPairsQuery {
   isMineOnly?: string
 }
 
+class PoolPairsFilter {
+  @IsOptional()
+  pagination?: PoolPairPagination
+
+  @IsOptional()
+  verbose?: boolean
+
+  @IsOptional()
+  options?: PoolPairsOptions
+}
+
+export class PoolPairsQueryPipe implements PipeTransform {
+  async transform (value: any, metadata: ArgumentMetadata): Promise<PoolPairsFilter> {
+    await this.validate(value)
+
+    const pagination: PoolPairPagination = {
+      start: Number(value.start) ?? 0,
+      including_start: value.including_start ?? true,
+      limit: Number(value.limit) ?? 100.0
+    }
+
+    const verbose = value.verbose?.toLowerCase() !== 'false'
+
+    const options: PoolPairsOptions = {
+      isMineOnly: value.isMineOnly?.toLowerCase() !== 'false'
+    }
+
+    const poolPairsFilter = new PoolPairsFilter()
+    poolPairsFilter.pagination = pagination
+    poolPairsFilter.verbose = verbose
+    poolPairsFilter.options = options
+
+    return poolPairsFilter
+  }
+
+  async validate (value: any): Promise<void> {
+    const poolPairsQuery = plainToClass(PoolPairsQuery, value)
+    const errors = await validate(poolPairsQuery)
+    if (errors.length > 0) {
+      const errorConstraints = errors.map(error => error.constraints)
+
+      const errorMessages = []
+      for (let i = 0; i < errorConstraints.length; i += 1) {
+        const constraint = errorConstraints[i]
+        if (constraint !== undefined) {
+          const errorMessage = Object.values(constraint)[0]
+          errorMessages.push(errorMessage)
+        }
+      }
+      throw new BadRequestException(errorMessages)
+    }
+  }
+}
+
 @Controller('/v1/:network/poolpairs')
 @UseGuards(NetworkGuard)
 @UseInterceptors(TransformInterceptor, ExceptionInterceptor)
@@ -37,24 +92,22 @@ export class PoolPairsController {
   }
 
   /**
-   * @param {PoolPairsQuery} query filter of listing pool pairs
+   * @param {PoolPairsFilter} filter filter of listing pool pairs
    * @return {PoolPairResult}
    */
   @Get()
-  async list (@Query() query?: PoolPairsQuery): Promise<PoolPairResult> {
-    const filter = query !== undefined ? remap(query) : undefined
+  async list (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolPairResult> {
     return await this.client.poolpair.listPoolPairs(filter?.pagination, filter?.verbose)
   }
 
   /**
    * @param {string} symbol token's symbol
-   * @param {PoolPairsQuery} query pool pair filter
+   * @param {PoolPairsFilter} query pool pair filter
    * @return {PoolPairResult}
    */
   @Get('/:symbol')
-  async get (@Param('symbol') symbol: string, @Query() query?: PoolPairsQuery): Promise<PoolPairResult> {
+  async get (@Param('symbol') symbol: string, @Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolPairResult> {
     try {
-      const filter = query !== undefined ? remap(query) : undefined
       return await this.client.poolpair.getPoolPair(symbol, filter?.verbose)
     } catch (e) {
       throw new BadRequestException()
@@ -62,29 +115,8 @@ export class PoolPairsController {
   }
 
   @Get('/shares')
-  async listPoolShares (@Query() query?: PoolPairsQuery): Promise<PoolShareResult> {
-    const filter = query !== undefined ? remap(query) : undefined
+  async listPoolShares (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolShareResult> {
     return await this.client.poolpair.listPoolShares(filter?.pagination, filter?.verbose, filter?.options)
-  }
-}
-
-function remap (query: PoolPairsQuery): PoolPairsFilter {
-  const pagination: PoolPairPagination = {
-    start: Number(query.start) ?? 0,
-    including_start: query.including_start?.toLowerCase() !== 'false',
-    limit: Number(query.limit) ?? 100
-  }
-
-  const verbose = query.verbose?.toLowerCase() !== 'false'
-
-  const options: PoolPairsOptions = {
-    isMineOnly: query.isMineOnly?.toLowerCase() !== 'false'
-  }
-
-  return {
-    pagination,
-    verbose,
-    options
   }
 }
 
@@ -114,12 +146,6 @@ export interface PoolPairInfo {
   creationHeight: BigNumber
 }
 
-export interface PoolPairPagination {
-  start: number
-  including_start: boolean
-  limit: number
-}
-
 export interface PoolShareResult {
   [id: string]: PoolShareInfo
 }
@@ -145,10 +171,10 @@ export interface AddPoolLiquidityUTXO {
   vout: number
 }
 
-export interface PoolPairsFilter {
-  pagination?: PoolPairPagination
-  verbose?: boolean
-  options?: PoolPairsOptions
+export interface PoolPairPagination {
+  start: number
+  including_start: boolean
+  limit: number
 }
 
 export interface PoolPairsOptions {
