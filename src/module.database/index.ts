@@ -3,13 +3,16 @@ import { Global, Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { FactoryProvider } from '@nestjs/common/interfaces/modules/provider.interface'
 import { Database } from '@src/module.database/database'
-import { MemoryDatabaseModule } from '@src/module.database/provider.memory'
+import { LevelDatabase } from '@src/module.database/provider.level/level.database'
+import { LevelDatabaseModule } from '@src/module.database/provider.level'
 import { MemoryDatabase } from '@src/module.database/provider.memory/memory.database'
+import { MemoryDatabaseModule } from '@src/module.database/provider.memory'
 
 /**
  * Runtime DatabaseProvider, dynamically inject a database type based on config in the database.provider.
  * @see Database
  * @see MemoryDatabase
+ * @see LevelDatabase
  */
 const DatabaseProvider: FactoryProvider = {
   provide: Database,
@@ -18,6 +21,8 @@ const DatabaseProvider: FactoryProvider = {
     switch (provider) {
       case 'memory':
         return await moduleRef.create(MemoryDatabase)
+      case 'level':
+        return await moduleRef.create(LevelDatabase)
       default:
         throw new Error(`bootstrapping error: invalid database.provider - ${provider}`)
     }
@@ -31,6 +36,7 @@ const DatabaseProvider: FactoryProvider = {
 @Global()
 @Module({
   imports: [
+    LevelDatabaseModule,
     MemoryDatabaseModule
   ],
   providers: [
