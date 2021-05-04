@@ -68,19 +68,24 @@ export class PoolPairsQueryPipe implements PipeTransform {
   async validate (value: any): Promise<void> {
     const poolPairsQuery = plainToClass(PoolPairsQuery, value)
     const errors = await validate(poolPairsQuery)
+
     if (errors.length > 0) {
       const errorConstraints = errors.map(error => error.constraints)
-
-      const errorMessages = []
-      for (let i = 0; i < errorConstraints.length; i += 1) {
-        const constraint = errorConstraints[i]
-        if (constraint !== undefined) {
-          const errorMessage = Object.values(constraint)[0]
-          errorMessages.push(errorMessage)
-        }
-      }
+      const errorMessages = this.constructErrorMessages(errorConstraints)
       throw new BadRequestException(errorMessages)
     }
+  }
+
+  constructErrorMessages (errorConstraints: any): string[] {
+    const errorMessages: string[] = []
+    for (let i = 0; i < errorConstraints.length; i += 1) {
+      const constraint = errorConstraints[i]
+      if (constraint !== undefined) {
+        const errorMessage = Object.values(constraint)[0] as string
+        errorMessages.push(errorMessage)
+      }
+    }
+    return errorMessages
   }
 }
 
