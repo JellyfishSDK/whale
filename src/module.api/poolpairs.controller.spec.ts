@@ -5,7 +5,7 @@ import { ConfigModule } from '@nestjs/config'
 import { PoolPairsController } from '@src/module.api/poolpairs.controller'
 import { BadRequestException } from '@nestjs/common'
 import BigNumber from 'bignumber.js'
-import { PoolPairsFilter } from '../module.api/poolpairs.controller'
+import { PoolPairsFilter, PoolShareInfoDto, PoolPairInfoDto } from '../module.api/poolpairs.controller'
 
 const container = new MasterNodeRegTestContainer()
 let client: JsonRpcClient
@@ -101,12 +101,12 @@ describe('controller.listPoolShares()', () => {
     const poolShares = await controller.listPoolShares()
 
     for (const k in poolShares) {
-      const data = poolShares[k]
-      expect(typeof data.poolID).toBe('string')
+      const data = poolShares[k] as PoolShareInfoDto
+      expect(typeof data.pool_id).toBe('string')
       expect(typeof data.owner).toBe('string')
-      expect(data['%'] instanceof BigNumber).toBe(true)
+      expect(data.percent instanceof BigNumber).toBe(true)
       expect(data.amount instanceof BigNumber).toBe(true)
-      expect(data.totalLiquidity instanceof BigNumber).toBe(true)
+      expect(data.total_liquidity instanceof BigNumber).toBe(true)
     }
   })
 
@@ -147,10 +147,10 @@ describe('controller.listPoolShares()', () => {
     const poolShares = await controller.listPoolShares(filter)
 
     for (const k in poolShares) {
-      const data = poolShares[k]
-      expect(typeof data.poolID).toBe('string')
+      const data = poolShares[k] as PoolShareInfoDto
+      expect(typeof data.pool_id).toBe('string')
       expect(typeof data.owner).toBe('string')
-      expect(data['%'] instanceof BigNumber).toBe(true)
+      expect(data.percent instanceof BigNumber).toBe(true)
     }
   })
 
@@ -169,12 +169,12 @@ describe('controller.listPoolShares()', () => {
     const poolShares = await controller.listPoolShares(filter)
 
     for (const k in poolShares) {
-      const data = poolShares[k]
-      expect(typeof data.poolID).toBe('string')
+      const data = poolShares[k] as PoolShareInfoDto
+      expect(typeof data.pool_id).toBe('string')
       expect(typeof data.owner).toBe('string')
-      expect(data['%'] instanceof BigNumber).toBe(true)
+      expect(data.percent instanceof BigNumber).toBe(true)
       expect(data.amount instanceof BigNumber).toBe(true)
-      expect(data.totalLiquidity instanceof BigNumber).toBe(true)
+      expect(data.total_liquidity instanceof BigNumber).toBe(true)
     }
   })
 })
@@ -195,7 +195,7 @@ describe('controller.list()', () => {
     const poolpairs = await controller.list()
 
     for (const k in poolpairs) {
-      const poolpair = poolpairs[k]
+      const poolpair = poolpairs[k] as PoolPairInfoDto
 
       if (poolpair.symbol === 'DFI-DETH') {
         expect(poolpair.name).toBe('Default Defi token-DETH')
@@ -218,26 +218,26 @@ describe('controller.list()', () => {
         assertions += 1
       }
 
-      expect(poolpair.totalLiquidity instanceof BigNumber).toBe(true)
-      expect(typeof poolpair.ownerAddress).toBe('string')
-      expect(typeof poolpair.idTokenA).toBe('string')
-      expect(typeof poolpair.idTokenB).toBe('string')
-      expect(poolpair.reserveA instanceof BigNumber).toBe(true)
-      expect(poolpair.reserveB instanceof BigNumber).toBe(true)
+      expect(poolpair.total_liquidity instanceof BigNumber).toBe(true)
+      expect(typeof poolpair.owner_address).toBe('string')
+      expect(typeof poolpair.id_token_a).toBe('string')
+      expect(typeof poolpair.id_token_b).toBe('string')
+      expect(poolpair.reserve_a instanceof BigNumber).toBe(true)
+      expect(poolpair.reserve_b instanceof BigNumber).toBe(true)
 
-      if (poolpair['reserveA/reserveB'] instanceof BigNumber && poolpair['reserveB/reserveA'] instanceof BigNumber) {
-        expect(poolpair.tradeEnabled).toBe(true)
+      if (poolpair.reserve_a_reserve_b instanceof BigNumber && poolpair.reserve_b_reserve_a instanceof BigNumber) {
+        expect(poolpair.trade_enabled).toBe(true)
       } else {
-        expect(poolpair['reserveA/reserveB']).toBe('0')
-        expect(poolpair['reserveB/reserveA']).toBe('0')
-        expect(poolpair.tradeEnabled).toBe(false)
+        expect(poolpair.reserve_a_reserve_b).toBe('0')
+        expect(poolpair.reserve_b_reserve_a).toBe('0')
+        expect(poolpair.trade_enabled).toBe(false)
       }
 
-      expect(poolpair.blockCommissionA instanceof BigNumber).toBe(true)
-      expect(poolpair.blockCommissionB instanceof BigNumber).toBe(true)
-      expect(poolpair.rewardPct instanceof BigNumber).toBe(true)
-      expect(typeof poolpair.creationTx).toBe('string')
-      expect(poolpair.creationHeight instanceof BigNumber).toBe(true)
+      expect(poolpair.block_commission_a instanceof BigNumber).toBe(true)
+      expect(poolpair.block_commission_b instanceof BigNumber).toBe(true)
+      expect(poolpair.reward_pct instanceof BigNumber).toBe(true)
+      expect(typeof poolpair.creation_tx).toBe('string')
+      expect(poolpair.creation_height instanceof BigNumber).toBe(true)
     }
 
     expect(assertions).toBe(3)
@@ -279,13 +279,13 @@ describe('controller.list()', () => {
     const poolpairs = await controller.list(filter)
 
     for (const k in poolpairs) {
-      const poolpair = poolpairs[k]
+      const poolpair = poolpairs[k] as PoolPairInfoDto
 
       expect(typeof poolpair.symbol).toBe('string')
       expect(typeof poolpair.name).toBe('string')
       expect(typeof poolpair.status).toBe('boolean')
-      expect(typeof poolpair.idTokenA).toBe('string')
-      expect(typeof poolpair.idTokenB).toBe('string')
+      expect(typeof poolpair.id_token_a).toBe('string')
+      expect(typeof poolpair.id_token_b).toBe('string')
     }
   })
 })
@@ -300,22 +300,22 @@ describe('controller.get()', () => {
     const poolpair = await controller.get('DFI-DBCH')
 
     for (const k in poolpair) {
-      const data = poolpair[k]
+      const data = poolpair[k] as PoolPairInfoDto
       expect(data.symbol).toBe('DFI-DBCH')
       expect(data.name).toBe('Default Defi token-DBCH')
       expect(data.status).toBe(true)
-      expect(typeof data.idTokenA).toBe('string')
-      expect(typeof data.idTokenB).toBe('string')
-      expect(data.reserveA instanceof BigNumber).toBe(true)
-      expect(data.reserveB instanceof BigNumber).toBe(true)
-      expect(typeof data['reserveA/reserveB']).toBe('string')
-      expect(typeof data['reserveB/reserveA']).toBe('string')
-      expect(data.tradeEnabled).toBe(false)
-      expect(data.blockCommissionA instanceof BigNumber).toBe(true)
-      expect(data.blockCommissionB instanceof BigNumber).toBe(true)
-      expect(data.rewardPct instanceof BigNumber).toBe(true)
-      expect(typeof data.creationTx).toBe('string')
-      expect(data.creationHeight instanceof BigNumber).toBe(true)
+      expect(typeof data.id_token_a).toBe('string')
+      expect(typeof data.id_token_b).toBe('string')
+      expect(data.reserve_a instanceof BigNumber).toBe(true)
+      expect(data.reserve_b instanceof BigNumber).toBe(true)
+      expect(typeof data.reserve_a_reserve_b).toBe('string')
+      expect(typeof data.reserve_b_reserve_a).toBe('string')
+      expect(data.trade_enabled).toBe(false)
+      expect(data.block_commission_a instanceof BigNumber).toBe(true)
+      expect(data.block_commission_b instanceof BigNumber).toBe(true)
+      expect(data.reward_pct instanceof BigNumber).toBe(true)
+      expect(typeof data.creation_tx).toBe('string')
+      expect(data.creation_height instanceof BigNumber).toBe(true)
     }
   })
 
@@ -326,12 +326,12 @@ describe('controller.get()', () => {
     const poolpair = await controller.get('DFI-DBCH', filter)
 
     for (const k in poolpair) {
-      const data = poolpair[k]
+      const data = poolpair[k] as PoolPairInfoDto
       expect(data.symbol).toBe('DFI-DBCH')
       expect(data.name).toBe('Default Defi token-DBCH')
       expect(data.status).toBe(true)
-      expect(typeof data.idTokenA).toBe('string')
-      expect(typeof data.idTokenB).toBe('string')
+      expect(typeof data.id_token_a).toBe('string')
+      expect(typeof data.id_token_b).toBe('string')
     }
   })
 

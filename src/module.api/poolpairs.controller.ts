@@ -27,7 +27,7 @@ class PoolPairsQuery {
 
   @IsOptional()
   @IsBooleanString()
-  isMineOnly?: string
+  is_mine_only?: string
 }
 
 export class PoolPairsFilter {
@@ -102,7 +102,8 @@ export class PoolPairsController {
    */
   @Get()
   async list (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolPairResult> {
-    return await this.client.poolpair.listPoolPairs(filter?.pagination, filter?.verbose)
+    const result = await this.client.poolpair.listPoolPairs(filter?.pagination, filter?.verbose)
+    return poolPairDtoMapper(result)
   }
 
   /**
@@ -113,7 +114,8 @@ export class PoolPairsController {
   @Get('/:symbol')
   async get (@Param('symbol') symbol: string, @Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolPairResult> {
     try {
-      return await this.client.poolpair.getPoolPair(symbol, filter?.verbose)
+      const result = await this.client.poolpair.getPoolPair(symbol, filter?.verbose)
+      return poolPairDtoMapper(result)
     } catch (e) {
       throw new BadRequestException()
     }
@@ -121,12 +123,103 @@ export class PoolPairsController {
 
   @Get('/shares')
   async listPoolShares (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolShareResult> {
-    return await this.client.poolpair.listPoolShares(filter?.pagination, filter?.verbose, filter?.options)
+    const result = await this.client.poolpair.listPoolShares(filter?.pagination, filter?.verbose, filter?.options)
+    return poolShareDtoMapper(result)
   }
 }
 
+function poolPairDtoMapper (object: any): PoolPairResult {
+  const result: { [key: string]: any } = {}
+
+  for (const k in object) {
+    const poolPairInfo = object[k]
+    const data: { [key: string]: any } = {}
+    result[k] = data
+    for (const k in poolPairInfo) {
+      switch (k) {
+        case 'idTokenA':
+          data.id_token_a = poolPairInfo[k]
+          break
+        case 'idTokenB':
+          data.id_token_b = poolPairInfo[k]
+          break
+        case 'reserveA':
+          data.reserve_a = poolPairInfo[k]
+          break
+        case 'reserveB':
+          data.reserve_b = poolPairInfo[k]
+          break
+        case 'totalLiquidity':
+          data.total_liquidity = poolPairInfo[k]
+          break
+        case 'reserveA/reserveB':
+          data.reserve_a_reserve_b = poolPairInfo[k]
+          break
+        case 'reserveB/reserveA':
+          data.reserve_b_reserve_a = poolPairInfo[k]
+          break
+        case 'tradeEnabled':
+          data.trade_enabled = poolPairInfo[k]
+          break
+        case 'ownerAddress':
+          data.owner_address = poolPairInfo[k]
+          break
+        case 'blockCommissionA':
+          data.block_commission_a = poolPairInfo[k]
+          break
+        case 'blockCommissionB':
+          data.block_commission_b = poolPairInfo[k]
+          break
+        case 'rewardPct':
+          data.reward_pct = poolPairInfo[k]
+          break
+        case 'customRewards':
+          data.custom_rewards = poolPairInfo[k]
+          break
+        case 'creationTx':
+          data.creation_tx = poolPairInfo[k]
+          break
+        case 'creationHeight':
+          data.creation_height = poolPairInfo[k]
+          break
+        default:
+          data[k] = poolPairInfo[k]
+          break
+      }
+    }
+  }
+  return result
+}
+
+function poolShareDtoMapper (object: any): any {
+  const result: { [key: string]: any } = {}
+
+  for (const k in object) {
+    const poolPairInfo = object[k]
+    const data: { [key: string]: any } = {}
+    result[k] = data
+    for (const k in poolPairInfo) {
+      switch (k) {
+        case 'poolID':
+          data.pool_id = poolPairInfo[k]
+          break
+        case '%':
+          data.percent = poolPairInfo[k]
+          break
+        case 'totalLiquidity':
+          data.total_liquidity = poolPairInfo[k]
+          break
+        default:
+          data[k] = poolPairInfo[k]
+          break
+      }
+    }
+  }
+  return result
+}
+
 export interface PoolPairResult {
-  [id: string]: PoolPairInfo
+  [id: string]: PoolPairInfo | PoolPairInfoDto
 }
 
 export interface PoolPairInfo {
@@ -151,8 +244,30 @@ export interface PoolPairInfo {
   creationHeight: BigNumber
 }
 
+export interface PoolPairInfoDto {
+  symbol: string
+  name: string
+  status: string
+  id_token_a: string
+  id_token_b: string
+  reserve_a: BigNumber
+  reserve_b: BigNumber
+  commission: BigNumber
+  total_liquidity: BigNumber
+  reserve_a_reserve_b: BigNumber | string
+  reserve_b_reserve_a: BigNumber | string
+  trade_enabled: boolean
+  owner_address: string
+  block_commission_a: BigNumber
+  block_commission_b: BigNumber
+  reward_pct: BigNumber
+  custom_rewards: BigNumber
+  creation_tx: string
+  creation_height: BigNumber
+}
+
 export interface PoolShareResult {
-  [id: string]: PoolShareInfo
+  [id: string]: PoolShareInfo | PoolShareInfoDto
 }
 
 export interface PoolShareInfo {
@@ -163,17 +278,12 @@ export interface PoolShareInfo {
   totalLiquidity: BigNumber
 }
 
-export interface AddPoolLiquidityOptions {
-  utxos?: AddPoolLiquidityUTXO[]
-}
-
-export interface AddPoolLiquiditySource {
-  [address: string]: string | string[]
-}
-
-export interface AddPoolLiquidityUTXO {
-  txid: string
-  vout: number
+export interface PoolShareInfoDto {
+  pool_id: string
+  owner: string
+  percent: BigNumber
+  amount: BigNumber
+  total_liquidity: BigNumber
 }
 
 export interface PoolPairPagination {
