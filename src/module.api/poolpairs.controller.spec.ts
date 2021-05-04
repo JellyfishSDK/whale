@@ -297,42 +297,35 @@ describe('controller.get()', () => {
   })
 
   it('should getPoolPair', async () => {
-    const poolpair = await controller.get('DFI-DBCH')
+    const data = await controller.get('DFI-DBCH')
 
-    for (const k in poolpair) {
-      const data = poolpair[k] as PoolPairInfoDto
-      expect(data.symbol).toBe('DFI-DBCH')
-      expect(data.name).toBe('Default Defi token-DBCH')
-      expect(data.status).toBe(true)
-      expect(typeof data.id_token_a).toBe('string')
-      expect(typeof data.id_token_b).toBe('string')
-      expect(data.reserve_a instanceof BigNumber).toBe(true)
-      expect(data.reserve_b instanceof BigNumber).toBe(true)
-      expect(typeof data.reserve_a_reserve_b).toBe('string')
-      expect(typeof data.reserve_b_reserve_a).toBe('string')
-      expect(data.trade_enabled).toBe(false)
-      expect(data.block_commission_a instanceof BigNumber).toBe(true)
-      expect(data.block_commission_b instanceof BigNumber).toBe(true)
-      expect(data.reward_pct instanceof BigNumber).toBe(true)
-      expect(typeof data.creation_tx).toBe('string')
-      expect(data.creation_height instanceof BigNumber).toBe(true)
-    }
+    expect(data.symbol).toBe('DFI-DBCH')
+    expect(data.name).toBe('Default Defi token-DBCH')
+    expect(data.status).toBe(true)
+    expect(typeof data.id_token_a).toBe('string')
+    expect(typeof data.id_token_b).toBe('string')
+    expect(data.reserve_a instanceof BigNumber).toBe(true)
+    expect(data.reserve_b instanceof BigNumber).toBe(true)
+    expect(typeof data.reserve_a_reserve_b).toBe('string')
+    expect(typeof data.reserve_b_reserve_a).toBe('string')
+    expect(data.trade_enabled).toBe(false)
+    expect(data.block_commission_a instanceof BigNumber).toBe(true)
+    expect(data.block_commission_b instanceof BigNumber).toBe(true)
+    expect(data.reward_pct instanceof BigNumber).toBe(true)
+    expect(typeof data.creation_tx).toBe('string')
+    expect(data.creation_height instanceof BigNumber).toBe(true)
   })
 
   it('should getPoolPair with verbose false', async () => {
     const filter = new PoolPairsFilter()
     filter.verbose = false
 
-    const poolpair = await controller.get('DFI-DBCH', filter)
-
-    for (const k in poolpair) {
-      const data = poolpair[k] as PoolPairInfoDto
-      expect(data.symbol).toBe('DFI-DBCH')
-      expect(data.name).toBe('Default Defi token-DBCH')
-      expect(data.status).toBe(true)
-      expect(typeof data.id_token_a).toBe('string')
-      expect(typeof data.id_token_b).toBe('string')
-    }
+    const data = await controller.get('DFI-DBCH', filter)
+    expect(data.symbol).toBe('DFI-DBCH')
+    expect(data.name).toBe('Default Defi token-DBCH')
+    expect(data.status).toBe(true)
+    expect(typeof data.id_token_a).toBe('string')
+    expect(typeof data.id_token_b).toBe('string')
   })
 
   it('should throw BadRequestException due to getting non-existent pair', async () => {

@@ -98,127 +98,121 @@ export class PoolPairsController {
 
   /**
    * @param {PoolPairsFilter} filter filter of listing pool pairs
-   * @return {PoolPairResult}
+   * @return {PoolPairsResult}
    */
   @Get()
-  async list (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolPairResult> {
+  async list (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolPairsResult> {
     const result = await this.client.poolpair.listPoolPairs(filter?.pagination, filter?.verbose)
-    return poolPairDtoMapper(result)
+    return toPoolPairsDto(result)
   }
 
   /**
    * @param {string} symbol token's symbol
    * @param {PoolPairsFilter} query pool pair filter
-   * @return {PoolPairResult}
+   * @return {PoolPairInfoDto}
    */
   @Get('/:symbol')
-  async get (@Param('symbol') symbol: string, @Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolPairResult> {
+  async get (@Param('symbol') symbol: string, @Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolPairInfoDto> {
     try {
       const result = await this.client.poolpair.getPoolPair(symbol, filter?.verbose)
-      return poolPairDtoMapper(result)
+      const id = Object.keys(result)[0]
+      return toPoolPairDto(result[id] as PoolPairInfo)
     } catch (e) {
       throw new BadRequestException()
     }
   }
 
   @Get('/shares')
-  async listPoolShares (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolShareResult> {
+  async listPoolShares (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolSharesResult> {
     const result = await this.client.poolpair.listPoolShares(filter?.pagination, filter?.verbose, filter?.options)
-    return poolShareDtoMapper(result)
+    return toPoolSharesDto(result)
   }
 }
 
-function poolPairDtoMapper (object: any): PoolPairResult {
-  const result: { [key: string]: any } = {}
+/**
+ * Map PoolPairsResult to PoolPairsResult(Dto)
+ *
+ * @param {PoolPairsResult} PoolPairsResult
+ * @return {PoolPairsResult}
+ */
+function toPoolPairsDto (PoolPairsResult: PoolPairsResult): PoolPairsResult {
+  /* eslint-disable  @typescript-eslint/consistent-type-assertions */
+  const result = {} as PoolPairsResult
 
-  for (const k in object) {
-    const poolPairInfo = object[k]
-    const data: { [key: string]: any } = {}
-    result[k] = data
-    for (const k in poolPairInfo) {
-      switch (k) {
-        case 'idTokenA':
-          data.id_token_a = poolPairInfo[k]
-          break
-        case 'idTokenB':
-          data.id_token_b = poolPairInfo[k]
-          break
-        case 'reserveA':
-          data.reserve_a = poolPairInfo[k]
-          break
-        case 'reserveB':
-          data.reserve_b = poolPairInfo[k]
-          break
-        case 'totalLiquidity':
-          data.total_liquidity = poolPairInfo[k]
-          break
-        case 'reserveA/reserveB':
-          data.reserve_a_reserve_b = poolPairInfo[k]
-          break
-        case 'reserveB/reserveA':
-          data.reserve_b_reserve_a = poolPairInfo[k]
-          break
-        case 'tradeEnabled':
-          data.trade_enabled = poolPairInfo[k]
-          break
-        case 'ownerAddress':
-          data.owner_address = poolPairInfo[k]
-          break
-        case 'blockCommissionA':
-          data.block_commission_a = poolPairInfo[k]
-          break
-        case 'blockCommissionB':
-          data.block_commission_b = poolPairInfo[k]
-          break
-        case 'rewardPct':
-          data.reward_pct = poolPairInfo[k]
-          break
-        case 'customRewards':
-          data.custom_rewards = poolPairInfo[k]
-          break
-        case 'creationTx':
-          data.creation_tx = poolPairInfo[k]
-          break
-        case 'creationHeight':
-          data.creation_height = poolPairInfo[k]
-          break
-        default:
-          data[k] = poolPairInfo[k]
-          break
-      }
-    }
+  for (const k in PoolPairsResult) {
+    const poolPairInfo = PoolPairsResult[k] as PoolPairInfo
+    result[k] = toPoolPairDto(poolPairInfo)
   }
   return result
 }
 
-function poolShareDtoMapper (object: any): any {
-  const result: { [key: string]: any } = {}
-
-  for (const k in object) {
-    const poolPairInfo = object[k]
-    const data: { [key: string]: any } = {}
-    result[k] = data
-    for (const k in poolPairInfo) {
-      switch (k) {
-        case 'poolID':
-          data.pool_id = poolPairInfo[k]
-          break
-        case '%':
-          data.percent = poolPairInfo[k]
-          break
-        case 'totalLiquidity':
-          data.total_liquidity = poolPairInfo[k]
-          break
-        default:
-          data[k] = poolPairInfo[k]
-          break
-      }
-    }
+/**
+ * Map PoolPairInfo to PoolPairInfoDto
+ *
+ * @param {PoolPairInfo} poolPairInfo
+ * @return {PoolPairInfoDto}
+ */
+function toPoolPairDto (poolPairInfo: PoolPairInfo): PoolPairInfoDto {
+  const data: PoolPairInfoDto = {
+    symbol: poolPairInfo.symbol,
+    name: poolPairInfo.name,
+    status: poolPairInfo.status,
+    id_token_a: poolPairInfo.idTokenA,
+    id_token_b: poolPairInfo.idTokenB,
+    reserve_a: poolPairInfo.reserveA,
+    reserve_b: poolPairInfo.reserveB,
+    commission: poolPairInfo.commission,
+    total_liquidity: poolPairInfo.totalLiquidity,
+    reserve_a_reserve_b: poolPairInfo['reserveA/reserveB'],
+    reserve_b_reserve_a: poolPairInfo['reserveB/reserveA'],
+    trade_enabled: poolPairInfo.tradeEnabled,
+    owner_address: poolPairInfo.ownerAddress,
+    block_commission_a: poolPairInfo.blockCommissionA,
+    block_commission_b: poolPairInfo.blockCommissionB,
+    reward_pct: poolPairInfo.rewardPct,
+    custom_rewards: poolPairInfo.customRewards,
+    creation_tx: poolPairInfo.creationTx,
+    creation_height: poolPairInfo.creationHeight
   }
+  return data
+}
+
+/**
+ * Map PoolSharesResult to PoolSharesResult(Dto)
+ *
+ * @param {PoolSharesResult} poolSharesResult
+ * @return {PoolSharesResult}
+ */
+function toPoolSharesDto (poolSharesResult: PoolSharesResult): PoolSharesResult {
+  /* eslint-disable  @typescript-eslint/consistent-type-assertions */
+  const result = {} as PoolSharesResult
+
+  for (const k in poolSharesResult) {
+    const poolShareInfo = poolSharesResult[k] as PoolShareInfo
+    result[k] = toPoolShareDto(poolShareInfo)
+  }
+
   return result
 }
 
-export interface PoolPairResult {
+/**
+ * Map PoolShareInfo to PoolShareInfoDto
+ *
+ * @param {PoolShareInfo} poolShareInfo
+ * @returns {PoolShareInfoDto}
+ */
+function toPoolShareDto (poolShareInfo: PoolShareInfo): PoolShareInfoDto {
+  const data: PoolShareInfoDto = {
+    pool_id: poolShareInfo.poolID,
+    owner: poolShareInfo.owner,
+    percent: poolShareInfo['%'],
+    amount: poolShareInfo.amount,
+    total_liquidity: poolShareInfo.totalLiquidity
+  }
+  return data
+}
+
+export interface PoolPairsResult {
   [id: string]: PoolPairInfo | PoolPairInfoDto
 }
 
@@ -266,7 +260,7 @@ export interface PoolPairInfoDto {
   creation_height: BigNumber
 }
 
-export interface PoolShareResult {
+export interface PoolSharesResult {
   [id: string]: PoolShareInfo | PoolShareInfoDto
 }
 

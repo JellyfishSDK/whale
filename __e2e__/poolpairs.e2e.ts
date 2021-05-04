@@ -384,26 +384,23 @@ describe('GET: /v1/regtest/poolpairs/:symbol', () => {
     })
 
     expect(res.statusCode).toBe(200)
-    const poolpair = res.json().data
+    const data = res.json().data
 
-    for (const k in poolpair) {
-      const data = poolpair[k]
-      expect(data.symbol).toBe('DFI-DBCH')
-      expect(data.name).toBe('Default Defi token-DBCH')
-      expect(data.status).toBe(true)
-      expect(typeof data.id_token_a).toBe('string')
-      expect(typeof data.id_token_b).toBe('string')
-      expect(typeof data.reserve_a).toBe('number')
-      expect(typeof data.reserve_b).toBe('number')
-      expect(typeof data.reserve_a_reserve_b).toBe('string')
-      expect(typeof data.reserve_b_reserve_a).toBe('string')
-      expect(data.trade_enabled).toBe(false)
-      expect(typeof data.block_commission_a).toBe('number')
-      expect(typeof data.block_commission_b).toBe('number')
-      expect(typeof data.reward_pct).toBe('number')
-      expect(typeof data.creation_tx).toBe('string')
-      expect(typeof data.creation_height).toBe('number')
-    }
+    expect(data.symbol).toBe('DFI-DBCH')
+    expect(data.name).toBe('Default Defi token-DBCH')
+    expect(data.status).toBe(true)
+    expect(typeof data.id_token_a).toBe('string')
+    expect(typeof data.id_token_b).toBe('string')
+    expect(typeof data.reserve_a).toBe('number')
+    expect(typeof data.reserve_b).toBe('number')
+    expect(typeof data.reserve_a_reserve_b).toBe('string')
+    expect(typeof data.reserve_b_reserve_a).toBe('string')
+    expect(data.trade_enabled).toBe(false)
+    expect(typeof data.block_commission_a).toBe('number')
+    expect(typeof data.block_commission_b).toBe('number')
+    expect(typeof data.reward_pct).toBe('number')
+    expect(typeof data.creation_tx).toBe('string')
+    expect(typeof data.creation_height).toBe('number')
   })
 
   it('should getPoolPair with verbose false', async () => {
@@ -416,16 +413,13 @@ describe('GET: /v1/regtest/poolpairs/:symbol', () => {
     })
 
     expect(res.statusCode).toBe(200)
-    const poolpair = res.json().data
+    const data = res.json().data
 
-    for (const k in poolpair) {
-      const data = poolpair[k]
-      expect(data.symbol).toBe('DFI-DBCH')
-      expect(data.name).toBe('Default Defi token-DBCH')
-      expect(data.status).toBe(true)
-      expect(typeof data.id_token_a).toBe('string')
-      expect(typeof data.id_token_b).toBe('string')
-    }
+    expect(data.symbol).toBe('DFI-DBCH')
+    expect(data.name).toBe('Default Defi token-DBCH')
+    expect(data.status).toBe(true)
+    expect(typeof data.id_token_a).toBe('string')
+    expect(typeof data.id_token_b).toBe('string')
   })
 
   it('should throw BadRequestException due to getting non-existent pair', async () => {
