@@ -1,17 +1,53 @@
 /**
+ * Supported model key types
+ */
+export type ModelKey = string | number
+export type ModelKeyType = 'string' | 'number'
+
+/**
  * @see Model
  */
-export interface ModelIndex {
+export interface ModelIndex<M extends Model> {
+  /**
+   * Fully featured name of the index.
+   * Index must not collide with other index in database.
+   */
+  name: string
+
   /**
    * Partition key of the model index.
    */
-  partitionKey: () => string | number
+  partition: {
+    type: ModelKeyType
+    key: (model: M) => ModelKey
+  }
   /**
    * Sort key of the model index, where present indicates composite key.
    * This attribute must be sorted in lexicographically order, which is a
    * typical implementation of most key-value store.
    */
-  sortKey?: () => string | number
+  sort?: {
+    type: ModelKeyType
+    key: (model: M) => ModelKey
+  }
+}
+
+export interface ModelMapping<M extends Model> {
+  /**
+   * Name of the Model, also know as table name.
+   * This will be used as a sub section key space and for the main id index.
+   */
+  type: string
+  /**
+   * Named indexes that can be declared. Although there are no limitations
+   * to the number of indexes you can create per model you should still limit to
+   * what you need. SortKey design tricks should be used to minimized the number
+   * of indexes you need. Indexes must not collide, and the onus is on the
+   * implementor to guarantee the behavior.
+   */
+  index: {
+    [name: string]: ModelIndex<M>
+  }
 }
 
 /**
@@ -46,33 +82,9 @@ export interface ModelIndex {
  * must not be supported for an agnostic database model design. This approach allows the use of
  * many NoSQL implementations for a truly hyper scale database design.
  */
-export abstract class Model {
+export interface Model {
   /**
-   * Type of the Model, also know as table name.
-   * This is used to separate partitionKey key space.
+   * id of the data, required for put/delete consistency
    */
-  _type!: typeof Model
-  /**
-   * Named indexes that can be declared. Although there are no limitations
-   * to the number of indexes you can create per model you should still limit to
-   * what you need. SortKey design tricks should be used to minimized the number
-   * of indexes you need. Indexes must not collide, and the onus is on the
-   * implementor to guarantee the behavior.
-   */
-  _index!: {
-    [name: string]: ModelIndex
-  }
-}
-
-/**
- * With derived name of the ModelIndex
- */
-export interface NamedModelIndex extends ModelIndex {
-  name: string
-}
-
-export function getIndexes (model: Model): NamedModelIndex[] {
-  return Object.entries(model._index).map(([name, index]) => {
-    return { name, ...index }
-  })
+  id: string
 }

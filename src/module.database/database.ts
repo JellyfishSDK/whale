@@ -1,4 +1,4 @@
-import { Model } from '@src/module.database/models/_model'
+import { Model, ModelIndex, ModelKey, ModelMapping } from '@src/module.database/model'
 
 /**
  * DeFi whale uses a database agnostic implementation. Any provider is valid as long as it
@@ -13,22 +13,31 @@ import { Model } from '@src/module.database/models/_model'
  * @see {Model} for more description and summary of what database implementation must conform to.
  */
 export abstract class Database {
-  abstract get<T extends Model> (
-    type: typeof Model,
-    index: string,
-    partitionKey: string | number,
-    sortKey?: string | number
-  ): Promise<T | undefined>
+  abstract get<M extends Model> (
+    index: ModelIndex<M>,
+    partitionKey: ModelKey,
+    sortKey?: ModelKey
+  ): Promise<M | undefined>
 
-  abstract query<T extends Model> (
-    type: typeof Model,
-    index: string,
+  abstract get<M extends Model> (
+    mapping: ModelMapping<M>,
+    id: string
+  ): Promise<M | undefined>
+
+  abstract query<M extends Model> (
+    index: ModelIndex<M>,
     options: QueryOptions
-  ): Promise<T[]>
+  ): Promise<M[]>
 
-  abstract put<T extends Model> (model: T): Promise<void>
+  abstract put<M extends Model> (
+    mapping: ModelMapping<M>,
+    model: M
+  ): Promise<void>
 
-  abstract delete<T extends Model> (model: T): Promise<void>
+  abstract delete<M extends Model> (
+    mapping: ModelMapping<M>,
+    id: string
+  ): Promise<void>
 }
 
 export enum SortOrder {
@@ -40,11 +49,11 @@ export interface QueryOptions {
   /**
    * Provide to indicates searching on the sort index within partition key space.
    */
-  partitionKey?: string | number
+  partitionKey?: ModelKey
   limit: number
   order: SortOrder
-  gt?: string | number
-  gte?: string | number
-  lt?: string | number
-  lte?: string | number
+  gt?: ModelKey
+  gte?: ModelKey
+  lt?: ModelKey
+  lte?: ModelKey
 }
