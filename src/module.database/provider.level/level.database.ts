@@ -17,7 +17,11 @@ export abstract class LevelUpDatabase extends Database {
    * Clear database, only for testing/debugging purpose.
    */
   async clear (): Promise<void> {
-    return await this.root.clear()
+    await this.root.clear()
+  }
+
+  async close (): Promise<void> {
+    await this.root.close()
   }
 
   /**

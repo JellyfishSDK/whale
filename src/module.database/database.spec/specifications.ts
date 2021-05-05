@@ -1,5 +1,4 @@
 import { Database, SortOrder } from '@src/module.database/database'
-import { LevelDatabase } from '@src/module.database/provider.level/level.database'
 import { PartitionMapping, PartitionSortMapping } from '@src/module.database/database.spec/_model'
 import { PARTITION_SORTS, PARTITIONS } from '@src/module.database/database.spec/_fixtures'
 
@@ -20,8 +19,6 @@ export async function setup (database: Database): Promise<void> {
  * Teardown all persisted data in each test scope
  */
 export async function teardown (database: Database): Promise<void> {
-  const levelDb = database as LevelDatabase
-  await levelDb.clear()
 }
 
 export async function shouldGetById (database: Database): Promise<void> {

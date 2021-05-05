@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config'
 import { LevelDatabaseModule } from '@src/module.database/provider.level/module'
 import * as spec from '@src/module.database/database.spec/specifications'
 import { Database } from '@src/module.database/database'
+import { LevelDatabase } from '@src/module.database/provider.level/level.database'
 
 let database: Database
 
@@ -19,12 +20,17 @@ beforeAll(async () => {
   database = app.get<Database>(Database)
 })
 
+afterAll(async () => {
+  await (database as LevelDatabase).close()
+})
+
 beforeEach(async () => {
   await spec.setup(database)
 })
 
 afterEach(async () => {
   await spec.teardown(database)
+  await (database as LevelDatabase).clear()
 })
 
 it('should get by id', async () => {
