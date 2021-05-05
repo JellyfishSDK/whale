@@ -9,7 +9,6 @@ beforeAll(async () => {
   await container.start()
   await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
-  await container.waitForWalletBalanceGTE(200)
   app = await createTestingApp(container)
 })
 
@@ -61,20 +60,8 @@ describe('GET: /v1/regtest/tokens/:id for newly created token', () => {
     await container.generate(1)
   }
 
-  async function mintTokens (symbol: string): Promise<void> {
-    const address = await container.call('getnewaddress')
-
-    const payload: { [key: string]: string } = {}
-    payload[address] = '100@0'
-    await container.call('utxostoaccount', [payload])
-    await container.call('minttokens', [`2000@${symbol}`])
-
-    await container.generate(25)
-  }
-
   beforeAll(async () => {
     await createToken('DSWAP')
-    await mintTokens('DSWAP')
   })
 
   it('should return DSWAP token with id as param', async () => {
@@ -96,9 +83,9 @@ describe('GET: /v1/regtest/tokens/:id for newly created token', () => {
     expect(data.is_dat).toBe(true)
     expect(data.is_lps).toBe(false)
     expect(data.finalized).toBe(false)
-    expect(data.minted).toBe(2000)
+    expect(data.minted).toBe(0)
     expect(typeof data.creation_tx).toBe('string')
-    expect(data.creation_height).toBe(107)
+    expect(data.creation_height).toBeGreaterThan(0)
     expect(data.destruction_tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
     expect(data.destruction_height).toBe(-1)
     expect(typeof data.collateral_address).toBe('string')
