@@ -1,7 +1,7 @@
 import { Database, SortOrder } from '@src/module.database/database'
 import { LevelDatabase } from '@src/module.database/provider.level/level.database'
-import { PartitionMapping, PartitionSortMapping } from '@src/module.database/database.spec/_model.spec'
-import { PARTITION_SORTS, PARTITIONS } from '@src/module.database/database.spec/_fixtures.spec'
+import { PartitionMapping, PartitionSortMapping } from '@src/module.database/database.spec/_model'
+import { PARTITION_SORTS, PARTITIONS } from '@src/module.database/database.spec/_fixtures'
 
 /**
  * Setup everything that is required to test database specification

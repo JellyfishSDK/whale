@@ -13,7 +13,12 @@ describe('provided module: level', () => {
     app = await Test.createTestingModule({
       imports: [ConfigModule.forRoot({
         isGlobal: true,
-        load: [() => ({ database: { provider: 'level' } })]
+        load: [() => ({
+          database: {
+            provider: 'level',
+            level: { location: '.level/module.database/index.spec.ts' }
+          }
+        })]
       }), DatabaseModule]
     }).compile()
 

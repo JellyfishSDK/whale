@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing'
 import { ConfigModule } from '@nestjs/config'
 import { LevelDatabaseModule } from '@src/module.database/provider.level/index'
 import { LevelDatabase } from '@src/module.database/provider.level/level.database'
-import * as spec from '@src/module.database/database.spec/database.spec'
+import * as spec from '@src/module.database/database.spec/specifications'
 
 let database: LevelDatabase
 
@@ -11,7 +11,10 @@ beforeAll(async () => {
     imports: [ConfigModule.forRoot({
       isGlobal: true,
       load: [() => ({
-        database: { level: { location: '.level/spec-ts' } }
+        database: {
+          provider: 'level',
+          level: { location: '.level/module.database/provider.level/level.database.spec.ts' }
+        }
       })]
     }), LevelDatabaseModule]
   }).compile()

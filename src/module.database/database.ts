@@ -1,13 +1,13 @@
 import { Model, ModelIndex, ModelKey, ModelMapping } from '@src/module.database/model'
 
 /**
- * DeFi whale uses a database agnostic implementation. Any provider is valid as long as it
- * can conforms to the interfaces provided in Database. Superset implementations such as
- * RDMS are always support.
+ * DeFi whale uses a database-agnostic implementation. Any provider is valid as long as it
+ * can conform to the interfaces provided in the Database. Superset implementations such as
+ * RDMS are always supported.
  *
  * For a performant design, the interface uses a log-structured merge-tree (LSM).
- * LSM uses a log data structure with performance characteristics that allows for high
- * write volume which is required for ledger based application. This database interface
+ * LSM uses a log data structure with performance characteristics that allow for high
+ * write volume which is required for ledger-based application. This database interface
  * implements a key-value structure with type, index, partition and sort as key.
  *
  * @see {Model} for more description and summary of what database implementation must conform to.

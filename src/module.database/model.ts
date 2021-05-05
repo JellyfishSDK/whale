@@ -68,10 +68,10 @@ export interface ModelMapping<M extends Model> {
  * Therefore allows database consumer to query each individual index. Therefore each model
  * can have multiple primary keys presenting it.
  *
- * ModelIndex with just partitionKey represent a key-value structure where there is a single
+ * ModelIndex with just partitionKey represents a key-value structure where there is a single
  * unique key in the index for each model. This supports your traditional queryById operations.
  *
- * ModelIndex with both partitionKey and sortKey represent a key-sort-value structure where
+ * ModelIndex with both partitionKey and sortKey represents a key-sort-value structure where
  * there is a single unique composite key. The composite key being partitionKey and sortKey.
  * Partition key as it suggests, partition the model index space into unique index slices.
  * While the sort key, sorts the unique index slices. Being a sorted key, allows for sort
