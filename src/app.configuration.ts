@@ -4,7 +4,7 @@
  * This configuration can be injected/replaced at runtime by overriding provider 'ConfigService' or
  * replacing the config module.
  */
-export const AppConfiguration: any = {
+export const AppConfiguration = (): any => ({
   defid: {
     url: process.env.WHALE_DEFID_URL
   },
@@ -15,4 +15,4 @@ export const AppConfiguration: any = {
       location: process.env.WHALE_DATABASE_LEVEL_LOCATION
     }
   }
-}
+})
