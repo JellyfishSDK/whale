@@ -3,6 +3,7 @@ import { BadRequestException, Controller, Get, UseGuards, UseInterceptors, Param
 import { ExceptionInterceptor } from './commons/exception.interceptor'
 import { NetworkGuard } from './commons/network.guard'
 import { TransformInterceptor } from './commons/transform.interceptor'
+import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 
 @Controller('/v1/:network/tokens')
 @UseGuards(NetworkGuard)
@@ -29,26 +30,7 @@ export class TokensController {
   }
 }
 
-export interface TokenInfo {
-  symbol: string
-  symbolKey: string
-  name: string
-  decimal: number
-  limit: number
-  mintable: boolean
-  tradeable: boolean
-  isDAT: boolean
-  isLPS: boolean
-  finalized: boolean
-  minted: number
-  creationTx: string
-  creationHeight: number
-  destructionTx: string
-  destructionHeight: number
-  collateralAddress: string
-}
-
-export interface TokenInfoDto {
+interface TokenInfoDto {
   symbol: string
   symbol_key: string
   name: string
