@@ -35,6 +35,7 @@ beforeEach(async () => {
 describe('controller.get() for DFI coin', () => {
   it('should return DFI coin with id as param', async () => {
     const data = await controller.get('0')
+
     expect(data.symbol).toBe('DFI')
     expect(data.symbol_key).toBe('DFI')
     expect(data.name).toBe('Default Defi token')
@@ -55,6 +56,7 @@ describe('controller.get() for DFI coin', () => {
 
   it('should return DFI coin with symbol as param', async () => {
     const data = await controller.get('DFI')
+
     expect(data.symbol).toBe('DFI')
     expect(data.symbol_key).toBe('DFI')
     expect(data.name).toBe('Default Defi token')
@@ -75,6 +77,7 @@ describe('controller.get() for DFI coin', () => {
 
   it('should return DFI coin with creationTx as param', async () => {
     const data = await controller.get('0000000000000000000000000000000000000000000000000000000000000000')
+
     expect(data.symbol).toBe('DFI')
     expect(data.symbol_key).toBe('DFI')
     expect(data.name).toBe('Default Defi token')

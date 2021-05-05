@@ -13,13 +13,13 @@ export class TokensController {
   }
 
   /**
-   * @param {string} id token's symbol key
-   * @return {TokenInfoDto}
+   * @param {string} id id/symbol/creationTx
+   * @return {Promise<TokenInfoDto>}
    */
   @Get('/:id')
   async get (@Param('id') id: string): Promise<TokenInfoDto> {
     try {
-      const result: any = await this.client.token.getToken(id)
+      const result = await this.client.token.getToken(id)
       return toTokenInfoDTO(result[Object.keys(result)[0]])
     } catch (e) {
       if (e?.payload?.message === 'Token not found') {
