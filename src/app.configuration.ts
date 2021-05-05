@@ -10,6 +10,9 @@ export const AppConfiguration: any = {
   },
   network: process.env.WHALE_NETWORK,
   database: {
-    provider: process.env.WHALE_DATABASE_PROVIDER
+    provider: process.env.WHALE_DATABASE_PROVIDER,
+    level: {
+      location: process.env.WHALE_DATABASE_LEVEL_LOCATION
+    }
   }
 }
