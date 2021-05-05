@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing'
 import { ConfigModule } from '@nestjs/config'
-import { LevelDatabaseModule } from '@src/module.database/provider.level/index'
+import { LevelDatabaseModule } from '@src/module.database/provider.level/module'
 import { LevelDatabase } from '@src/module.database/provider.level/level.database'
 import * as spec from '@src/module.database/database.spec/specifications'
 
