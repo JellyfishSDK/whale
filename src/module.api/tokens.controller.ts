@@ -13,6 +13,8 @@ export class TokensController {
   }
 
   /**
+   * Returns information about token.
+   *
    * @param {string} id id/symbol/creationTx
    * @return {Promise<TokenInfoDto>}
    */
@@ -50,7 +52,7 @@ interface TokenInfoDto {
 }
 
 /**
- * Map TokenInfo to TokenInfoDto
+ * Map TokenInfo to TokenInfoDto.
  *
  * @param {TokenInfo} tokenInfo
  * @return {TokenInfoDto}
