@@ -97,8 +97,10 @@ export class PoolPairsController {
   }
 
   /**
-   * @param {PoolPairsFilter} filter filter of listing pool pairs
-   * @return {PoolPairsResult}
+   * List pool pairs with optional filters
+   *
+   * @param {PoolPairsFilter} [filter] filter of listing pool pairs
+   * @return {Promise<PoolPairInfoDto>}
    */
   @Get()
   async list (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolPairInfoDto[]> {
@@ -107,9 +109,11 @@ export class PoolPairsController {
   }
 
   /**
+   * Get pool pair by symbol
+   *
    * @param {string} symbol token's symbol
-   * @param {PoolPairsFilter} query pool pair filter
-   * @return {PoolPairInfoDto}
+   * @param {PoolPairsFilter} [filter] pool pair filter
+   * @return {Promise<PoolPairInfoDto>}
    */
   @Get('/:symbol')
   async get (@Param('symbol') symbol: string, @Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolPairInfoDto> {
@@ -122,6 +126,12 @@ export class PoolPairsController {
     }
   }
 
+  /**
+   * List pool shares with optional filters
+   *
+   * @param {PoolPairsFilter} [filter]
+   * @returns {Promise<PoolShareInfoDto[]>}
+   */
   @Get('/shares')
   async listPoolShares (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolShareInfoDto[]> {
     const result = await this.client.poolpair.listPoolShares(filter?.pagination, filter?.verbose, filter?.options)
@@ -130,10 +140,10 @@ export class PoolPairsController {
 }
 
 /**
- * Map PoolPairsResult to PoolPairsResult(Dto)
+ * Map PoolPairsResult to PoolPairInfoDto[]
  *
  * @param {PoolPairsResult} PoolPairsResult
- * @return {PoolPairsResult}
+ * @return {PoolPairInfoDto[]}
  */
 function toPoolPairsDto (PoolPairsResult: PoolPairsResult): PoolPairInfoDto[] {
   const result: PoolPairInfoDto[] = []
@@ -179,10 +189,10 @@ function toPoolPairDto (poolPairInfo: PoolPairInfo, id: string): PoolPairInfoDto
 }
 
 /**
- * Map PoolSharesResult to PoolSharesResult(Dto)
+ * Map PoolSharesResult to PoolShareInfoDto[]
  *
  * @param {PoolSharesResult} poolSharesResult
- * @return {PoolSharesResult}
+ * @return {PoolShareInfoDto[]}
  */
 function toPoolSharesDto (poolSharesResult: PoolSharesResult): PoolShareInfoDto[] {
   const result: PoolShareInfoDto[] = []
