@@ -1,22 +1,16 @@
 import { Test } from '@nestjs/testing'
-import { ConfigModule } from '@nestjs/config'
-import { LevelDatabaseModule } from '@src/module.database/provider.level/index'
-import { LevelDatabase } from '@src/module.database/provider.level/level.database'
+import { MemoryDatabaseModule } from '@src/module.database/provider.memory/index'
+import { MemoryDatabase } from '@src/module.database/provider.memory/memory.database'
 import * as spec from '@src/module.database/database.spec/database.spec'
 
-let database: LevelDatabase
+let database: MemoryDatabase
 
 beforeAll(async () => {
   const app = await Test.createTestingModule({
-    imports: [ConfigModule.forRoot({
-      isGlobal: true,
-      load: [() => ({
-        database: { level: { location: '.level/spec-ts' } }
-      })]
-    }), LevelDatabaseModule]
+    imports: [MemoryDatabaseModule]
   }).compile()
 
-  database = app.get<LevelDatabase>(LevelDatabase)
+  database = app.get<MemoryDatabase>(MemoryDatabase)
 })
 
 beforeEach(async () => {

@@ -7,13 +7,8 @@ import { Model, ModelIndex, ModelKey, ModelMapping } from '@src/module.database/
 
 const lexint = lexicographic('hex')
 
-/**
- * LevelDatabase uses [Level/level](https://github.com/Level/level) with a LevelDB instances under the hood.
- * [Level/subleveldown](https://github.com/Level/subleveldown) is used to divide key spaces into
- * models are their partitions. Data stored in level are denormalized.
- */
-export class LevelDatabase extends Database {
-  constructor (@Inject('LEVEL_UP_ROOT') protected readonly root: LevelUp) {
+export abstract class LevelUpDatabase extends Database {
+  protected constructor (protected readonly root: LevelUp) {
     super()
   }
 
@@ -134,5 +129,17 @@ export class LevelDatabase extends Database {
 
     const subRoot = this.subRoot(mapping)
     await subRoot.del(model.id)
+  }
+}
+
+/**
+ * LevelDatabase uses [Level/level](https://github.com/Level/level) with a LevelDB instances under the hood.
+ * [Level/subleveldown](https://github.com/Level/subleveldown) is used to divide key spaces into
+ * models are their partitions. Data stored in level are denormalized.
+ */
+export class LevelDatabase extends LevelUpDatabase {
+  /* eslint-disable @typescript-eslint/no-useless-constructor */
+  constructor (@Inject('LEVEL_UP_ROOT') root: LevelUp) {
+    super(root)
   }
 }
