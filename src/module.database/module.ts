@@ -1,49 +1,34 @@
-import { ModuleRef } from '@nestjs/core'
-import { Global, Module } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
-import { FactoryProvider } from '@nestjs/common/interfaces/modules/provider.interface'
-import { Database } from '@src/module.database/database'
-import { LevelDatabase } from '@src/module.database/provider.level/level.database'
+import { DynamicModule, Module, Type } from '@nestjs/common'
 import { LevelDatabaseModule } from '@src/module.database/provider.level/module'
-import { MemoryDatabase } from '@src/module.database/provider.memory/memory.database'
 import { MemoryDatabaseModule } from '@src/module.database/provider.memory/module'
 
+const PROVIDER = process.env.WHALE_DATABASE_PROVIDER
+
 /**
- * Runtime DatabaseProvider, dynamically inject a database type based on config in the database.provider.
+ * DeFi Whale Database Module for service agnostic storage layer.
  * @see Database
  * @see MemoryDatabase
  * @see LevelDatabase
  */
-const DatabaseProvider: FactoryProvider = {
-  provide: Database,
-  useFactory: async (configService: ConfigService, moduleRef: ModuleRef) => {
-    const provider = configService.get<string>('database.provider', '')
-    switch (provider) {
-      case 'memory':
-        return await moduleRef.create(MemoryDatabase)
-      case 'level':
-        return await moduleRef.create(LevelDatabase)
-      default:
-        throw new Error(`bootstrapping error: invalid database.provider - ${provider}`)
-    }
-  },
-  inject: [ConfigService, ModuleRef]
-}
-
-/**
- * DeFi Whale Database Module for service agnostic storage layer.
- */
-@Global()
-@Module({
-  imports: [
-    LevelDatabaseModule,
-    MemoryDatabaseModule
-  ],
-  providers: [
-    DatabaseProvider
-  ],
-  exports: [Database]
-})
+@Module({})
 export class DatabaseModule {
+  static forRoot (provider: string | undefined = PROVIDER): DynamicModule {
+    return {
+      module: DatabaseModule,
+      imports: [
+        this.getModule(provider ?? 'level')
+      ]
+    }
+  }
 
+  private static getModule (provider: string): Type {
+    if (provider === 'memory') {
+      return MemoryDatabaseModule
+    }
+    if (provider === 'level') {
+      return LevelDatabaseModule
+    }
+
+    throw new Error(`bootstrapping error: invalid database.provider - ${provider}`)
+  }
 }

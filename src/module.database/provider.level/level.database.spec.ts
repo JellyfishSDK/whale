@@ -1,10 +1,10 @@
 import { Test } from '@nestjs/testing'
 import { ConfigModule } from '@nestjs/config'
 import { LevelDatabaseModule } from '@src/module.database/provider.level/module'
-import { LevelDatabase } from '@src/module.database/provider.level/level.database'
 import * as spec from '@src/module.database/database.spec/specifications'
+import { Database } from '@src/module.database/database'
 
-let database: LevelDatabase
+let database: Database
 
 beforeAll(async () => {
   const app = await Test.createTestingModule({
@@ -16,7 +16,7 @@ beforeAll(async () => {
     }), LevelDatabaseModule]
   }).compile()
 
-  database = app.get<LevelDatabase>(LevelDatabase)
+  database = app.get<Database>(Database)
 })
 
 beforeEach(async () => {

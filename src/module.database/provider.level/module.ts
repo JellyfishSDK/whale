@@ -1,7 +1,8 @@
 import fs from 'fs'
-import { Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common'
 import { LevelDatabase } from '@src/module.database/provider.level/level.database'
 import { ConfigService } from '@nestjs/config'
+import { Database } from '@src/module.database/database'
 
 /**
  * LevelUp will fail to create if directory does not exist.
@@ -13,9 +14,9 @@ function mkdir (location: string): void {
   fs.mkdirSync(location, { recursive: true })
 }
 
+@Global()
 @Module({
   providers: [
-    LevelDatabase,
     {
       provide: 'LEVEL_UP_LOCATION',
       useFactory: (configService: ConfigService): string => {
@@ -27,10 +28,14 @@ function mkdir (location: string): void {
         return location
       },
       inject: [ConfigService]
+    },
+    {
+      provide: Database,
+      useClass: LevelDatabase
     }
   ],
   exports: [
-    'LEVEL_UP_LOCATION'
+    Database
   ]
 })
 export class LevelDatabaseModule {

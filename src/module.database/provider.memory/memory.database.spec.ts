@@ -1,16 +1,16 @@
 import { Test } from '@nestjs/testing'
 import { MemoryDatabaseModule } from '@src/module.database/provider.memory/module'
-import { MemoryDatabase } from '@src/module.database/provider.memory/memory.database'
 import * as spec from '@src/module.database/database.spec/specifications'
+import { Database } from '@src/module.database/database'
 
-let database: MemoryDatabase
+let database: Database
 
 beforeAll(async () => {
   const app = await Test.createTestingModule({
     imports: [MemoryDatabaseModule]
   }).compile()
 
-  database = app.get<MemoryDatabase>(MemoryDatabase)
+  database = app.get<Database>(Database)
 })
 
 beforeEach(async () => {

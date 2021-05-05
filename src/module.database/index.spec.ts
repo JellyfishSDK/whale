@@ -9,14 +9,12 @@ describe('provided module: level', () => {
   let app: TestingModule
   let database: Database
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     app = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({
-        isGlobal: true,
-        load: [() => ({
-          database: { provider: 'level' }
-        })]
-      }), DatabaseModule]
+      imports: [
+        ConfigModule.forRoot({ isGlobal: true }),
+        DatabaseModule.forRoot('level')
+      ]
     }).compile()
 
     database = app.get<Database>(Database)
@@ -37,12 +35,11 @@ describe('provided module: memory', () => {
   let app: TestingModule
   let database: Database
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     app = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({
-        isGlobal: true,
-        load: [() => ({ database: { provider: 'memory' } })]
-      }), DatabaseModule]
+      imports: [
+        DatabaseModule.forRoot('memory')
+      ]
     }).compile()
 
     database = app.get<Database>(Database)
@@ -63,10 +60,7 @@ describe('provided module: invalid', () => {
   it('should fail module instantiation as database provider is invalid', async () => {
     const initModule = async (): Promise<void> => {
       await Test.createTestingModule({
-        imports: [ConfigModule.forRoot({
-          isGlobal: true,
-          load: [() => ({ database: { provider: 'invalid' } })]
-        }), DatabaseModule]
+        imports: [DatabaseModule.forRoot('invalid')]
       }).compile()
     }
 
