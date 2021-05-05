@@ -11,6 +11,8 @@ let controller: TokensController
 beforeAll(async () => {
   await container.start()
   await container.waitForReady()
+  await container.waitForWalletCoinbaseMaturity()
+  await container.waitForWalletBalanceGTE(200)
   client = new JsonRpcClient(await container.getCachedRpcUrl())
 })
 
@@ -30,28 +32,150 @@ beforeEach(async () => {
   controller = app.get<TokensController>(TokensController)
 })
 
-describe('controller.get()', () => {
-  it('should getToken', async () => {
-    const result = await controller.get('DFI')
-    expect(Object.keys(result).length).toBe(1)
+export interface TokenInfoDto {
+  symbol: string
+  symbol_key: string
+  name: string
+  decimal: number
+  limit: number
+  mintable: boolean
+  tradeable: boolean
+  is_dat: boolean
+  is_lps: boolean
+  finalized: boolean
+  minted: number
+  creation_tx: string
+  creation_height: number
+  destruction_tx: string
+  destruction_height: number
+  collateral_address: string
+}
 
-    const data = result[0]
-
+describe('controller.get() for DFI coin', () => {
+  function expectDFI (data: TokenInfoDto): void {
     expect(data.symbol).toBe('DFI')
-    expect(data.symbolKey).toBe('DFI')
+    expect(data.symbol_key).toBe('DFI')
     expect(data.name).toBe('Default Defi token')
     expect(data.decimal).toBe(8)
     expect(data.limit).toBe(0)
     expect(data.mintable).toBe(false)
     expect(data.tradeable).toBe(true)
-    expect(data.isDAT).toBe(true)
-    expect(data.isLPS).toBe(false)
+    expect(data.is_dat).toBe(true)
+    expect(data.is_lps).toBe(false)
     expect(data.finalized).toBe(true)
     expect(data.minted).toBe(0)
-    expect(data.creationTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.creationHeight).toBe(0)
-    expect(data.destructionTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.destructionHeight).toBe(-1)
-    expect(data.collateralAddress).toBe('')
+    expect(data.creation_tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+    expect(data.creation_height).toBe(0)
+    expect(data.destruction_tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+    expect(data.destruction_height).toBe(-1)
+    expect(data.collateral_address).toBe('')
+  }
+
+  it('should return DFI coin with id as param', async () => {
+    const data = await controller.get('0')
+    expectDFI(data)
+  })
+
+  it('should return DFI coin with symbol as param', async () => {
+    const data = await controller.get('DFI')
+    expectDFI(data)
+  })
+
+  it('should return DFI coin with creationTx as param', async () => {
+    const data = await controller.get('0000000000000000000000000000000000000000000000000000000000000000')
+    expectDFI(data)
+  })
+})
+
+describe('controller.get() for newly created token', () => {
+  function expectDSWAP (data: TokenInfoDto): void {
+    expect(data.symbol).toBe('DSWAP')
+    expect(data.symbol_key).toBe('DSWAP')
+    expect(data.name).toBe('DSWAP')
+    expect(data.decimal).toBe(8)
+    expect(data.limit).toBe(0)
+    expect(data.mintable).toBe(true)
+    expect(data.tradeable).toBe(true)
+    expect(data.is_dat).toBe(true)
+    expect(data.is_lps).toBe(false)
+    expect(data.finalized).toBe(false)
+    expect(data.minted).toBe(2000)
+    expect(typeof data.creation_tx).toBe('string')
+    expect(data.creation_height).toBe(107)
+    expect(data.destruction_tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+    expect(data.destruction_height).toBe(-1)
+    expect(typeof data.collateral_address).toBe('string')
+  }
+
+  async function createToken (symbol: string): Promise<void> {
+    const address = await container.call('getnewaddress')
+    const metadata = {
+      symbol,
+      name: symbol,
+      isDAT: true,
+      mintable: true,
+      tradeable: true,
+      collateralAddress: address
+    }
+    await container.call('createtoken', [metadata])
+    await container.generate(1)
+  }
+
+  async function mintTokens (symbol: string): Promise<void> {
+    const address = await container.call('getnewaddress')
+
+    const payload: { [key: string]: string } = {}
+    payload[address] = '100@0'
+    await container.call('utxostoaccount', [payload])
+    await container.call('minttokens', [`2000@${symbol}`])
+
+    await container.generate(25)
+  }
+
+  beforeAll(async () => {
+    await createToken('DSWAP')
+    await mintTokens('DSWAP')
+  })
+
+  it('should return DSWAP token with id as param', async () => {
+    const data = await controller.get('1')
+    expectDSWAP(data)
+  })
+
+  it('should return DSWAP token with symbol as param', async () => {
+    const data = await controller.get('DSWAP')
+    expectDSWAP(data)
+  })
+
+  it('should return DSWAP token with creationTx as param', async () => {
+    let data = await controller.get('1')
+    data = await controller.get(data.creation_tx)
+    expectDSWAP(data)
+  })
+})
+
+describe('controller.get() for token which does not exist', () => {
+  it('should return Token not found with id as param', async () => {
+    try {
+      await controller.get('2')
+    } catch (e) {
+      expect(e.message).toBe('Token not found')
+    }
+  })
+
+  it('should return Token not found with symbol as param', async () => {
+    try {
+      await controller.get('MOCK')
+    } catch (e) {
+      expect(e.message).toBe('Token not found')
+    }
+  })
+
+  it('should return Token not found with creationTx as param', async () => {
+    try {
+      await controller.get('0000000000000000000000000000000000000000000000000000000000000001')
+    } catch (e) {
+      expect(e.message).toBe('Token not found')
+    }
   })
 })
