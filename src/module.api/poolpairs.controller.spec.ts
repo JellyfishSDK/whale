@@ -5,7 +5,7 @@ import { ConfigModule } from '@nestjs/config'
 import { PoolPairsController } from '@src/module.api/poolpairs.controller'
 import { BadRequestException } from '@nestjs/common'
 import BigNumber from 'bignumber.js'
-import { PoolPairsFilter, PoolShareInfoDto, PoolPairInfoDto } from '../module.api/poolpairs.controller'
+import { PoolPairsFilter } from '../module.api/poolpairs.controller'
 
 const container = new MasterNodeRegTestContainer()
 let client: JsonRpcClient
@@ -100,8 +100,8 @@ describe('controller.listPoolShares()', () => {
   it('should listPoolShares', async () => {
     const poolShares = await controller.listPoolShares()
 
-    for (const k in poolShares) {
-      const data = poolShares[k] as PoolShareInfoDto
+    for (let i = 0; i < poolShares.length; i += 1) {
+      const data = poolShares[i]
       expect(typeof data.pool_id).toBe('string')
       expect(typeof data.owner).toBe('string')
       expect(data.percent instanceof BigNumber).toBe(true)
@@ -120,7 +120,7 @@ describe('controller.listPoolShares()', () => {
 
     const poolShares = await controller.listPoolShares(filter)
 
-    expect(Object.keys(poolShares).length).toBe(0)
+    expect(poolShares.length).toBe(0)
   })
 
   it('should listPoolShares with pagination limit', async () => {
@@ -132,7 +132,7 @@ describe('controller.listPoolShares()', () => {
     }
     const poolShares = await controller.listPoolShares(filter)
 
-    expect(Object.keys(poolShares).length).toBe(2)
+    expect(poolShares.length).toBe(2)
   })
 
   it('should listPoolPairs with verbose false', async () => {
@@ -146,8 +146,8 @@ describe('controller.listPoolShares()', () => {
 
     const poolShares = await controller.listPoolShares(filter)
 
-    for (const k in poolShares) {
-      const data = poolShares[k] as PoolShareInfoDto
+    for (let i = 0; i < poolShares.length; i += 1) {
+      const data = poolShares[i]
       expect(typeof data.pool_id).toBe('string')
       expect(typeof data.owner).toBe('string')
       expect(data.percent instanceof BigNumber).toBe(true)
@@ -168,8 +168,8 @@ describe('controller.listPoolShares()', () => {
 
     const poolShares = await controller.listPoolShares(filter)
 
-    for (const k in poolShares) {
-      const data = poolShares[k] as PoolShareInfoDto
+    for (let i = 0; i < poolShares.length; i += 1) {
+      const data = poolShares[i]
       expect(typeof data.pool_id).toBe('string')
       expect(typeof data.owner).toBe('string')
       expect(data.percent instanceof BigNumber).toBe(true)
@@ -194,8 +194,8 @@ describe('controller.list()', () => {
     let assertions = 0
     const poolpairs = await controller.list()
 
-    for (const k in poolpairs) {
-      const poolpair = poolpairs[k] as PoolPairInfoDto
+    for (let i = 0; i < poolpairs.length; i += 1) {
+      const poolpair = poolpairs[i]
 
       if (poolpair.symbol === 'DFI-DETH') {
         expect(poolpair.name).toBe('Default Defi token-DETH')
@@ -253,7 +253,7 @@ describe('controller.list()', () => {
 
     const poolpairs = await controller.list(filter)
 
-    expect(Object.keys(poolpairs).length).toBe(0)
+    expect(poolpairs.length).toBe(0)
   })
 
   it('should listPoolPairs with pagination limit', async () => {
@@ -265,7 +265,7 @@ describe('controller.list()', () => {
     }
     const poolpairs = await controller.list(filter)
 
-    expect(Object.keys(poolpairs).length).toBe(2)
+    expect(poolpairs.length).toBe(2)
   })
 
   it('should listPoolPairs with verbose false', async () => {
@@ -278,8 +278,8 @@ describe('controller.list()', () => {
     filter.verbose = false
     const poolpairs = await controller.list(filter)
 
-    for (const k in poolpairs) {
-      const poolpair = poolpairs[k] as PoolPairInfoDto
+    for (let i = 0; i < poolpairs.length; i += 1) {
+      const poolpair = poolpairs[i]
 
       expect(typeof poolpair.symbol).toBe('string')
       expect(typeof poolpair.name).toBe('string')

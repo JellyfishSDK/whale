@@ -114,8 +114,8 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
     expect(res.statusCode).toBe(200)
     const poolShares = res.json().data
 
-    for (const k in poolShares) {
-      const data = poolShares[k]
+    for (let i = 0; i < poolShares.length; i += 1) {
+      const data = poolShares[i]
       expect(typeof data.pool_id).toBe('string')
       expect(typeof data.owner).toBe('string')
       expect(typeof data.percent).toBe('number')
@@ -138,7 +138,7 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
     expect(res.statusCode).toBe(200)
     const poolShares = res.json().data
 
-    expect(Object.keys(poolShares).length).toBe(0)
+    expect(poolShares.length).toBe(0)
   })
 
   it('should listPoolShares with pagination limit', async () => {
@@ -155,7 +155,7 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
     expect(res.statusCode).toBe(200)
     const poolShares = res.json().data
 
-    expect(Object.keys(poolShares).length).toBe(2)
+    expect(poolShares.length).toBe(2)
   })
 
   it('should listPoolPairs with verbose false', async () => {
@@ -173,8 +173,8 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
     expect(res.statusCode).toBe(200)
     const poolShares = res.json().data
 
-    for (const k in poolShares) {
-      const data = poolShares[k]
+    for (let i = 0; i < poolShares.length; i += 1) {
+      const data = poolShares[i]
       expect(typeof data.pool_id).toBe('string')
       expect(typeof data.owner).toBe('string')
       expect(typeof data.percent).toBe('number')
@@ -197,8 +197,8 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
     expect(res.statusCode).toBe(200)
     const poolShares = res.json().data
 
-    for (const k in poolShares) {
-      const data = poolShares[k]
+    for (let i = 0; i < poolShares.length; i += 1) {
+      const data = poolShares[i]
       expect(typeof data.pool_id).toBe('string')
       expect(typeof data.owner).toBe('string')
       expect(typeof data.percent).toBe('number')
@@ -250,8 +250,8 @@ describe('GET: /v1/regtest/poolpairs', () => {
     expect(res.statusCode).toBe(200)
     const poolpairs = res.json().data
 
-    for (const k in poolpairs) {
-      const poolpair = poolpairs[k]
+    for (let i = 0; i < poolpairs.length; i += 1) {
+      const poolpair = poolpairs[i]
 
       if (poolpair.symbol === 'DFI-DETH') {
         expect(poolpair.name).toBe('Default Defi token-DETH')
@@ -274,6 +274,7 @@ describe('GET: /v1/regtest/poolpairs', () => {
         assertions += 1
       }
 
+      expect(typeof poolpair.id).toBe('string')
       expect(typeof poolpair.total_liquidity).toBe('number')
       expect(typeof poolpair.owner_address).toBe('string')
       expect(typeof poolpair.id_token_a).toBe('string')
@@ -313,7 +314,7 @@ describe('GET: /v1/regtest/poolpairs', () => {
     expect(res.statusCode).toBe(200)
     const poolpairs = res.json().data
 
-    expect(Object.keys(poolpairs).length).toBe(0)
+    expect(poolpairs.length).toBe(0)
   })
 
   it('should listPoolPairs with pagination limit', async () => {
@@ -330,7 +331,7 @@ describe('GET: /v1/regtest/poolpairs', () => {
     expect(res.statusCode).toBe(200)
     const poolpairs = res.json().data
 
-    expect(Object.keys(poolpairs).length).toBe(2)
+    expect(poolpairs.length).toBe(2)
 
     // test putting query with url should be working as well
     const res1 = await app.inject({
@@ -341,7 +342,7 @@ describe('GET: /v1/regtest/poolpairs', () => {
     expect(res1.statusCode).toBe(200)
     const poolpairs1 = res1.json().data
 
-    expect(Object.keys(poolpairs1).length).toBe(1)
+    expect(poolpairs1.length).toBe(1)
   })
 
   it('should listPoolPairs with verbose false', async () => {
@@ -359,8 +360,8 @@ describe('GET: /v1/regtest/poolpairs', () => {
     expect(res.statusCode).toBe(200)
     const poolpairs = res.json().data
 
-    for (const k in poolpairs) {
-      const poolpair = poolpairs[k]
+    for (let i = 0; i < poolpairs.length; i += 1) {
+      const poolpair = poolpairs[i]
 
       expect(typeof poolpair.symbol).toBe('string')
       expect(typeof poolpair.name).toBe('string')

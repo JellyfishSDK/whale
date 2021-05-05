@@ -101,7 +101,7 @@ export class PoolPairsController {
    * @return {PoolPairsResult}
    */
   @Get()
-  async list (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolPairsResult> {
+  async list (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolPairInfoDto[]> {
     const result = await this.client.poolpair.listPoolPairs(filter?.pagination, filter?.verbose)
     return toPoolPairsDto(result)
   }
@@ -116,14 +116,14 @@ export class PoolPairsController {
     try {
       const result = await this.client.poolpair.getPoolPair(symbol, filter?.verbose)
       const id = Object.keys(result)[0]
-      return toPoolPairDto(result[id] as PoolPairInfo)
+      return toPoolPairDto(result[id] as PoolPairInfo, id)
     } catch (e) {
       throw new BadRequestException()
     }
   }
 
   @Get('/shares')
-  async listPoolShares (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolSharesResult> {
+  async listPoolShares (@Query(new PoolPairsQueryPipe()) filter?: PoolPairsFilter): Promise<PoolShareInfoDto[]> {
     const result = await this.client.poolpair.listPoolShares(filter?.pagination, filter?.verbose, filter?.options)
     return toPoolSharesDto(result)
   }
@@ -135,14 +135,14 @@ export class PoolPairsController {
  * @param {PoolPairsResult} PoolPairsResult
  * @return {PoolPairsResult}
  */
-function toPoolPairsDto (PoolPairsResult: PoolPairsResult): PoolPairsResult {
-  /* eslint-disable  @typescript-eslint/consistent-type-assertions */
-  const result = {} as PoolPairsResult
+function toPoolPairsDto (PoolPairsResult: PoolPairsResult): PoolPairInfoDto[] {
+  const result: PoolPairInfoDto[] = []
 
   for (const k in PoolPairsResult) {
     const poolPairInfo = PoolPairsResult[k] as PoolPairInfo
-    result[k] = toPoolPairDto(poolPairInfo)
+    result.push(toPoolPairDto(poolPairInfo, k))
   }
+
   return result
 }
 
@@ -152,8 +152,9 @@ function toPoolPairsDto (PoolPairsResult: PoolPairsResult): PoolPairsResult {
  * @param {PoolPairInfo} poolPairInfo
  * @return {PoolPairInfoDto}
  */
-function toPoolPairDto (poolPairInfo: PoolPairInfo): PoolPairInfoDto {
+function toPoolPairDto (poolPairInfo: PoolPairInfo, id: string): PoolPairInfoDto {
   const data: PoolPairInfoDto = {
+    id,
     symbol: poolPairInfo.symbol,
     name: poolPairInfo.name,
     status: poolPairInfo.status,
@@ -183,13 +184,12 @@ function toPoolPairDto (poolPairInfo: PoolPairInfo): PoolPairInfoDto {
  * @param {PoolSharesResult} poolSharesResult
  * @return {PoolSharesResult}
  */
-function toPoolSharesDto (poolSharesResult: PoolSharesResult): PoolSharesResult {
-  /* eslint-disable  @typescript-eslint/consistent-type-assertions */
-  const result = {} as PoolSharesResult
+function toPoolSharesDto (poolSharesResult: PoolSharesResult): PoolShareInfoDto[] {
+  const result: PoolShareInfoDto[] = []
 
   for (const k in poolSharesResult) {
     const poolShareInfo = poolSharesResult[k] as PoolShareInfo
-    result[k] = toPoolShareDto(poolShareInfo)
+    result.push(toPoolShareDto(poolShareInfo))
   }
 
   return result
@@ -239,6 +239,7 @@ export interface PoolPairInfo {
 }
 
 export interface PoolPairInfoDto {
+  id: string
   symbol: string
   name: string
   status: string
