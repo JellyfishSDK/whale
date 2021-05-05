@@ -162,23 +162,23 @@ describe('GET: /v1/regtest/tokens/:id for newly created token', () => {
     expectDSWAP(data)
   })
 
-  // it('should return DSWAP token with creationTx as param', async () => {
-  //   const res = await app.inject({
-  //     method: 'GET',
-  //     url: '/v1/regtest/tokens/1'
-  //   })
-  //
-  //   let data = res.json().data
-  //
-  //   const res1 = await app.inject({
-  //     method: 'GET',
-  //     url: `/v1/regtest/tokens/${data.creation_tx}`
-  //   })
-  //
-  //   expect(res1.statusCode).toBe(200)
-  //   data = res1.json().data
-  //   expectDSWAP(data)
-  // })
+  it('should return DSWAP token with creationTx as param', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/v1/regtest/tokens/1'
+    })
+
+    let data: TokenInfoDto = res.json().data
+
+    const res1 = await app.inject({
+      method: 'GET',
+      url: `/v1/regtest/tokens/${data.creation_tx}`
+    })
+
+    expect(res1.statusCode).toBe(200)
+    data = res1.json().data
+    expectDSWAP(data)
+  })
 })
 
 describe('GET: /v1/regtest/tokens/:id for token which does not exist', () => {
