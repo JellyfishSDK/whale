@@ -4,6 +4,7 @@ import { LevelUpDatabase } from '@src/module.database/provider.level/level.datab
 
 /**
  * MemoryDatabase uses [Level/memdown](https://github.com/Level/memdown)
+ * This is a non persistent store created specifically for testing.
  */
 export class MemoryDatabase extends LevelUpDatabase {
   constructor () {

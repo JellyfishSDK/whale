@@ -1,6 +1,7 @@
 import sub from 'subleveldown'
-import lexicographic from 'lexicographic-integer-encoding'
+import level from 'level'
 import { LevelUp } from 'levelup'
+import lexicographic from 'lexicographic-integer-encoding'
 import { Inject } from '@nestjs/common'
 import { QueryOptions, Database, SortOrder } from '@src/module.database/database'
 import { Model, ModelIndex, ModelKey, ModelMapping } from '@src/module.database/model'
@@ -138,8 +139,7 @@ export abstract class LevelUpDatabase extends Database {
  * models are their partitions. Data stored in level are denormalized.
  */
 export class LevelDatabase extends LevelUpDatabase {
-  /* eslint-disable @typescript-eslint/no-useless-constructor */
-  constructor (@Inject('LEVEL_UP') root: LevelUp) {
-    super(root)
+  constructor (@Inject('LEVEL_UP_LOCATION') location: string) {
+    super(level(location))
   }
 }

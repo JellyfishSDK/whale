@@ -11,10 +11,7 @@ beforeAll(async () => {
     imports: [ConfigModule.forRoot({
       isGlobal: true,
       load: [() => ({
-        database: {
-          provider: 'level',
-          level: { location: '.level/module.database/provider.level/level.database.spec.ts' }
-        }
+        database: { provider: 'level' }
       })]
     }), LevelDatabaseModule]
   }).compile()

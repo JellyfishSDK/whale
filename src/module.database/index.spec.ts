@@ -9,15 +9,12 @@ describe('provided module: level', () => {
   let app: TestingModule
   let database: Database
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     app = await Test.createTestingModule({
       imports: [ConfigModule.forRoot({
         isGlobal: true,
         load: [() => ({
-          database: {
-            provider: 'level',
-            level: { location: '.level/module.database/index.spec.ts' }
-          }
+          database: { provider: 'level' }
         })]
       }), DatabaseModule]
     }).compile()
@@ -40,7 +37,7 @@ describe('provided module: memory', () => {
   let app: TestingModule
   let database: Database
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     app = await Test.createTestingModule({
       imports: [ConfigModule.forRoot({
         isGlobal: true,
