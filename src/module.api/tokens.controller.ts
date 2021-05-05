@@ -24,10 +24,7 @@ export class TokensController {
       const result = await this.client.token.getToken(id)
       return toTokenInfoDTO(result[Object.keys(result)[0]])
     } catch (e) {
-      if (e?.payload?.message === 'Token not found') {
-        throw new BadRequestException(e.payload.message)
-      }
-      throw new BadRequestException()
+      throw new BadRequestException(e.payload.message)
     }
   }
 }
