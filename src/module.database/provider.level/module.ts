@@ -19,7 +19,7 @@ function mkdir (location: string): void {
   providers: [
     LevelDatabase,
     {
-      provide: 'LEVEL_UP_ROOT',
+      provide: 'LEVEL_UP',
       useFactory: (configService: ConfigService): LevelUp => {
         const location = configService.get('database.level.location', '.level/default')
         mkdir(location)

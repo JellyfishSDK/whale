@@ -139,7 +139,7 @@ export abstract class LevelUpDatabase extends Database {
  */
 export class LevelDatabase extends LevelUpDatabase {
   /* eslint-disable @typescript-eslint/no-useless-constructor */
-  constructor (@Inject('LEVEL_UP_ROOT') root: LevelUp) {
+  constructor (@Inject('LEVEL_UP') root: LevelUp) {
     super(root)
   }
 }
