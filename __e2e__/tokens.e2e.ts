@@ -16,6 +16,38 @@ afterAll(async () => {
   await container.stop()
 })
 
+async function createToken (symbol: string): Promise<void> {
+  const address = await container.call('getnewaddress')
+  const metadata = {
+    symbol,
+    name: symbol,
+    isDAT: true,
+    mintable: true,
+    tradeable: true,
+    collateralAddress: address
+  }
+  await container.call('createtoken', [metadata])
+  await container.generate(1)
+}
+
+describe('GET: /v1/regtest/tokens', () => {
+  beforeAll(async () => {
+    await createToken('DBTC')
+  })
+
+  it('should return all tokens with no param', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/v1/regtest/tokens'
+    })
+
+    expect(res.statusCode).toBe(200)
+    const data = res.json().data
+
+    console.log(data)
+  })
+})
+
 describe('GET: /v1/regtest/tokens/:id for DFI coin', () => {
   it('should return DFI coin with id as param', async () => {
     const res = await app.inject({
@@ -46,20 +78,6 @@ describe('GET: /v1/regtest/tokens/:id for DFI coin', () => {
 })
 
 describe('GET: /v1/regtest/tokens/:id for newly created token', () => {
-  async function createToken (symbol: string): Promise<void> {
-    const address = await container.call('getnewaddress')
-    const metadata = {
-      symbol,
-      name: symbol,
-      isDAT: true,
-      mintable: true,
-      tradeable: true,
-      collateralAddress: address
-    }
-    await container.call('createtoken', [metadata])
-    await container.generate(1)
-  }
-
   beforeAll(async () => {
     await createToken('DSWAP')
   })
