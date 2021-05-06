@@ -1,9 +1,29 @@
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { BadRequestException, Controller, Get, UseGuards, UseInterceptors, Param } from '@nestjs/common'
+// import { IsOptional, IsBooleanString } from 'class-validator'
 import { ExceptionInterceptor } from './commons/exception.interceptor'
 import { NetworkGuard } from './commons/network.guard'
 import { TransformInterceptor } from './commons/transform.interceptor'
 import { TokenInfo, TokenPagination } from '@defichain/jellyfish-api-core/dist/category/token'
+// import { IsPositiveNumberString } from './custom.validations'
+
+// class PoolPairsQuery {
+//   @IsOptional()
+//   @IsPositiveNumberString()
+//   start?: string
+//
+//   @IsOptional()
+//   @IsBooleanString()
+//   including_start?: string
+//
+//   @IsOptional()
+//   @IsPositiveNumberString()
+//   limit?: string
+//
+//   @IsOptional()
+//   @IsBooleanString()
+//   verbose?: string
+// }
 
 @Controller('/v1/:network/tokens')
 @UseGuards(NetworkGuard)
@@ -19,13 +39,19 @@ export class TokensController {
    */
   @Get('/')
   async get (
+    @Param('symbol')
     pagination: TokenPagination = {
       start: 0,
       including_start: true,
       limit: 100
     },
+    @Param('verbose')
     verbose = true): Promise<TokenInfoDto[]> {
     try {
+      console.log(33113311)
+      console.log(pagination)
+      console.log(verbose)
+
       const result = await this.client.token.listTokens(pagination, verbose)
       return toTokenInfoDTOs(result)
     } catch (e) {
@@ -97,17 +123,15 @@ function toTokenInfoDTO (tokenInfo: TokenInfo): TokenInfoDto {
 }
 
 /**
-   * Map data to TokenInfoDto[].
-   *
-   * @param {data} any
-   * @return {TokenInfoDto[]}
-   */
+ * Map data to TokenInfoDto[].
+ *
+ * @param {data} any
+ * @return {TokenInfoDto[]}
+ */
 function toTokenInfoDTOs (data: any): TokenInfoDto[] {
   const result: TokenInfoDto[] = []
-
   Object.keys(data).forEach(function (key, index) {
-    result.push(data[Object.keys(data)[index]])
+    result.push(toTokenInfoDTO(data[Object.keys(data)[index]]))
   })
-
   return result
 }

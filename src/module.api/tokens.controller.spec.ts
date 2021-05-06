@@ -47,45 +47,45 @@ async function createToken (symbol: string): Promise<void> {
 
 describe('controller.get() for all tokens', () => {
   beforeAll(async () => {
-    await createToken('DBTC')
+    await createToken('DSWAP')
   })
 
   it('should listTokens', async () => {
-    const tokens = await client.token.listTokens()
-    for (const k in tokens) {
-      const token = tokens[k]
+    const tokens = await controller.get()
+
+    tokens.forEach(function (token) {
       expect(token.decimal).toBe(8)
       expect(token.limit).toBe(0)
       expect(token.minted).toBe(0)
-      expect(token.isLPS).toBe(false)
-      expect(typeof token.creationTx).toBe('string')
-      expect(typeof token.creationHeight).toBe('number')
-      expect(typeof token.destructionTx).toBe('string')
-      expect(typeof token.destructionHeight).toBe('number')
-      expect(typeof token.collateralAddress).toBe('string')
+      expect(token.is_lps).toBe(false)
+      expect(typeof token.creation_tx).toBe('string')
+      expect(typeof token.creation_height).toBe('number')
+      expect(typeof token.destruction_tx).toBe('string')
+      expect(typeof token.destruction_height).toBe('number')
+      expect(typeof token.collateral_address).toBe('string')
 
       switch (token.symbol) {
         case 'DFI':
           expect(token.symbol).toBe('DFI')
-          expect(token.symbolKey).toBe('DFI')
+          expect(token.symbol_key).toBe('DFI')
           expect(token.name).toBe('Default Defi token')
           expect(token.mintable).toBe(false)
           expect(token.tradeable).toBe(true)
-          expect(token.isDAT).toBe(true)
+          expect(token.is_dat).toBe(true)
           expect(token.finalized).toBe(true)
-          expect(token.collateralAddress).toBe('')
+          expect(token.collateral_address).toBe('')
           break
         case 'DBTC':
-          expect(token.symbol).toBe('DBTC')
-          expect(token.symbolKey).toBe('DBTC')
-          expect(token.name).toBe('DBTC')
+          expect(token.symbol).toBe('DSWAP')
+          expect(token.symbol_key).toBe('DSWAP')
+          expect(token.name).toBe('DSWAP')
           expect(token.mintable).toBe(true)
           expect(token.tradeable).toBe(true)
-          expect(token.isDAT).toBe(true)
+          expect(token.is_dat).toBe(true)
           expect(token.finalized).toBe(false)
           break
       }
-    }
+    })
   })
 
   it('should listTokens with pagination and return an empty object as out of range', async () => {
@@ -94,8 +94,7 @@ describe('controller.get() for all tokens', () => {
       including_start: true,
       limit: 100
     }
-    const tokens = await client.token.listTokens(pagination)
-
+    const tokens = await controller.get(pagination)
     expect(Object.keys(tokens).length).toBe(0)
   })
 
@@ -105,28 +104,28 @@ describe('controller.get() for all tokens', () => {
       including_start: true,
       limit: 2
     }
-    const tokens = await client.token.listTokens(pagination)
+    const tokens = await controller.get(pagination)
 
     expect(Object.keys(tokens).length).toBe(2)
   })
 
-  it('should listTokens with start = 1', async () => {
+  it('should listTokens with start 1', async () => {
     const pagination = {
       start: 1,
       including_start: true,
       limit: 2
     }
-    const tokens = await client.token.listTokens(pagination)
+    const tokens = await controller.get(pagination)
     expect(Object.keys(tokens).length).toBe(1)
   })
 
-  it('should listTokens with including_start = false', async () => {
+  it('should listTokens with including_start false', async () => {
     const pagination = {
       start: 0,
       including_start: false,
       limit: 2
     }
-    const tokens = await client.token.listTokens(pagination)
+    const tokens = await controller.get(pagination)
     expect(Object.keys(tokens).length).toBe(1)
   })
 
@@ -137,17 +136,17 @@ describe('controller.get() for all tokens', () => {
       limit: 100
     }
 
-    const token = await client.token.listTokens(pagination, false)
-    const data = token['0']
+    const tokens = await controller.get(pagination, false)
+    const data = tokens[0]
 
     expect(data.symbol).toBe('DFI')
-    expect(data.symbolKey).toBe('DFI')
+    expect(data.symbol_key).toBe('DFI')
     expect(data.name).toBe('Default Defi token')
   })
 })
 
-describe('controller.getId() for DFI coin', () => {
-  it('should return DFI coin with id as param', async () => {
+describe('controller.getId() for DFI', () => {
+  it('should return DFI with id as param', async () => {
     const data = await controller.getId('0')
 
     expect(data.symbol).toBe('DFI')
@@ -168,7 +167,7 @@ describe('controller.getId() for DFI coin', () => {
     expect(data.collateral_address).toBe('')
   })
 
-  it('should return DFI coin with symbol as param', async () => {
+  it('should return DFI with symbol as param', async () => {
     const data = await controller.getId('DFI')
 
     expect(data.symbol).toBe('DFI')
@@ -189,7 +188,7 @@ describe('controller.getId() for DFI coin', () => {
     expect(data.collateral_address).toBe('')
   })
 
-  it('should return DFI coin with creationTx as param', async () => {
+  it('should return DFI with creationTx as param', async () => {
     const data = await controller.getId('0000000000000000000000000000000000000000000000000000000000000000')
 
     expect(data.symbol).toBe('DFI')
@@ -212,10 +211,6 @@ describe('controller.getId() for DFI coin', () => {
 })
 
 describe('controller.getId() for newly created token', () => {
-  beforeAll(async () => {
-    await createToken('DSWAP')
-  })
-
   it('should return DSWAP token with id as param', async () => {
     const data = await controller.getId('1')
 
