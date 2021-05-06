@@ -30,3 +30,8 @@ labels:
     sync: true
     matcher:
       files: "packages/module.health/**"
+
+  - label: area/module-model
+    sync: true
+    matcher:
+      files: "packages/module.model/**"
