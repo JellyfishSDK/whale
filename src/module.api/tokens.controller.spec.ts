@@ -31,9 +31,9 @@ beforeEach(async () => {
   controller = app.get<TokensController>(TokensController)
 })
 
-describe('controller.get() for DFI coin', () => {
+describe('controller.getId() for DFI coin', () => {
   it('should return DFI coin with id as param', async () => {
-    const data = await controller.get('0')
+    const data = await controller.getId('0')
 
     expect(data.symbol).toBe('DFI')
     expect(data.symbol_key).toBe('DFI')
@@ -54,7 +54,7 @@ describe('controller.get() for DFI coin', () => {
   })
 
   it('should return DFI coin with symbol as param', async () => {
-    const data = await controller.get('DFI')
+    const data = await controller.getId('DFI')
 
     expect(data.symbol).toBe('DFI')
     expect(data.symbol_key).toBe('DFI')
@@ -75,7 +75,7 @@ describe('controller.get() for DFI coin', () => {
   })
 
   it('should return DFI coin with creationTx as param', async () => {
-    const data = await controller.get('0000000000000000000000000000000000000000000000000000000000000000')
+    const data = await controller.getId('0000000000000000000000000000000000000000000000000000000000000000')
 
     expect(data.symbol).toBe('DFI')
     expect(data.symbol_key).toBe('DFI')
@@ -96,7 +96,7 @@ describe('controller.get() for DFI coin', () => {
   })
 })
 
-describe('controller.get() for newly created token', () => {
+describe('controller.getId() for newly created token', () => {
   async function createToken (symbol: string): Promise<void> {
     const address = await container.call('getnewaddress')
     const metadata = {
@@ -116,7 +116,7 @@ describe('controller.get() for newly created token', () => {
   })
 
   it('should return DSWAP token with id as param', async () => {
-    const data = await controller.get('1')
+    const data = await controller.getId('1')
 
     expect(data.symbol).toBe('DSWAP')
     expect(data.symbol_key).toBe('DSWAP')
@@ -137,7 +137,7 @@ describe('controller.get() for newly created token', () => {
   })
 
   it('should return DSWAP token with symbol as param', async () => {
-    const data = await controller.get('DSWAP')
+    const data = await controller.getId('DSWAP')
 
     expect(data.symbol).toBe('DSWAP')
     expect(data.symbol_key).toBe('DSWAP')
@@ -158,8 +158,8 @@ describe('controller.get() for newly created token', () => {
   })
 
   it('should return DSWAP token with creationTx as param', async () => {
-    let data = await controller.get('1')
-    data = await controller.get(data.creation_tx)
+    let data = await controller.getId('1')
+    data = await controller.getId(data.creation_tx)
 
     expect(data.symbol).toBe('DSWAP')
     expect(data.symbol_key).toBe('DSWAP')
@@ -180,21 +180,21 @@ describe('controller.get() for newly created token', () => {
   })
 })
 
-describe('controller.get() for token which does not exist', () => {
+describe('controller.getId() for token which does not exist', () => {
   it('should return Token not found with id as param', async () => {
-    await expect(controller.get('2'))
+    await expect(controller.getId('2'))
       .rejects
       .toThrow('Token not found')
   })
 
   it('should return Token not found with symbol as param', async () => {
-    await expect(controller.get('MOCK'))
+    await expect(controller.getId('MOCK'))
       .rejects
       .toThrow('Token not found')
   })
 
   it('should return Token not found with creationTx as param', async () => {
-    await expect(controller.get('5000000000000000000000000000000000000000000000000000000000000000'))
+    await expect(controller.getId('5000000000000000000000000000000000000000000000000000000000000000'))
       .rejects
       .toThrow('Token not found')
   })

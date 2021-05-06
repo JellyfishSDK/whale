@@ -3,7 +3,7 @@ import { BadRequestException, Controller, Get, UseGuards, UseInterceptors, Param
 import { ExceptionInterceptor } from './commons/exception.interceptor'
 import { NetworkGuard } from './commons/network.guard'
 import { TransformInterceptor } from './commons/transform.interceptor'
-import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
+import { TokenInfo, TokenPagination } from '@defichain/jellyfish-api-core/dist/category/token'
 
 @Controller('/v1/:network/tokens')
 @UseGuards(NetworkGuard)
@@ -15,11 +15,32 @@ export class TokensController {
   /**
    * Returns information about token.
    *
+   * @return {Promise<TokenInfoDto[]>}
+   */
+  @Get('/')
+  async get (
+    pagination: TokenPagination = {
+      start: 0,
+      including_start: true,
+      limit: 100
+    },
+    verbose = true): Promise<TokenInfoDto[]> {
+    try {
+      const result = await this.client.token.listTokens(pagination, verbose)
+      return toTokenInfoDTOs(result)
+    } catch (e) {
+      throw new BadRequestException(e.payload.message)
+    }
+  }
+
+  /**
+   * Returns information about token.
+   *
    * @param {string} id id/symbol/creationTx
    * @return {Promise<TokenInfoDto>}
    */
   @Get('/:id')
-  async get (@Param('id') id: string): Promise<TokenInfoDto> {
+  async getId (@Param('id') id: string): Promise<TokenInfoDto> {
     try {
       const result = await this.client.token.getToken(id)
       return toTokenInfoDTO(result[Object.keys(result)[0]])
@@ -73,4 +94,20 @@ function toTokenInfoDTO (tokenInfo: TokenInfo): TokenInfoDto {
     destruction_height: tokenInfo.destructionHeight,
     collateral_address: tokenInfo.collateralAddress
   }
+}
+
+/**
+   * Map data to TokenInfoDto[].
+   *
+   * @param {data} any
+   * @return {TokenInfoDto[]}
+   */
+function toTokenInfoDTOs (data: any): TokenInfoDto[] {
+  const result: TokenInfoDto[] = []
+
+  Object.keys(data).forEach(function (key, index) {
+    result.push(data[Object.keys(data)[index]])
+  })
+
+  return result
 }
