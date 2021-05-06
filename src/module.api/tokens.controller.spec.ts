@@ -31,6 +31,121 @@ beforeEach(async () => {
   controller = app.get<TokensController>(TokensController)
 })
 
+async function createToken (symbol: string): Promise<void> {
+  const address = await container.call('getnewaddress')
+  const metadata = {
+    symbol,
+    name: symbol,
+    isDAT: true,
+    mintable: true,
+    tradeable: true,
+    collateralAddress: address
+  }
+  await container.call('createtoken', [metadata])
+  await container.generate(1)
+}
+
+describe('controller.get() for all tokens', () => {
+  beforeAll(async () => {
+    await createToken('DBTC')
+  })
+
+  it('should listTokens', async () => {
+    const tokens = await client.token.listTokens()
+    for (const k in tokens) {
+      const token = tokens[k]
+      expect(token.decimal).toBe(8)
+      expect(token.limit).toBe(0)
+      expect(token.minted).toBe(0)
+      expect(token.isLPS).toBe(false)
+      expect(typeof token.creationTx).toBe('string')
+      expect(typeof token.creationHeight).toBe('number')
+      expect(typeof token.destructionTx).toBe('string')
+      expect(typeof token.destructionHeight).toBe('number')
+      expect(typeof token.collateralAddress).toBe('string')
+
+      switch (token.symbol) {
+        case 'DFI':
+          expect(token.symbol).toBe('DFI')
+          expect(token.symbolKey).toBe('DFI')
+          expect(token.name).toBe('Default Defi token')
+          expect(token.mintable).toBe(false)
+          expect(token.tradeable).toBe(true)
+          expect(token.isDAT).toBe(true)
+          expect(token.finalized).toBe(true)
+          expect(token.collateralAddress).toBe('')
+          break
+        case 'DBTC':
+          expect(token.symbol).toBe('DBTC')
+          expect(token.symbolKey).toBe('DBTC')
+          expect(token.name).toBe('DBTC')
+          expect(token.mintable).toBe(true)
+          expect(token.tradeable).toBe(true)
+          expect(token.isDAT).toBe(true)
+          expect(token.finalized).toBe(false)
+          break
+      }
+    }
+  })
+
+  it('should listTokens with pagination and return an empty object as out of range', async () => {
+    const pagination = {
+      start: 300,
+      including_start: true,
+      limit: 100
+    }
+    const tokens = await client.token.listTokens(pagination)
+
+    expect(Object.keys(tokens).length).toBe(0)
+  })
+
+  it('should listTokens with pagination limit', async () => {
+    const pagination = {
+      start: 0,
+      including_start: true,
+      limit: 2
+    }
+    const tokens = await client.token.listTokens(pagination)
+
+    expect(Object.keys(tokens).length).toBe(2)
+  })
+
+  it('should listTokens with start = 1', async () => {
+    const pagination = {
+      start: 1,
+      including_start: true,
+      limit: 2
+    }
+    const tokens = await client.token.listTokens(pagination)
+    expect(Object.keys(tokens).length).toBe(1)
+  })
+
+  it('should listTokens with including_start = false', async () => {
+    const pagination = {
+      start: 0,
+      including_start: false,
+      limit: 2
+    }
+    const tokens = await client.token.listTokens(pagination)
+    expect(Object.keys(tokens).length).toBe(1)
+  })
+
+  it('should listTokens with verbose false', async () => {
+    const pagination = {
+      start: 0,
+      including_start: true,
+      limit: 100
+    }
+
+    const token = await client.token.listTokens(pagination, false)
+    const data = token['0']
+
+    expect(data.symbol).toBe('DFI')
+    expect(data.symbolKey).toBe('DFI')
+    expect(data.name).toBe('Default Defi token')
+  })
+})
+
 describe('controller.getId() for DFI coin', () => {
   it('should return DFI coin with id as param', async () => {
     const data = await controller.getId('0')
@@ -97,20 +212,6 @@ describe('controller.getId() for DFI coin', () => {
 })
 
 describe('controller.getId() for newly created token', () => {
-  async function createToken (symbol: string): Promise<void> {
-    const address = await container.call('getnewaddress')
-    const metadata = {
-      symbol,
-      name: symbol,
-      isDAT: true,
-      mintable: true,
-      tradeable: true,
-      collateralAddress: address
-    }
-    await container.call('createtoken', [metadata])
-    await container.generate(1)
-  }
-
   beforeAll(async () => {
     await createToken('DSWAP')
   })
