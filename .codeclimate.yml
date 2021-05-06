@@ -12,5 +12,5 @@ exclude_patterns:
   - "**/node_modules/"
   - "**/*.test.ts"
   - "**/*.spec.ts"
-  - "**/*.spec/**"
+  - "**/*.spec/"
   - "**/*.d.ts"

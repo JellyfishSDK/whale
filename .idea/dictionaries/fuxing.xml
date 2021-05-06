@@ -85,6 +85,7 @@
       <w>keypoolsize</w>
       <w>lessthan</w>
       <w>lessthanorequal</w>
+      <w>lexint</w>
       <w>libevent</w>
       <w>listaccounts</w>
       <w>listaddressgroupings</w>
@@ -102,6 +103,7 @@
       <w>masternodeoperator</w>
       <w>masternodestate</w>
       <w>mediantime</w>
+      <w>memdown</w>
       <w>mempool</w>
       <w>merkleroot</w>
       <w>mintedblocks</w>
@@ -151,6 +153,7 @@
       <w>sigsrequired</w>
       <w>softforks</w>
       <w>strippedsize</w>
+      <w>subleveldown</w>
       <w>testcontainers</w>
       <w>testmempoolaccept</w>
       <w>thedoublejay</w>
