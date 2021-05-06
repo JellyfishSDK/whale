@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
+import { poolpair } from '@defichain/jellyfish-api-core'
 import { BadRequestException, Controller, Get, Param, Query, UseGuards, UseInterceptors, PipeTransform, ArgumentMetadata } from '@nestjs/common'
 import { IsOptional, IsBooleanString, validate } from 'class-validator'
 import { ExceptionInterceptor } from './commons/exception.interceptor'
@@ -120,7 +121,7 @@ export class PoolPairsController {
     try {
       const result = await this.client.poolpair.getPoolPair(symbol, filter?.verbose)
       const id = Object.keys(result)[0]
-      return toPoolPairDto(result[id] as PoolPairInfo, id)
+      return toPoolPairDto(result[id], id)
     } catch (e) {
       throw new BadRequestException()
     }
@@ -149,7 +150,7 @@ function toPoolPairsDto (PoolPairsResult: PoolPairsResult): PoolPairInfoDto[] {
   const result: PoolPairInfoDto[] = []
 
   for (const k in PoolPairsResult) {
-    const poolPairInfo = PoolPairsResult[k] as PoolPairInfo
+    const poolPairInfo = PoolPairsResult[k] as poolpair.PoolPairInfo
     result.push(toPoolPairDto(poolPairInfo, k))
   }
 
@@ -162,7 +163,7 @@ function toPoolPairsDto (PoolPairsResult: PoolPairsResult): PoolPairInfoDto[] {
  * @param {PoolPairInfo} poolPairInfo
  * @return {PoolPairInfoDto}
  */
-function toPoolPairDto (poolPairInfo: PoolPairInfo, id: string): PoolPairInfoDto {
+function toPoolPairDto (poolPairInfo: poolpair.PoolPairInfo, id: string): PoolPairInfoDto {
   const data: PoolPairInfoDto = {
     id,
     symbol: poolPairInfo.symbol,
@@ -223,29 +224,7 @@ function toPoolShareDto (poolShareInfo: PoolShareInfo): PoolShareInfoDto {
 }
 
 export interface PoolPairsResult {
-  [id: string]: PoolPairInfo | PoolPairInfoDto
-}
-
-export interface PoolPairInfo {
-  symbol: string
-  name: string
-  status: string
-  idTokenA: string
-  idTokenB: string
-  reserveA: BigNumber
-  reserveB: BigNumber
-  commission: BigNumber
-  totalLiquidity: BigNumber
-  'reserveA/reserveB': BigNumber | string
-  'reserveB/reserveA': BigNumber | string
-  tradeEnabled: boolean
-  ownerAddress: string
-  blockCommissionA: BigNumber
-  blockCommissionB: BigNumber
-  rewardPct: BigNumber
-  customRewards: BigNumber
-  creationTx: string
-  creationHeight: BigNumber
+  [id: string]: poolpair.PoolPairInfo | PoolPairInfoDto
 }
 
 export interface PoolPairInfoDto {
