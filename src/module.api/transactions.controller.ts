@@ -10,7 +10,7 @@ import {
   ValidationPipe
 } from '@nestjs/common'
 import { NetworkGuard } from '@src/module.api/guards'
-import { TransformInterceptor, ExceptionInterceptor } from '@src/module.api/interceptors'
+import { ExceptionInterceptor, ResponseInterceptor } from '@src/module.api/interceptors'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { IsHexadecimal, IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator'
 import { HttpBadRequestError } from './exceptions/bad-request.exception'
@@ -28,7 +28,7 @@ class RawTxDto {
 
 @Controller('/v1/:network/transactions')
 @UseGuards(NetworkGuard)
-@UseInterceptors(TransformInterceptor, ExceptionInterceptor)
+@UseInterceptors(ResponseInterceptor, ExceptionInterceptor)
 export class TransactionsController {
   /**
    * MaxFeeRate = vkb * Fees

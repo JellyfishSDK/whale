@@ -13,7 +13,7 @@ import {
 
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { NetworkGuard } from '@src/module.api/guards'
-import { TransformInterceptor, ExceptionInterceptor } from '@src/module.api/interceptors'
+import { ExceptionInterceptor, ResponseInterceptor } from '@src/module.api/interceptors'
 
 /**
  * MethodWhitelist is a whitelist validation pipe to check
@@ -50,7 +50,7 @@ export class CallDto {
 
 @Controller('/v1/:network/call')
 @UseGuards(NetworkGuard)
-@UseInterceptors(TransformInterceptor, ExceptionInterceptor)
+@UseInterceptors(ResponseInterceptor, ExceptionInterceptor)
 export class CallController {
   constructor (private readonly client: JsonRpcClient) {
   }
