@@ -51,15 +51,6 @@ describe('/_health/probes/readiness', () => {
 
     expect(res.statusCode).toBe(503)
     expect(res.json()).toEqual({
-      details: {
-        defid: {
-          blocks: 1,
-          headers: 1,
-          initialBlockDownload: true,
-          peers: 0,
-          status: 'down'
-        }
-      },
       error: {
         defid: {
           blocks: 1,
@@ -69,8 +60,9 @@ describe('/_health/probes/readiness', () => {
           status: 'down'
         }
       },
-      info: {},
-      status: 'error'
+      message: 'Bad Request',
+      url: '/_health/probes/readiness',
+      at: expect.any(String)
     })
   })
 })

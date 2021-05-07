@@ -188,7 +188,7 @@ describe('POST: /v1/regtest/transactions/test', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
-      message: 'Bad Request',
+      message: BAD_REQUEST_ERROR.message,
       statusCode: 400,
       url: '/v1/regtest/transactions/test',
       at: expect.any(String)
@@ -208,7 +208,7 @@ describe('POST: /v1/regtest/transactions/test', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
-      message: 'Bad Request',
+      message: BAD_REQUEST_ERROR.message,
       statusCode: 400,
       url: '/v1/regtest/transactions/test',
       at: expect.any(String)

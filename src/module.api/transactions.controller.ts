@@ -1,6 +1,5 @@
 import BigNumber from 'bignumber.js'
 import {
-  BadRequestException,
   Body,
   Controller,
   HttpCode,
@@ -45,7 +44,7 @@ export class TransactionsController {
   /**
    * @param {RawTxDto} tx to submit to the network.
    * @return {Promise<string>} hash of the transaction
-   * @throws {BadRequestException} if tx fail mempool acceptance
+   * @throws {HttpBadRequestError} if tx fail mempool acceptance
    */
   @Post()
   async send (@Body() tx: RawTxDto): Promise<string> {
@@ -60,7 +59,7 @@ export class TransactionsController {
   /**
    * @param {RawTxDto} tx to test whether allow acceptance into mempool.
    * @return {Promise<void>}
-   * @throws {BadRequestException} if tx fail mempool acceptance
+   * @throws {HttpBadRequestError} if tx fail mempool acceptance
    */
   @Post('/test')
   @HttpCode(200)
@@ -73,7 +72,7 @@ export class TransactionsController {
       }
     } catch (e) {
     }
-    throw new BadRequestException()
+    throw new HttpBadRequestError()
   }
 
   private getMaxFeeRate (tx: RawTxDto): BigNumber {

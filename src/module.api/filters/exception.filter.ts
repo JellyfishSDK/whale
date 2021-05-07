@@ -9,7 +9,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus()
 
     const err = exception.getResponse() as AppErrorMessage
-    console.log('err: ', err)
 
     const message = typeof err !== 'string' ? err.message : err
     const statusCode = typeof err !== 'string' ? err.statusCode : HttpStatus.BAD_REQUEST
