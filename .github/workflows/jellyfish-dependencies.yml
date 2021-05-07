@@ -1,0 +1,37 @@
+name: Jellyfish Dependencies
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '15'
+
+      - run: npm ci
+      - run: |
+        npm upgrade \
+          @defichain/jellyfish-api-core \
+          @defichain/jellyfish-api-jsonrpc \
+          @defichain/jellyfish-network \
+          @defichain/jellyfish-json \
+          @defichain/jellyfish-crypto \
+          @defichain/testcontainers
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@052fc72b4198ba9fbc81b818c6e1859f747d49a8
+        with:
+          token: ${{ secrets.DEFICHAIN_BOT_GITHUB_TOKEN }}
+          labels: kind/dependencies
+          commit-message: Bump jellyfish dependencies
+          committer: DeFiChain Bot <github-bot@defichain.com>
+          author: DeFiChain Bot <github-bot@defichain.com>
+          title: Bump jellyfish dependencies
+          body: Bump jellyfish dependencies
+          branch: jellyfish-dependencies/bump
