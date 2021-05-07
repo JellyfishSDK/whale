@@ -1,7 +1,7 @@
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 it('should encode script hex', () => {
-  const hex = HexEncoder.encodeScriptHex('1600140e7c0ab18b305bc987a266dc06de26fcfab4b56a')
+  const hex = HexEncoder.asSHA256('1600140e7c0ab18b305bc987a266dc06de26fcfab4b56a')
   expect(hex).toBe('3d78c27dffed5c633ec8cb3c1bab3aec7c63ff9247cd2a7646f98e4f7075cca0')
   expect(hex.length).toBe(64)
 })
