@@ -1,6 +1,7 @@
 name: Jellyfish Dependencies
 
 on:
+  repository_dispatch:
   schedule:
     - cron: '0 */2 * * *'
 
