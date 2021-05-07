@@ -249,7 +249,7 @@ describe('POST: /v1/regtest/transactions', () => {
     await expectTxn(txid, 9.995, await bKey.publicKey())
   })
 
-  it('should fail due to invalid txn', async () => {
+  it.only('should fail due to invalid txn', async () => {
     const hex = '0400000100881133bb11aa00cc'
     const res = await app.inject({
       method: 'POST',
@@ -258,6 +258,8 @@ describe('POST: /v1/regtest/transactions', () => {
         hex: hex
       }
     })
+
+    console.log('res.json(): ', res.json())
 
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
