@@ -16,8 +16,10 @@ jobs:
           node-version: '15'
 
       - run: npm ci
-      - run: |
-        npm upgrade \
+
+      - name: Upgrade dependencies
+        run: |
+          npm upgrade \
           @defichain/jellyfish-api-core \
           @defichain/jellyfish-api-jsonrpc \
           @defichain/jellyfish-network \

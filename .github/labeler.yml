@@ -6,32 +6,32 @@ labels:
     matcher:
       files: ".github/**"
 
-  - label: area/module-actor
-    sync: true
-    matcher:
-      files: "packages/module.actor/**"
-
   - label: area/module-api
     sync: true
     matcher:
-      files: "packages/module.api/**"
+      files: "src/module.api/**"
 
   - label: area/module-database
     sync: true
     matcher:
-      files: "packages/module.database/**"
+      files: "src/module.database/**"
 
   - label: area/module-defid
     sync: true
     matcher:
-      files: "packages/module.defid/**"
+      files: "src/module.defid/**"
 
   - label: area/module-health
     sync: true
     matcher:
-      files: "packages/module.health/**"
+      files: "src/module.health/**"
+
+  - label: area/module-indexer
+    sync: true
+    matcher:
+      files: "src/module.indexer/**"
 
   - label: area/module-model
     sync: true
     matcher:
-      files: "packages/module.model/**"
+      files: "src/module.model/**"
