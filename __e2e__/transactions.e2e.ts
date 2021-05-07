@@ -5,7 +5,6 @@ import { Bech32, Elliptic, EllipticPair, HRP, WIF } from '@defichain/jellyfish-c
 import { RegTest } from '@defichain/jellyfish-network'
 import BigNumber from 'bignumber.js'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { HttpStatus } from '@nestjs/common'
 import { BAD_REQUEST_ERROR } from '@src/module.api/constants'
 
 const container = new MasterNodeRegTestContainer()
@@ -74,7 +73,7 @@ function describeFailValidations (url: string): void {
         statusCode: 400,
         message: ['hex must be a hexadecimal number', 'hex should not be empty'],
         error: 'Bad Request',
-        url,
+        url: url,
         at: expect.any(String)
       })
     })
@@ -93,7 +92,7 @@ function describeFailValidations (url: string): void {
         statusCode: 400,
         message: ['hex must be a hexadecimal number'],
         error: 'Bad Request',
-        url,
+        url: url,
         at: expect.any(String)
       })
     })
@@ -113,7 +112,7 @@ function describeFailValidations (url: string): void {
         statusCode: 400,
         message: ['maxFeeRate must not be less than 0'],
         error: 'Bad Request',
-        url,
+        url: url,
         at: expect.any(String)
       })
     })
@@ -136,7 +135,7 @@ function describeFailValidations (url: string): void {
           'maxFeeRate must be a number conforming to the specified constraints'
         ],
         error: 'Bad Request',
-        url,
+        url: url,
         at: expect.any(String)
       })
     })
@@ -273,10 +272,10 @@ describe('POST: /v1/regtest/transactions', () => {
       }
     })
 
-    expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST)
+    expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
       message: BAD_REQUEST_ERROR.message,
-      statusCode: HttpStatus.BAD_REQUEST,
+      statusCode: 400,
       url: '/v1/regtest/transactions',
       at: expect.any(String)
     })
@@ -293,10 +292,10 @@ describe('POST: /v1/regtest/transactions', () => {
       }
     })
 
-    expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST)
+    expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
       message: BAD_REQUEST_ERROR.message,
-      statusCode: HttpStatus.BAD_REQUEST,
+      statusCode: 400,
       url: '/v1/regtest/transactions',
       at: expect.any(String)
     })
