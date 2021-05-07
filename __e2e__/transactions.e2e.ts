@@ -5,6 +5,8 @@ import { Bech32, Elliptic, EllipticPair, HRP, WIF } from '@defichain/jellyfish-c
 import { RegTest } from '@defichain/jellyfish-network'
 import BigNumber from 'bignumber.js'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
+import { HttpStatus } from '@nestjs/common'
+import { BAD_REQUEST_ERROR } from '@src/module.api/constants'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -71,7 +73,9 @@ function describeFailValidations (url: string): void {
       expect(res.json()).toEqual({
         statusCode: 400,
         message: ['hex must be a hexadecimal number', 'hex should not be empty'],
-        error: 'Bad Request'
+        error: 'Bad Request',
+        url,
+        at: expect.any(String)
       })
     })
 
@@ -88,7 +92,9 @@ function describeFailValidations (url: string): void {
       expect(res.json()).toEqual({
         statusCode: 400,
         message: ['hex must be a hexadecimal number'],
-        error: 'Bad Request'
+        error: 'Bad Request',
+        url,
+        at: expect.any(String)
       })
     })
 
@@ -106,7 +112,9 @@ function describeFailValidations (url: string): void {
       expect(res.json()).toEqual({
         statusCode: 400,
         message: ['maxFeeRate must not be less than 0'],
-        error: 'Bad Request'
+        error: 'Bad Request',
+        url,
+        at: expect.any(String)
       })
     })
 
@@ -127,7 +135,9 @@ function describeFailValidations (url: string): void {
           'maxFeeRate must not be less than 0',
           'maxFeeRate must be a number conforming to the specified constraints'
         ],
-        error: 'Bad Request'
+        error: 'Bad Request',
+        url,
+        at: expect.any(String)
       })
     })
   })
@@ -180,7 +190,9 @@ describe('POST: /v1/regtest/transactions/test', () => {
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
       message: 'Bad Request',
-      statusCode: 400
+      statusCode: 400,
+      url: '/v1/regtest/transactions/test',
+      at: expect.any(String)
     })
   })
 
@@ -198,7 +210,9 @@ describe('POST: /v1/regtest/transactions/test', () => {
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
       message: 'Bad Request',
-      statusCode: 400
+      statusCode: 400,
+      url: '/v1/regtest/transactions/test',
+      at: expect.any(String)
     })
   })
 })
@@ -249,7 +263,7 @@ describe('POST: /v1/regtest/transactions', () => {
     await expectTxn(txid, 9.995, await bKey.publicKey())
   })
 
-  it.only('should fail due to invalid txn', async () => {
+  it('should fail due to invalid txn', async () => {
     const hex = '0400000100881133bb11aa00cc'
     const res = await app.inject({
       method: 'POST',
@@ -259,12 +273,12 @@ describe('POST: /v1/regtest/transactions', () => {
       }
     })
 
-    console.log('res.json(): ', res.json())
-
-    expect(res.statusCode).toBe(400)
+    expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST)
     expect(res.json()).toEqual({
-      message: 'Bad Request',
-      statusCode: 400
+      message: BAD_REQUEST_ERROR.message,
+      statusCode: HttpStatus.BAD_REQUEST,
+      url: '/v1/regtest/transactions',
+      at: expect.any(String)
     })
   })
 
@@ -279,10 +293,12 @@ describe('POST: /v1/regtest/transactions', () => {
       }
     })
 
-    expect(res.statusCode).toBe(400)
+    expect(res.statusCode).toBe(HttpStatus.BAD_REQUEST)
     expect(res.json()).toEqual({
-      message: 'Bad Request',
-      statusCode: 400
+      message: BAD_REQUEST_ERROR.message,
+      statusCode: HttpStatus.BAD_REQUEST,
+      url: '/v1/regtest/transactions',
+      at: expect.any(String)
     })
   })
 })

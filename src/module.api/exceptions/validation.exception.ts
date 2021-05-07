@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus } from '@nestjs/common'
 import { VALIDATION_ERROR } from '../constants'
-import { ErrorMessage } from '../interfaces'
+import { AppErrorMessage } from '../interfaces'
 
 export class ValidationError extends HttpException {
-  constructor (error?: ErrorMessage) {
-    super(error ?? VALIDATION_ERROR, HttpStatus.BAD_REQUEST)
+  constructor (error?: AppErrorMessage) {
+    super(error ?? VALIDATION_ERROR.message, HttpStatus.BAD_REQUEST)
   }
 }

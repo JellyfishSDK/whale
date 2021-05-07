@@ -13,6 +13,7 @@ import { NetworkGuard } from '@src/module.api/guards'
 import { TransformInterceptor, ExceptionInterceptor } from '@src/module.api/interceptors'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { IsHexadecimal, IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator'
+import { HttpBadRequestError } from './exceptions/bad-request.exception'
 
 class RawTxDto {
   @IsNotEmpty()
@@ -52,7 +53,7 @@ export class TransactionsController {
     try {
       return await this.client.rawtx.sendRawTransaction(tx.hex, maxFeeRate)
     } catch (e) {
-      throw new BadRequestException()
+      throw new HttpBadRequestError()
     }
   }
 
