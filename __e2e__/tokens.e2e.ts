@@ -1,6 +1,7 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { createTestingApp } from './module.testing'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { createToken } from '@defichain/testing'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -10,26 +11,12 @@ beforeAll(async () => {
   await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
   app = await createTestingApp(container)
-  await createToken('DSWAP')
+  await createToken(container, 'DSWAP')
 })
 
 afterAll(async () => {
   await container.stop()
 })
-
-async function createToken (symbol: string): Promise<void> {
-  const address = await container.call('getnewaddress')
-  const metadata = {
-    symbol,
-    name: symbol,
-    isDAT: true,
-    mintable: true,
-    tradeable: true,
-    collateralAddress: address
-  }
-  await container.call('createtoken', [metadata])
-  await container.generate(1)
-}
 
 describe('GET: /v1/regtest/tokens', () => {
   it('should return coins and tokens with pagination limit', async () => {

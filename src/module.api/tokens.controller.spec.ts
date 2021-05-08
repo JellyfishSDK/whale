@@ -3,6 +3,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TokensController } from '@src/module.api/tokens.controller'
 import { ConfigModule } from '@nestjs/config'
+import { createToken } from '@defichain/testing'
 
 const container = new MasterNodeRegTestContainer()
 let client: JsonRpcClient
@@ -13,7 +14,7 @@ beforeAll(async () => {
   await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
   client = new JsonRpcClient(await container.getCachedRpcUrl())
-  await createToken('DSWAP')
+  await createToken(container, 'DSWAP')
 })
 
 afterAll(async () => {
@@ -31,20 +32,6 @@ beforeEach(async () => {
 
   controller = app.get<TokensController>(TokensController)
 })
-
-async function createToken (symbol: string): Promise<void> {
-  const address = await container.call('getnewaddress')
-  const metadata = {
-    symbol,
-    name: symbol,
-    isDAT: true,
-    mintable: true,
-    tradeable: true,
-    collateralAddress: address
-  }
-  await container.call('createtoken', [metadata])
-  await container.generate(1)
-}
 
 describe('controller.get() for all coin and tokens', () => {
   it('should listTokens', async () => {
