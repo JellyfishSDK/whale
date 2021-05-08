@@ -1,5 +1,5 @@
 import { Global, Module } from '@nestjs/common'
-import { BlockCachedMapper } from '@src/module.model/block.cached'
+import { RawBlockMapper } from '@src/module.model/raw.block'
 import { BlockMapper } from '@src/module.model/block'
 import { ScriptActivityMapper } from '@src/module.model/script.activity'
 import { ScriptAggregationMapper } from '@src/module.model/script.aggregation'
@@ -11,7 +11,7 @@ import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
 @Global()
 @Module({
   providers: [
-    BlockCachedMapper,
+    RawBlockMapper,
     BlockMapper,
     ScriptActivityMapper,
     ScriptAggregationMapper,
