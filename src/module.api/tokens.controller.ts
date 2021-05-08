@@ -1,33 +1,69 @@
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { BadRequestException, Controller, Get, UseGuards, UseInterceptors, Param } from '@nestjs/common'
-// import { IsOptional, IsBooleanString } from 'class-validator'
+import { BadRequestException, Controller, Get, Query, PipeTransform, ArgumentMetadata, UseGuards, UseInterceptors, Param } from '@nestjs/common'
 import { ExceptionInterceptor } from './commons/exception.interceptor'
 import { NetworkGuard } from './commons/network.guard'
-import { TransformInterceptor } from './commons/transform.interceptor'
+import { ResponseInterceptor } from './commons/response.interceptor'
 import { TokenInfo, TokenPagination } from '@defichain/jellyfish-api-core/dist/category/token'
-// import { IsPositiveNumberString } from './custom.validations'
+import { IsOptional, validate } from 'class-validator'
+import { IsPositiveNumberString } from './custom.validations'
+import { plainToClass } from 'class-transformer'
 
-// class PoolPairsQuery {
-//   @IsOptional()
-//   @IsPositiveNumberString()
-//   start?: string
-//
-//   @IsOptional()
-//   @IsBooleanString()
-//   including_start?: string
-//
-//   @IsOptional()
-//   @IsPositiveNumberString()
-//   limit?: string
-//
-//   @IsOptional()
-//   @IsBooleanString()
-//   verbose?: string
-// }
+class TokensQuery {
+  @IsOptional()
+  @IsPositiveNumberString()
+  start?: string
+
+  @IsOptional()
+  @IsPositiveNumberString()
+  limit?: string
+}
+
+export class TokensFilter {
+  @IsOptional()
+  start?: string
+
+  @IsOptional()
+  limit?: string
+}
+
+export class TokensQueryPipe implements PipeTransform {
+  async transform (value: any, metadata: ArgumentMetadata): Promise<TokensFilter> {
+    await this.validate(value)
+
+    const tokensFilter = new TokensFilter()
+    tokensFilter.start = value.start ?? '0'
+    tokensFilter.limit = value.limit ?? '100'
+
+    return tokensFilter
+  }
+
+  async validate (value: any): Promise<void> {
+    const tokensQuery = plainToClass(TokensQuery, value)
+    const errors = await validate(tokensQuery)
+
+    if (errors.length > 0) {
+      const errorConstraints = errors.map(error => error.constraints)
+      const errorMessages = this.constructErrorMessages(errorConstraints)
+      throw new BadRequestException(errorMessages)
+    }
+  }
+
+  constructErrorMessages (errorConstraints: any): string[] {
+    const errorMessages: string[] = []
+    for (let i = 0; i < errorConstraints.length; i += 1) {
+      const constraint = errorConstraints[i]
+      if (constraint !== undefined) {
+        const errorMessage = Object.values(constraint)[0] as string
+        errorMessages.push(errorMessage)
+      }
+    }
+    return errorMessages
+  }
+}
 
 @Controller('/v1/:network/tokens')
 @UseGuards(NetworkGuard)
-@UseInterceptors(TransformInterceptor, ExceptionInterceptor)
+@UseInterceptors(ResponseInterceptor, ExceptionInterceptor)
 export class TokensController {
   constructor (private readonly client: JsonRpcClient) {
   }
@@ -38,21 +74,15 @@ export class TokensController {
    * @return {Promise<TokenInfoDto[]>}
    */
   @Get('/')
-  async get (
-    @Param('symbol')
-    pagination: TokenPagination = {
-      start: 0,
+  async get (@Query(new TokensQueryPipe()) filter?: TokensFilter): Promise<TokenInfoDto[]> {
+    const pagination: TokenPagination = {
+      start: Number(filter?.start) ?? 0,
       including_start: true,
-      limit: 100
-    },
-    @Param('verbose')
-    verbose = true): Promise<TokenInfoDto[]> {
-    try {
-      console.log(33113311)
-      console.log(pagination)
-      console.log(verbose)
+      limit: Number(filter?.limit) ?? 100
+    }
 
-      const result = await this.client.token.listTokens(pagination, verbose)
+    try {
+      const result = await this.client.token.listTokens(pagination, true)
       return toTokenInfoDTOs(result)
     } catch (e) {
       throw new BadRequestException(e.payload.message)
