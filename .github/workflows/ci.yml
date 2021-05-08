@@ -75,8 +75,8 @@ jobs:
       - name: Setup docker containers
         run: docker-compose -f __sanity__/docker-compose.yml up -d
 
-      - name: Wait for container
-        run: ./__sanity__/wait-for.sh "http://localhost:3000/_health/probes/liveness"
+      - name: Wait for
+        run: ./__sanity__/wait-for http://localhost:3000/_health/probes/liveness -t 6
 
       - name: Sanity testing
         uses: matt-ball/newman-action@0659e9b8d056c0d03d94e1dbfce380512088b566
