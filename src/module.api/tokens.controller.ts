@@ -7,39 +7,67 @@ import { TokenInfo, TokenPagination } from '@defichain/jellyfish-api-core/dist/c
 import { IsOptional, validate } from 'class-validator'
 import { IsPositiveNumberString } from './custom.validations'
 import { plainToClass } from 'class-transformer'
+import { SliceResponse } from '@src/module.api/commons/slice.response'
 
-class TokensQuery {
+class TokenSizeQuery {
   @IsOptional()
   @IsPositiveNumberString()
-  start?: string
+  size?: string
+}
 
+class TokenNextQuery {
   @IsOptional()
   @IsPositiveNumberString()
-  limit?: string
+  next?: string
 }
 
 export class TokensFilter {
   @IsOptional()
-  start?: string
+  size?: string
 
   @IsOptional()
-  limit?: string
+  next?: string
 }
 
-export class TokensQueryPipe implements PipeTransform {
-  async transform (value: any, metadata: ArgumentMetadata): Promise<TokensFilter> {
+export class TokensSizePipe implements PipeTransform {
+  async transform (value: any, metadata: ArgumentMetadata): Promise<string> {
     await this.validate(value)
-
-    const tokensFilter = new TokensFilter()
-    tokensFilter.start = value.start ?? '0'
-    tokensFilter.limit = value.limit ?? '100'
-
-    return tokensFilter
+    return value.size ?? '0'
   }
 
   async validate (value: any): Promise<void> {
-    const tokensQuery = plainToClass(TokensQuery, value)
-    const errors = await validate(tokensQuery)
+    const tokenSizeQuery = plainToClass(TokenSizeQuery, value)
+    const errors = await validate(tokenSizeQuery)
+
+    if (errors.length > 0) {
+      const errorConstraints = errors.map(error => error.constraints)
+      const errorMessages = this.constructErrorMessages(errorConstraints)
+      throw new BadRequestException(errorMessages)
+    }
+  }
+
+  constructErrorMessages (errorConstraints: any): string[] {
+    const errorMessages: string[] = []
+    for (let i = 0; i < errorConstraints.length; i += 1) {
+      const constraint = errorConstraints[i]
+      if (constraint !== undefined) {
+        const errorMessage = Object.values(constraint)[0] as string
+        errorMessages.push(errorMessage)
+      }
+    }
+    return errorMessages
+  }
+}
+
+export class TokensNextPipe implements PipeTransform {
+  async transform (value: any, metadata: ArgumentMetadata): Promise<string> {
+    await this.validate(value)
+    return value.next ?? '0'
+  }
+
+  async validate (value: any): Promise<void> {
+    const tokenNextQuery = plainToClass(TokenNextQuery, value)
+    const errors = await validate(tokenNextQuery)
 
     if (errors.length > 0) {
       const errorConstraints = errors.map(error => error.constraints)
@@ -73,20 +101,35 @@ export class TokensController {
    *
    * @return {Promise<TokenInfoDto[]>}
    */
+
   @Get('/')
-  async get (@Query(new TokensQueryPipe()) filter?: TokensFilter): Promise<TokenInfoDto[]> {
+  async get (
+    @Query(new TokensSizePipe()) size?: number,
+      @Query(new TokensNextPipe()) next?: string
+  ): Promise<SliceResponse<TokenInfoDto>> {
+    const hid = await this.client.token.listTokens()
+    const items = await this.query(hid, size, next)
+    return SliceResponse.of(items, size ?? 100, item => {
+      return item.symbol_key
+    })
+  }
+
+  async query (hid: any, size?: number, next?: string): Promise<TokenInfoDto[]> {
     const pagination: TokenPagination = {
-      start: Number(filter?.start) ?? 0,
+      start: Number(next) ?? 0,
       including_start: true,
-      limit: Number(filter?.limit) ?? 100
+      limit: Number(size) ?? 100
     }
 
-    try {
-      const result = await this.client.token.listTokens(pagination, true)
-      return toTokenInfoDTOs(result)
-    } catch (e) {
-      throw new BadRequestException(e.payload.message)
+    const tokenInfoDtos: TokenInfoDto[] = []
+
+    const results = await this.client.token.listTokens(pagination, true)
+
+    for (const key of Object.keys(results)) {
+      tokenInfoDtos.push(toTokenInfoDTO(results[key]))
     }
+
+    return tokenInfoDtos
   }
 
   /**
@@ -106,7 +149,7 @@ export class TokensController {
   }
 }
 
-interface TokenInfoDto {
+export interface TokenInfoDto {
   symbol: string
   symbol_key: string
   name: string
@@ -150,18 +193,4 @@ function toTokenInfoDTO (tokenInfo: TokenInfo): TokenInfoDto {
     destruction_height: tokenInfo.destructionHeight,
     collateral_address: tokenInfo.collateralAddress
   }
-}
-
-/**
- * Map data to TokenInfoDto[].
- *
- * @param {data} any
- * @return {TokenInfoDto[]}
- */
-function toTokenInfoDTOs (data: any): TokenInfoDto[] {
-  const result: TokenInfoDto[] = []
-  Object.keys(data).forEach(function (key, index) {
-    result.push(toTokenInfoDTO(data[Object.keys(data)[index]]))
-  })
-  return result
 }

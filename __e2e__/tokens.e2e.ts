@@ -10,6 +10,7 @@ beforeAll(async () => {
   await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
   app = await createTestingApp(container)
+  await createToken('DSWAP')
 })
 
 afterAll(async () => {
@@ -31,17 +32,13 @@ async function createToken (symbol: string): Promise<void> {
 }
 
 describe('GET: /v1/regtest/tokens', () => {
-  beforeAll(async () => {
-    await createToken('DBTC')
-  })
-
   it('should return coins and tokens with pagination limit', async () => {
     const res = await app.inject({
       method: 'GET',
       url: 'v1/regtest/tokens',
       query: {
-        start: '0',
-        limit: '2'
+        size: '2',
+        next: '0'
       }
     })
 
@@ -108,8 +105,8 @@ describe('GET: /v1/regtest/tokens', () => {
       method: 'GET',
       url: 'v1/regtest/tokens',
       query: {
-        start: '0',
-        limit: '2'
+        size: '2',
+        next: '0'
       }
     })
 
@@ -141,8 +138,8 @@ describe('GET: /v1/regtest/tokens', () => {
       method: 'GET',
       url: 'v1/regtest/tokens',
       query: {
-        start: '300',
-        limit: '100'
+        size: '100',
+        next: '300'
       }
     })
 
@@ -152,13 +149,13 @@ describe('GET: /v1/regtest/tokens', () => {
     expect(data.length).toBe(0)
   })
 
-  it('should fail due to invalid query type', async () => {
+  it('should fail due to invalid size', async () => {
     const res = await app.inject({
       method: 'GET',
       url: 'v1/regtest/tokens',
       query: {
-        start: 'invalid',
-        limit: '-2'
+        size: '-2',
+        next: '0'
       }
     })
 
@@ -166,8 +163,27 @@ describe('GET: /v1/regtest/tokens', () => {
     expect(res.json()).toEqual({
       error: 'Bad Request',
       message: [
-        'start must be a positive number string',
-        'limit must be a positive number string'
+        'size must be a positive number string'
+      ],
+      statusCode: 400
+    })
+  })
+
+  it('should fail due to invalid next', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: 'v1/regtest/tokens',
+      query: {
+        size: '1',
+        next: '-2'
+      }
+    })
+
+    expect(res.statusCode).toBe(400)
+    expect(res.json()).toEqual({
+      error: 'Bad Request',
+      message: [
+        'next must be a positive number string'
       ],
       statusCode: 400
     })
@@ -204,10 +220,6 @@ describe('GET: /v1/regtest/tokens/:id for DFI coin', () => {
 })
 
 describe('GET: /v1/regtest/tokens/:id for newly created token', () => {
-  beforeAll(async () => {
-    await createToken('DSWAP')
-  })
-
   it('should return DSWAP token with id as param', async () => {
     const res = await app.inject({
       method: 'GET',

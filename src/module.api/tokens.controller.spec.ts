@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { TokensController, TokensFilter } from '@src/module.api/tokens.controller'
+import { TokensController } from '@src/module.api/tokens.controller'
 import { ConfigModule } from '@nestjs/config'
 
 const container = new MasterNodeRegTestContainer()
@@ -13,6 +13,7 @@ beforeAll(async () => {
   await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
   client = new JsonRpcClient(await container.getCachedRpcUrl())
+  await createToken('DSWAP')
 })
 
 afterAll(async () => {
@@ -46,14 +47,10 @@ async function createToken (symbol: string): Promise<void> {
 }
 
 describe('controller.get() for all coin and tokens', () => {
-  beforeAll(async () => {
-    await createToken('DSWAP')
-  })
-
   it('should listTokens', async () => {
-    const tokens = await controller.get()
+    const result = await controller.get()
 
-    tokens.forEach(function (token) {
+    result.data.forEach(function (token) {
       expect(token.decimal).toBe(8)
       expect(token.limit).toBe(0)
       expect(token.minted).toBe(0)
@@ -88,32 +85,28 @@ describe('controller.get() for all coin and tokens', () => {
     })
   })
 
-  it('should listTokens with start 300, limit 100 and return an empty object as out of range', async () => {
-    const filter = new TokensFilter()
-    filter.start = '300'
-    filter.limit = '100'
+  it('should listTokens with size 100, next 300 and return an empty object as out of range', async () => {
+    const size = 100
+    const next = '300'
 
-    const tokens = await controller.get(filter)
-    expect(Object.keys(tokens).length).toBe(0)
+    const result = await controller.get(size, next)
+    expect(Object.keys(result.data).length).toBe(0)
   })
 
-  it('should listTokens with start 0 limit 2', async () => {
-    const filter = new TokensFilter()
-    filter.start = '0'
-    filter.limit = '2'
+  it('should listTokens with size 2 next 0', async () => {
+    const size = 2
+    const next = '0'
 
-    const tokens = await controller.get(filter)
-
-    expect(Object.keys(tokens).length).toBe(2)
+    const result = await controller.get(size, next)
+    expect(Object.keys(result.data).length).toBe(2)
   })
 
-  it('should listTokens with start 1', async () => {
-    const filter = new TokensFilter()
-    filter.start = '1'
-    filter.limit = '2'
+  it('should listTokens with size 2 next 1', async () => {
+    const size = 2
+    const next = '1'
 
-    const tokens = await controller.get(filter)
-    expect(Object.keys(tokens).length).toBe(1)
+    const result = await controller.get(size, next)
+    expect(Object.keys(result.data).length).toBe(1)
   })
 })
 
