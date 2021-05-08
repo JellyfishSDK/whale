@@ -72,10 +72,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup docker containers and wait
-        run: |
-          docker-compose -f __sanity__/docker-compose.yml up -d
-          ./__sanity__/wait-for.sh http://localhost:3000/_health/probes/liveness
+      - name: Setup docker containers
+        run: docker-compose -f __sanity__/docker-compose.yml up -d
+
+      - name: Wait for
+        run: ./__sanity__/wait-for http://localhost:3000/_health/probes/liveness -t 60
 
       - name: Sanity testing
         uses: matt-ball/newman-action@0659e9b8d056c0d03d94e1dbfce380512088b566
