@@ -40,6 +40,7 @@
   "devDependencies": {
     "@defichain/jellyfish-crypto": "next",
     "@defichain/testcontainers": "next",
+    "@defichain/testing": "next",
     "@nestjs/cli": "^7.6.0",
     "@nestjs/schematics": "^7.3.0",
     "@nestjs/testing": "^7.6.15",

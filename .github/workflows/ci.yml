@@ -48,6 +48,9 @@ jobs:
     needs: [ build, test, lint ]
     name: Docker Buildx
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [ linux/amd64, linux/arm64 ]
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -59,11 +62,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: false
-          platforms: |
-            linux/amd64
-            linux/arm64
-          tags: |
-            ghcr.io/defich/whale:latest
+          platforms: ${{ matrix.platform }}
+          tags: ghcr.io/defich/whale:latest
 
   docker-sanity:
     needs: [ build, test, lint ]
@@ -72,10 +72,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup docker containers and wait
-        run: |
-          docker-compose -f __sanity__/docker-compose.yml up -d
-          ./__sanity__/wait-for.sh http://localhost:3000/_health/probes/liveness
+      - name: Setup docker containers
+        run: docker-compose -f __sanity__/docker-compose.yml up -d
+
+      - name: Wait for
+        run: ./__sanity__/wait-for http://localhost:3000/_health/probes/liveness -t 6
 
       - name: Sanity testing
         uses: matt-ball/newman-action@0659e9b8d056c0d03d94e1dbfce380512088b566
