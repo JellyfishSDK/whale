@@ -23,7 +23,8 @@ async function createTestingModule (container: MasterNodeRegTestContainer): Prom
   const url = await container.getCachedRpcUrl()
 
   const builder = Test.createTestingModule({
-    imports: [AppModule]
+    // always default to memory module for e2e testing
+    imports: [AppModule.forRoot('memory')]
   })
 
   return await builder

@@ -32,11 +32,12 @@ issue:
       list:
         - core
         - workflow
-        - module-actor
         - module-api
         - module-database
         - module-defid
         - module-health
+        - module-indexer
+        - module-model
       multiple: true
       needs:
         comment: |

@@ -10,9 +10,14 @@
 /website/                                       @fuxingloh
 
 /src/                                           @fuxingloh
-/src/module-actor/                              @fuxingloh
-/src/module-api/                                @fuxingloh
-/src/module-database/                           @fuxingloh
+/src/module.api/                                @fuxingloh @canonbrother @jingyi2811
+/src/module.database/                           @fuxingloh
+/src/module.database/provider.level             @fuxingloh
+/src/module.database/provider.memory            @fuxingloh
+/src/module.defid/                              @fuxingloh
+/src/module.health/                             @fuxingloh
+/src/module.indexer/                            @fuxingloh
+/src/module.model/                              @fuxingloh
 
 lerna.json                                      @fuxingloh
 tsconfig.json                                   @fuxingloh
