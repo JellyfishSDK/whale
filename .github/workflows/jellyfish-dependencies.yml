@@ -25,7 +25,8 @@ jobs:
           @defichain/jellyfish-network \
           @defichain/jellyfish-json \
           @defichain/jellyfish-crypto \
-          @defichain/testcontainers
+          @defichain/testcontainers \
+          @defichain/testing
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@052fc72b4198ba9fbc81b818c6e1859f747d49a8
