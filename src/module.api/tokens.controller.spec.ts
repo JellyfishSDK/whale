@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { TokensController } from '@src/module.api/tokens.controller'
+import { TokensController, TokensFilter } from '@src/module.api/tokens.controller'
 import { ConfigModule } from '@nestjs/config'
 
 const container = new MasterNodeRegTestContainer()
@@ -45,7 +45,7 @@ async function createToken (symbol: string): Promise<void> {
   await container.generate(1)
 }
 
-describe('controller.get() for all tokens', () => {
+describe('controller.get() for all coin and tokens', () => {
   beforeAll(async () => {
     await createToken('DSWAP')
   })
@@ -88,60 +88,32 @@ describe('controller.get() for all tokens', () => {
     })
   })
 
-  it('should listTokens with pagination and return an empty object as out of range', async () => {
-    const pagination = {
-      start: 300,
-      including_start: true,
-      limit: 100
-    }
-    const tokens = await controller.get(pagination)
+  it('should listTokens with start 300, limit 100 and return an empty object as out of range', async () => {
+    const filter = new TokensFilter()
+    filter.start = '300'
+    filter.limit = '100'
+
+    const tokens = await controller.get(filter)
     expect(Object.keys(tokens).length).toBe(0)
   })
 
-  it('should listTokens with pagination limit', async () => {
-    const pagination = {
-      start: 0,
-      including_start: true,
-      limit: 2
-    }
-    const tokens = await controller.get(pagination)
+  it('should listTokens with start 0 limit 2', async () => {
+    const filter = new TokensFilter()
+    filter.start = '0'
+    filter.limit = '2'
+
+    const tokens = await controller.get(filter)
 
     expect(Object.keys(tokens).length).toBe(2)
   })
 
   it('should listTokens with start 1', async () => {
-    const pagination = {
-      start: 1,
-      including_start: true,
-      limit: 2
-    }
-    const tokens = await controller.get(pagination)
+    const filter = new TokensFilter()
+    filter.start = '1'
+    filter.limit = '2'
+
+    const tokens = await controller.get(filter)
     expect(Object.keys(tokens).length).toBe(1)
-  })
-
-  it('should listTokens with including_start false', async () => {
-    const pagination = {
-      start: 0,
-      including_start: false,
-      limit: 2
-    }
-    const tokens = await controller.get(pagination)
-    expect(Object.keys(tokens).length).toBe(1)
-  })
-
-  it('should listTokens with verbose false', async () => {
-    const pagination = {
-      start: 0,
-      including_start: true,
-      limit: 100
-    }
-
-    const tokens = await controller.get(pagination, false)
-    const data = tokens[0]
-
-    expect(data.symbol).toBe('DFI')
-    expect(data.symbol_key).toBe('DFI')
-    expect(data.name).toBe('Default Defi token')
   })
 })
 
