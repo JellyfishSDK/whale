@@ -5,7 +5,7 @@ import { BadRequestException, Controller, Get, Param, Query, UseGuards, UseInter
 import { IsOptional, IsBooleanString, validate } from 'class-validator'
 import { ExceptionInterceptor } from './commons/exception.interceptor'
 import { NetworkGuard } from './commons/network.guard'
-import { TransformInterceptor } from './commons/transform.interceptor'
+import { ResponseInterceptor } from './commons/response.interceptor'
 import { IsPositiveNumberString } from './custom.validations'
 import { plainToClass } from 'class-transformer'
 
@@ -33,20 +33,20 @@ class PoolPairsQuery {
 
 export class PoolPairsFilter {
   @IsOptional()
-  pagination?: PoolPairPagination
+  pagination?: poolpair.PoolPairPagination
 
   @IsOptional()
   verbose?: boolean
 
   @IsOptional()
-  options?: PoolPairsOptions
+  options?: poolpair.PoolShareOptions
 }
 
 export class PoolPairsQueryPipe implements PipeTransform {
   async transform (value: any, metadata: ArgumentMetadata): Promise<PoolPairsFilter> {
     await this.validate(value)
 
-    const pagination: PoolPairPagination = {
+    const pagination: poolpair.PoolPairPagination = {
       start: Number(value.start) ?? 0,
       including_start: value.including_start ?? true,
       limit: Number(value.limit) ?? 100.0
@@ -54,7 +54,7 @@ export class PoolPairsQueryPipe implements PipeTransform {
 
     const verbose = value.verbose?.toLowerCase() !== 'false'
 
-    const options: PoolPairsOptions = {
+    const options: poolpair.PoolShareOptions = {
       isMineOnly: value.isMineOnly?.toLowerCase() !== 'false'
     }
 
@@ -92,7 +92,7 @@ export class PoolPairsQueryPipe implements PipeTransform {
 
 @Controller('/v1/:network/poolpairs')
 @UseGuards(NetworkGuard)
-@UseInterceptors(TransformInterceptor, ExceptionInterceptor)
+@UseInterceptors(ResponseInterceptor, ExceptionInterceptor)
 export class PoolPairsController {
   constructor (private readonly client: JsonRpcClient) {
   }
@@ -199,7 +199,7 @@ function toPoolSharesDto (poolSharesResult: PoolSharesResult): PoolShareInfoDto[
   const result: PoolShareInfoDto[] = []
 
   for (const k in poolSharesResult) {
-    const poolShareInfo = poolSharesResult[k] as PoolShareInfo
+    const poolShareInfo = poolSharesResult[k] as poolpair.PoolShareInfo
     result.push(toPoolShareDto(poolShareInfo))
   }
 
@@ -212,7 +212,7 @@ function toPoolSharesDto (poolSharesResult: PoolSharesResult): PoolShareInfoDto[
  * @param {PoolShareInfo} poolShareInfo
  * @returns {PoolShareInfoDto}
  */
-function toPoolShareDto (poolShareInfo: PoolShareInfo): PoolShareInfoDto {
+function toPoolShareDto (poolShareInfo: poolpair.PoolShareInfo): PoolShareInfoDto {
   const data: PoolShareInfoDto = {
     pool_id: poolShareInfo.poolID,
     owner: poolShareInfo.owner,
@@ -251,15 +251,7 @@ export interface PoolPairInfoDto {
 }
 
 export interface PoolSharesResult {
-  [id: string]: PoolShareInfo | PoolShareInfoDto
-}
-
-export interface PoolShareInfo {
-  poolID: string
-  owner: string
-  '%': BigNumber
-  amount: BigNumber
-  totalLiquidity: BigNumber
+  [id: string]: poolpair.PoolShareInfo | PoolShareInfoDto
 }
 
 export interface PoolShareInfoDto {
@@ -268,14 +260,4 @@ export interface PoolShareInfoDto {
   percent: BigNumber
   amount: BigNumber
   total_liquidity: BigNumber
-}
-
-export interface PoolPairPagination {
-  start: number
-  including_start: boolean
-  limit: number
-}
-
-export interface PoolPairsOptions {
-  isMineOnly?: boolean
 }
