@@ -43,3 +43,4 @@ jobs:
             #### What this PR does / why we need it:
             Bump `@defichain/*` dependencies to the newest release.
           branch: defichain-bot/bump-deps
+          draft: true
