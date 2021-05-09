@@ -1,7 +1,7 @@
 import { registerDecorator, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator'
 
 @ValidatorConstraint({ async: false })
-export class IsPositiveNumberStringContraint implements ValidatorConstraintInterface {
+export class IsPositiveNumberStringConstraint implements ValidatorConstraintInterface {
   validate (value: any, args: ValidationArguments): boolean {
     if (!isNaN(value) && Number(value) >= 0) {
       return true
@@ -21,7 +21,7 @@ export function IsPositiveNumberString (validationOptions?: ValidationOptions) {
       propertyName: propertyName,
       options: validationOptions,
       constraints: [],
-      validator: IsPositiveNumberStringContraint
+      validator: IsPositiveNumberStringConstraint
     })
   }
 }

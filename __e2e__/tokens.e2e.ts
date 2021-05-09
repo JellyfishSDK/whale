@@ -19,14 +19,10 @@ afterAll(async () => {
 })
 
 describe('GET: /v1/regtest/tokens', () => {
-  it('should return coins and tokens with pagination limit', async () => {
+  it('should return all tokens', async () => {
     const res = await app.inject({
       method: 'GET',
-      url: 'v1/regtest/tokens',
-      query: {
-        size: '2',
-        next: '0'
-      }
+      url: 'v1/regtest/tokens'
     })
 
     expect(res.statusCode).toBe(200)
@@ -36,15 +32,6 @@ describe('GET: /v1/regtest/tokens', () => {
 
     for (const k in result) {
       const data = result[k]
-      expect(data.decimal).toBe(8)
-      expect(data.limit).toBe(0)
-      expect(data.minted).toBe(0)
-      expect(data.is_lps).toBe(false)
-      expect(typeof data.creation_tx).toBe('string')
-      expect(typeof data.creation_height).toBe('number')
-      expect(typeof data.destruction_tx).toBe('string')
-      expect(typeof data.destruction_height).toBe('number')
-      expect(typeof data.collateral_address).toBe('string')
 
       switch (data.symbol) {
         case 'DFI':
@@ -87,7 +74,7 @@ describe('GET: /v1/regtest/tokens', () => {
     }
   })
 
-  it('should return coins and tokens without pagination limit', async () => {
+  it('should return tokens with size 2 next 0', async () => {
     const res = await app.inject({
       method: 'GET',
       url: 'v1/regtest/tokens',
@@ -98,29 +85,12 @@ describe('GET: /v1/regtest/tokens', () => {
     })
 
     expect(res.statusCode).toBe(200)
-    const result = res.json().data
+    const data = res.json().data
 
-    expect(result.length).toBe(2)
-
-    for (const k in result) {
-      const data = result[k]
-
-      switch (data.symbol) {
-        case 'DFI':
-          expect(data.symbol).toBe('DFI')
-          expect(data.symbol_key).toBe('DFI')
-          expect(data.name).toBe('Default Defi token')
-          break
-        case 'DSWAP':
-          expect(data.symbol).toBe('DSWAP')
-          expect(data.symbol_key).toBe('DSWAP')
-          expect(data.name).toBe('DSWAP')
-          break
-      }
-    }
+    expect(data.length).toBe(2)
   })
 
-  it('should return an empty object if out of range', async () => {
+  it('should return an empty object if size 100 next 300 which is out of range', async () => {
     const res = await app.inject({
       method: 'GET',
       url: 'v1/regtest/tokens',
@@ -149,9 +119,7 @@ describe('GET: /v1/regtest/tokens', () => {
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
       error: 'Bad Request',
-      message: [
-        'size must be a positive number string'
-      ],
+      message: ['size must be a positive number string'],
       statusCode: 400
     })
   })
@@ -161,7 +129,7 @@ describe('GET: /v1/regtest/tokens', () => {
       method: 'GET',
       url: 'v1/regtest/tokens',
       query: {
-        size: '1',
+        size: '0',
         next: '-2'
       }
     })
@@ -169,9 +137,7 @@ describe('GET: /v1/regtest/tokens', () => {
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
       error: 'Bad Request',
-      message: [
-        'next must be a positive number string'
-      ],
+      message: ['next must be a positive number string'],
       statusCode: 400
     })
   })
@@ -236,7 +202,7 @@ describe('GET: /v1/regtest/tokens/:id for newly created token', () => {
 })
 
 describe('GET: /v1/regtest/tokens/:id for malformed id', () => {
-  it('should return 400 if id is malformed', async () => {
+  it('should fail due to id is malformed', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/v1/regtest/tokens/$*@'

@@ -1,92 +1,69 @@
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { BadRequestException, Controller, Get, Query, PipeTransform, ArgumentMetadata, UseGuards, UseInterceptors, Param } from '@nestjs/common'
-import { ExceptionInterceptor } from './commons/exception.interceptor'
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Query,
+  PipeTransform,
+  ArgumentMetadata,
+  UseGuards,
+  UseInterceptors,
+  Param
+} from '@nestjs/common'
 import { NetworkGuard } from './commons/network.guard'
 import { ResponseInterceptor } from './commons/response.interceptor'
+import { ExceptionInterceptor } from './commons/exception.interceptor'
 import { TokenInfo, TokenPagination } from '@defichain/jellyfish-api-core/dist/category/token'
-import { IsOptional, validate } from 'class-validator'
+import { validate } from 'class-validator'
 import { IsPositiveNumberString } from './custom.validations'
 import { plainToClass } from 'class-transformer'
 import { SliceResponse } from '@src/module.api/commons/slice.response'
 
 class TokenSizeQuery {
-  @IsOptional()
   @IsPositiveNumberString()
   size?: string
 }
 
 class TokenNextQuery {
-  @IsOptional()
   @IsPositiveNumberString()
   next?: string
 }
 
-export class TokensFilter {
-  @IsOptional()
-  size?: string
-
-  @IsOptional()
-  next?: string
-}
-
-export class TokensSizePipe implements PipeTransform {
+class TokenSizePipe implements PipeTransform {
   async transform (value: any, metadata: ArgumentMetadata): Promise<string> {
-    await this.validate(value)
-    return value.size ?? '0'
-  }
-
-  async validate (value: any): Promise<void> {
-    const tokenSizeQuery = plainToClass(TokenSizeQuery, value)
-    const errors = await validate(tokenSizeQuery)
-
-    if (errors.length > 0) {
-      const errorConstraints = errors.map(error => error.constraints)
-      const errorMessages = this.constructErrorMessages(errorConstraints)
-      throw new BadRequestException(errorMessages)
-    }
-  }
-
-  constructErrorMessages (errorConstraints: any): string[] {
-    const errorMessages: string[] = []
-    for (let i = 0; i < errorConstraints.length; i += 1) {
-      const constraint = errorConstraints[i]
-      if (constraint !== undefined) {
-        const errorMessage = Object.values(constraint)[0] as string
-        errorMessages.push(errorMessage)
-      }
-    }
-    return errorMessages
+    await validatePipe(TokenSizeQuery, value)
+    return value.size
   }
 }
 
-export class TokensNextPipe implements PipeTransform {
+class TokenNextPipe implements PipeTransform {
   async transform (value: any, metadata: ArgumentMetadata): Promise<string> {
-    await this.validate(value)
-    return value.next ?? '0'
+    await validatePipe(TokenNextQuery, value)
+    return value.next
   }
+}
 
-  async validate (value: any): Promise<void> {
-    const tokenNextQuery = plainToClass(TokenNextQuery, value)
-    const errors = await validate(tokenNextQuery)
+async function validatePipe (cls: any, value: any): Promise<void> {
+  const tokenNextQuery = plainToClass(cls, value)
+  const errors = await validate(tokenNextQuery)
 
-    if (errors.length > 0) {
-      const errorConstraints = errors.map(error => error.constraints)
-      const errorMessages = this.constructErrorMessages(errorConstraints)
-      throw new BadRequestException(errorMessages)
+  if (errors.length > 0) {
+    const errorConstraints = errors.map(error => error.constraints)
+    const errorMessages = constructErrorMessages(errorConstraints)
+    throw new BadRequestException(errorMessages)
+  }
+}
+
+function constructErrorMessages (errorConstraints: any): string[] {
+  const errorMessages: string[] = []
+  for (let i = 0; i < errorConstraints.length; i += 1) {
+    const constraint = errorConstraints[i]
+    if (constraint !== undefined) {
+      const errorMessage = Object.values(constraint)[0] as string
+      errorMessages.push(errorMessage)
     }
   }
-
-  constructErrorMessages (errorConstraints: any): string[] {
-    const errorMessages: string[] = []
-    for (let i = 0; i < errorConstraints.length; i += 1) {
-      const constraint = errorConstraints[i]
-      if (constraint !== undefined) {
-        const errorMessage = Object.values(constraint)[0] as string
-        errorMessages.push(errorMessage)
-      }
-    }
-    return errorMessages
-  }
+  return errorMessages
 }
 
 @Controller('/v1/:network/tokens')
@@ -99,37 +76,36 @@ export class TokensController {
   /**
    * Returns information about token.
    *
-   * @return {Promise<TokenInfoDto[]>}
+   * @param {number} size Maximum number of tokens to return.
+   * @param {number} next first key to iterate from, in lexicographical order.
+   * @return {Promise<SliceResponse<TokenInfoDto>>}
    */
-
   @Get('/')
   async get (
-    @Query(new TokensSizePipe()) size?: number,
-      @Query(new TokensNextPipe()) next?: string
+    @Query(new TokenSizePipe()) size = 1000000000,
+    @Query(new TokenNextPipe()) next = 1
   ): Promise<SliceResponse<TokenInfoDto>> {
-    const hid = await this.client.token.listTokens()
-    const items = await this.query(hid, size, next)
-    return SliceResponse.of(items, size ?? 100, item => {
-      return item.symbol_key
-    })
-  }
+    try {
+      const pagination: TokenPagination = {
+        start: next,
+        including_start: true,
+        limit: size
+      }
 
-  async query (hid: any, size?: number, next?: string): Promise<TokenInfoDto[]> {
-    const pagination: TokenPagination = {
-      start: Number(next) ?? 0,
-      including_start: true,
-      limit: Number(size) ?? 100
+      const data = await this.client.token.listTokens(pagination, true)
+
+      const tokenInfoDtos: TokenInfoDto[] = []
+
+      for (const key of Object.keys(data)) {
+        tokenInfoDtos.push(toTokenInfoDTO(data[key]))
+      }
+
+      return SliceResponse.of(tokenInfoDtos, size, item => {
+        return item.symbol_key
+      })
+    } catch (e) {
+      throw new BadRequestException(e.payload.message)
     }
-
-    const tokenInfoDtos: TokenInfoDto[] = []
-
-    const results = await this.client.token.listTokens(pagination, true)
-
-    for (const key of Object.keys(results)) {
-      tokenInfoDtos.push(toTokenInfoDTO(results[key]))
-    }
-
-    return tokenInfoDtos
   }
 
   /**
@@ -141,31 +117,12 @@ export class TokensController {
   @Get('/:id')
   async getId (@Param('id') id: string): Promise<TokenInfoDto> {
     try {
-      const result = await this.client.token.getToken(id)
-      return toTokenInfoDTO(result[Object.keys(result)[0]])
+      const data = await this.client.token.getToken(id)
+      return toTokenInfoDTO(data[Object.keys(data)[0]])
     } catch (e) {
       throw new BadRequestException(e.payload.message)
     }
   }
-}
-
-export interface TokenInfoDto {
-  symbol: string
-  symbol_key: string
-  name: string
-  decimal: number
-  limit: number
-  mintable: boolean
-  tradeable: boolean
-  is_dat: boolean
-  is_lps: boolean
-  finalized: boolean
-  minted: number
-  creation_tx: string
-  creation_height: number
-  destruction_tx: string
-  destruction_height: number
-  collateral_address: string
 }
 
 /**
@@ -193,4 +150,23 @@ function toTokenInfoDTO (tokenInfo: TokenInfo): TokenInfoDto {
     destruction_height: tokenInfo.destructionHeight,
     collateral_address: tokenInfo.collateralAddress
   }
+}
+
+export interface TokenInfoDto {
+  symbol: string
+  symbol_key: string
+  name: string
+  decimal: number
+  limit: number
+  mintable: boolean
+  tradeable: boolean
+  is_dat: boolean
+  is_lps: boolean
+  finalized: boolean
+  minted: number
+  creation_tx: string
+  creation_height: number
+  destruction_tx: string
+  destruction_height: number
+  collateral_address: string
 }
