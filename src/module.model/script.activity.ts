@@ -42,6 +42,7 @@ export class ScriptActivityMapper {
   }
 
   static typeAsHex (type: ScriptActivityType): ScriptActivityTypeHex {
+    // TODO(fuxingloh): not a good design, need to deprecate this
     switch (type) {
       case 'vin':
         return ScriptActivityTypeHex.VIN

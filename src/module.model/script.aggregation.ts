@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Model, ModelMapping } from '@src/module.database/model'
 import { Database, SortOrder } from '@src/module.database/database'
+import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 const ScriptAggregationMapping: ModelMapping<ScriptAggregation> = {
   type: 'script_aggregation',
@@ -40,6 +41,10 @@ export class ScriptAggregationMapper {
       order: SortOrder.DESC,
       lt: lt
     })
+  }
+
+  async get (hid: string, height: number): Promise<ScriptAggregation | undefined> {
+    return await this.database.get(ScriptAggregationMapping, HexEncoder.encodeHeight(height) + hid)
   }
 
   async put (aggregation: ScriptAggregation): Promise<void> {
