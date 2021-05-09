@@ -80,24 +80,24 @@ describe('controller.get() for all tokens', () => {
   })
 
   it('should listTokens with an empty object if size 100 next 300 which is out of range', async () => {
-    const size = 100
-    const next = 300
+    const size = '100'
+    const next = '300'
 
     const result = await controller.get(size, next)
     expect(Object.keys(result.data).length).toBe(0)
   })
 
   it('should listTokens with size 2 next 0', async () => {
-    const size = 2
-    const next = 0
+    const size = '2'
+    const next = '0'
 
     const result = await controller.get(size, next)
     expect(Object.keys(result.data).length).toBe(2)
   })
 
   it('should listTokens with size 1 next 1', async () => {
-    const size = 1
-    const next = 1
+    const size = '1'
+    const next = '1'
 
     const result = await controller.get(size, next)
     expect(Object.keys(result.data).length).toBe(1)
