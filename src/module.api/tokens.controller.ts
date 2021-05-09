@@ -14,17 +14,19 @@ import { NetworkGuard } from './commons/network.guard'
 import { ResponseInterceptor } from './commons/response.interceptor'
 import { ExceptionInterceptor } from './commons/exception.interceptor'
 import { TokenInfo, TokenPagination } from '@defichain/jellyfish-api-core/dist/category/token'
-import { validate } from 'class-validator'
+import { IsOptional, validate } from 'class-validator'
 import { IsPositiveNumberString } from './custom.validations'
 import { plainToClass } from 'class-transformer'
 import { SliceResponse } from '@src/module.api/commons/slice.response'
 
 class TokenSizeQuery {
+  @IsOptional()
   @IsPositiveNumberString()
   size?: string
 }
 
 class TokenNextQuery {
+  @IsOptional()
   @IsPositiveNumberString()
   next?: string
 }
@@ -82,14 +84,17 @@ export class TokensController {
    */
   @Get('/')
   async get (
-    @Query(new TokenSizePipe()) size = 1000000000,
-    @Query(new TokenNextPipe()) next = 1
+    @Query(new TokenSizePipe()) size = '1000000000',
+    @Query(new TokenNextPipe()) next = '0'
   ): Promise<SliceResponse<TokenInfoDto>> {
+    const start = Number(next)
+    const limit = Number(size)
+
     try {
       const pagination: TokenPagination = {
-        start: next,
+        start,
         including_start: true,
-        limit: size
+        limit
       }
 
       const data = await this.client.token.listTokens(pagination, true)
@@ -100,7 +105,7 @@ export class TokensController {
         tokenInfoDtos.push(toTokenInfoDTO(data[key]))
       }
 
-      return SliceResponse.of(tokenInfoDtos, size, item => {
+      return SliceResponse.of(tokenInfoDtos, limit, item => {
         return item.symbol_key
       })
     } catch (e) {
