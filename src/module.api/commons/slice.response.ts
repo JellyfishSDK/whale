@@ -1,4 +1,4 @@
-import { Response } from '@src/module.api/interceptors'
+import { Response } from '@src/module.api/commons/response.interceptor'
 
 /**
  * SliceResponse, implements Response interface from response.interceptor.
