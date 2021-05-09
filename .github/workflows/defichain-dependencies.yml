@@ -1,4 +1,4 @@
-name: Jellyfish Dependencies
+name: Defichain Dependencies
 
 on:
   repository_dispatch:
@@ -33,13 +33,13 @@ jobs:
         with:
           token: ${{ secrets.DEFICHAIN_BOT_GITHUB_TOKEN }}
           labels: kind/dependencies
-          commit-message: Bump jellyfish dependencies
+          commit-message: Bump defichain dependencies
           committer: DeFiChain Bot <github-bot@defichain.com>
           author: DeFiChain Bot <github-bot@defichain.com>
-          title: Bump jellyfish dependencies
+          title: Bump defichain dependencies
           body: |
             #### What kind of PR is this?:
             /kind dependencies
             #### What this PR does / why we need it:
-            Bump jellyfish dependencies to the newest @next release.
-          branch: jellyfish-dependencies/bump
+            Bump `@defichain/*` dependencies to the newest release.
+          branch: defichain-bot/bump-deps
