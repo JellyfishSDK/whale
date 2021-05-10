@@ -101,8 +101,8 @@ export class NestJSApiException extends ApiException {
     super({
       code: NestJSApiException.mapCode(exception),
       type: NestJSApiException.mapType(exception),
-      message: exception.message,
-      at: Date.now()
+      at: Date.now(),
+      message: exception.message
     })
   }
 
