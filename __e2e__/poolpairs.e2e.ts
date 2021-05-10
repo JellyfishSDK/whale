@@ -116,11 +116,11 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
 
     for (let i = 0; i < poolShares.length; i += 1) {
       const data = poolShares[i]
-      expect(typeof data.pool_id).toBe('string')
+      expect(typeof data.poolID).toBe('string')
       expect(typeof data.owner).toBe('string')
       expect(typeof data.percent).toBe('number')
       expect(typeof data.amount).toBe('number')
-      expect(typeof data.total_liquidity).toBe('number')
+      expect(typeof data.totalLiquidity).toBe('number')
     }
   })
 
@@ -175,7 +175,7 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
 
     for (let i = 0; i < poolShares.length; i += 1) {
       const data = poolShares[i]
-      expect(typeof data.pool_id).toBe('string')
+      expect(typeof data.poolID).toBe('string')
       expect(typeof data.owner).toBe('string')
       expect(typeof data.percent).toBe('number')
     }
@@ -199,11 +199,11 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
 
     for (let i = 0; i < poolShares.length; i += 1) {
       const data = poolShares[i]
-      expect(typeof data.pool_id).toBe('string')
+      expect(typeof data.poolID).toBe('string')
       expect(typeof data.owner).toBe('string')
       expect(typeof data.percent).toBe('number')
       expect(typeof data.amount).toBe('number')
-      expect(typeof data.total_liquidity).toBe('number')
+      expect(typeof data.totalLiquidity).toBe('number')
     }
   })
 })
@@ -275,26 +275,26 @@ describe('GET: /v1/regtest/poolpairs', () => {
       }
 
       expect(typeof poolpair.id).toBe('string')
-      expect(typeof poolpair.total_liquidity).toBe('number')
-      expect(typeof poolpair.owner_address).toBe('string')
-      expect(typeof poolpair.id_token_a).toBe('string')
-      expect(typeof poolpair.id_token_b).toBe('string')
-      expect(typeof poolpair.reserve_a).toBe('number')
-      expect(typeof poolpair.reserve_b).toBe('number')
+      expect(typeof poolpair.totalLiquidity).toBe('number')
+      expect(typeof poolpair.ownerAddress).toBe('string')
+      expect(typeof poolpair.idTokenA).toBe('string')
+      expect(typeof poolpair.idTokenB).toBe('string')
+      expect(typeof poolpair.reserveA).toBe('number')
+      expect(typeof poolpair.reserveB).toBe('number')
 
-      if (typeof poolpair.reserve_a_reserve_b === 'number' && typeof poolpair.reserve_b_reserve_a === 'number') {
-        expect(poolpair.trade_enabled).toBe(true)
+      if (typeof poolpair['reserveA/reserveB'] === 'number' && typeof poolpair['reserveB/reserveA'] === 'number') {
+        expect(poolpair.tradeEnabled).toBe(true)
       } else {
-        expect(poolpair.reserve_a_reserve_b).toBe('0')
-        expect(poolpair.reserve_b_reserve_a).toBe('0')
-        expect(poolpair.trade_enabled).toBe(false)
+        expect(poolpair['reserveA/reserveB']).toBe('0')
+        expect(poolpair['reserveB/reserveA']).toBe('0')
+        expect(poolpair.tradeEnabled).toBe(false)
       }
 
-      expect(typeof poolpair.block_commission_a).toBe('number')
-      expect(typeof poolpair.block_commission_b).toBe('number')
-      expect(typeof poolpair.reward_pct).toBe('number')
-      expect(typeof poolpair.creation_height).toBe('number')
-      expect(typeof poolpair.creation_tx).toBe('string')
+      expect(typeof poolpair.blockCommissionA).toBe('number')
+      expect(typeof poolpair.blockCommissionB).toBe('number')
+      expect(typeof poolpair.rewardPct).toBe('number')
+      expect(typeof poolpair.creationHeight).toBe('number')
+      expect(typeof poolpair.creationTx).toBe('string')
     }
 
     expect(assertions).toBe(3)
@@ -366,8 +366,8 @@ describe('GET: /v1/regtest/poolpairs', () => {
       expect(typeof poolpair.symbol).toBe('string')
       expect(typeof poolpair.name).toBe('string')
       expect(typeof poolpair.status).toBe('boolean')
-      expect(typeof poolpair.id_token_a).toBe('string')
-      expect(typeof poolpair.id_token_b).toBe('string')
+      expect(typeof poolpair.idTokenA).toBe('string')
+      expect(typeof poolpair.idTokenB).toBe('string')
     }
   })
 })
@@ -390,18 +390,18 @@ describe('GET: /v1/regtest/poolpairs/:symbol', () => {
     expect(data.symbol).toBe('DFI-DBCH')
     expect(data.name).toBe('Default Defi token-DBCH')
     expect(data.status).toBe(true)
-    expect(typeof data.id_token_a).toBe('string')
-    expect(typeof data.id_token_b).toBe('string')
-    expect(typeof data.reserve_a).toBe('number')
-    expect(typeof data.reserve_b).toBe('number')
-    expect(typeof data.reserve_a_reserve_b).toBe('string')
-    expect(typeof data.reserve_b_reserve_a).toBe('string')
-    expect(data.trade_enabled).toBe(false)
-    expect(typeof data.block_commission_a).toBe('number')
-    expect(typeof data.block_commission_b).toBe('number')
-    expect(typeof data.reward_pct).toBe('number')
-    expect(typeof data.creation_tx).toBe('string')
-    expect(typeof data.creation_height).toBe('number')
+    expect(typeof data.idTokenA).toBe('string')
+    expect(typeof data.idTokenB).toBe('string')
+    expect(typeof data.reserveA).toBe('number')
+    expect(typeof data.reserveB).toBe('number')
+    expect(typeof data['reserveA/reserveB']).toBe('string')
+    expect(typeof data['reserveB/reserveA']).toBe('string')
+    expect(data.tradeEnabled).toBe(false)
+    expect(typeof data.blockCommissionA).toBe('number')
+    expect(typeof data.blockCommissionB).toBe('number')
+    expect(typeof data.rewardPct).toBe('number')
+    expect(typeof data.creationTx).toBe('string')
+    expect(typeof data.creationHeight).toBe('number')
   })
 
   it('should getPoolPair with verbose false', async () => {
@@ -419,8 +419,8 @@ describe('GET: /v1/regtest/poolpairs/:symbol', () => {
     expect(data.symbol).toBe('DFI-DBCH')
     expect(data.name).toBe('Default Defi token-DBCH')
     expect(data.status).toBe(true)
-    expect(typeof data.id_token_a).toBe('string')
-    expect(typeof data.id_token_b).toBe('string')
+    expect(typeof data.idTokenA).toBe('string')
+    expect(typeof data.idTokenB).toBe('string')
   })
 
   it('should throw BadRequestException due to getting non-existent pair', async () => {

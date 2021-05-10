@@ -169,22 +169,22 @@ function toPoolPairDto (poolPairInfo: poolpair.PoolPairInfo, id: string): PoolPa
     symbol: poolPairInfo.symbol,
     name: poolPairInfo.name,
     status: poolPairInfo.status,
-    id_token_a: poolPairInfo.idTokenA,
-    id_token_b: poolPairInfo.idTokenB,
-    reserve_a: poolPairInfo.reserveA,
-    reserve_b: poolPairInfo.reserveB,
+    idTokenA: poolPairInfo.idTokenA,
+    idTokenB: poolPairInfo.idTokenB,
+    reserveA: poolPairInfo.reserveA,
+    reserveB: poolPairInfo.reserveB,
     commission: poolPairInfo.commission,
-    total_liquidity: poolPairInfo.totalLiquidity,
-    reserve_a_reserve_b: poolPairInfo['reserveA/reserveB'],
-    reserve_b_reserve_a: poolPairInfo['reserveB/reserveA'],
-    trade_enabled: poolPairInfo.tradeEnabled,
-    owner_address: poolPairInfo.ownerAddress,
-    block_commission_a: poolPairInfo.blockCommissionA,
-    block_commission_b: poolPairInfo.blockCommissionB,
-    reward_pct: poolPairInfo.rewardPct,
-    custom_rewards: poolPairInfo.customRewards,
-    creation_tx: poolPairInfo.creationTx,
-    creation_height: poolPairInfo.creationHeight
+    totalLiquidity: poolPairInfo.totalLiquidity,
+    'reserveA/reserveB': poolPairInfo['reserveA/reserveB'],
+    'reserveB/reserveA': poolPairInfo['reserveB/reserveA'],
+    tradeEnabled: poolPairInfo.tradeEnabled,
+    ownerAddress: poolPairInfo.ownerAddress,
+    blockCommissionA: poolPairInfo.blockCommissionA,
+    blockCommissionB: poolPairInfo.blockCommissionB,
+    rewardPct: poolPairInfo.rewardPct,
+    customRewards: poolPairInfo.customRewards,
+    creationTx: poolPairInfo.creationTx,
+    creationHeight: poolPairInfo.creationHeight
   }
   return data
 }
@@ -214,11 +214,11 @@ function toPoolSharesDto (poolSharesResult: PoolSharesResult): PoolShareInfoDto[
  */
 function toPoolShareDto (poolShareInfo: poolpair.PoolShareInfo): PoolShareInfoDto {
   const data: PoolShareInfoDto = {
-    pool_id: poolShareInfo.poolID,
+    poolID: poolShareInfo.poolID,
     owner: poolShareInfo.owner,
     percent: poolShareInfo['%'],
     amount: poolShareInfo.amount,
-    total_liquidity: poolShareInfo.totalLiquidity
+    totalLiquidity: poolShareInfo.totalLiquidity
   }
   return data
 }
@@ -232,22 +232,22 @@ export interface PoolPairInfoDto {
   symbol: string
   name: string
   status: string
-  id_token_a: string
-  id_token_b: string
-  reserve_a: BigNumber
-  reserve_b: BigNumber
+  idTokenA: string
+  idTokenB: string
+  reserveA: BigNumber
+  reserveB: BigNumber
   commission: BigNumber
-  total_liquidity: BigNumber
-  reserve_a_reserve_b: BigNumber | string
-  reserve_b_reserve_a: BigNumber | string
-  trade_enabled: boolean
-  owner_address: string
-  block_commission_a: BigNumber
-  block_commission_b: BigNumber
-  reward_pct: BigNumber
-  custom_rewards: BigNumber
-  creation_tx: string
-  creation_height: BigNumber
+  totalLiquidity: BigNumber
+  'reserveA/reserveB': BigNumber | string
+  'reserveB/reserveA': BigNumber | string
+  tradeEnabled: boolean
+  ownerAddress: string
+  blockCommissionA: BigNumber
+  blockCommissionB: BigNumber
+  rewardPct: BigNumber
+  customRewards: BigNumber
+  creationTx: string
+  creationHeight: BigNumber
 }
 
 export interface PoolSharesResult {
@@ -255,9 +255,9 @@ export interface PoolSharesResult {
 }
 
 export interface PoolShareInfoDto {
-  pool_id: string
+  poolID: string
   owner: string
   percent: BigNumber
   amount: BigNumber
-  total_liquidity: BigNumber
+  totalLiquidity: BigNumber
 }
