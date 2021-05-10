@@ -3,11 +3,11 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { ConfigModule } from '@nestjs/config'
 import { wallet } from '@defichain/jellyfish-api-core'
-import { BlockchainController } from '@src/module.api/blockchain.controller'
+import { MempoolController } from '@src/module.api/mempool.controller'
 
 const container = new MasterNodeRegTestContainer()
 let client: JsonRpcClient
-let controller: BlockchainController
+let controller: MempoolController
 
 beforeAll(async () => {
   await container.start()
@@ -25,11 +25,11 @@ beforeEach(async () => {
     imports: [ConfigModule.forRoot({
       load: [() => ({ network: 'regtest' })]
     })],
-    controllers: [BlockchainController],
+    controllers: [MempoolController],
     providers: [{ provide: JsonRpcClient, useValue: client }]
   }).compile()
 
-  controller = app.get<BlockchainController>(BlockchainController)
+  controller = app.get<MempoolController>(MempoolController)
 })
 
 describe('controller.getTransactions()', () => {

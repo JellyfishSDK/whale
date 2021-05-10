@@ -12,7 +12,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 @Controller('/v1/:network/mempool')
 @UseGuards(NetworkGuard)
 @UseInterceptors(ResponseInterceptor, ExceptionInterceptor)
-export class BlockchainController {
+export class MempoolController {
   constructor (private readonly client: JsonRpcClient) {
   }
 

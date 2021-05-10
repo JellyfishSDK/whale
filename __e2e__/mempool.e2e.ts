@@ -20,7 +20,7 @@ afterAll(async () => {
   await container.stop()
 })
 
-describe('GET: /v1/regtest/mempooltransactions', () => {
+describe('GET: /v1/regtest/mempool/transactions', () => {
   let transactionId: string
 
   beforeAll(async () => {
