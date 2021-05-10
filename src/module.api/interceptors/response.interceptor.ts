@@ -1,7 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common'
 import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
-import { SliceResponse } from '@src/module.api/commons/slice.response'
+import { SliceResponse } from '@src/module.api/interceptors/slice.response'
 
 /**
  * Universal response structure for 'module.api'

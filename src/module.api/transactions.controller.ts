@@ -9,9 +9,9 @@ import {
   ValidationPipe,
   UseFilters
 } from '@nestjs/common'
-import { NetworkGuard } from '@src/module.api/commons/network.guard'
-import { ExceptionInterceptor } from '@src/module.api/commons/exception.interceptor'
-import { ResponseInterceptor } from '@src/module.api/commons/response.interceptor'
+import { NetworkGuard } from '@src/module.api/guards/network.guard'
+import { ExceptionInterceptor } from '@src/module.api/interceptors/exception.interceptor'
+import { ResponseInterceptor } from '@src/module.api/interceptors/response.interceptor'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { IsHexadecimal, IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator'
 import { BadRequestError } from './commons/error.exception'

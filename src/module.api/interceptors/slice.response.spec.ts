@@ -1,4 +1,4 @@
-import { SliceResponse } from '@src/module.api/commons/slice.response'
+import { SliceResponse } from '@src/module.api/interceptors/slice.response'
 
 it('should create with SliceResponse.next', () => {
   const items = [{ id: '1', sort: 'a' }, { id: '2', sort: 'b' }]
