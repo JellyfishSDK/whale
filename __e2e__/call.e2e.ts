@@ -24,11 +24,13 @@ it('should 404 with invalid network', async () => {
 
   expect(res.statusCode).toBe(404)
   expect(res.json()).toEqual({
-    error: 'Not Found',
-    message: 'Network not found',
-    code: 404,
-    url: '/v1/mainnet/call/getblockchaininfo',
-    at: expect.any(String)
+    error: {
+      code: 404,
+      type: 'NotFound',
+      at: expect.any(Number),
+      message: 'Network not found',
+      url: '/v1/mainnet/call/getblockchaininfo'
+    }
   })
 })
 
@@ -40,11 +42,13 @@ it('should 403 with non whitelisted method', async () => {
 
   expect(res.statusCode).toBe(403)
   expect(res.json()).toEqual({
-    error: 'Forbidden',
-    message: 'RPC method not whitelisted',
-    code: 403,
-    url: '/v1/regtest/call/getbalance',
-    at: expect.any(String)
+    error: {
+      code: 403,
+      type: 'Forbidden',
+      message: 'RPC method not whitelisted',
+      at: expect.any(Number),
+      url: '/v1/regtest/call/getbalance'
+    }
   })
 })
 
@@ -61,11 +65,13 @@ it('should 400 with invalid post body params', async () => {
 
   expect(res.statusCode).toBe(400)
   expect(res.json()).toEqual({
-    error: 'Bad Request',
-    message: "RpcApiError: 'Unknown named parameter block', code: -8",
-    code: 400,
-    url: '/v1/regtest/call/getblock',
-    at: expect.any(String)
+    error: {
+      code: 400,
+      type: 'BadRequest',
+      message: "RpcApiError: 'Unknown named parameter block', code: -8",
+      at: expect.any(Number),
+      url: '/v1/regtest/call/getblock'
+    }
   })
 })
 

@@ -1,7 +1,13 @@
-import { BadRequestException, CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common'
+import { CallHandler, ExecutionContext, HttpException, Injectable, NestInterceptor } from '@nestjs/common'
 import { Observable, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
-import { ApiError } from '@defichain/jellyfish-api-core'
+import { ApiError as JellyfishApiError } from '@defichain/jellyfish-api-core'
+import {
+  ApiException,
+  BadRequestApiException,
+  NestJSApiException,
+  UnknownApiException
+} from '@src/module.api/interceptors/api.error'
 
 /**
  * Exception Interceptor to remap errors in module-api.
@@ -9,15 +15,26 @@ import { ApiError } from '@defichain/jellyfish-api-core'
 @Injectable()
 export class ExceptionInterceptor implements NestInterceptor {
   intercept (context: ExecutionContext, next: CallHandler): Observable<any> {
+    const url: string = context.switchToHttp().getRequest().raw?.url
+
     return next.handle().pipe(catchError(err => {
-      return throwError(this.handleError(err))
+      return throwError(this.map(err).withUrl(url))
     }))
   }
 
-  handleError (err: Error): Error {
-    if (err instanceof ApiError) {
-      return new BadRequestException(err.message)
+  map (err: Error): ApiException {
+    if (err instanceof ApiException) {
+      return err
     }
-    return err
+
+    if (err instanceof HttpException) {
+      return new NestJSApiException(err)
+    }
+
+    if (err instanceof JellyfishApiError) {
+      return new BadRequestApiException(err.message)
+    }
+
+    return new UnknownApiException()
   }
 }
