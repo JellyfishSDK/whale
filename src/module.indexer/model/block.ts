@@ -20,20 +20,20 @@ export class BlockIndexer extends Indexer {
     return {
       id: block.hash,
       hash: block.hash,
-      previous_hash: block.previousblockhash,
+      previousHash: block.previousblockhash,
       height: block.height,
       version: block.version,
       time: block.time,
-      median_time: block.mediantime,
-      transaction_count: block.tx.length,
+      medianTime: block.mediantime,
+      transactionCount: block.tx.length,
       difficulty: block.difficulty,
       masternode: block.masternode,
       minter: block.minter,
-      minter_block_count: block.mintedBlocks,
-      stake_modifier: block.stakeModifier,
+      minterBlockCount: block.mintedBlocks,
+      stakeModifier: block.stakeModifier,
       merkleroot: block.merkleroot,
       size: block.size,
-      size_stripped: block.strippedsize,
+      sizeStripped: block.strippedsize,
       weight: block.weight
     }
   }

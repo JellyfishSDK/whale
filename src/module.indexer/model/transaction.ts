@@ -31,11 +31,11 @@ export class TransactionIndexer extends Indexer {
       hash: txn.hash,
       version: txn.version,
       size: txn.size,
-      v_size: txn.vsize,
+      vSize: txn.vsize,
       weight: txn.weight,
-      lock_time: txn.locktime,
-      vin_count: txn.vin.length,
-      vout_count: txn.vout.length
+      lockTime: txn.locktime,
+      vinCount: txn.vin.length,
+      voutCount: txn.vout.length
     }
   }
 }

@@ -61,6 +61,6 @@ export interface ScriptUnspent extends Model {
     txid: string // ------------| txn that created this unspent
     n: number // ---------------| index number of this output within the transaction, if coinbase it will be 0
     value: string // -----------| output value stored as string, string as decimal: 0.0000
-    token_id?: number // -------| dct id, unused currently, optional before txn v4
+    tokenId?: number // --------| dct id, unused currently, optional before txn v4
   }
 }

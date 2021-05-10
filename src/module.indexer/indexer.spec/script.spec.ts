@@ -68,12 +68,12 @@ it('should wait for block height 1', async () => {
   expect(aggregation?.block.height).toBe(1)
   expect(aggregation?.script.hex).toBe(scriptHex)
 
-  expect(aggregation?.statistic.tx_count).toBe(2)
-  expect(aggregation?.statistic.tx_in_count).toBe(2)
-  expect(aggregation?.statistic.tx_out_count).toBe(0)
+  expect(aggregation?.statistic.txCount).toBe(2)
+  expect(aggregation?.statistic.txInCount).toBe(2)
+  expect(aggregation?.statistic.txOutCount).toBe(0)
 
-  expect(aggregation?.amount.tx_out).toBe('0.00000000')
-  expect(aggregation?.amount.tx_in).toBe('48.00000000')
+  expect(aggregation?.amount.txOut).toBe('0.00000000')
+  expect(aggregation?.amount.txIn).toBe('48.00000000')
   expect(aggregation?.amount.unspent).toBe('48.00000000')
 })
 
@@ -93,12 +93,12 @@ it('should wait for block height 2', async () => {
   expect(aggregation?.block.height).toBe(2)
   expect(aggregation?.script.hex).toBe(scriptHex)
 
-  expect(aggregation?.statistic.tx_count).toBe(1)
-  expect(aggregation?.statistic.tx_in_count).toBe(1)
-  expect(aggregation?.statistic.tx_out_count).toBe(0)
+  expect(aggregation?.statistic.txCount).toBe(1)
+  expect(aggregation?.statistic.txInCount).toBe(1)
+  expect(aggregation?.statistic.txOutCount).toBe(0)
 
-  expect(aggregation?.amount.tx_out).toBe('0.00000000')
-  expect(aggregation?.amount.tx_in).toBe('38.00000000')
+  expect(aggregation?.amount.txOut).toBe('0.00000000')
+  expect(aggregation?.amount.txIn).toBe('38.00000000')
   expect(aggregation?.amount.unspent).toBe('38.00000000')
 })
 
@@ -118,11 +118,11 @@ it('should wait for block height 3', async () => {
   expect(aggregation?.block.height).toBe(3)
   expect(aggregation?.script.hex).toBe(scriptHex)
 
-  expect(aggregation?.statistic.tx_count).toBe(2)
-  expect(aggregation?.statistic.tx_in_count).toBe(2)
-  expect(aggregation?.statistic.tx_out_count).toBe(0)
+  expect(aggregation?.statistic.txCount).toBe(2)
+  expect(aggregation?.statistic.txInCount).toBe(2)
+  expect(aggregation?.statistic.txOutCount).toBe(0)
 
-  expect(aggregation?.amount.tx_out).toBe('0.00000000')
-  expect(aggregation?.amount.tx_in).toBe('76.00000000')
+  expect(aggregation?.amount.txOut).toBe('0.00000000')
+  expect(aggregation?.amount.txIn).toBe('76.00000000')
   expect(aggregation?.amount.unspent).toBe('76.00000000')
 })

@@ -58,7 +58,7 @@ it('should wait for block 0', async () => {
   const blockMapper = app.get(BlockMapper)
   const block = await blockMapper.getByHeight(0)
 
-  await expectTransactions(block!.hash, block!.transaction_count)
+  await expectTransactions(block!.hash, block!.transactionCount)
 })
 
 it('should wait for block 5', async () => {
@@ -67,7 +67,7 @@ it('should wait for block 5', async () => {
   const blockMapper = app.get(BlockMapper)
   const block = await blockMapper.getByHeight(5)
 
-  await expectTransactions(block!.hash, block!.transaction_count)
+  await expectTransactions(block!.hash, block!.transactionCount)
 })
 
 it('should wait for block 20', async () => {
@@ -76,5 +76,5 @@ it('should wait for block 20', async () => {
   const blockMapper = app.get(BlockMapper)
   const block = await blockMapper.getByHeight(20)
 
-  await expectTransactions(block!.hash, block!.transaction_count)
+  await expectTransactions(block!.hash, block!.transactionCount)
 })

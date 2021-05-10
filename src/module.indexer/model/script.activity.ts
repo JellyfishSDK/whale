@@ -62,7 +62,7 @@ export class ScriptActivityIndexer extends Indexer {
       id: this.mapId(block, 'vin', vin.txid, vin.vout),
       hid: HexEncoder.asSHA256(vout.script.hex),
       type: 'vin',
-      type_hex: ScriptActivityMapper.typeAsHex('vin'),
+      typeHex: ScriptActivityMapper.typeAsHex('vin'),
       txid: txn.txid,
       block: {
         hash: block.hash,
@@ -77,7 +77,7 @@ export class ScriptActivityIndexer extends Indexer {
         n: vin.vout
       },
       value: vout.value,
-      token_id: vout.token_id
+      tokenId: vout.tokenId
     }
   }
 
@@ -86,7 +86,7 @@ export class ScriptActivityIndexer extends Indexer {
       id: this.mapId(block, 'vout', txn.txid, vout.n),
       hid: HexEncoder.asSHA256(vout.scriptPubKey.hex),
       type: 'vout',
-      type_hex: ScriptActivityMapper.typeAsHex('vout'),
+      typeHex: ScriptActivityMapper.typeAsHex('vout'),
       txid: txn.txid,
       block: {
         hash: block.hash,
@@ -101,7 +101,7 @@ export class ScriptActivityIndexer extends Indexer {
         n: vout.n
       },
       value: vout.value.toFixed(8),
-      token_id: vout.tokenId
+      tokenId: vout.tokenId
     }
   }
 

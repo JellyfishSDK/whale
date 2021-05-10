@@ -17,7 +17,7 @@ export class VoutFinder {
         txid: txn.txid,
         n: vout.n,
         value: vout.value.toFixed(8),
-        token_id: vout.tokenId,
+        tokenId: vout.tokenId,
         script: {
           type: vout.scriptPubKey.type,
           hex: vout.scriptPubKey.hex

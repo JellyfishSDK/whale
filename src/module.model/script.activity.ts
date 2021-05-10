@@ -67,7 +67,7 @@ export interface ScriptActivity extends Model {
   hid: string // ---------------| hashed id, for length compatibility reasons this is the hashed id of script
 
   type: ScriptActivityType
-  type_hex: ScriptActivityTypeHex
+  typeHex: ScriptActivityTypeHex
   txid: string // --------------| txn that created the script activity
 
   block: {
@@ -91,5 +91,5 @@ export interface ScriptActivity extends Model {
   }
 
   value: string // -------------| output value stored as string, string as decimal: 0.0000
-  token_id?: number // ---------| token id, unused currently, optional before txn v4
+  tokenId?: number // ----------| token id, unused currently, optional before txn v4
 }

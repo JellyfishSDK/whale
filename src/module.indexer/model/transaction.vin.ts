@@ -49,12 +49,12 @@ export class TransactionVinIndexer extends Indexer {
         txid: vout.txid,
         n: vout.n,
         value: vout.value,
-        token_id: vout.token_id
+        tokenId: vout.tokenId
       } : undefined,
       script: vin.scriptSig !== undefined ? {
         hex: vin.scriptSig.hex
       } : undefined,
-      tx_in_witness: vin.txinwitness,
+      txInWitness: vin.txinwitness,
       sequence: vin.sequence
     }
   }

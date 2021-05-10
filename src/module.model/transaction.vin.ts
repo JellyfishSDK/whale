@@ -59,13 +59,13 @@ export interface TransactionVin extends Model {
     txid: string
     n: number
     value: string
-    token_id?: number
+    tokenId?: number
   }
 
   script?: {
     hex: string
   }
 
-  tx_in_witness?: string[]
+  txInWitness?: string[]
   sequence: string
 }

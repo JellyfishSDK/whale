@@ -105,14 +105,14 @@ export interface ScriptAggregation extends Model {
   }
 
   statistic: {
-    tx_count: number // ----------| total num of in & out transaction up to block height, see above
-    tx_in_count: number // -------| total num of transaction going in up to block height, see above
-    tx_out_count: number // ------| total num of transaction going out up to block height, see above
+    txCount: number // -----------| total num of in & out transaction up to block height, see above
+    txInCount: number // ---------| total num of transaction going in up to block height, see above
+    txOutCount: number // --------| total num of transaction going out up to block height, see above
   }
 
   amount: { // -------------------| stored as string, string as decimal: 0.0000
-    tx_in: string // -------------| sum of all value going in up to block height
-    tx_out: string // ------------| sum of all value going out up to block height
+    txIn: string // --------------| sum of all value going in up to block height
+    txOut: string // -------------| sum of all value going out up to block height
     unspent: string // -----------| sum of all unspent value up to block height
   }
 }

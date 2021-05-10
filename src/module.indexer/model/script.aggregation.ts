@@ -39,8 +39,8 @@ export class ScriptAggregationIndexer extends Indexer {
 
         // Spent (REMOVE)
         const aggregation = findScriptAggregation(vout.script.hex, vout.script.type)
-        aggregation.statistic.tx_out_count += 1
-        aggregation.amount.tx_out = new BigNumber(aggregation.amount.tx_out).plus(vout.value).toFixed(8)
+        aggregation.statistic.txOutCount += 1
+        aggregation.amount.txOut = new BigNumber(aggregation.amount.txOut).plus(vout.value).toFixed(8)
       }
 
       for (const vout of txn.vout) {
@@ -50,23 +50,23 @@ export class ScriptAggregationIndexer extends Indexer {
 
         // Unspent (ADD)
         const aggregation = findScriptAggregation(vout.scriptPubKey.hex, vout.scriptPubKey.type)
-        aggregation.statistic.tx_in_count += 1
-        aggregation.amount.tx_in = new BigNumber(aggregation.amount.tx_in).plus(vout.value).toFixed(8)
+        aggregation.statistic.txInCount += 1
+        aggregation.amount.txIn = new BigNumber(aggregation.amount.txIn).plus(vout.value).toFixed(8)
       }
     }
 
     for (const aggregation of Object.values(records)) {
       const latest = await this.mapper.getLatest(aggregation.hid)
       if (latest !== undefined) {
-        aggregation.statistic.tx_in_count += latest.statistic.tx_in_count
-        aggregation.statistic.tx_out_count += latest.statistic.tx_out_count
+        aggregation.statistic.txInCount += latest.statistic.txInCount
+        aggregation.statistic.txOutCount += latest.statistic.txOutCount
 
-        aggregation.amount.tx_in = new BigNumber(aggregation.amount.tx_in).plus(latest.amount.tx_in).toFixed(8)
-        aggregation.amount.tx_out = new BigNumber(aggregation.amount.tx_out).plus(latest.amount.tx_out).toFixed(8)
+        aggregation.amount.txIn = new BigNumber(aggregation.amount.txIn).plus(latest.amount.txIn).toFixed(8)
+        aggregation.amount.txOut = new BigNumber(aggregation.amount.txOut).plus(latest.amount.txOut).toFixed(8)
       }
 
-      aggregation.statistic.tx_count = aggregation.statistic.tx_in_count + aggregation.statistic.tx_out_count
-      aggregation.amount.unspent = new BigNumber(aggregation.amount.tx_in).minus(aggregation.amount.tx_out).toFixed(8)
+      aggregation.statistic.txCount = aggregation.statistic.txInCount + aggregation.statistic.txOutCount
+      aggregation.amount.unspent = new BigNumber(aggregation.amount.txIn).minus(aggregation.amount.txOut).toFixed(8)
 
       await this.mapper.put(aggregation)
     }
@@ -117,13 +117,13 @@ export class ScriptAggregationIndexer extends Indexer {
         hex: hex
       },
       statistic: {
-        tx_count: 0,
-        tx_in_count: 0,
-        tx_out_count: 0
+        txCount: 0,
+        txInCount: 0,
+        txOutCount: 0
       },
       amount: {
-        tx_in: '0.00000000',
-        tx_out: '0.00000000',
+        txIn: '0.00000000',
+        txOut: '0.00000000',
         unspent: '0.00000000'
       }
     }
