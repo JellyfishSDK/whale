@@ -8,13 +8,16 @@ import {
   PipeTransform,
   Injectable,
   ArgumentMetadata,
-  UseGuards, UseInterceptors
+  UseGuards,
+  UseInterceptors,
+  UseFilters
 } from '@nestjs/common'
 
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { NetworkGuard } from '@src/module.api/commons/network.guard'
 import { ResponseInterceptor } from '@src/module.api/commons/response.interceptor'
 import { ExceptionInterceptor } from '@src/module.api/commons/exception.interceptor'
+import { HttpExceptionFilter } from './commons/exception.filter'
 
 /**
  * MethodWhitelist is a whitelist validation pipe to check
@@ -51,6 +54,7 @@ export class CallDto {
 
 @Controller('/v1/:network/call')
 @UseGuards(NetworkGuard)
+@UseFilters(HttpExceptionFilter)
 @UseInterceptors(ResponseInterceptor, ExceptionInterceptor)
 export class CallController {
   constructor (private readonly client: JsonRpcClient) {

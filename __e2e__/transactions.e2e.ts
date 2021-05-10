@@ -5,6 +5,7 @@ import { Bech32, Elliptic, EllipticPair, HRP, WIF } from '@defichain/jellyfish-c
 import { RegTest } from '@defichain/jellyfish-network'
 import BigNumber from 'bignumber.js'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
+import { BadRequestError } from '@src/module.api/commons/error.exception'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -69,9 +70,11 @@ function describeFailValidations (url: string): void {
 
       expect(res.statusCode).toBe(400)
       expect(res.json()).toEqual({
-        statusCode: 400,
+        code: 400,
         message: ['hex must be a hexadecimal number', 'hex should not be empty'],
-        error: 'Bad Request'
+        error: 'Bad Request',
+        url: url,
+        at: expect.any(String)
       })
     })
 
@@ -86,9 +89,11 @@ function describeFailValidations (url: string): void {
 
       expect(res.statusCode).toBe(400)
       expect(res.json()).toEqual({
-        statusCode: 400,
+        code: 400,
         message: ['hex must be a hexadecimal number'],
-        error: 'Bad Request'
+        error: 'Bad Request',
+        url: url,
+        at: expect.any(String)
       })
     })
 
@@ -104,9 +109,11 @@ function describeFailValidations (url: string): void {
 
       expect(res.statusCode).toBe(400)
       expect(res.json()).toEqual({
-        statusCode: 400,
+        code: 400,
         message: ['maxFeeRate must not be less than 0'],
-        error: 'Bad Request'
+        error: 'Bad Request',
+        url: url,
+        at: expect.any(String)
       })
     })
 
@@ -122,12 +129,14 @@ function describeFailValidations (url: string): void {
 
       expect(res.statusCode).toBe(400)
       expect(res.json()).toEqual({
-        statusCode: 400,
+        code: 400,
         message: [
           'maxFeeRate must not be less than 0',
           'maxFeeRate must be a number conforming to the specified constraints'
         ],
-        error: 'Bad Request'
+        error: 'Bad Request',
+        url: url,
+        at: expect.any(String)
       })
     })
   })
@@ -179,8 +188,10 @@ describe('POST: /v1/regtest/transactions/test', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
-      message: 'Bad Request',
-      statusCode: 400
+      message: BadRequestError.DEFAULT_MESSAGE,
+      code: 400,
+      url: '/v1/regtest/transactions/test',
+      at: expect.any(String)
     })
   })
 
@@ -197,8 +208,10 @@ describe('POST: /v1/regtest/transactions/test', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
-      message: 'Bad Request',
-      statusCode: 400
+      message: BadRequestError.DEFAULT_MESSAGE,
+      code: 400,
+      url: '/v1/regtest/transactions/test',
+      at: expect.any(String)
     })
   })
 })
@@ -261,8 +274,10 @@ describe('POST: /v1/regtest/transactions', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
-      message: 'Bad Request',
-      statusCode: 400
+      message: BadRequestError.DEFAULT_MESSAGE,
+      code: 400,
+      url: '/v1/regtest/transactions',
+      at: expect.any(String)
     })
   })
 
@@ -279,8 +294,10 @@ describe('POST: /v1/regtest/transactions', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
-      message: 'Bad Request',
-      statusCode: 400
+      message: BadRequestError.DEFAULT_MESSAGE,
+      code: 400,
+      url: '/v1/regtest/transactions',
+      at: expect.any(String)
     })
   })
 })

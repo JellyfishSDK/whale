@@ -26,7 +26,9 @@ it('should 404 with invalid network', async () => {
   expect(res.json()).toEqual({
     error: 'Not Found',
     message: 'Network not found',
-    statusCode: 404
+    code: 404,
+    url: '/v1/mainnet/call/getblockchaininfo',
+    at: expect.any(String)
   })
 })
 
@@ -40,7 +42,9 @@ it('should 403 with non whitelisted method', async () => {
   expect(res.json()).toEqual({
     error: 'Forbidden',
     message: 'RPC method not whitelisted',
-    statusCode: 403
+    code: 403,
+    url: '/v1/regtest/call/getbalance',
+    at: expect.any(String)
   })
 })
 
@@ -59,7 +63,9 @@ it('should 400 with invalid post body params', async () => {
   expect(res.json()).toEqual({
     error: 'Bad Request',
     message: "RpcApiError: 'Unknown named parameter block', code: -8",
-    statusCode: 400
+    code: 400,
+    url: '/v1/regtest/call/getblock',
+    at: expect.any(String)
   })
 })
 
