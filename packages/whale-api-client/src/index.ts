@@ -1,6 +1,4 @@
-export * from './errors/api.error'
-export * from './errors/api.validation.exception'
-export * from './errors/client.timeout.exception'
+export * from './errors'
 
 export * as call from './api/call'
 export * as transactions from './api/transactions'

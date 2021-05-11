@@ -46,3 +46,47 @@ jobs:
           tags: |
             ghcr.io/defich/whale:latest
             ghcr.io/defich/whale:${{ steps.version.outputs.result }}
+
+
+  npm:
+    name: NPM
+    runs-on: ubuntu-latest
+    environment: NPM Release
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '15'
+
+      - uses: actions/github-script@v4.0.2
+        id: version
+        with:
+          script: |
+            const semver = context.ref.replace('refs/tags/v', '')
+            if (semver.match(/[0-9]\.[0-9]\.[0-9]/)) {
+              return semver
+            }
+
+            throw new Error('not semver')
+          result-encoding: string
+
+      - run: npm ci
+      - run: npm run packages:build
+      - run: npm run packages:version ${{ steps.version.outputs.result }}
+
+      - name: Publish Next
+        if: github.event.release.prerelease
+        run: |
+          npm config set //registry.npmjs.org/:_authToken=$NPM_AUTH_TOKEN
+          npm run packages:publish:next
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
+      - name: Publish Latest
+        if: "!github.event.release.prerelease"
+        run: |
+          npm config set //registry.npmjs.org/:_authToken=$NPM_AUTH_TOKEN
+          npm run packages:publish:latest
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+

@@ -1,6 +1,6 @@
 import { ApiResponse, WhaleApiClient } from '../whale.api.client'
 import { JellyfishJSON, Precision, PrecisionPath } from '@defichain/jellyfish-api-core'
-import { raiseIfError } from '../errors/api.error'
+import { raiseIfError } from '../errors'
 
 export class Call {
   constructor (private readonly client: WhaleApiClient) {
@@ -16,9 +16,7 @@ export class Call {
   async call<T> (method: string, params: any[], precision: Precision | PrecisionPath): Promise<T> {
     const body = JellyfishJSON.stringify({ params: params })
     const responseRaw = await this.client.requestRaw('POST', `call/${method}`, body)
-    const text = await responseRaw.text()
-
-    const response: ApiResponse<T> = JellyfishJSON.parse(text, precision)
+    const response: ApiResponse<T> = JellyfishJSON.parse(responseRaw.body, precision)
     raiseIfError(response)
     return response.data
   }

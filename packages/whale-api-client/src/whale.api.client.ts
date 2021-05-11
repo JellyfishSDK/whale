@@ -2,8 +2,7 @@ import { Call } from './api/call'
 import { Transactions } from './api/transactions'
 import AbortController from 'abort-controller'
 import fetch from 'cross-fetch'
-import { raiseIfError, WhaleApiError } from './errors/api.error'
-import { WhaleClientTimeoutException } from './errors/client.timeout.exception'
+import { raiseIfError, WhaleApiError, WhaleClientTimeoutException } from './errors'
 
 /**
  * WhaleApiClient Options
@@ -53,6 +52,11 @@ export interface ApiResponsePage {
  */
 export type Method = 'POST' | 'GET'
 
+export interface RawResponse {
+  status: number
+  body: string
+}
+
 export class WhaleApiClient {
   public readonly call = new Call(this)
   public readonly transactions = new Transactions(this)
@@ -71,13 +75,13 @@ export class WhaleApiClient {
    */
   async request<T> (method: Method, path: string, body: object): Promise<T> {
     const raw = await this.requestRaw(method, path, JSON.stringify(body))
-    const response: ApiResponse<T> = await raw.json()
+    const response: ApiResponse<T> = JSON.parse(raw.body)
     raiseIfError(response)
 
     return response.data
   }
 
-  async requestRaw (method: Method, path: string, body: string): Promise<Response> {
+  async requestRaw (method: Method, path: string, body: string): Promise<RawResponse> {
     const { url, timeout, version, network } = this.options
 
     const controller = new AbortController()
@@ -86,6 +90,9 @@ export class WhaleApiClient {
     const endpoint = `${url}/${version as string}/${network as string}/${path}`
     const request = fetch(endpoint, {
       method: method,
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: body,
       cache: 'no-cache',
       signal: controller.signal
@@ -94,7 +101,10 @@ export class WhaleApiClient {
     try {
       const response = await request
       clearTimeout(id)
-      return response
+      return {
+        status: response.status,
+        body: await response.text()
+      }
     } catch (err) {
       if (err.type === 'aborted') {
         /* eslint-disable @typescript-eslint/no-non-null-assertion */

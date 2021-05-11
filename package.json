@@ -19,7 +19,11 @@
     "start:prod": "node dist/main",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:ci": "jest --ci --coverage"
+    "test:ci": "jest --ci --coverage",
+    "packages:build": "lerna run build",
+    "packages:version": "lerna version $1 --yes --no-push --no-git-tag-version",
+    "packages:publish:next": "lerna exec -- npm publish --tag next --access public",
+    "packages:publish:latest": "lerna exec -- npm publish --tag latest --access public"
   },
   "dependencies": {
     "@defichain/jellyfish-api-core": "next",
@@ -59,6 +63,7 @@
     "@types/subleveldown": "^4.1.0",
     "husky": "^6.0.0",
     "jest": "^26.6.3",
+    "lerna": "^4.0.0",
     "lint-staged": "^10.5.4",
     "ts-jest": "^26.5.6",
     "ts-loader": "^9.1.1",
