@@ -9,7 +9,7 @@ export class Transactions {
    * @throws WhaleApiException if failed mempool acceptance
    */
   async send (rawTx: RawTxDto): Promise<string> {
-    return await this.client.request('POST', 'transactions', rawTx)
+    return await this.client.requestData('POST', 'transactions', rawTx)
   }
 
   /**
@@ -17,7 +17,7 @@ export class Transactions {
    * @throws WhaleApiException if failed mempool acceptance
    */
   async test (rawTx: RawTxDto): Promise<void> {
-    return await this.client.request('POST', 'transactions/test', rawTx)
+    return await this.client.requestData('POST', 'transactions/test', rawTx)
   }
 }
 
