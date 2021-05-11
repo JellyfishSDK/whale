@@ -82,13 +82,30 @@ export class WhaleApiClient {
   }
 
   async requestRaw (method: Method, path: string, body: string): Promise<RawResponse> {
-    const { url, timeout, version, network } = this.options
+    const { timeout } = this.options
 
     const controller = new AbortController()
     const id = setTimeout(() => controller.abort(), timeout)
 
+    try {
+      const response = await this._fetch(method, path, body, controller)
+      clearTimeout(id)
+      return response
+    } catch (err) {
+      if (err.type === 'aborted') {
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
+        throw new WhaleClientTimeoutException(timeout!)
+      }
+
+      throw err
+    }
+  }
+
+  protected async _fetch (method: Method, path: string, body: string, controller: AbortController): Promise<RawResponse> {
+    const { url, version, network } = this.options
+
     const endpoint = `${url}/${version as string}/${network as string}/${path}`
-    const request = fetch(endpoint, {
+    const response = await fetch(endpoint, {
       method: method,
       headers: {
         'Content-Type': 'application/json'
@@ -98,20 +115,9 @@ export class WhaleApiClient {
       signal: controller.signal
     })
 
-    try {
-      const response = await request
-      clearTimeout(id)
-      return {
-        status: response.status,
-        body: await response.text()
-      }
-    } catch (err) {
-      if (err.type === 'aborted') {
-        /* eslint-disable @typescript-eslint/no-non-null-assertion */
-        throw new WhaleClientTimeoutException(timeout!)
-      }
-
-      throw err
+    return {
+      status: response.status,
+      body: await response.text()
     }
   }
 }

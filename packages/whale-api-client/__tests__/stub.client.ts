@@ -10,7 +10,7 @@ export class StubWhaleApiClient extends WhaleApiClient {
     super({ url: 'not required' })
   }
 
-  async requestRaw (method: Method, path: string, body: string): Promise<RawResponse> {
+  protected async _fetch (method: Method, path: string, body: string, controller: AbortController): Promise<RawResponse> {
     if (this.service.app === undefined) {
       throw new Error('StubService is not yet started.')
     }
