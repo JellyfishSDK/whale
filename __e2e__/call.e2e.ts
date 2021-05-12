@@ -19,7 +19,7 @@ afterAll(async () => {
 it('should 404 with invalid network', async () => {
   const res = await app.inject({
     method: 'POST',
-    url: '/v1/mainnet/call/getblockchaininfo'
+    url: '/v1/mainnet/rpc/getblockchaininfo'
   })
 
   expect(res.statusCode).toBe(404)
@@ -29,7 +29,7 @@ it('should 404 with invalid network', async () => {
       type: 'NotFound',
       at: expect.any(Number),
       message: 'Network not found',
-      url: '/v1/mainnet/call/getblockchaininfo'
+      url: '/v1/mainnet/rpc/getblockchaininfo'
     }
   })
 })
@@ -37,7 +37,7 @@ it('should 404 with invalid network', async () => {
 it('should 403 with non whitelisted method', async () => {
   const res = await app.inject({
     method: 'POST',
-    url: '/v1/regtest/call/getbalance'
+    url: '/v1/regtest/rpc/getbalance'
   })
 
   expect(res.statusCode).toBe(403)
@@ -47,7 +47,7 @@ it('should 403 with non whitelisted method', async () => {
       type: 'Forbidden',
       message: 'RPC method not whitelisted',
       at: expect.any(Number),
-      url: '/v1/regtest/call/getbalance'
+      url: '/v1/regtest/rpc/getbalance'
     }
   })
 })
@@ -55,7 +55,7 @@ it('should 403 with non whitelisted method', async () => {
 it('should 400 with invalid post body params', async () => {
   const res = await app.inject({
     method: 'POST',
-    url: '/v1/regtest/call/getblock',
+    url: '/v1/regtest/rpc/getblock',
     payload: {
       params: {
         block: 1
@@ -70,16 +70,16 @@ it('should 400 with invalid post body params', async () => {
       type: 'BadRequest',
       message: "RpcApiError: 'Unknown named parameter block', code: -8",
       at: expect.any(Number),
-      url: '/v1/regtest/call/getblock'
+      url: '/v1/regtest/rpc/getblock'
     }
   })
 })
 
 describe('whitelisted rpc methods', () => {
-  it('should 200 POST: /v1/regtest/call/getblockchaininfo', async () => {
+  it('should 200 POST: /v1/regtest/rpc/getblockchaininfo', async () => {
     const res = await app.inject({
       method: 'POST',
-      url: '/v1/regtest/call/getblockchaininfo'
+      url: '/v1/regtest/rpc/getblockchaininfo'
     })
 
     expect(res.statusCode).toBe(200)
@@ -90,10 +90,10 @@ describe('whitelisted rpc methods', () => {
     expect(typeof data.blocks).toBe('number')
   })
 
-  it('should 200 POST: /v1/regtest/call/getblockcount', async () => {
+  it('should 200 POST: /v1/regtest/rpc/getblockcount', async () => {
     const res = await app.inject({
       method: 'POST',
-      url: '/v1/regtest/call/getblockcount'
+      url: '/v1/regtest/rpc/getblockcount'
     })
 
     expect(res.statusCode).toBe(200)
@@ -103,7 +103,7 @@ describe('whitelisted rpc methods', () => {
     expect(typeof data).toBe('number')
   })
 
-  it('should 200 POST: /v1/regtest/call/getblockhash', async () => {
+  it('should 200 POST: /v1/regtest/rpc/getblockhash', async () => {
     await waitForExpect(async () => {
       const count = await container.call('getblockcount')
       await expect(count).toBeGreaterThan(1)
@@ -111,7 +111,7 @@ describe('whitelisted rpc methods', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v1/regtest/call/getblockhash',
+      url: '/v1/regtest/rpc/getblockhash',
       payload: {
         params: [1]
       }
@@ -124,7 +124,7 @@ describe('whitelisted rpc methods', () => {
     expect(data.length).toBe(64)
   })
 
-  it('should 200 POST: /v1/regtest/call/getblock', async () => {
+  it('should 200 POST: /v1/regtest/rpc/getblock', async () => {
     await waitForExpect(async () => {
       const count = await container.call('getblockcount')
       await expect(count).toBeGreaterThan(1)
@@ -133,7 +133,7 @@ describe('whitelisted rpc methods', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/v1/regtest/call/getblock',
+      url: '/v1/regtest/rpc/getblock',
       payload: {
         params: [hash]
       }
@@ -147,3 +147,5 @@ describe('whitelisted rpc methods', () => {
     expect(Array.isArray(data.tx)).toBe(true)
   })
 })
+
+// TODO(fuxingloh): migrate test to packages/whale-api-client
