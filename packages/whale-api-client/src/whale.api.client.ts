@@ -1,11 +1,10 @@
-import { Call } from './api/call'
+import { Rpc } from './api/rpc'
 import { Transactions } from './api/transactions'
 import AbortController from 'abort-controller'
 import fetch from 'cross-fetch'
 import { URLSearchParams } from 'url'
 import { raiseIfError, WhaleClientException, WhaleClientTimeoutException } from './errors'
 import { ApiResponse, ApiResponsePagination } from './whale.api.response'
-import { Address } from './api/address'
 
 /**
  * WhaleApiClient Options
@@ -51,8 +50,7 @@ export interface ResponseAsString {
 }
 
 export class WhaleApiClient {
-  public readonly address = new Address(this)
-  public readonly call = new Call(this)
+  public readonly rpc = new Rpc(this)
   public readonly transactions = new Transactions(this)
 
   constructor (
