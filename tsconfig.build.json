@@ -5,7 +5,8 @@
     "test",
     "__e2e__",
     "dist",
-    "**/*spec.ts",
-    "packages/"
+    "packages/",
+    "**/*.spec.ts",
+    "**/*.spec/"
   ]
 }
