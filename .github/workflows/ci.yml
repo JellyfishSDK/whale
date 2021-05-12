@@ -82,3 +82,15 @@ jobs:
         uses: matt-ball/newman-action@0659e9b8d056c0d03d94e1dbfce380512088b566
         with:
           collection: __sanity__/postman_collection.json
+
+  packages-build:
+    name: Packages Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '15'
+
+      - run: npm ci
+      - run: npm run packages:build

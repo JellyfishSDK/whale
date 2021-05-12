@@ -6,6 +6,16 @@ labels:
     matcher:
       files: ".github/**"
 
+  - label: area/whale-api-client
+    sync: true
+    matcher:
+      files: "packages/whale-api-client/**"
+
+  - label: area/whale-api-wallet
+    sync: true
+    matcher:
+      files: "packages/whale-api-wallet/**"
+
   - label: area/module-api
     sync: true
     matcher:
