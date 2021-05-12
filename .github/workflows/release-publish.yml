@@ -11,7 +11,7 @@ jobs:
     environment: Docker Release
     steps:
       - name: Set up Semver
-        uses: actions/github-script@v4
+        uses: actions/github-script@v4.0.2
         id: version
         with:
           script: |
