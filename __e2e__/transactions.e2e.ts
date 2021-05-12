@@ -67,11 +67,26 @@ function describeFailValidations (url: string): void {
         }
       })
 
-      expect(res.statusCode).toBe(400)
+      expect(res.statusCode).toBe(422)
       expect(res.json()).toEqual({
-        statusCode: 400,
-        message: ['hex must be a hexadecimal number', 'hex should not be empty'],
-        error: 'Bad Request'
+        error: {
+          at: expect.any(Number),
+          code: 422,
+          type: 'ValidationError',
+          url: url,
+          validation: {
+            properties: [
+              {
+                constraints: [
+                  'hex must be a hexadecimal number',
+                  'hex should not be empty'
+                ],
+                property: 'hex',
+                value: ''
+              }
+            ]
+          }
+        }
       })
     })
 
@@ -84,11 +99,25 @@ function describeFailValidations (url: string): void {
         }
       })
 
-      expect(res.statusCode).toBe(400)
+      expect(res.statusCode).toBe(422)
       expect(res.json()).toEqual({
-        statusCode: 400,
-        message: ['hex must be a hexadecimal number'],
-        error: 'Bad Request'
+        error: {
+          at: expect.any(Number),
+          code: 422,
+          type: 'ValidationError',
+          url: url,
+          validation: {
+            properties: [
+              {
+                constraints: [
+                  'hex must be a hexadecimal number'
+                ],
+                property: 'hex',
+                value: 'fuxingloh'
+              }
+            ]
+          }
+        }
       })
     })
 
@@ -102,11 +131,25 @@ function describeFailValidations (url: string): void {
         }
       })
 
-      expect(res.statusCode).toBe(400)
+      expect(res.statusCode).toBe(422)
       expect(res.json()).toEqual({
-        statusCode: 400,
-        message: ['maxFeeRate must not be less than 0'],
-        error: 'Bad Request'
+        error: {
+          at: expect.any(Number),
+          code: 422,
+          type: 'ValidationError',
+          url: url,
+          validation: {
+            properties: [
+              {
+                constraints: [
+                  'maxFeeRate must not be less than 0'
+                ],
+                property: 'maxFeeRate',
+                value: -1.5
+              }
+            ]
+          }
+        }
       })
     })
 
@@ -120,14 +163,26 @@ function describeFailValidations (url: string): void {
         }
       })
 
-      expect(res.statusCode).toBe(400)
+      expect(res.statusCode).toBe(422)
       expect(res.json()).toEqual({
-        statusCode: 400,
-        message: [
-          'maxFeeRate must not be less than 0',
-          'maxFeeRate must be a number conforming to the specified constraints'
-        ],
-        error: 'Bad Request'
+        error: {
+          at: expect.any(Number),
+          code: 422,
+          type: 'ValidationError',
+          url: url,
+          validation: {
+            properties: [
+              {
+                constraints: [
+                  'maxFeeRate must not be less than 0',
+                  'maxFeeRate must be a number conforming to the specified constraints'
+                ],
+                property: 'maxFeeRate',
+                value: 'abc'
+              }
+            ]
+          }
+        }
       })
     })
   })
@@ -179,8 +234,12 @@ describe('POST: /v1/regtest/transactions/test', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
-      message: 'Bad Request',
-      statusCode: 400
+      error: {
+        type: 'BadRequest',
+        code: 400,
+        url: '/v1/regtest/transactions/test',
+        at: expect.any(Number)
+      }
     })
   })
 
@@ -197,8 +256,12 @@ describe('POST: /v1/regtest/transactions/test', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
-      message: 'Bad Request',
-      statusCode: 400
+      error: {
+        type: 'BadRequest',
+        code: 400,
+        url: '/v1/regtest/transactions/test',
+        at: expect.any(Number)
+      }
     })
   })
 })
@@ -261,8 +324,12 @@ describe('POST: /v1/regtest/transactions', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
-      message: 'Bad Request',
-      statusCode: 400
+      error: {
+        type: 'BadRequest',
+        code: 400,
+        url: '/v1/regtest/transactions',
+        at: expect.any(Number)
+      }
     })
   })
 
@@ -279,8 +346,12 @@ describe('POST: /v1/regtest/transactions', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.json()).toEqual({
-      message: 'Bad Request',
-      statusCode: 400
+      error: {
+        type: 'BadRequest',
+        code: 400,
+        url: '/v1/regtest/transactions',
+        at: expect.any(Number)
+      }
     })
   })
 })

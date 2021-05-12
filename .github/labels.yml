@@ -53,9 +53,11 @@
 - color: fbca04
   name: area/core
 - color: fbca04
-  name: area/workflow
+  name: area/whale-api-client
 - color: fbca04
-  name: area/module-actor
+  name: area/whale-api-wallet
+- color: fbca04
+  name: area/workflow
 - color: fbca04
   name: area/module-api
 - color: fbca04
@@ -64,6 +66,10 @@
   name: area/module-defid
 - color: fbca04
   name: area/module-health
+- color: fbca04
+  name: area/module-indexer
+- color: fbca04
+  name: area/module-model
 
 # Priority
 - color: d93f0b

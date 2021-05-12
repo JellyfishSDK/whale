@@ -32,11 +32,14 @@ issue:
       list:
         - core
         - workflow
-        - module-actor
+        - whale-api-client
+        - whale-api-wallet
         - module-api
         - module-database
         - module-defid
         - module-health
+        - module-indexer
+        - module-model
       multiple: true
       needs:
         comment: |

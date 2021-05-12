@@ -95,13 +95,13 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
     })
 
     expect(res.json()).toEqual({
-      statusCode: 400,
-      message: [
-        'start must be a positive number string',
-        'including_start must be a boolean string',
-        'limit must be a positive number string'
-      ],
-      error: 'Bad Request'
+      error: {
+        at: expect.any(Number),
+        code: 400,
+        message: 'Bad Request Exception',
+        type: 'BadRequest',
+        url: '/v1/regtest/poolpairs/shares?start=invalid&including_start=yes&limit=-2'
+      }
     })
   })
 
@@ -231,12 +231,13 @@ describe('GET: /v1/regtest/poolpairs', () => {
     })
 
     expect(res.json()).toEqual({
-      statusCode: 400,
-      message: [
-        'start must be a positive number string',
-        'including_start must be a boolean string'
-      ],
-      error: 'Bad Request'
+      error: {
+        at: expect.any(Number),
+        code: 400,
+        message: 'Bad Request Exception',
+        type: 'BadRequest',
+        url: '/v1/regtest/poolpairs?start=invalid&including_start=yes&limit=100'
+      }
     })
   })
 
@@ -430,8 +431,13 @@ describe('GET: /v1/regtest/poolpairs/:symbol', () => {
     })
 
     expect(res.json()).toEqual({
-      statusCode: 400,
-      message: 'Bad Request'
+      error: {
+        at: expect.any(Number),
+        code: 400,
+        message: 'Bad Request',
+        type: 'BadRequest',
+        url: '/v1/regtest/poolpairs/DFI-NONEXIST'
+      }
     })
   })
 })

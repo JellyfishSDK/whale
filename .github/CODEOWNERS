@@ -9,14 +9,18 @@
 
 /website/                                       @fuxingloh
 
+/packages/                                      @fuxingloh
+/packages/whale-api-client/                     @fuxingloh @canonbrother @jingyi2811
+/packages/whale-api-wallet/                     @fuxingloh
+
 /src/                                           @fuxingloh
-/src/module.actor/                              @fuxingloh
 /src/module.api/                                @fuxingloh @canonbrother @jingyi2811
 /src/module.database/                           @fuxingloh
 /src/module.database/provider.level             @fuxingloh
 /src/module.database/provider.memory            @fuxingloh
 /src/module.defid/                              @fuxingloh
 /src/module.health/                             @fuxingloh
+/src/module.indexer/                            @fuxingloh
 /src/module.model/                              @fuxingloh
 
 lerna.json                                      @fuxingloh

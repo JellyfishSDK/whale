@@ -7,7 +7,7 @@
 
 The super index for DeFi Blockchain to simplify DeFi light implementation.
 
-> 🚧 Work in progress.
+> 🚧 Work in progress, DeFi Whale is considered Alpha Software. Use at your own risk, APIs are yet not finalized.
 
 ## Developing & Contributing
 
