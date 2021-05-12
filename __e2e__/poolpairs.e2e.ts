@@ -3,6 +3,7 @@ import { createTestingApp } from './module.testing'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import BigNumber from 'bignumber.js'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
+import { getNewAddress, createToken, mintTokens, createPoolPair } from '@defichain/testing'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -21,47 +22,9 @@ afterAll(async () => {
   await container.stop()
 })
 
-async function createToken (symbol: string): Promise<void> {
-  const address = await container.call('getnewaddress')
-  const metadata = {
-    symbol,
-    name: symbol,
-    isDAT: true,
-    mintable: true,
-    tradeable: true,
-    collateralAddress: address
-  }
-  await container.call('createtoken', [metadata])
-  await container.generate(1)
-}
-
-async function createPoolPair (tokenB: string, metadata?: any): Promise<void> {
-  const address = await container.call('getnewaddress')
-  const defaultMetadata = {
-    tokenA: 'DFI',
-    tokenB,
-    commission: 0,
-    status: true,
-    ownerAddress: address
-  }
-  await client.poolpair.createPoolPair({ ...defaultMetadata, ...metadata })
-  await container.generate(1)
-}
-
-async function mintTokens (symbol: string): Promise<void> {
-  const address = await container.call('getnewaddress')
-
-  const payload: { [key: string]: string } = {}
-  payload[address] = '100@0'
-  await container.call('utxostoaccount', [payload])
-  await container.call('minttokens', [`2000@${symbol}`])
-
-  await container.generate(25)
-}
-
 describe('GET: /v1/regtest/poolpairs/shares', () => {
   async function addPoolLiquidity (): Promise<void> {
-    const shareAddress = await container.call('getnewaddress')
+    const shareAddress = await getNewAddress(container)
     const data = await client.poolpair.addPoolLiquidity({
       '*': ['10@DFI', '200@DSWAP']
     }, shareAddress)
@@ -72,11 +35,11 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
   }
 
   beforeAll(async () => {
-    await createToken('DSWAP')
+    await createToken(container, 'DSWAP')
 
-    await mintTokens('DSWAP')
+    await mintTokens(container, 'DSWAP')
 
-    await createPoolPair('DSWAP')
+    await createPoolPair(container, 'DFI', 'DSWAP')
 
     await addPoolLiquidity()
     await addPoolLiquidity()
@@ -210,13 +173,13 @@ describe('GET: /v1/regtest/poolpairs/shares', () => {
 
 describe('GET: /v1/regtest/poolpairs', () => {
   beforeAll(async () => {
-    await createToken('DETH')
-    await createToken('DXRP')
-    await createToken('DUSDT')
+    await createToken(container, 'DETH')
+    await createToken(container, 'DXRP')
+    await createToken(container, 'DUSDT')
 
-    await createPoolPair('DETH', { commission: 0.001 })
-    await createPoolPair('DXRP', { commission: 0.003 })
-    await createPoolPair('DUSDT', { status: false })
+    await createPoolPair(container, 'DFI', 'DETH', { commission: 0.001 })
+    await createPoolPair(container, 'DFI', 'DXRP', { commission: 0.003 })
+    await createPoolPair(container, 'DFI', 'DUSDT', { status: false })
   })
 
   it('should fail due to invalid query type', async () => {
@@ -375,8 +338,8 @@ describe('GET: /v1/regtest/poolpairs', () => {
 
 describe('GET: /v1/regtest/poolpairs/:symbol', () => {
   beforeAll(async () => {
-    await createToken('DBCH')
-    await createPoolPair('DBCH')
+    await createToken(container, 'DBCH')
+    await createPoolPair(container, 'DFI', 'DBCH')
   })
 
   it('should getPoolPair', async () => {
