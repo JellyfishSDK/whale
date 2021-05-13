@@ -28,7 +28,7 @@ beforeEach(async () => {
   await container.waitForWalletBalanceGTE(15)
 })
 
-it('send()', async () => {
+it('transactions.send()', async () => {
   const hex = await createSignedTxnHex(container, 10, 9.9999)
   const txid = await client.transactions.send({
     hex: hex
