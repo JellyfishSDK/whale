@@ -8,7 +8,6 @@ checks:
 
 exclude_patterns:
   - "dist/"
-  - "__e2e__/"
   - "**/node_modules/"
   - "**/*.test.ts"
   - "**/*.spec.ts"

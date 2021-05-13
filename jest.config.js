@@ -8,7 +8,6 @@ module.exports = {
   testTimeout: 180000,
   coveragePathIgnorePatterns: [
     '/node_modules/',
-    '.*/__e2e__/.*',
     '.*/.*.spec/.*',
     '.*/__tests__/.*'
   ]
