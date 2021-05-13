@@ -18,16 +18,17 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await Promise.all([
-    service.stop(),
-    container.stop()
-  ])
+  try {
+    await service.stop()
+  } finally {
+    await container.stop()
+  }
 })
 
 it('should not be able to access wallet', async () => {
-  return expect(async () => {
+  return await expect(async () => {
     await client.wallet.getBalance()
-  }).toThrow('WhaleRpcClient: wallet.getBalance not enabled in WhaleApiClient')
+  }).rejects.toThrow('WhaleRpcClient: wallet.getBalance not enabled in WhaleApiClient')
 })
 
 describe('whitelisted rpc methods', () => {

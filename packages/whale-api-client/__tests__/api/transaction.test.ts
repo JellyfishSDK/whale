@@ -20,10 +20,11 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await Promise.all([
-    service.stop(),
-    container.stop()
-  ])
+  try {
+    await service.stop()
+  } finally {
+    await container.stop()
+  }
 })
 
 beforeEach(async () => {

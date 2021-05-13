@@ -12,7 +12,11 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await container.stop()
+  try {
+    await app.close()
+  } finally {
+    await container.stop()
+  }
 })
 
 describe('/_health/probes/liveness', () => {
