@@ -19,8 +19,10 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await service.stop()
-  await container.stop()
+  await Promise.all([
+    service.stop(),
+    container.stop()
+  ])
 })
 
 it('should throw error for non whitelisted method', async () => {

@@ -5,6 +5,9 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { newFastifyAdapter } from '@src/fastify'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 
+/**
+ * Override default ConfigService for E2E testing
+ */
 class TestConfigService extends ConfigService {
   constructor (rpcUrl: string) {
     super({
@@ -19,28 +22,23 @@ class TestConfigService extends ConfigService {
   }
 }
 
-async function createTestingModule (container: MasterNodeRegTestContainer): Promise<TestingModule> {
-  const url = await container.getCachedRpcUrl()
-
-  const builder = Test.createTestingModule({
-    // always default to memory module for e2e testing
+async function createTestingModule (url: string): Promise<TestingModule> {
+  return await Test.createTestingModule({
     imports: [AppModule.forRoot('memory')]
   })
-
-  return await builder
     .overrideProvider(ConfigService).useValue(new TestConfigService(url))
     .compile()
 }
 
 /**
  * Configures a TestingModule that is configured to connect to a provided @defichain/testcontainers.
- * Returns a INestApplication that is initialized and ready for e2e testing.
  *
  * @param {MasterNodeRegTestContainer} container to connect TestingModule to
  * @return Promise<NestFastifyApplication> that is initialized
  */
 export async function createTestingApp (container: MasterNodeRegTestContainer): Promise<NestFastifyApplication> {
-  const module = await createTestingModule(container)
+  const url = await container.getCachedRpcUrl()
+  const module = await createTestingModule(url)
   const app = module.createNestApplication<NestFastifyApplication>(
     newFastifyAdapter({
       logger: false

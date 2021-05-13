@@ -1,5 +1,5 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { createTestingApp } from '../../../__e2e__/module.testing'
+import { createTestingApp } from '../../e2e.module'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 
 const container = new MasterNodeRegTestContainer()
