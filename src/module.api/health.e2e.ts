@@ -1,6 +1,6 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp } from './module.testing'
+import { createTestingApp } from '@src/e2e.module'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -12,7 +12,11 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await container.stop()
+  try {
+    await app.close()
+  } finally {
+    await container.stop()
+  }
 })
 
 describe('/_health/probes/liveness', () => {

@@ -40,8 +40,11 @@ same directory of the code you are testing. Code coverage is collected for this.
 #### End-to-end Testing
 
 On top of unit tests, this provides additional testing that tests the entire lifecycle of DeFi whale. All dependencies
-and modules are integrated together as expected. They follow the naming semantic of `*.e2e.ts` and placed in
-the `__e2e__` directory. Code coverage is collected for this.
+and modules are integrated together as expected. They follow the naming semantic of `*.e2e.ts` and placed in the same
+directory as the component. Code coverage is collected for this.
+
+For endpoints that are meant to be consumed by developer, the testing should be done in `whale-api-cient`. Dogfooding at
+its finest, tests should be written in `packages/whale-api-client/__tests__` to test the e2e aspect of each endpoint.
 
 #### Sanity Testing
 
