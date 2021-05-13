@@ -5,6 +5,8 @@
     "test",
     "dist",
     "packages/",
+    "**/*.e2e.ts",
+    "**/e2e.*.ts",
     "**/*.spec.ts",
     "**/*.spec/"
   ]
