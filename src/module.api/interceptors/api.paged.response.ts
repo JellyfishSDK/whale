@@ -1,7 +1,7 @@
 import { ApiResponse } from '@src/module.api/interceptors/response.interceptor'
 
 /**
- * ApiPage for pagination ApiSliceResponse pagination
+ * ApiPage for pagination ApiPagedResponse pagination
  * - `next` token indicate the token used to get the next slice window.
  */
 export interface ApiPage {
@@ -9,11 +9,11 @@ export interface ApiPage {
 }
 
 /**
- * ApiSliceResponse, implements ApiResponse interface from response.interceptor.
+ * ApiPagedResponse, implements ApiResponse interface from response.interceptor.
  *
- * ApiSliceResponse indicates that this response of data array slice is part of a sorted list of items.
+ * ApiPagedResponse indicates that this response of data array slice is part of a sorted list of items.
  * Items are part of a larger sorted list and the slice indicates a window within the large sorted list.
- * Each ApiSliceResponse holds the data array and the "token" for the next part of the slice.
+ * Each ApiPagedResponse holds the data array and the "token" for the next part of the slice.
  * The next token should be passed via @Query('next') and only used when getting the next slice.
  * Hence the first request, the next token is always empty and not provided.
  *
@@ -62,13 +62,8 @@ export interface ApiPage {
  * Answer: Blocks sorted by height in descending order, that's your sorted list and your slice window.
  *       : <- Latest | [100] [99] [98] [97] [...] | Oldest ->
  */
-export class ApiSliceResponse<T> implements ApiResponse {
+export class ApiPagedResponse<T> implements ApiResponse {
   data: T[]
-
-  /**
-   * Although this is called ApiSliceResponse, page is a easier to
-   * understand semantic for your average developer. Hence page.
-   */
   page?: ApiPage
 
   private constructor (data: T[], next?: string | number) {
@@ -80,8 +75,8 @@ export class ApiSliceResponse<T> implements ApiResponse {
    * @param {T[]} data array slice
    * @param {string} next token slice for greater than, less than operator
    */
-  static next<T> (data: T[], next?: string | number): ApiSliceResponse<T> {
-    return new ApiSliceResponse<T>(data, next)
+  static next<T> (data: T[], next?: string | number): ApiPagedResponse<T> {
+    return new ApiPagedResponse<T>(data, next)
   }
 
   /**
@@ -89,7 +84,7 @@ export class ApiSliceResponse<T> implements ApiResponse {
    * @param {number} limit number of elements in the data array slice
    * @param {(item: T) => string} nextProvider to get next token when (limit === data array slice)
    */
-  static of<T> (data: T[], limit: number, nextProvider: (item: T) => string | number): ApiSliceResponse<T> {
+  static of<T> (data: T[], limit: number, nextProvider: (item: T) => string | number): ApiPagedResponse<T> {
     if (data.length === limit) {
       const next = nextProvider(data[limit - 1])
       return this.next(data, next)
