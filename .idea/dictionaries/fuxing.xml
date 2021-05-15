@@ -147,6 +147,7 @@
       <w>segwit</w>
       <w>sendrawtransaction</w>
       <w>sendtoaddress</w>
+      <w>sendtokenstoaddress</w>
       <w>setwalletflag</w>
       <w>sighash</w>
       <w>sighashtype</w>
