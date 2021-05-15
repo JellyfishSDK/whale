@@ -14,7 +14,8 @@
     "baseUrl": "./",
     "incremental": true,
     "paths": {
-      "@src/*": ["src/*"]
+      "@src/*": ["src/*"],
+      "@whale-api-client/api/*": ["packages/whale-api-client/src/api/*"]
     }
   }
 }
