@@ -1,5 +1,5 @@
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
-import { CacheModule, Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { RpcController } from '@src/module.api/rpc.controller'
 import { HealthController } from '@src/module.api/health.controller'
 import { TransactionsController } from '@src/module.api/transactions.controller'
@@ -12,7 +12,6 @@ import { ResponseInterceptor } from '@src/module.api/interceptors/response.inter
  * Exposed ApiModule for public interfacing
  */
 @Module({
-  imports: [CacheModule.register()],
   controllers: [
     RpcController,
     HealthController,
