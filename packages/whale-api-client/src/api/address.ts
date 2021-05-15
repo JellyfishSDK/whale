@@ -8,6 +8,14 @@ export class Address {
   constructor (private readonly client: WhaleApiClient) {
   }
 
+  async getBalance (address: string): Promise<string> {
+    return await this.client.requestData('GET', `address/${address}/balance`)
+  }
+
+  async getAggregation (address: string): Promise<string> {
+    return await this.client.requestData('GET', `address/${address}/aggregation`)
+  }
+
   /**
    * List all tokens balance belonging to an address.
    *
@@ -18,6 +26,14 @@ export class Address {
    */
   async listTokens (address: string, size: number = 30, next?: string): Promise<ApiPagedResponse<AddressToken>> {
     return await this.client.requestList('GET', `address/${address}/tokens`, size, next)
+  }
+
+  async listTransactions (address: string, size: number = 30, next?: string): Promise<ApiPagedResponse<string>> {
+    return await this.client.requestList('GET', `address/${address}/transactions`, size, next)
+  }
+
+  async listTransactionUnspent (address: string, size: number = 30, next?: string): Promise<ApiPagedResponse<string>> {
+    return await this.client.requestList('GET', `address/${address}/transactions/unspent`, size, next)
   }
 }
 
