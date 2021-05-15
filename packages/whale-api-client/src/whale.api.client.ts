@@ -3,7 +3,6 @@ import fetch from 'cross-fetch'
 import { URLSearchParams } from 'url'
 import { raiseIfError, WhaleClientException, WhaleClientTimeoutException } from './errors'
 import { WhaleApiResponse, ApiPagedResponse } from './whale.api.response'
-import { Address } from './api/address'
 import { Rpc } from './api/rpc'
 import { Transactions } from './api/transactions'
 
@@ -51,7 +50,6 @@ export interface ResponseAsString {
 }
 
 export class WhaleApiClient {
-  public readonly address = new Address(this)
   public readonly rpc = new Rpc(this)
   public readonly transactions = new Transactions(this)
 
