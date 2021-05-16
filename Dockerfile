@@ -8,9 +8,10 @@ COPY package-lock.json ./
 
 RUN npm ci
 
-COPY src ./src
 COPY tsconfig.json ./
 COPY tsconfig.build.json ./
+COPY src ./src
+COPY packages ./packages
 
 RUN npm run build
 
