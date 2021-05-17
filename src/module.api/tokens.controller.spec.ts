@@ -41,65 +41,56 @@ describe('controller.get() for all tokens', () => {
       switch (data.symbol) {
         case 'DFI':
           expect(data.symbol).toBe('DFI')
-          expect(data.symbol_key).toBe('DFI')
+          expect(data.symbolKey).toBe('DFI')
           expect(data.name).toBe('Default Defi token')
           expect(data.decimal).toBe(8)
           expect(data.limit).toBe(0)
           expect(data.mintable).toBe(false)
           expect(data.tradeable).toBe(true)
-          expect(data.is_dat).toBe(true)
-          expect(data.is_lps).toBe(false)
+          expect(data.isDAT).toBe(true)
+          expect(data.isLPS).toBe(false)
           expect(data.finalized).toBe(true)
           expect(data.minted).toBe(0)
-          expect(data.creation_tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-          expect(data.creation_height).toBe(0)
-          expect(data.destruction_tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-          expect(data.destruction_height).toBe(-1)
-          expect(data.collateral_address).toBe('')
+          expect(data.creationTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+          expect(data.creationHeight).toBe(0)
+          expect(data.destructionTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+          expect(data.destructionHeight).toBe(-1)
+          expect(data.collateralAddress).toBe('')
           break
         case 'DSWAP':
           expect(data.symbol).toBe('DSWAP')
-          expect(data.symbol_key).toBe('DSWAP')
+          expect(data.symbolKey).toBe('DSWAP')
           expect(data.name).toBe('DSWAP')
           expect(data.decimal).toBe(8)
           expect(data.limit).toBe(0)
           expect(data.mintable).toBe(true)
           expect(data.tradeable).toBe(true)
-          expect(data.is_dat).toBe(true)
-          expect(data.is_lps).toBe(false)
+          expect(data.isDAT).toBe(true)
+          expect(data.isLPS).toBe(false)
           expect(data.finalized).toBe(false)
           expect(data.minted).toBe(0)
-          expect(typeof data.creation_tx).toBe('string')
-          expect(data.creation_height).toBeGreaterThan(0)
-          expect(data.destruction_tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-          expect(data.destruction_height).toBe(-1)
-          expect(typeof data.collateral_address).toBe('string')
+          expect(typeof data.creationTx).toBe('string')
+          expect(data.creationHeight).toBeGreaterThan(0)
+          expect(data.destructionTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+          expect(data.destructionHeight).toBe(-1)
+          expect(typeof data.collateralAddress).toBe('string')
           break
       }
     })
   })
 
   it('should listTokens with an empty object if size 100 next 300 which is out of range', async () => {
-    const size = '100'
-    const next = '300'
-
-    const result = await controller.get(size, next)
+    const result = await controller.get({ size: 100, next: '300' })
     expect(Object.keys(result.data).length).toBe(0)
   })
 
   it('should listTokens with size 2 next 0', async () => {
-    const size = '2'
-    const next = '0'
-
-    const result = await controller.get(size, next)
+    const result = await controller.get({ size: 2, next: '0' })
     expect(Object.keys(result.data).length).toBe(2)
   })
 
   it('should listTokens with size 1 next 1', async () => {
-    const size = '1'
-    const next = '1'
-
-    const result = await controller.get(size, next)
+    const result = await controller.get({ size: 1, next: '1' })
     expect(Object.keys(result.data).length).toBe(1)
   })
 })
@@ -109,28 +100,28 @@ describe('controller.getId() for DFI', () => {
     const data = await controller.getId('0')
 
     expect(data.symbol).toBe('DFI')
-    expect(data.symbol_key).toBe('DFI')
+    expect(data.symbolKey).toBe('DFI')
     expect(data.name).toBe('Default Defi token')
     expect(data.decimal).toBe(8)
     expect(data.limit).toBe(0)
     expect(data.mintable).toBe(false)
     expect(data.tradeable).toBe(true)
-    expect(data.is_dat).toBe(true)
-    expect(data.is_lps).toBe(false)
+    expect(data.isDAT).toBe(true)
+    expect(data.isLPS).toBe(false)
     expect(data.finalized).toBe(true)
     expect(data.minted).toBe(0)
-    expect(data.creation_tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.creation_height).toBe(0)
-    expect(data.destruction_tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.destruction_height).toBe(-1)
-    expect(data.collateral_address).toBe('')
+    expect(data.creationTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+    expect(data.creationHeight).toBe(0)
+    expect(data.destructionTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+    expect(data.destructionHeight).toBe(-1)
+    expect(data.collateralAddress).toBe('')
   })
 
   it('should return DFI with symbol as param', async () => {
     const data = await controller.getId('DFI')
 
     expect(data.symbol).toBe('DFI')
-    expect(data.symbol_key).toBe('DFI')
+    expect(data.symbolKey).toBe('DFI')
     expect(data.name).toBe('Default Defi token')
   })
 
@@ -138,7 +129,7 @@ describe('controller.getId() for DFI', () => {
     const data = await controller.getId('0000000000000000000000000000000000000000000000000000000000000000')
 
     expect(data.symbol).toBe('DFI')
-    expect(data.symbol_key).toBe('DFI')
+    expect(data.symbolKey).toBe('DFI')
     expect(data.name).toBe('Default Defi token')
   })
 })
@@ -148,37 +139,37 @@ describe('controller.getId() for newly created token', () => {
     const data = await controller.getId('1')
 
     expect(data.symbol).toBe('DSWAP')
-    expect(data.symbol_key).toBe('DSWAP')
+    expect(data.symbolKey).toBe('DSWAP')
     expect(data.name).toBe('DSWAP')
     expect(data.decimal).toBe(8)
     expect(data.limit).toBe(0)
     expect(data.mintable).toBe(true)
     expect(data.tradeable).toBe(true)
-    expect(data.is_dat).toBe(true)
-    expect(data.is_lps).toBe(false)
+    expect(data.isDAT).toBe(true)
+    expect(data.isLPS).toBe(false)
     expect(data.finalized).toBe(false)
     expect(data.minted).toBe(0)
-    expect(typeof data.creation_tx).toBe('string')
-    expect(data.creation_height).toBeGreaterThan(0)
-    expect(data.destruction_tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.destruction_height).toBe(-1)
-    expect(typeof data.collateral_address).toBe('string')
+    expect(typeof data.creationTx).toBe('string')
+    expect(data.creationHeight).toBeGreaterThan(0)
+    expect(data.destructionTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+    expect(data.destructionHeight).toBe(-1)
+    expect(typeof data.collateralAddress).toBe('string')
   })
 
   it('should return DSWAP token with symbol as param', async () => {
     const data = await controller.getId('DSWAP')
 
     expect(data.symbol).toBe('DSWAP')
-    expect(data.symbol_key).toBe('DSWAP')
+    expect(data.symbolKey).toBe('DSWAP')
     expect(data.name).toBe('DSWAP')
   })
 
   it('should return DSWAP token with creationTx as param', async () => {
     let data = await controller.getId('1')
-    data = await controller.getId(data.creation_tx)
+    data = await controller.getId(data.creationTx)
 
     expect(data.symbol).toBe('DSWAP')
-    expect(data.symbol_key).toBe('DSWAP')
+    expect(data.symbolKey).toBe('DSWAP')
     expect(data.name).toBe('DSWAP')
   })
 })
