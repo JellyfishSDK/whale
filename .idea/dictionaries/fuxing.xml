@@ -41,6 +41,7 @@
       <w>devnet</w>
       <w>dftx</w>
       <w>dockerode</w>
+      <w>dogfooding</w>
       <w>dummypos</w>
       <w>dumpprivkey</w>
       <w>equalverify</w>
@@ -58,6 +59,7 @@
       <w>getmintinginfo</w>
       <w>getnetworkhashps</w>
       <w>getnewaddress</w>
+      <w>getrawtransaction</w>
       <w>getreceivedbyaddress</w>
       <w>gettoken</w>
       <w>gettransaction</w>
@@ -145,6 +147,7 @@
       <w>segwit</w>
       <w>sendrawtransaction</w>
       <w>sendtoaddress</w>
+      <w>sendtokenstoaddress</w>
       <w>setwalletflag</w>
       <w>sighash</w>
       <w>sighashtype</w>

@@ -32,6 +32,8 @@ issue:
       list:
         - core
         - workflow
+        - whale-api-client
+        - whale-api-wallet
         - module-api
         - module-database
         - module-defid

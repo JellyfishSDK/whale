@@ -8,11 +8,12 @@ COPY package-lock.json ./
 
 RUN npm ci
 
-COPY src ./src
 COPY tsconfig.json ./
 COPY tsconfig.build.json ./
+COPY src ./src
+COPY packages ./packages
 
 RUN npm run build
 
 ENV NODE_ENV=production
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]

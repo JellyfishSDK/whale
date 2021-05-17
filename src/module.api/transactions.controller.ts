@@ -1,19 +1,8 @@
 import BigNumber from 'bignumber.js'
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  HttpCode,
-  Post,
-  UseGuards,
-  UseInterceptors,
-  ValidationPipe
-} from '@nestjs/common'
-import { NetworkGuard } from '@src/module.api/commons/network.guard'
-import { ResponseInterceptor } from '@src/module.api/commons/response.interceptor'
-import { ExceptionInterceptor } from '@src/module.api/commons/exception.interceptor'
+import { Body, Controller, HttpCode, Post, ValidationPipe } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { IsHexadecimal, IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator'
+import { BadRequestApiException } from '@src/module.api/_core/api.error'
 
 class RawTxDto {
   @IsNotEmpty()
@@ -27,8 +16,6 @@ class RawTxDto {
 }
 
 @Controller('/v1/:network/transactions')
-@UseGuards(NetworkGuard)
-@UseInterceptors(ResponseInterceptor, ExceptionInterceptor)
 export class TransactionsController {
   /**
    * MaxFeeRate = vkb * Fees
@@ -45,7 +32,7 @@ export class TransactionsController {
   /**
    * @param {RawTxDto} tx to submit to the network.
    * @return {Promise<string>} hash of the transaction
-   * @throws {BadRequestException} if tx fail mempool acceptance
+   * @throws {BadRequestApiException} if tx fail mempool acceptance
    */
   @Post()
   async send (@Body() tx: RawTxDto): Promise<string> {
@@ -53,14 +40,15 @@ export class TransactionsController {
     try {
       return await this.client.rawtx.sendRawTransaction(tx.hex, maxFeeRate)
     } catch (e) {
-      throw new BadRequestException()
+      // TODO(fuxingloh): more meaningful error
+      throw new BadRequestApiException()
     }
   }
 
   /**
    * @param {RawTxDto} tx to test whether allow acceptance into mempool.
    * @return {Promise<void>}
-   * @throws {BadRequestException} if tx fail mempool acceptance
+   * @throws {BadRequestApiException} if tx fail mempool acceptance
    */
   @Post('/test')
   @HttpCode(200)
@@ -73,7 +61,7 @@ export class TransactionsController {
       }
     } catch (e) {
     }
-    throw new BadRequestException()
+    throw new BadRequestApiException()
   }
 
   private getMaxFeeRate (tx: RawTxDto): BigNumber {

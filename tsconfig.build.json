@@ -3,8 +3,13 @@
   "exclude": [
     "node_modules",
     "test",
-    "__e2e__",
     "dist",
-    "**/*spec.ts"
+    "packages/**/__tests__",
+    "packages/**/src/error",
+    "packages/**/src/**.ts",
+    "**/*.e2e.ts",
+    "**/e2e.*.ts",
+    "**/*.spec.ts",
+    "**/*.spec/"
   ]
 }
