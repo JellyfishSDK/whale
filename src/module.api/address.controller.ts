@@ -9,6 +9,11 @@ import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { ScriptActivity, ScriptActivityMapper } from '@src/module.model/script.activity'
 import { ScriptAggregation, ScriptAggregationMapper } from '@src/module.model/script.aggregation'
 import { ScriptUnspent, ScriptUnspentMapper } from '@src/module.model/script.unspent'
+import { DeFiAddress } from '@defichain/jellyfish-address'
+import { NetworkName } from '@defichain/jellyfish-network'
+import { HexEncoder } from '@src/module.model/_hex.encoder'
+import script from '@defichain/jellyfish-transaction/dist/script'
+import { SmartBuffer } from 'smart-buffer'
 
 @Controller('/v1/:network/address/:address')
 export class AddressController {
@@ -22,14 +27,20 @@ export class AddressController {
   }
 
   @Get('/balance')
-  async getBalance (@Param('address') address: string): Promise<string> {
-    const aggregation = await this.getAggregation(address)
+  async getBalance (
+    @Param('network') network: NetworkName,
+      @Param('address') address: string
+  ): Promise<string> {
+    const aggregation = await this.getAggregation(network, address)
     return aggregation?.amount.unspent ?? '0'
   }
 
   @Get('/aggregation')
-  async getAggregation (@Param('address') address: string): Promise<ScriptAggregation | undefined> {
-    const hid = addressToHid(address)
+  async getAggregation (
+    @Param('network') network: NetworkName,
+      @Param('address') address: string
+  ): Promise<ScriptAggregation | undefined> {
+    const hid = addressToHid(network, address)
     return await this.aggregationMapper.getLatest(hid)
   }
 
@@ -68,11 +79,12 @@ export class AddressController {
 
   @Get('/transactions')
   async listTransactions (
-    @Param('address') address: string,
+    @Param('network') network: NetworkName,
+      @Param('address') address: string,
       @Query('size') size: number = 30,
       @Query('next') next?: string
   ): Promise<ApiPagedResponse<ScriptActivity>> {
-    const hid = addressToHid(address)
+    const hid = addressToHid(network, address)
     const items = await this.activityMapper.query(hid, size, next)
 
     return ApiPagedResponse.of(items, size, item => {
@@ -82,11 +94,12 @@ export class AddressController {
 
   @Get('/transactions/unspent')
   async listTransactionUnspent (
-    @Param('address') address: string,
+    @Param('network') network: NetworkName,
+      @Param('address') address: string,
       @Query('size') size: number = 30,
       @Query('next') next?: string
   ): Promise<ApiPagedResponse<ScriptUnspent>> {
-    const hid = addressToHid(address)
+    const hid = addressToHid(network, address)
     const items = await this.unspentMapper.query(hid, size, next)
 
     return ApiPagedResponse.of(items, size, item => {
@@ -96,12 +109,17 @@ export class AddressController {
 }
 
 /**
+ * @param {NetworkName} name of the network
  * @param {string} address to convert to HID
  * @return {string} HID is hashed script.hex, SHA256(decodeAddress(address).hex)
  */
-function addressToHid (address: string): string {
-  // TODO(fuxingloh): convert from address to hex to HID
-  return ''
+function addressToHid (name: NetworkName, address: string): string {
+  // TODO(fuxingloh): need to refactor this
+  const decoded = DeFiAddress.from(name, address)
+  const stack = decoded.getScript().stack
+  const buffer = new SmartBuffer()
+  script.fromOpCodesToBuffer(stack, buffer)
+  return HexEncoder.asSHA256(buffer.toString('hex'))
 }
 
 function mapAddressToken (id: string, tokenInfo: TokenInfo, value: BigNumber): AddressToken {

@@ -20,11 +20,13 @@ jobs:
       - name: Upgrade dependencies
         run: |
           npm upgrade \
+          @defichain/jellyfish-address \
           @defichain/jellyfish-api-core \
           @defichain/jellyfish-api-jsonrpc \
           @defichain/jellyfish-network \
           @defichain/jellyfish-json \
           @defichain/jellyfish-crypto \
+          @defichain/jellyfish-transaction \
           @defichain/testcontainers \
           @defichain/testing
 
@@ -43,4 +45,3 @@ jobs:
             #### What this PR does / why we need it:
             Bump `@defichain/*` dependencies to the newest release.
           branch: defichain-bot/bump-deps
-          draft: true

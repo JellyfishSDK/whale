@@ -26,10 +26,12 @@
     "packages:publish:latest": "lerna exec -- npm publish --tag latest --access public"
   },
   "dependencies": {
+    "@defichain/jellyfish-address": "next",
     "@defichain/jellyfish-api-core": "next",
     "@defichain/jellyfish-api-jsonrpc": "next",
     "@defichain/jellyfish-json": "next",
     "@defichain/jellyfish-network": "next",
+    "@defichain/jellyfish-transaction": "next",
     "@nestjs/common": "^7.6.15",
     "@nestjs/config": "^0.6.3",
     "@nestjs/core": "^7.6.15",
