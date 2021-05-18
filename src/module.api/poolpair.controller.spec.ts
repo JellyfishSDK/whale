@@ -29,6 +29,45 @@ beforeAll(async () => {
   }).compile()
 
   controller = app.get(PoolPairController)
+
+  const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
+
+  for (const token of tokens) {
+    await container.waitForWalletBalanceGTE(110)
+    await createToken(container, token)
+    await mintTokens(container, token)
+  }
+  await createPoolPair(container, 'A', 'B')
+  await createPoolPair(container, 'A', 'C')
+  await createPoolPair(container, 'A', 'D')
+  await createPoolPair(container, 'A', 'E')
+  await createPoolPair(container, 'A', 'F')
+  await createPoolPair(container, 'B', 'C')
+  await createPoolPair(container, 'B', 'D')
+  await createPoolPair(container, 'B', 'E')
+  await container.generate(1)
+
+  await addPoolLiquidity(container, {
+    tokenA: 'A',
+    amountA: 100,
+    tokenB: 'B',
+    amountB: 200,
+    shareAddress: await getNewAddress(container)
+  })
+  await addPoolLiquidity(container, {
+    tokenA: 'A',
+    amountA: 50,
+    tokenB: 'C',
+    amountB: 300,
+    shareAddress: await getNewAddress(container)
+  })
+  await addPoolLiquidity(container, {
+    tokenA: 'A',
+    amountA: 90,
+    tokenB: 'D',
+    amountB: 360,
+    shareAddress: await getNewAddress(container)
+  })
 })
 
 afterAll(async () => {
@@ -36,24 +75,6 @@ afterAll(async () => {
 })
 
 describe('list', () => {
-  beforeAll(async () => {
-    const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
-
-    for (const token of tokens) {
-      await container.waitForWalletBalanceGTE(110)
-      await createToken(container, token)
-    }
-    await createPoolPair(container, 'A', 'B')
-    await createPoolPair(container, 'A', 'C')
-    await createPoolPair(container, 'A', 'D')
-    await createPoolPair(container, 'A', 'E')
-    await createPoolPair(container, 'A', 'F')
-    await createPoolPair(container, 'B', 'C')
-    await createPoolPair(container, 'B', 'D')
-    await createPoolPair(container, 'B', 'E')
-    await container.generate(1)
-  })
-
   it('should list', async () => {
     const response = await controller.list({
       size: 30
@@ -69,13 +90,13 @@ describe('list', () => {
       status: true,
       idTokenA: '1',
       idTokenB: '3',
-      reserveA: new BigNumber('0'),
-      reserveB: new BigNumber('0'),
+      reserveA: new BigNumber('50'),
+      reserveB: new BigNumber('300'),
       commission: new BigNumber('0'),
-      totalLiquidity: new BigNumber('0'),
-      'reserveA/reserveB': '0',
-      'reserveB/reserveA': '0',
-      tradeEnabled: false,
+      totalLiquidity: new BigNumber('122.47448713'),
+      'reserveA/reserveB': new BigNumber('0.16666666'),
+      'reserveB/reserveA': new BigNumber('6'),
+      tradeEnabled: true,
       ownerAddress: expect.any(String),
       blockCommissionA: new BigNumber('0'),
       blockCommissionB: new BigNumber('0'),
@@ -121,42 +142,39 @@ describe('list', () => {
   })
 })
 
-describe('listPoolShares', () => {
-  beforeAll(async () => {
-    const tokens = ['U', 'V', 'W']
+describe('get', () => {
+  it('should get', async () => {
+    const response = await controller.get('A-B')
 
-    for (const token of tokens) {
-      await container.waitForWalletBalanceGTE(110)
-      await createToken(container, token)
-      await mintTokens(container, token)
-    }
-    await createPoolPair(container, 'U', 'V')
-    await createPoolPair(container, 'U', 'W')
-    await createPoolPair(container, 'V', 'W')
-
-    await addPoolLiquidity(container, {
-      tokenA: 'U',
-      amountA: 100,
-      tokenB: 'V',
-      amountB: 200,
-      shareAddress: await getNewAddress(container)
-    })
-    await addPoolLiquidity(container, {
-      tokenA: 'U',
-      amountA: 50,
-      tokenB: 'W',
-      amountB: 300,
-      shareAddress: await getNewAddress(container)
-    })
-    await addPoolLiquidity(container, {
-      tokenA: 'V',
-      amountA: 90,
-      tokenB: 'W',
-      amountB: 360,
-      shareAddress: await getNewAddress(container)
+    expect(response).toEqual({
+      symbol: 'A-B',
+      name: 'A-B',
+      status: true,
+      idTokenA: expect.any(String),
+      idTokenB: expect.any(String),
+      reserveA: new BigNumber('100'),
+      reserveB: new BigNumber('200'),
+      commission: new BigNumber('0'),
+      totalLiquidity: new BigNumber('141.42135623'),
+      'reserveA/reserveB': new BigNumber('0.5'),
+      'reserveB/reserveA': new BigNumber('2'),
+      tradeEnabled: true,
+      ownerAddress: expect.any(String),
+      blockCommissionA: new BigNumber('0'),
+      blockCommissionB: new BigNumber('0'),
+      rewardPct: new BigNumber('0'),
+      customRewards: undefined,
+      creationTx: expect.any(String),
+      creationHeight: expect.any(BigNumber)
     })
   })
 
+  it('should throw error while getting non-existent poolpair', async () => {
+    await expect(controller.get('B-Z')).rejects.toThrow()
+  })
+})
+
+describe('listPoolShares', () => {
   it('should listPoolShares', async () => {
     const response = await controller.listPoolShares({
       size: 30
@@ -167,7 +185,7 @@ describe('listPoolShares', () => {
 
     expect(response.data[1]).toEqual({
       id: expect.any(String),
-      poolID: '19',
+      poolID: '8',
       owner: expect.any(String),
       percent: expect.any(BigNumber),
       amount: expect.any(BigNumber),
@@ -180,9 +198,9 @@ describe('listPoolShares', () => {
       size: 2
     })
     expect(first.data.length).toBe(2)
-    expect(first.page?.next).toBe('19')
-    expect(first.data[0].poolID).toBe('18')
-    expect(first.data[1].poolID).toBe('19')
+    expect(first.page?.next).toBe('8')
+    expect(first.data[0].poolID).toBe('7')
+    expect(first.data[1].poolID).toBe('8')
 
     const next = await controller.listPoolShares({
       size: 10,
@@ -191,7 +209,7 @@ describe('listPoolShares', () => {
 
     expect(next.data.length).toBe(1)
     expect(next.page?.next).toBeUndefined()
-    expect(next.data[0].poolID).toBe('20')
+    expect(next.data[0].poolID).toBe('9')
   })
 
   it('should listPoolShares with undefined next pagination', async () => {
@@ -201,6 +219,6 @@ describe('listPoolShares', () => {
     })
 
     expect(first.data.length).toBe(1)
-    expect(first.page?.next).toBe('18')
+    expect(first.page?.next).toBe('7')
   })
 })

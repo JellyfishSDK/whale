@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common'
+import { ConflictException, Controller, Get, Query } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PoolPairInfoCache } from '@src/module.api/cache/poolpair.info.cache'
@@ -16,6 +16,8 @@ export class PoolPairController {
 
   /**
    * @param {PaginationQuery} query
+   * @param {number} query.size
+   * @param {string} [query.next]
    */
   @Get('/')
   async list (
@@ -40,7 +42,22 @@ export class PoolPairController {
   }
 
   /**
+   * @param {string} symbol
+   * @return {Promise<PoolPairInfo>}
+   */
+  @Get('/:symbol')
+  async get (symbol: string): Promise<PoolPairInfo> {
+    const poolPairInfo = await this.poolPairInfoCache.get(symbol)
+    if (poolPairInfo === undefined) {
+      throw new ConflictException('unable to find token')
+    }
+    return poolPairInfo
+  }
+
+  /**
    * @param {PaginationQuery} query
+   * @param {number} query.size
+   * @param {string} [query.next]
    */
   @Get('/shares')
   async listPoolShares (

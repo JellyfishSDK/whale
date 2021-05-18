@@ -1,3 +1,4 @@
+import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import BigNumber from 'bignumber.js'
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
@@ -20,6 +21,23 @@ export class PoolPair {
     return await this.client.requestList('GET', 'poolpairs', size, next)
   }
 
+  /**
+   * Get pool pair
+   *
+   * @param {string} symbol
+   * @return {Promise<PoolPairInfo>}
+   */
+  async get (symbol: string): Promise<PoolPairInfo> {
+    return await this.client.requestData('GET', `poolpairs/${symbol}`)
+  }
+
+  /**
+   * List pool shares
+   *
+   * @param {number} size of PoolPairInfoDto balance to query
+   * @param {number} next set of PoolPairInfoDto
+   * @return {Promise<ApiPagedResponse<PoolPairInfoDto>>}
+   */
   async listPoolShares (size: number = 30, next?: string): Promise<ApiPagedResponse<PoolShareInfoDto>> {
     return await this.client.requestList('GET', 'poolpairs/shares', size, next)
   }
