@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { ConfigModule } from '@nestjs/config'
+import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { TokensController } from '@src/module.api/tokens.controller'
 import { createToken } from '@defichain/testing'
 
@@ -23,13 +22,9 @@ afterAll(async () => {
 
 beforeEach(async () => {
   const app: TestingModule = await Test.createTestingModule({
-    imports: [ConfigModule.forRoot({
-      load: [() => ({ network: 'regtest' })]
-    })],
     controllers: [TokensController],
     providers: [{ provide: JsonRpcClient, useValue: client }]
   }).compile()
-
   controller = app.get<TokensController>(TokensController)
 })
 

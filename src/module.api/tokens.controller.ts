@@ -1,8 +1,8 @@
 import { Controller, Get, Param, Query } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
+import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
-import { TokenInfo, TokenResult } from '@defichain/jellyfish-api-core/dist/category/token'
 
 @Controller('/v1/:network/tokens')
 export class TokensController {
@@ -19,12 +19,12 @@ export class TokensController {
   async get (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<TokenInfo>> {
-    const result: TokenResult = await this.client.token.listTokens({
+    const data = await this.client.token.listTokens({
       start: query.next !== undefined ? Number(query.next) : 0,
       including_start: query.next === undefined,
-      limit: Number(query.size)
+      limit: query.size
     }, true)
-    const tokens: TokenData[] = Object.entries(result)
+    const tokens: TokenData[] = Object.entries(data)
       .map(([id, value]): TokenData => {
         return {
           id: id,
