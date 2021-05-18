@@ -10,26 +10,44 @@ export class TokensController {
   }
 
   /**
-   * @param {string} list of tokens
+   * Returns information about token.
+   *
    * @param {PaginationQuery} query
+   * @return {Promise<ApiPagedResponse<TokenInfo>>}
    */
   @Get('/')
   async get (
-    @Query() query: PaginationQuery = { next: '0', size: 1000000 }
+    @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<TokenInfo>> {
     const result: TokenResult = await this.client.token.listTokens({
-      start: Number(query.next),
-      including_start: true,
-      limit: query.size
+      start: query.next !== undefined ? Number(query.next) : 0,
+      including_start: query.next === undefined,
+      limit: Number(query.size)
     }, true)
-
-    const tokens: TokenInfo[] = Object.entries(result)
-      .map(([id, value]): TokenInfo => {
-        return value
-      })
-
+    const tokens: TokenData[] = Object.entries(result)
+      .map(([id, value]): TokenData => {
+        return {
+          id: id,
+          symbol: value.symbol,
+          symbolKey: value.symbolKey,
+          name: value.name,
+          decimal: value.decimal,
+          limit: value.limit,
+          mintable: value.mintable,
+          tradeable: value.tradeable,
+          isDAT: value.isDAT,
+          isLPS: value.isLPS,
+          finalized: value.finalized,
+          minted: value.minted,
+          creationTx: value.creationTx,
+          creationHeight: value.creationHeight,
+          destructionTx: value.destructionTx,
+          destructionHeight: value.destructionHeight,
+          collateralAddress: value.collateralAddress
+        }
+      }).sort(a => Number.parseInt(a.id))
     return ApiPagedResponse.of(tokens, query.size, item => {
-      return item.symbolKey
+      return item.id
     })
   }
 
@@ -37,11 +55,31 @@ export class TokensController {
    * Returns information about token.
    *
    * @param {string} id id/symbol/creationTx
-   * @return {Promise<TokenResult>}
+   * @return {Promise<TokenInfo>}
    */
   @Get('/:id')
   async getId (@Param('id') id: string): Promise<TokenInfo> {
     const data = await this.client.token.getToken(id)
     return data[Object.keys(data)[0]]
   }
+}
+
+interface TokenData {
+  id: string
+  symbol: string
+  symbolKey: string
+  name: string
+  decimal: number
+  limit: number
+  mintable: boolean
+  tradeable: boolean
+  isDAT: boolean
+  isLPS: boolean
+  finalized: boolean
+  minted: number
+  creationTx: string
+  creationHeight: number
+  destructionTx: string
+  destructionHeight: number
+  collateralAddress: string
 }

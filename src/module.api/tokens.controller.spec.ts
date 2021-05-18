@@ -35,8 +35,7 @@ beforeEach(async () => {
 
 describe('controller.get() for all tokens', () => {
   it('should listTokens', async () => {
-    const result = await controller.get()
-
+    const result = await controller.get({ size: 100 })
     result.data.forEach(function (data) {
       switch (data.symbol) {
         case 'DFI':
@@ -79,19 +78,32 @@ describe('controller.get() for all tokens', () => {
     })
   })
 
+  it('should listTokens with pagination', async () => {
+    const first = await controller.get({ size: 1 })
+    expect(first.data.length).toBe(1)
+    expect(first.page?.next).toBe('0')
+
+    const second = await controller.get({
+      size: 1,
+      next: first.page?.next
+    })
+
+    expect(second.data.length).toBe(1)
+    expect(second.page?.next).toBe('1')
+
+    const third = await controller.get({
+      size: 1,
+      next: second.page?.next
+    })
+
+    expect(third.data.length).toBe(0)
+    expect(third.page).toBeUndefined()
+  })
+
   it('should listTokens with an empty object if size 100 next 300 which is out of range', async () => {
     const result = await controller.get({ size: 100, next: '300' })
-    expect(Object.keys(result.data).length).toBe(0)
-  })
-
-  it('should listTokens with size 2 next 0', async () => {
-    const result = await controller.get({ size: 2, next: '0' })
-    expect(Object.keys(result.data).length).toBe(2)
-  })
-
-  it('should listTokens with size 1 next 1', async () => {
-    const result = await controller.get({ size: 1, next: '1' })
-    expect(Object.keys(result.data).length).toBe(1)
+    expect(result.data.length).toBe(0)
+    expect(result.page).toBeUndefined()
   })
 })
 
