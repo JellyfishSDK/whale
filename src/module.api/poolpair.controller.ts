@@ -2,9 +2,9 @@ import { Controller, Get, Query } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PoolPairInfoCache } from '@src/module.api/cache/poolpair.info.cache'
-import { PoolPairInfoDto } from '@whale-api-client/api/poolpair'
+import { PoolPairInfoDto, PoolShareInfoDto } from '@whale-api-client/api/poolpair'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
-import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
+import { PoolPairInfo, PoolShareInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 
 @Controller('/v1/:network/poolpairs')
 export class PoolPairController {
@@ -15,14 +15,15 @@ export class PoolPairController {
   }
 
   /**
-   * @param {string} address to list tokens belonging to address
    * @param {PaginationQuery} query
    */
   @Get('/')
   async list (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<PoolPairInfoDto>> {
+    // TODO(canonbrother): read cache
     // const poolPairResult = await this.poolPairInfoCache.list(query)
+
     const poolPairResult = await this.rpcClient.poolpair.listPoolPairs({
       start: query.next !== undefined ? Number(query.next) : 0,
       including_start: query.next === undefined, // TODO(fuxingloh): open issue at DeFiCh/ain, rpc_accounts.cpp#388
@@ -34,6 +35,32 @@ export class PoolPairController {
     }).sort(a => Number.parseInt(a.id))
 
     return ApiPagedResponse.of(poolPairInfosDto, query.size, item => {
+      return item.id
+    })
+  }
+
+  /**
+   * @param {PaginationQuery} query
+   */
+  @Get('/shares')
+  async listPoolShares (
+    @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<PoolShareInfoDto>> {
+    // TODO(canonbrother): read cache
+
+    const poolShareResult = await this.rpcClient.poolpair.listPoolShares({
+      start: query.next !== undefined ? Number(query.next) : 0,
+      including_start: query.next === undefined, // TODO(fuxingloh): open issue at DeFiCh/ain, rpc_accounts.cpp#388
+      limit: query.size
+    }, true)
+
+    console.log('poolShareResult: ', poolShareResult)
+
+    const poolShareInfosDto = Object.entries(poolShareResult).map(([id, value]) => {
+      return mapPoolShare(id, value)
+    }).sort(a => Number.parseInt(a.id))
+
+    return ApiPagedResponse.of(poolShareInfosDto, query.size, item => {
       return item.id
     })
   }
@@ -61,5 +88,16 @@ function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairInfoDto {
     customRewards: poolPairInfo.customRewards,
     creationTx: poolPairInfo.creationTx,
     creationHeight: poolPairInfo.creationHeight
+  }
+}
+
+function mapPoolShare (id: string, poolShareInfo: PoolShareInfo): PoolShareInfoDto {
+  return {
+    id,
+    poolID: poolShareInfo.poolID,
+    owner: poolShareInfo.owner,
+    percent: poolShareInfo['%'],
+    amount: poolShareInfo.amount,
+    totalLiquidity: poolShareInfo.totalLiquidity
   }
 }

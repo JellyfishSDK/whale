@@ -10,7 +10,7 @@ export class PoolPair {
   }
 
   /**
-   * List poolpairs
+   * List pool pairs
    *
    * @param {number} size of PoolPairInfoDto balance to query
    * @param {number} next set of PoolPairInfoDto
@@ -18,6 +18,10 @@ export class PoolPair {
    */
   async list (size: number = 30, next?: string): Promise<ApiPagedResponse<PoolPairInfoDto>> {
     return await this.client.requestList('GET', 'poolpairs', size, next)
+  }
+
+  async listPoolShares (size: number = 30, next?: string): Promise<ApiPagedResponse<PoolShareInfoDto>> {
+    return await this.client.requestList('GET', 'poolpairs/shares', size, next)
   }
 }
 
@@ -42,4 +46,13 @@ export interface PoolPairInfoDto {
   customRewards: BigNumber
   creationTx: string
   creationHeight: BigNumber
+}
+
+export interface PoolShareInfoDto {
+  id: string
+  poolID: string
+  owner: string
+  percent: BigNumber
+  amount: BigNumber
+  totalLiquidity: BigNumber
 }
