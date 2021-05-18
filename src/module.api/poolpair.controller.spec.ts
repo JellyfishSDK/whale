@@ -184,7 +184,6 @@ describe('listPoolShares', () => {
     expect(response.page).toBeUndefined()
 
     expect(response.data[1]).toEqual({
-      id: expect.any(String),
       poolID: '8',
       owner: expect.any(String),
       percent: expect.any(BigNumber),

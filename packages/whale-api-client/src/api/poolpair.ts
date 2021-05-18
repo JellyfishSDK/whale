@@ -36,7 +36,7 @@ export class PoolPair {
    *
    * @param {number} size of PoolPairInfoDto balance to query
    * @param {number} next set of PoolPairInfoDto
-   * @return {Promise<ApiPagedResponse<PoolPairInfoDto>>}
+   * @return {Promise<ApiPagedResponse<PoolShareInfoDto>>}
    */
   async listPoolShares (size: number = 30, next?: string): Promise<ApiPagedResponse<PoolShareInfoDto>> {
     return await this.client.requestList('GET', 'poolpairs/shares', size, next)
@@ -67,7 +67,6 @@ export interface PoolPairInfoDto {
 }
 
 export interface PoolShareInfoDto {
-  id: string
   poolID: string
   owner: string
   percent: BigNumber

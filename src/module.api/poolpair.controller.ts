@@ -18,6 +18,7 @@ export class PoolPairController {
    * @param {PaginationQuery} query
    * @param {number} query.size
    * @param {string} [query.next]
+   * @return {Promise<ApiPagedResponse<PoolPairInfoDto>>}
    */
   @Get('/')
   async list (
@@ -55,6 +56,7 @@ export class PoolPairController {
    * @param {PaginationQuery} query
    * @param {number} query.size
    * @param {string} [query.next]
+   * @return {Promise<ApiPagedResponse<PoolShareInfoDto>>}
    */
   @Get('/shares')
   async listPoolShares (
@@ -66,9 +68,9 @@ export class PoolPairController {
       limit: query.size
     }, true)
 
-    const poolShareInfosDto = Object.entries(poolShareResult).map(([id, value]) => {
-      return mapPoolShare(id, value)
-    }).sort(a => Number.parseInt(a.id))
+    const poolShareInfosDto = Object.entries(poolShareResult).map(([, value]) => {
+      return mapPoolShare(value)
+    }).sort(a => Number.parseInt(a.poolID))
 
     return ApiPagedResponse.of(poolShareInfosDto, query.size, item => {
       return item.poolID
@@ -101,9 +103,8 @@ function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairInfoDto {
   }
 }
 
-function mapPoolShare (id: string, poolShareInfo: PoolShareInfo): PoolShareInfoDto {
+function mapPoolShare (poolShareInfo: PoolShareInfo): PoolShareInfoDto {
   return {
-    id,
     poolID: poolShareInfo.poolID,
     owner: poolShareInfo.owner,
     percent: poolShareInfo['%'],
