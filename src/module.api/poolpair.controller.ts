@@ -23,9 +23,6 @@ export class PoolPairController {
   async list (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<PoolPairInfoDto>> {
-    // TODO(canonbrother): read cache
-    // const poolPairResult = await this.poolPairInfoCache.list(query)
-
     const poolPairResult = await this.rpcClient.poolpair.listPoolPairs({
       start: query.next !== undefined ? Number(query.next) : 0,
       including_start: query.next === undefined, // TODO(fuxingloh): open issue at DeFiCh/ain, rpc_accounts.cpp#388
@@ -63,8 +60,6 @@ export class PoolPairController {
   async listPoolShares (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<PoolShareInfoDto>> {
-    // TODO(canonbrother): read cache
-
     const poolShareResult = await this.rpcClient.poolpair.listPoolShares({
       start: query.next !== undefined ? Number(query.next) : 0,
       including_start: query.next === undefined, // TODO(fuxingloh): open issue at DeFiCh/ain, rpc_accounts.cpp#388
