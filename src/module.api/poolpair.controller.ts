@@ -54,14 +54,12 @@ export class PoolPairController {
       limit: query.size
     }, true)
 
-    console.log('poolShareResult: ', poolShareResult)
-
     const poolShareInfosDto = Object.entries(poolShareResult).map(([id, value]) => {
       return mapPoolShare(id, value)
     }).sort(a => Number.parseInt(a.id))
 
     return ApiPagedResponse.of(poolShareInfosDto, query.size, item => {
-      return item.id
+      return item.poolID
     })
   }
 }
