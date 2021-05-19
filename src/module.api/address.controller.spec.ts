@@ -61,8 +61,8 @@ describe('tokens', () => {
     await container.generate(1)
   })
 
-  it('should listTokens', async () => {
-    const response = await controller.listTokens(address, {
+  it('should listToken', async () => {
+    const response = await controller.listToken(address, {
       size: 30
     })
 
@@ -80,8 +80,8 @@ describe('tokens', () => {
     })
   })
 
-  it('should listTokens with pagination', async () => {
-    const first = await controller.listTokens(address, {
+  it('should listToken with pagination', async () => {
+    const first = await controller.listToken(address, {
       size: 2
     })
     expect(first.data.length).toBe(2)
@@ -89,7 +89,7 @@ describe('tokens', () => {
     expect(first.data[0].symbol).toBe('A')
     expect(first.data[1].symbol).toBe('B')
 
-    const next = await controller.listTokens(address, {
+    const next = await controller.listToken(address, {
       size: 10,
       next: first.page?.next
     })
@@ -102,8 +102,8 @@ describe('tokens', () => {
     expect(next.data[3].symbol).toBe('F')
   })
 
-  it('should listTokens with undefined next pagination', async () => {
-    const first = await controller.listTokens(address, {
+  it('should listToken with undefined next pagination', async () => {
+    const first = await controller.listToken(address, {
       size: 2,
       next: undefined
     })

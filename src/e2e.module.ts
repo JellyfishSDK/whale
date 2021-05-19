@@ -9,6 +9,8 @@ import { MemoryDatabase } from '@src/module.database/provider.memory/memory.data
 import { Database } from '@src/module.database/database'
 import { BlockMapper } from '@src/module.model/block'
 import waitForExpect from 'wait-for-expect'
+import { addressToHid } from '@src/module.api/address.controller'
+import { ScriptAggregationMapper } from '@src/module.model/script.aggregation'
 
 /**
  * Configures an end-to-end testing app integrated with all modules.
@@ -69,6 +71,15 @@ export async function waitForIndexedHeight (app: NestFastifyApplication, height:
   await waitForExpect(async () => {
     const block = await blockMapper.getHighest()
     await expect(block?.height).toBeGreaterThan(height)
+  }, timeout)
+}
+
+export async function waitForAddressTxCount (app: NestFastifyApplication, address: string, txCount: number, timeout: number = 15000): Promise<void> {
+  const hid = addressToHid('regtest', address)
+  const aggregationMapper = app.get(ScriptAggregationMapper)
+  await waitForExpect(async () => {
+    const agg = await aggregationMapper.getLatest(hid)
+    expect(agg?.statistic.txCount).toBe(txCount)
   }, timeout)
 }
 

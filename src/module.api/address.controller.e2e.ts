@@ -1,9 +1,7 @@
-import waitForExpect from 'wait-for-expect'
-import { AddressController, addressToHid } from '@src/module.api/address.controller'
-import { ScriptAggregationMapper } from '@src/module.model/script.aggregation'
+import { AddressController } from '@src/module.api/address.controller'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
+import { createTestingApp, stopTestingApp, waitForAddressTxCount, waitForIndexedHeight } from '@src/e2e.module'
 import { createSignedTxnHex } from '@defichain/testing'
 import { WIF } from '@defichain/jellyfish-crypto'
 
@@ -27,15 +25,6 @@ afterAll(async () => {
   await stopTestingApp(container, app)
 })
 
-async function expectTxCount (address: string, txCount: number, timeout: number = 15000): Promise<void> {
-  const hid = addressToHid('regtest', address)
-  const aggregationMapper = app.get(ScriptAggregationMapper)
-  await waitForExpect(async () => {
-    const agg = await aggregationMapper.getLatest(hid)
-    expect(agg?.statistic.txCount).toBe(txCount)
-  }, timeout)
-}
-
 describe('balance', () => {
   it('getBalance should be zero', async () => {
     const address = await container.getNewAddress()
@@ -47,7 +36,7 @@ describe('balance', () => {
     const address = 'bcrt1qf5v8n3kfe6v5mharuvj0qnr7g74xnu9leut39r'
 
     await container.fundAddress(address, 1.23)
-    await expectTxCount(address, 1)
+    await waitForAddressTxCount(app, address, 1)
 
     const balance = await controller.getBalance('regtest', address)
     expect(balance).toBe('1.23000000')
@@ -57,7 +46,7 @@ describe('balance', () => {
     const address = await container.getNewAddress('', 'legacy')
 
     await container.fundAddress(address, 0.00100000)
-    await expectTxCount(address, 1)
+    await waitForAddressTxCount(app, address, 1)
 
     const balance = await controller.getBalance('regtest', address)
     expect(balance).toBe('0.00100000')
@@ -67,7 +56,7 @@ describe('balance', () => {
     const address = await container.getNewAddress('', 'p2sh-segwit')
 
     await container.fundAddress(address, 10.99999999)
-    await expectTxCount(address, 1)
+    await waitForAddressTxCount(app, address, 1)
 
     const balance = await controller.getBalance('regtest', address)
     expect(balance).toBe('10.99999999')
@@ -79,7 +68,7 @@ describe('balance', () => {
     await container.fundAddress(address, 0.12340001)
     await container.fundAddress(address, 4.32412313)
     await container.fundAddress(address, 12.93719381)
-    await expectTxCount(address, 3)
+    await waitForAddressTxCount(app, address, 3)
 
     const balance = await controller.getBalance('regtest', address)
     expect(balance).toBe('17.38471695')
@@ -93,7 +82,7 @@ describe('aggregation', () => {
     await container.fundAddress(address, 0.12340001)
     await container.fundAddress(address, 4.32412313)
     await container.fundAddress(address, 12.93719381)
-    await expectTxCount(address, 3)
+    await waitForAddressTxCount(app, address, 3)
 
     const agg = await controller.getAggregation('regtest', address)
     expect(agg).toEqual({
@@ -151,12 +140,12 @@ describe('transactions', () => {
       await createSignedTxnHex(container, 1.123, 1.1228, options)
     ])
     await container.generate(1)
-    await expectTxCount(addressB.bech32, 2)
+    await waitForAddressTxCount(app, addressB.bech32, 2)
   })
 
   describe('listTransaction addressA', () => {
-    it('should listTransactions', async () => {
-      const response = await controller.listTransactions('regtest', addressA.bech32, {
+    it('should listTransaction', async () => {
+      const response = await controller.listTransaction('regtest', addressA.bech32, {
         size: 30
       })
 
@@ -186,8 +175,8 @@ describe('transactions', () => {
       })
     })
 
-    it('should listTransactions with pagination', async () => {
-      const first = await controller.listTransactions('regtest', addressA.bech32, {
+    it('should listTransaction with pagination', async () => {
+      const first = await controller.listTransaction('regtest', addressA.bech32, {
         size: 2
       })
       expect(first.data.length).toBe(2)
@@ -197,7 +186,7 @@ describe('transactions', () => {
       expect(first.data[1].value).toBe('1.12300000')
       expect(first.data[1].type).toBe('vout')
 
-      const next = await controller.listTransactions('regtest', addressA.bech32, {
+      const next = await controller.listTransaction('regtest', addressA.bech32, {
         size: 10,
         next: first.page?.next
       })
@@ -218,8 +207,8 @@ describe('transactions', () => {
       expect(next.data[5].type).toBe('vout')
     })
 
-    it('should listTransactions with undefined next pagination', async () => {
-      const first = await controller.listTransactions('regtest', addressA.bech32, {
+    it('should listTransaction with undefined next pagination', async () => {
+      const first = await controller.listTransaction('regtest', addressA.bech32, {
         size: 2,
         next: undefined
       })
@@ -291,8 +280,8 @@ describe('transactions', () => {
   })
 
   describe('listTransaction addressB', () => {
-    it('should listTransactions', async () => {
-      const response = await controller.listTransactions('regtest', addressB.bech32, {
+    it('should listTransaction', async () => {
+      const response = await controller.listTransaction('regtest', addressB.bech32, {
         size: 30
       })
 
