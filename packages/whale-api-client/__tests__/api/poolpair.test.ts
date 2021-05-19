@@ -81,20 +81,20 @@ describe('list', () => {
       status: true,
       idTokenA: '1',
       idTokenB: '3',
-      reserveA: new BigNumber('50'),
-      reserveB: new BigNumber('300'),
-      commission: new BigNumber('0'),
-      totalLiquidity: new BigNumber('122.47448713'),
-      'reserveA/reserveB': new BigNumber('0.16666666'),
-      'reserveB/reserveA': new BigNumber('6'),
+      reserveA: 50,
+      reserveB: 300,
+      commission: 0,
+      totalLiquidity: 122.47448713,
+      'reserveA/reserveB': 0.16666666,
+      'reserveB/reserveA': 6,
       tradeEnabled: true,
       ownerAddress: expect.any(String),
-      blockCommissionA: new BigNumber('0'),
-      blockCommissionB: new BigNumber('0'),
-      rewardPct: new BigNumber('0'),
+      blockCommissionA: 0,
+      blockCommissionB: 0,
+      rewardPct: 0,
       customRewards: undefined,
       creationTx: expect.any(String),
-      creationHeight: expect.any(BigNumber)
+      creationHeight: expect.any(Number)
     })
   })
 

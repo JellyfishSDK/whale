@@ -126,7 +126,6 @@ export class WhaleApiClient {
    */
   async requestAsApiResponse<T> (method: Method, path: string, object?: any): Promise<WhaleApiResponse<T>> {
     const json = object !== undefined ? JSON.stringify(object) : undefined
-    console.log('requestAsApiResponse: ', method, path, json)
     const raw = await this.requestAsString(method, path, json)
     const response: WhaleApiResponse<T> = JSON.parse(raw.body)
     raiseIfError(response)
