@@ -1,4 +1,3 @@
-import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import BigNumber from 'bignumber.js'
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
@@ -25,9 +24,9 @@ export class PoolPair {
    * Get pool pair
    *
    * @param {string} id
-   * @return {Promise<PoolPairInfo>}
+   * @return {Promise<PoolPairInfoDto>}
    */
-  async get (id: string): Promise<PoolPairInfo> {
+  async get (id: string): Promise<PoolPairInfoDto> {
     return await this.client.requestData('GET', `poolpairs/${id}`)
   }
 }
