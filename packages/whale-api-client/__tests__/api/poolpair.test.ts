@@ -79,22 +79,28 @@ describe('list', () => {
       symbol: 'A-C',
       name: 'A-C',
       status: true,
-      idTokenA: '1',
-      idTokenB: '3',
-      reserveA: 50,
-      reserveB: 300,
+      token: {
+        a: '1',
+        b: '3'
+      },
+      reserve: {
+        a: 50,
+        b: 300
+      },
       commission: 0,
       totalLiquidity: 122.47448713,
-      'reserveA/reserveB': 0.16666666,
-      'reserveB/reserveA': 6,
       tradeEnabled: true,
       ownerAddress: expect.any(String),
-      blockCommissionA: 0,
-      blockCommissionB: 0,
+      blockCommission: {
+        a: 0,
+        b: 0
+      },
       rewardPct: 0,
       customRewards: undefined,
-      creationTx: expect.any(String),
-      creationHeight: expect.any(Number)
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(Number)
+      }
     })
   })
 
@@ -135,22 +141,28 @@ describe('get', () => {
       symbol: 'A-B',
       name: 'A-B',
       status: true,
-      idTokenA: expect.any(String),
-      idTokenB: expect.any(String),
-      reserveA: new BigNumber('100'),
-      reserveB: new BigNumber('200'),
+      token: {
+        a: expect.any(String),
+        b: expect.any(String)
+      },
+      reserve: {
+        a: new BigNumber('100'),
+        b: new BigNumber('200')
+      },
       commission: new BigNumber('0'),
       totalLiquidity: new BigNumber('141.42135623'),
-      'reserveA/reserveB': new BigNumber('0.5'),
-      'reserveB/reserveA': new BigNumber('2'),
       tradeEnabled: true,
       ownerAddress: expect.any(String),
-      blockCommissionA: new BigNumber('0'),
-      blockCommissionB: new BigNumber('0'),
+      blockCommission: {
+        a: new BigNumber('0'),
+        b: new BigNumber('0')
+      },
       rewardPct: new BigNumber('0'),
       customRewards: undefined,
-      creationTx: expect.any(String),
-      creationHeight: expect.any(BigNumber)
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(BigNumber)
+      }
     })
   })
 

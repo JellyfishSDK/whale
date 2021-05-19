@@ -66,19 +66,27 @@ function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairInfoDto {
     symbol: poolPairInfo.symbol,
     name: poolPairInfo.name,
     status: poolPairInfo.status,
-    idTokenA: poolPairInfo.idTokenA,
-    idTokenB: poolPairInfo.idTokenB,
-    reserveA: poolPairInfo.reserveA,
-    reserveB: poolPairInfo.reserveB,
+    token: {
+      a: poolPairInfo.idTokenA,
+      b: poolPairInfo.idTokenB
+    },
+    reserve: {
+      a: poolPairInfo.reserveA,
+      b: poolPairInfo.reserveB
+    },
     commission: poolPairInfo.commission,
     totalLiquidity: poolPairInfo.totalLiquidity,
     tradeEnabled: poolPairInfo.tradeEnabled,
     ownerAddress: poolPairInfo.ownerAddress,
-    blockCommissionA: poolPairInfo.blockCommissionA,
-    blockCommissionB: poolPairInfo.blockCommissionB,
+    blockCommission: {
+      a: poolPairInfo.blockCommissionA,
+      b: poolPairInfo.blockCommissionB
+    },
     rewardPct: poolPairInfo.rewardPct,
     customRewards: poolPairInfo.customRewards,
-    creationTx: poolPairInfo.creationTx,
-    creationHeight: poolPairInfo.creationHeight
+    creation: {
+      tx: poolPairInfo.creationTx,
+      height: poolPairInfo.creationHeight
+    }
   }
 }

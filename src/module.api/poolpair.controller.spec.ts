@@ -87,20 +87,28 @@ describe('list', () => {
       symbol: 'A-C',
       name: 'A-C',
       status: true,
-      idTokenA: '1',
-      idTokenB: '3',
-      reserveA: new BigNumber('50'),
-      reserveB: new BigNumber('300'),
+      token: {
+        a: '1',
+        b: '3'
+      },
+      reserve: {
+        a: new BigNumber('50'),
+        b: new BigNumber('300')
+      },
       commission: new BigNumber('0'),
       totalLiquidity: new BigNumber('122.47448713'),
       tradeEnabled: true,
       ownerAddress: expect.any(String),
-      blockCommissionA: new BigNumber('0'),
-      blockCommissionB: new BigNumber('0'),
+      blockCommission: {
+        a: new BigNumber('0'),
+        b: new BigNumber('0')
+      },
       rewardPct: new BigNumber('0'),
       customRewards: undefined,
-      creationTx: expect.any(String),
-      creationHeight: expect.any(BigNumber)
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(BigNumber)
+      }
     })
   })
 
@@ -144,23 +152,32 @@ describe('get', () => {
     const response = await controller.get('A-B')
 
     expect(response).toEqual({
+      id: '7',
       symbol: 'A-B',
       name: 'A-B',
       status: true,
-      idTokenA: expect.any(String),
-      idTokenB: expect.any(String),
-      reserveA: new BigNumber('100'),
-      reserveB: new BigNumber('200'),
+      token: {
+        a: expect.any(String),
+        b: expect.any(String)
+      },
+      reserve: {
+        a: new BigNumber('100'),
+        b: new BigNumber('200')
+      },
       commission: new BigNumber('0'),
       totalLiquidity: new BigNumber('141.42135623'),
       tradeEnabled: true,
       ownerAddress: expect.any(String),
-      blockCommissionA: new BigNumber('0'),
-      blockCommissionB: new BigNumber('0'),
+      blockCommission: {
+        a: new BigNumber('0'),
+        b: new BigNumber('0')
+      },
       rewardPct: new BigNumber('0'),
       customRewards: undefined,
-      creationTx: expect.any(String),
-      creationHeight: expect.any(BigNumber)
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(BigNumber)
+      }
     })
   })
 
