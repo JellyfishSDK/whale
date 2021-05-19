@@ -1,4 +1,4 @@
-import { NotFoundException, Controller, Get, Query } from '@nestjs/common'
+import { Controller, Get, Query } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PoolPairInfoCache } from '@src/module.api/cache/poolpair.info.cache'
@@ -41,15 +41,22 @@ export class PoolPairController {
 
   /**
    * @param {string} symbol
-   * @return {Promise<PoolPairInfo>}
+   * @return {Promise<PoolPairInfoDto>}
    */
   @Get('/:symbol')
-  async get (symbol: string): Promise<PoolPairInfo> {
-    const poolPairInfo = await this.poolPairInfoCache.get(symbol)
-    if (poolPairInfo === undefined) {
-      throw new NotFoundException('unable to find poolpair')
+  async get (symbol: string): Promise<PoolPairInfoDto> {
+    let poolPairInfoDto = await this.poolPairInfoCache.get(symbol)
+    if (poolPairInfoDto != null) {
+      return poolPairInfoDto
     }
-    return poolPairInfo
+
+    const poolPairResult = await this.rpcClient.poolpair.getPoolPair(symbol, true)
+    const id = Object.keys(poolPairResult)[0]
+    poolPairInfoDto = mapPoolPair(id, poolPairResult[id])
+
+    await this.poolPairInfoCache.set(symbol, poolPairInfoDto)
+
+    return poolPairInfoDto
   }
 }
 
@@ -65,8 +72,6 @@ function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairInfoDto {
     reserveB: poolPairInfo.reserveB,
     commission: poolPairInfo.commission,
     totalLiquidity: poolPairInfo.totalLiquidity,
-    'reserveA/reserveB': poolPairInfo['reserveA/reserveB'],
-    'reserveB/reserveA': poolPairInfo['reserveB/reserveA'],
     tradeEnabled: poolPairInfo.tradeEnabled,
     ownerAddress: poolPairInfo.ownerAddress,
     blockCommissionA: poolPairInfo.blockCommissionA,

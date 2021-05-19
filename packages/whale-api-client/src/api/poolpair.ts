@@ -43,8 +43,6 @@ export interface PoolPairInfoDto {
   reserveB: BigNumber
   commission: BigNumber
   totalLiquidity: BigNumber
-  'reserveA/reserveB': BigNumber | string
-  'reserveB/reserveA': BigNumber | string
   tradeEnabled: boolean
   ownerAddress: string
   blockCommissionA: BigNumber

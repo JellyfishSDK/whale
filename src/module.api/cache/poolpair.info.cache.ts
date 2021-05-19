@@ -1,7 +1,7 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common'
 import { Cache } from 'cache-manager'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
+import { PoolPairInfoDto } from '@whale-api-client/api/poolpair'
 
 @Injectable()
 export class PoolPairInfoCache {
@@ -14,27 +14,24 @@ export class PoolPairInfoCache {
   }
 
   /**
-   * Get poolpair from cache at first, else get poolpair via rpc client
+   * Get poolpair from cache
    *
    * @param {string} symbol
-   * @return {Promise<PoolPairInfo | undefined>}
+   * @return {Promise<PoolPairInfoDto | undefined>}
    */
-  async get (symbol: string): Promise<PoolPairInfo | undefined> {
-    let poolPairInfo = await this.cacheManager.get<PoolPairInfo>(symbol)
+  async get (symbol: string): Promise<PoolPairInfoDto | undefined> {
+    return await this.cacheManager.get<PoolPairInfoDto>(symbol)
+  }
 
-    if (poolPairInfo !== undefined) {
-      return poolPairInfo
-    }
-
-    const poolPairResult = await this.rpcClient.poolpair.getPoolPair(symbol, true)
-    for (const k in poolPairResult) {
-      poolPairInfo = poolPairResult[k]
-    }
-
-    await this.cacheManager.set(symbol, poolPairInfo, {
+  /**
+   * Set poolpair in cache
+   *
+   * @param {string} symbol
+   * @return {Promise<void>}
+   */
+  async set (symbol: string, poolPairInfoDto: PoolPairInfoDto): Promise<void> {
+    await this.cacheManager.set(symbol, poolPairInfoDto, {
       ttl: PoolPairInfoCache.TTL_SECONDS
     })
-
-    return poolPairInfo
   }
 }

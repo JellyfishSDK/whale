@@ -34,9 +34,12 @@ beforeAll(async () => {
   await createPoolPair(container, 'A', 'C')
   await createPoolPair(container, 'B', 'C')
 
-  await cache.get('A-B')
-  await cache.get('A-C')
-  await cache.get('B-C')
+  // TODO(canonbrother): add listpoolpairs in @defi/testing
+  const poolPairResult = await container.call('listpoolpairs')
+  for (const k in poolPairResult) {
+    const poolpair = poolPairResult[k]
+    await cache.set(poolpair.symbol, poolpair)
+  }
 
   await container.stop()
 })

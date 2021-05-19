@@ -93,8 +93,6 @@ describe('list', () => {
       reserveB: new BigNumber('300'),
       commission: new BigNumber('0'),
       totalLiquidity: new BigNumber('122.47448713'),
-      'reserveA/reserveB': new BigNumber('0.16666666'),
-      'reserveB/reserveA': new BigNumber('6'),
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       blockCommissionA: new BigNumber('0'),
