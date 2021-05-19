@@ -20,7 +20,7 @@ export class PoolPairController {
    * @param {string} [query.next]
    * @return {Promise<ApiPagedResponse<PoolPairInfoDto>>}
    */
-  @Get('/')
+  @Get('')
   async list (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<PoolPairInfoDto>> {
