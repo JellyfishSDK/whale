@@ -4,6 +4,7 @@ import { URLSearchParams } from 'url'
 import { raiseIfError, WhaleClientException, WhaleClientTimeoutException } from './errors'
 import { WhaleApiResponse, ApiPagedResponse } from './whale.api.response'
 import { Address } from './api/address'
+import { PoolPair } from './api/poolpair'
 import { Rpc } from './api/rpc'
 import { Transactions } from './api/transactions'
 
@@ -52,6 +53,7 @@ export interface ResponseAsString {
 
 export class WhaleApiClient {
   public readonly address = new Address(this)
+  public readonly poolpair = new PoolPair(this)
   public readonly rpc = new Rpc(this)
   public readonly transactions = new Transactions(this)
 
@@ -124,6 +126,7 @@ export class WhaleApiClient {
    */
   async requestAsApiResponse<T> (method: Method, path: string, object?: any): Promise<WhaleApiResponse<T>> {
     const json = object !== undefined ? JSON.stringify(object) : undefined
+    console.log('requestAsApiResponse: ', method, path, json)
     const raw = await this.requestAsString(method, path, json)
     const response: WhaleApiResponse<T> = JSON.parse(raw.body)
     raiseIfError(response)
