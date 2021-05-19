@@ -12,8 +12,8 @@ import { ScriptUnspent, ScriptUnspentMapper } from '@src/module.model/script.uns
 import { DeFiAddress } from '@defichain/jellyfish-address'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
-import script from '@defichain/jellyfish-transaction/dist/script'
 import { SmartBuffer } from 'smart-buffer'
+import { OP_CODES } from "@defichain/jellyfish-transaction";
 
 @Controller('/v1/:network/address/:address')
 export class AddressController {
@@ -29,7 +29,7 @@ export class AddressController {
   @Get('/balance')
   async getBalance (
     @Param('network') network: NetworkName,
-      @Param('address') address: string
+    @Param('address') address: string
   ): Promise<string> {
     const aggregation = await this.getAggregation(network, address)
     return aggregation?.amount.unspent ?? '0'
@@ -38,7 +38,7 @@ export class AddressController {
   @Get('/aggregation')
   async getAggregation (
     @Param('network') network: NetworkName,
-      @Param('address') address: string
+    @Param('address') address: string
   ): Promise<ScriptAggregation | undefined> {
     const hid = addressToHid(network, address)
     return await this.aggregationMapper.getLatest(hid)
@@ -51,7 +51,7 @@ export class AddressController {
   @Get('/tokens')
   async listTokens (
     @Param('address') address: string,
-      @Query() query: PaginationQuery
+    @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<AddressToken>> {
     const accounts = await this.rpcClient.account.getAccount(address, {
       start: query.next !== undefined ? Number(query.next) : undefined,
@@ -80,9 +80,9 @@ export class AddressController {
   @Get('/transactions')
   async listTransactions (
     @Param('network') network: NetworkName,
-      @Param('address') address: string,
-      @Query('size') size: number = 30,
-      @Query('next') next?: string
+    @Param('address') address: string,
+    @Query('size') size: number = 30,
+    @Query('next') next?: string
   ): Promise<ApiPagedResponse<ScriptActivity>> {
     const hid = addressToHid(network, address)
     const items = await this.activityMapper.query(hid, size, next)
@@ -95,9 +95,9 @@ export class AddressController {
   @Get('/transactions/unspent')
   async listTransactionUnspent (
     @Param('network') network: NetworkName,
-      @Param('address') address: string,
-      @Query('size') size: number = 30,
-      @Query('next') next?: string
+    @Param('address') address: string,
+    @Query('size') size: number = 30,
+    @Query('next') next?: string
   ): Promise<ApiPagedResponse<ScriptUnspent>> {
     const hid = addressToHid(network, address)
     const items = await this.unspentMapper.query(hid, size, next)
@@ -114,11 +114,11 @@ export class AddressController {
  * @return {string} HID is hashed script.hex, SHA256(decodeAddress(address).hex)
  */
 function addressToHid (name: NetworkName, address: string): string {
-  // TODO(fuxingloh): need to refactor this
+  // TODO(fuxingloh): refactor jellyfish-address, then refactor this
   const decoded = DeFiAddress.from(name, address)
   const stack = decoded.getScript().stack
   const buffer = new SmartBuffer()
-  script.fromOpCodesToBuffer(stack, buffer)
+  OP_CODES.toBuffer(stack, buffer)
   return HexEncoder.asSHA256(buffer.toString('hex'))
 }
 

@@ -22,20 +22,24 @@ beforeAll(async () => {
   await container.start()
   await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
-  const client = new JsonRpcClient(await container.getCachedRpcUrl())
+  const defidUrl = await container.getCachedRpcUrl()
   address = await container.getNewAddress('', 'bech32')
 
   const app: TestingModule = await Test.createTestingModule({
     imports: [
+      ConfigModule.forRoot({
+        isGlobal: true,
+        load: [() => ({ defid: { url: defidUrl } })]
+      }),
       CacheModule.register(),
       ScheduleModule.forRoot(),
       DatabaseModule.forRoot('memory'),
       ModelModule,
+      DeFiDModule,
       IndexerModule
     ],
     controllers: [AddressController],
     providers: [
-      { provide: JsonRpcClient, useValue: client },
       TokenInfoCache
     ]
   }).compile()
@@ -55,6 +59,7 @@ describe('tokens', () => {
       await mintTokens(container, token, { mintAmount: 1000 })
       await sendTokensToAddress(container, address, 10, token)
     }
+    await container.generate(1)
   })
 
   it('should listTokens', async () => {
