@@ -133,9 +133,10 @@ describe('list', () => {
 
 describe('get', () => {
   it('should get', async () => {
-    const response = await client.poolpair.get('A-B')
+    const response = await client.poolpair.get('7')
 
     expect(response).toEqual({
+      id: '7',
       symbol: 'A-B',
       name: 'A-B',
       status: true,
@@ -163,6 +164,6 @@ describe('get', () => {
   })
 
   it('should throw error while getting non-existent poolpair', async () => {
-    await expect(client.poolpair.get('B-Z')).rejects.toThrow()
+    await expect(client.poolpair.get('999')).rejects.toThrow()
   })
 })

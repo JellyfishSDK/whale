@@ -24,11 +24,11 @@ export class PoolPair {
   /**
    * Get pool pair
    *
-   * @param {string} symbol
+   * @param {string} id
    * @return {Promise<PoolPairInfo>}
    */
-  async get (symbol: string): Promise<PoolPairInfo> {
-    return await this.client.requestData('GET', `poolpairs/${symbol}`)
+  async get (id: string): Promise<PoolPairInfo> {
+    return await this.client.requestData('GET', `poolpairs/${id}`)
   }
 }
 

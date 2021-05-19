@@ -40,21 +40,20 @@ export class PoolPairController {
   }
 
   /**
-   * @param {string} symbol
+   * @param {string} id
    * @return {Promise<PoolPairInfoDto>}
    */
-  @Get('/:symbol')
-  async get (symbol: string): Promise<PoolPairInfoDto> {
-    let poolPairInfoDto = await this.poolPairInfoCache.get(symbol)
+  @Get('/:id')
+  async get (id: string): Promise<PoolPairInfoDto> {
+    let poolPairInfoDto = await this.poolPairInfoCache.get(id)
     if (poolPairInfoDto != null) {
       return poolPairInfoDto
     }
 
-    const poolPairResult = await this.rpcClient.poolpair.getPoolPair(symbol, true)
-    const id = Object.keys(poolPairResult)[0]
+    const poolPairResult = await this.rpcClient.poolpair.getPoolPair(id, true)
     poolPairInfoDto = mapPoolPair(id, poolPairResult[id])
 
-    await this.poolPairInfoCache.set(symbol, poolPairInfoDto)
+    await this.poolPairInfoCache.set(id, poolPairInfoDto)
 
     return poolPairInfoDto
   }

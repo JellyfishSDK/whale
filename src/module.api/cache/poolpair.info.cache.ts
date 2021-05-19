@@ -16,21 +16,21 @@ export class PoolPairInfoCache {
   /**
    * Get poolpair from cache
    *
-   * @param {string} symbol
+   * @param {string} id
    * @return {Promise<PoolPairInfoDto | undefined>}
    */
-  async get (symbol: string): Promise<PoolPairInfoDto | undefined> {
-    return await this.cacheManager.get<PoolPairInfoDto>(symbol)
+  async get (id: string): Promise<PoolPairInfoDto | undefined> {
+    return await this.cacheManager.get<PoolPairInfoDto>(id)
   }
 
   /**
    * Set poolpair in cache
    *
-   * @param {string} symbol
+   * @param {string} id
    * @return {Promise<void>}
    */
-  async set (symbol: string, poolPairInfoDto: PoolPairInfoDto): Promise<void> {
-    await this.cacheManager.set(symbol, poolPairInfoDto, {
+  async set (id: string, poolPairInfoDto: PoolPairInfoDto): Promise<void> {
+    await this.cacheManager.set(id, poolPairInfoDto, {
       ttl: PoolPairInfoCache.TTL_SECONDS
     })
   }

@@ -147,7 +147,7 @@ describe('list', () => {
 
 describe('get', () => {
   it('should get', async () => {
-    const response = await controller.get('A-B')
+    const response = await controller.get('7')
 
     expect(response).toEqual({
       id: '7',
@@ -178,6 +178,6 @@ describe('get', () => {
   })
 
   it('should throw error while getting non-existent poolpair', async () => {
-    await expect(controller.get('B-Z')).rejects.toThrow()
+    await expect(controller.get('999')).rejects.toThrow()
   })
 })
