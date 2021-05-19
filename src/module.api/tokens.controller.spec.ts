@@ -31,6 +31,7 @@ beforeEach(async () => {
 describe('controller.get() for all tokens', () => {
   it('should listTokens', async () => {
     const result = await controller.get({ size: 100 })
+
     result.data.forEach(function (data) {
       switch (data.symbol) {
         case 'DFI':
@@ -75,6 +76,7 @@ describe('controller.get() for all tokens', () => {
 
   it('should listTokens with pagination', async () => {
     const first = await controller.get({ size: 1 })
+
     expect(first.data.length).toBe(1)
     expect(first.page?.next).toBe('0')
 
@@ -97,6 +99,7 @@ describe('controller.get() for all tokens', () => {
 
   it('should listTokens with an empty object if size 100 next 300 which is out of range', async () => {
     const result = await controller.get({ size: 100, next: '300' })
+
     expect(result.data.length).toBe(0)
     expect(result.page).toBeUndefined()
   })

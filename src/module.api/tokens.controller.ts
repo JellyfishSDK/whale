@@ -10,7 +10,7 @@ export class TokensController {
   }
 
   /**
-   * Returns information about token.
+   * Returns information about tokens.
    *
    * @param {PaginationQuery} query
    * @return {Promise<ApiPagedResponse<TokenInfo>>}
@@ -52,7 +52,7 @@ export class TokensController {
   }
 
   /**
-   * Returns information about token.
+   * Returns information about tokens.
    *
    * @param {string} id id/symbol/creationTx
    * @return {Promise<TokenInfo>}
