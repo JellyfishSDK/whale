@@ -1,19 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { AddressController } from '@src/module.api/address.controller'
 import { createToken, mintTokens, sendTokensToAddress } from '@defichain/testing'
 import { TokenInfoCache } from '@src/module.api/cache/token.info.cache'
 import { CacheModule } from '@nestjs/common'
-import { ConfigModule } from "@nestjs/config";
-import { ScheduleModule } from "@nestjs/schedule";
-import { DatabaseModule } from "@src/module.database/module";
-import { ModelModule } from "@src/module.model/_module";
-import { DeFiDModule } from "@src/module.defid";
-import { IndexerModule } from "@src/module.indexer/module";
+import { ConfigModule } from '@nestjs/config'
+import { ScheduleModule } from '@nestjs/schedule'
+import { DatabaseModule } from '@src/module.database/module'
+import { ModelModule } from '@src/module.model/_module'
+import { DeFiDModule } from '@src/module.defid'
+import { IndexerModule } from '@src/module.indexer/module'
 
 const container = new MasterNodeRegTestContainer()
-let address: string
 let controller: AddressController
 
 const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
@@ -23,7 +21,6 @@ beforeAll(async () => {
   await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
   const defidUrl = await container.getCachedRpcUrl()
-  address = await container.getNewAddress('', 'bech32')
 
   const app: TestingModule = await Test.createTestingModule({
     imports: [
@@ -52,6 +49,8 @@ afterAll(async () => {
 })
 
 describe('tokens', () => {
+  const address = 'bcrt1qf5v8n3kfe6v5mharuvj0qnr7g74xnu9leut39r'
+
   beforeAll(async () => {
     for (const token of tokens) {
       await container.waitForWalletBalanceGTE(110)
@@ -112,13 +111,4 @@ describe('tokens', () => {
     expect(first.data.length).toBe(2)
     expect(first.page?.next).toBe('2')
   })
-})
-
-describe('balance', () => {
-  it('should getBalance should be zero', async () => {
-    const balance = await controller.getBalance('regtest', address)
-    console.log(balance)
-  });
-
-  // TODO(fuxingloh):
 })
