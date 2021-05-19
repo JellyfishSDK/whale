@@ -155,8 +155,6 @@ describe('get', () => {
       reserveB: new BigNumber('200'),
       commission: new BigNumber('0'),
       totalLiquidity: new BigNumber('141.42135623'),
-      'reserveA/reserveB': new BigNumber('0.5'),
-      'reserveB/reserveA': new BigNumber('2'),
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       blockCommissionA: new BigNumber('0'),
@@ -170,53 +168,5 @@ describe('get', () => {
 
   it('should throw error while getting non-existent poolpair', async () => {
     await expect(controller.get('B-Z')).rejects.toThrow()
-  })
-})
-
-describe('listPoolShares', () => {
-  it('should listPoolShares', async () => {
-    const response = await controller.listPoolShares({
-      size: 30
-    })
-
-    expect(response.data.length).toBe(3)
-    expect(response.page).toBeUndefined()
-
-    expect(response.data[1]).toEqual({
-      poolID: '8',
-      owner: expect.any(String),
-      percent: expect.any(BigNumber),
-      amount: expect.any(BigNumber),
-      totalLiquidity: expect.any(BigNumber)
-    })
-  })
-
-  it('should listPoolShares with pagination', async () => {
-    const first = await controller.listPoolShares({
-      size: 2
-    })
-    expect(first.data.length).toBe(2)
-    expect(first.page?.next).toBe('8')
-    expect(first.data[0].poolID).toBe('7')
-    expect(first.data[1].poolID).toBe('8')
-
-    const next = await controller.listPoolShares({
-      size: 10,
-      next: first.page?.next
-    })
-
-    expect(next.data.length).toBe(1)
-    expect(next.page?.next).toBeUndefined()
-    expect(next.data[0].poolID).toBe('9')
-  })
-
-  it('should listPoolShares with undefined next pagination', async () => {
-    const first = await controller.listPoolShares({
-      size: 1,
-      next: undefined
-    })
-
-    expect(first.data.length).toBe(1)
-    expect(first.page?.next).toBe('7')
   })
 })

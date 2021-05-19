@@ -158,35 +158,3 @@ describe('get', () => {
     await expect(client.poolpair.get('B-Z')).rejects.toThrow()
   })
 })
-
-describe('listPoolShares', () => {
-  it('should listPoolShares', async () => {
-    const response = await client.poolpair.listPoolShares(30)
-
-    expect(response.length).toBe(3)
-    expect(response.hasNext).toBe(false)
-
-    expect(response[1]).toEqual({
-      poolID: '8',
-      owner: expect.any(String),
-      percent: 99,
-      amount: 122.47447713,
-      totalLiquidity: 122.47448713
-    })
-  })
-
-  it('should listPoolShares with pagination', async () => {
-    const first = await client.poolpair.listPoolShares(2)
-    expect(first.length).toBe(2)
-    expect(first.hasNext).toBe(true)
-    expect(first.nextToken).toBe('8')
-
-    expect(first[0].poolID).toBe('7')
-    expect(first[1].poolID).toBe('8')
-
-    const next = await client.paginate(first)
-    expect(next.length).toBe(1)
-    expect(next.nextToken).toBeUndefined()
-    expect(next[0].poolID).toBe('9')
-  })
-})

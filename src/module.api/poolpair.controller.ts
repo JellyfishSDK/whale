@@ -2,9 +2,9 @@ import { ConflictException, Controller, Get, Query } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PoolPairInfoCache } from '@src/module.api/cache/poolpair.info.cache'
-import { PoolPairInfoDto, PoolShareInfoDto } from '@whale-api-client/api/poolpair'
+import { PoolPairInfoDto } from '@whale-api-client/api/poolpair'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
-import { PoolPairInfo, PoolShareInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
+import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 
 @Controller('/v1/:network/poolpairs')
 export class PoolPairController {
@@ -51,31 +51,6 @@ export class PoolPairController {
     }
     return poolPairInfo
   }
-
-  /**
-   * @param {PaginationQuery} query
-   * @param {number} query.size
-   * @param {string} [query.next]
-   * @return {Promise<ApiPagedResponse<PoolShareInfoDto>>}
-   */
-  @Get('/shares')
-  async listPoolShares (
-    @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<PoolShareInfoDto>> {
-    const poolShareResult = await this.rpcClient.poolpair.listPoolShares({
-      start: query.next !== undefined ? Number(query.next) : 0,
-      including_start: query.next === undefined, // TODO(fuxingloh): open issue at DeFiCh/ain, rpc_accounts.cpp#388
-      limit: query.size
-    }, true)
-
-    const poolShareInfosDto = Object.entries(poolShareResult).map(([, value]) => {
-      return mapPoolShare(value)
-    }).sort(a => Number.parseInt(a.poolID))
-
-    return ApiPagedResponse.of(poolShareInfosDto, query.size, item => {
-      return item.poolID
-    })
-  }
 }
 
 function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairInfoDto {
@@ -100,15 +75,5 @@ function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairInfoDto {
     customRewards: poolPairInfo.customRewards,
     creationTx: poolPairInfo.creationTx,
     creationHeight: poolPairInfo.creationHeight
-  }
-}
-
-function mapPoolShare (poolShareInfo: PoolShareInfo): PoolShareInfoDto {
-  return {
-    poolID: poolShareInfo.poolID,
-    owner: poolShareInfo.owner,
-    percent: poolShareInfo['%'],
-    amount: poolShareInfo.amount,
-    totalLiquidity: poolShareInfo.totalLiquidity
   }
 }
