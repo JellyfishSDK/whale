@@ -37,22 +37,20 @@ export interface PoolPairInfoDto {
   symbol: string
   name: string
   status: string
-  token: {
-    a: string
-    b: string
+  tokenA: {
+    id: string
+    reserve: BigNumber
+    blockCommission: BigNumber
   }
-  reserve: {
-    a: BigNumber
-    b: BigNumber
+  tokenB: {
+    id: string
+    reserve: BigNumber
+    blockCommission: BigNumber
   }
   commission: BigNumber
   totalLiquidity: BigNumber
   tradeEnabled: boolean
   ownerAddress: string
-  blockCommission: {
-    a: BigNumber
-    b: BigNumber
-  }
   rewardPct: BigNumber
   customRewards: BigNumber
   creation: {
