@@ -1,29 +1,49 @@
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
-import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 
 export class Tokens {
   constructor (private readonly client: WhaleApiClient) {
   }
 
   /**
-   * Returns information about tokens.
+   * Paginate query tokens.
    *
    * @param {number} size of tokens to query
    * @param {number} next set of tokens
-   * @return {Promise<ApiPagedResponse<TokenInfo>>}
+   * @return {Promise<ApiPagedResponse<TokenData>>}
    */
-  async get (size: number = 30, next?: string): Promise<ApiPagedResponse<TokenInfo>> {
+  async list (size: number = 30, next?: string): Promise<ApiPagedResponse<TokenData>> {
     return await this.client.requestList('GET', 'tokens', size, next)
   }
 
   /**
-   * Returns information about tokens.
+   * Get information about a token with id of the token.
    *
-   * @param {string} id id/symbol/creationTx
-   * @return {Promise<TokenInfo>}
+   * @param {string} id
+   * @return {Promise<TokenData>}
    */
-  async getId (id: string): Promise<TokenInfo> {
+  async get (id: string): Promise<TokenData> {
     return await this.client.requestData('GET', `tokens/${id}`)
   }
+}
+
+/**
+ * Tokens data.
+ */
+export interface TokenData {
+  id: string
+  symbol: string
+  symbolKey: string
+  name: string
+  decimal: number
+  limit: number
+  mintable: boolean
+  tradeable: boolean
+  isDAT: boolean
+  isLPS: boolean
+  finalized: boolean
+  minted: number
+  creation: { tx: string, height: number }
+  destruction: { tx: string, height: number }
+  collateralAddress: string
 }

@@ -28,11 +28,12 @@ beforeEach(async () => {
   controller = app.get<TokensController>(TokensController)
 })
 
-describe('controller.get() for all tokens', () => {
+describe('controller.list() for all tokens', () => {
   it('should listTokens', async () => {
-    const result = await controller.get({ size: 100 })
+    const result = await controller.list({ size: 100 })
 
-    result.data.forEach(function (data) {
+    for (let i = 0; i < result.data.length; i++) {
+      const data = result.data[i]
       switch (data.symbol) {
         case 'DFI':
           expect(data.symbol).toBe('DFI')
@@ -46,10 +47,10 @@ describe('controller.get() for all tokens', () => {
           expect(data.isLPS).toBe(false)
           expect(data.finalized).toBe(true)
           expect(data.minted).toBe(0)
-          expect(data.creationTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-          expect(data.creationHeight).toBe(0)
-          expect(data.destructionTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-          expect(data.destructionHeight).toBe(-1)
+          expect(data.creation.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+          expect(data.creation.height).toBe(0)
+          expect(data.destruction.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+          expect(data.destruction.height).toBe(-1)
           expect(data.collateralAddress).toBe('')
           break
         case 'DSWAP':
@@ -64,23 +65,23 @@ describe('controller.get() for all tokens', () => {
           expect(data.isLPS).toBe(false)
           expect(data.finalized).toBe(false)
           expect(data.minted).toBe(0)
-          expect(typeof data.creationTx).toBe('string')
-          expect(data.creationHeight).toBeGreaterThan(0)
-          expect(data.destructionTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-          expect(data.destructionHeight).toBe(-1)
+          expect(typeof data.creation.tx).toBe('string')
+          expect(data.creation.height).toBeGreaterThan(0)
+          expect(data.destruction.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+          expect(data.destruction.height).toBe(-1)
           expect(typeof data.collateralAddress).toBe('string')
           break
       }
-    })
+    }
   })
 
   it('should listTokens with pagination', async () => {
-    const first = await controller.get({ size: 1 })
+    const first = await controller.list({ size: 1 })
 
     expect(first.data.length).toBe(1)
     expect(first.page?.next).toBe('0')
 
-    const second = await controller.get({
+    const second = await controller.list({
       size: 1,
       next: first.page?.next
     })
@@ -88,7 +89,7 @@ describe('controller.get() for all tokens', () => {
     expect(second.data.length).toBe(1)
     expect(second.page?.next).toBe('1')
 
-    const third = await controller.get({
+    const third = await controller.list({
       size: 1,
       next: second.page?.next
     })
@@ -98,16 +99,16 @@ describe('controller.get() for all tokens', () => {
   })
 
   it('should listTokens with an empty object if size 100 next 300 which is out of range', async () => {
-    const result = await controller.get({ size: 100, next: '300' })
+    const result = await controller.list({ size: 100, next: '300' })
 
     expect(result.data.length).toBe(0)
     expect(result.page).toBeUndefined()
   })
 })
 
-describe('controller.getId() for DFI', () => {
+describe('controller.get() for DFI', () => {
   it('should return DFI with id as param', async () => {
-    const data = await controller.getId('0')
+    const data = await controller.get('0')
 
     expect(data.symbol).toBe('DFI')
     expect(data.symbolKey).toBe('DFI')
@@ -120,33 +121,17 @@ describe('controller.getId() for DFI', () => {
     expect(data.isLPS).toBe(false)
     expect(data.finalized).toBe(true)
     expect(data.minted).toBe(0)
-    expect(data.creationTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.creationHeight).toBe(0)
-    expect(data.destructionTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.destructionHeight).toBe(-1)
+    expect(data.creation.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+    expect(data.creation.height).toBe(0)
+    expect(data.destruction.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+    expect(data.destruction.height).toBe(-1)
     expect(data.collateralAddress).toBe('')
-  })
-
-  it('should return DFI with symbol as param', async () => {
-    const data = await controller.getId('DFI')
-
-    expect(data.symbol).toBe('DFI')
-    expect(data.symbolKey).toBe('DFI')
-    expect(data.name).toBe('Default Defi token')
-  })
-
-  it('should return DFI with creationTx as param', async () => {
-    const data = await controller.getId('0000000000000000000000000000000000000000000000000000000000000000')
-
-    expect(data.symbol).toBe('DFI')
-    expect(data.symbolKey).toBe('DFI')
-    expect(data.name).toBe('Default Defi token')
   })
 })
 
-describe('controller.getId() for newly created token', () => {
+describe('controller.get() for newly created token', () => {
   it('should return DSWAP token with id as param', async () => {
-    const data = await controller.getId('1')
+    const data = await controller.get('1')
 
     expect(data.symbol).toBe('DSWAP')
     expect(data.symbolKey).toBe('DSWAP')
@@ -159,46 +144,17 @@ describe('controller.getId() for newly created token', () => {
     expect(data.isLPS).toBe(false)
     expect(data.finalized).toBe(false)
     expect(data.minted).toBe(0)
-    expect(typeof data.creationTx).toBe('string')
-    expect(data.creationHeight).toBeGreaterThan(0)
-    expect(data.destructionTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.destructionHeight).toBe(-1)
+    expect(typeof data.creation.tx).toBe('string')
+    expect(data.creation.height).toBeGreaterThan(0)
+    expect(data.destruction.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+    expect(data.destruction.height).toBe(-1)
     expect(typeof data.collateralAddress).toBe('string')
-  })
-
-  it('should return DSWAP token with symbol as param', async () => {
-    const data = await controller.getId('DSWAP')
-
-    expect(data.symbol).toBe('DSWAP')
-    expect(data.symbolKey).toBe('DSWAP')
-    expect(data.name).toBe('DSWAP')
-  })
-
-  it('should return DSWAP token with creationTx as param', async () => {
-    let data = await controller.getId('1')
-    data = await controller.getId(data.creationTx)
-
-    expect(data.symbol).toBe('DSWAP')
-    expect(data.symbolKey).toBe('DSWAP')
-    expect(data.name).toBe('DSWAP')
   })
 })
 
-describe('controller.getId() for token which does not exist', () => {
+describe('controller.get() for token which does not exist', () => {
   it('should fail with id as param', async () => {
-    await expect(controller.getId('2'))
-      .rejects
-      .toThrow('Token not found')
-  })
-
-  it('should fail with symbol as param', async () => {
-    await expect(controller.getId('MOCK'))
-      .rejects
-      .toThrow('Token not found')
-  })
-
-  it('should fail with creationTx as param', async () => {
-    await expect(controller.getId('5000000000000000000000000000000000000000000000000000000000000000'))
+    await expect(controller.get('2'))
       .rejects
       .toThrow('Token not found')
   })

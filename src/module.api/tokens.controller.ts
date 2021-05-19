@@ -1,8 +1,9 @@
-import { Controller, Get, Param, Query } from '@nestjs/common'
+import { Controller, Get, Param, Query, ParseIntPipe } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
+import { TokenData } from '@whale-api-client/api/tokens'
 
 @Controller('/v1/:network/tokens')
 export class TokensController {
@@ -10,15 +11,15 @@ export class TokensController {
   }
 
   /**
-   * Returns information about tokens.
+   * Paginate query tokens.
    *
    * @param {PaginationQuery} query
-   * @return {Promise<ApiPagedResponse<TokenInfo>>}
+   * @return {Promise<ApiPagedResponse<TokenData>>}
    */
   @Get('/')
-  async get (
+  async list (
     @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<TokenInfo>> {
+  ): Promise<ApiPagedResponse<TokenData>> {
     const data = await this.client.token.listTokens({
       start: query.next !== undefined ? Number(query.next) : 0,
       including_start: query.next === undefined,
@@ -26,25 +27,7 @@ export class TokensController {
     }, true)
     const tokens: TokenData[] = Object.entries(data)
       .map(([id, value]): TokenData => {
-        return {
-          id: id,
-          symbol: value.symbol,
-          symbolKey: value.symbolKey,
-          name: value.name,
-          decimal: value.decimal,
-          limit: value.limit,
-          mintable: value.mintable,
-          tradeable: value.tradeable,
-          isDAT: value.isDAT,
-          isLPS: value.isLPS,
-          finalized: value.finalized,
-          minted: value.minted,
-          creationTx: value.creationTx,
-          creationHeight: value.creationHeight,
-          destructionTx: value.destructionTx,
-          destructionHeight: value.destructionHeight,
-          collateralAddress: value.collateralAddress
-        }
+        return mapTokenData(id, value)
       }).sort(a => Number.parseInt(a.id))
     return ApiPagedResponse.of(tokens, query.size, item => {
       return item.id
@@ -52,34 +35,34 @@ export class TokensController {
   }
 
   /**
-   * Returns information about tokens.
+   * Get information about a token with id of the token.
    *
-   * @param {string} id id/symbol/creationTx
-   * @return {Promise<TokenInfo>}
+   * @param {string} id
+   * @return {Promise<TokenData>}
    */
   @Get('/:id')
-  async getId (@Param('id') id: string): Promise<TokenInfo> {
+  async get (@Param('id', ParseIntPipe) id: string): Promise<TokenData> {
     const data = await this.client.token.getToken(id)
-    return data[Object.keys(data)[0]]
+    return mapTokenData('0', data[Object.keys(data)[0]])
   }
 }
 
-interface TokenData {
-  id: string
-  symbol: string
-  symbolKey: string
-  name: string
-  decimal: number
-  limit: number
-  mintable: boolean
-  tradeable: boolean
-  isDAT: boolean
-  isLPS: boolean
-  finalized: boolean
-  minted: number
-  creationTx: string
-  creationHeight: number
-  destructionTx: string
-  destructionHeight: number
-  collateralAddress: string
+function mapTokenData (id: string, tokenInfo: TokenInfo): TokenData {
+  return {
+    id: id,
+    symbol: tokenInfo.symbol,
+    symbolKey: tokenInfo.symbolKey,
+    name: tokenInfo.name,
+    decimal: tokenInfo.decimal,
+    limit: tokenInfo.limit,
+    mintable: tokenInfo.mintable,
+    tradeable: tokenInfo.tradeable,
+    isDAT: tokenInfo.isDAT,
+    isLPS: tokenInfo.isLPS,
+    finalized: tokenInfo.finalized,
+    minted: tokenInfo.minted,
+    creation: { tx: tokenInfo.creationTx, height: tokenInfo.creationHeight },
+    destruction: { tx: tokenInfo.destructionTx, height: tokenInfo.destructionHeight },
+    collateralAddress: tokenInfo.collateralAddress
+  }
 }

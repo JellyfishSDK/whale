@@ -3,7 +3,7 @@ import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
 import { WhaleApiClient } from '../../src'
 import { createToken } from '@defichain/testing'
-import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
+import { TokenData } from '../../src/api/tokens'
 
 let container: MasterNodeRegTestContainer
 let service: StubService
@@ -29,12 +29,12 @@ afterAll(async () => {
   }
 })
 
-describe('client.tokens.get()', () => {
+describe('client.tokens.list()', () => {
   it('should listTokens', async () => {
-    const result = await client.tokens.get()
+    const result = await client.tokens.list()
     expect(result.length).toBe(2)
-    for (const k in result) {
-      const data = result[k]
+    for (let i = 0; i < result.length; i++) {
+      const data = result[i]
       switch (data.symbol) {
         case 'DFI':
           expect(data.symbol).toBe('DFI')
@@ -48,10 +48,10 @@ describe('client.tokens.get()', () => {
           expect(data.isLPS).toBe(false)
           expect(data.finalized).toBe(true)
           expect(data.minted).toBe(0)
-          expect(data.creationTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-          expect(data.creationHeight).toBe(0)
-          expect(data.destructionTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-          expect(data.destructionHeight).toBe(-1)
+          expect(data.creation.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+          expect(data.creation.height).toBe(0)
+          expect(data.destruction.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+          expect(data.destruction.height).toBe(-1)
           expect(data.collateralAddress).toBe('')
           break
         case 'DSWAP':
@@ -66,10 +66,10 @@ describe('client.tokens.get()', () => {
           expect(data.isLPS).toBe(false)
           expect(data.finalized).toBe(false)
           expect(data.minted).toBe(0)
-          expect(typeof data.creationTx).toBe('string')
-          expect(data.creationHeight).toBeGreaterThan(0)
-          expect(data.destructionTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-          expect(data.destructionHeight).toBe(-1)
+          expect(typeof data.creation.tx).toBe('string')
+          expect(data.creation.height).toBeGreaterThan(0)
+          expect(data.destruction.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+          expect(data.destruction.height).toBe(-1)
           expect(typeof data.collateralAddress).toBe('string')
           break
       }
@@ -77,7 +77,7 @@ describe('client.tokens.get()', () => {
   })
 
   it('should listTokens with pagination', async () => {
-    const first = await client.tokens.get(1)
+    const first = await client.tokens.list(1)
 
     expect(first.length).toBe(1)
     expect(first.hasNext).toBe(true)
@@ -97,9 +97,9 @@ describe('client.tokens.get()', () => {
   })
 })
 
-describe('client.tokens.getId()', () => {
+describe('client.tokens.get()', () => {
   it('should return DFI coin with id as param', async () => {
-    const data = await client.tokens.getId('0')
+    const data = await client.tokens.get('0')
     expect(data.symbol).toBe('DFI')
     expect(data.symbolKey).toBe('DFI')
     expect(data.name).toBe('Default Defi token')
@@ -111,15 +111,15 @@ describe('client.tokens.getId()', () => {
     expect(data.isLPS).toBe(false)
     expect(data.finalized).toBe(true)
     expect(data.minted).toBe(0)
-    expect(data.creationTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.creationHeight).toBe(0)
-    expect(data.destructionTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.destructionHeight).toBe(-1)
+    expect(data.creation.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+    expect(data.creation.height).toBe(0)
+    expect(data.destruction.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+    expect(data.destruction.height).toBe(-1)
     expect(data.collateralAddress).toBe('')
   })
 
   it('should return DSWAP token with id as param', async () => {
-    const data = await client.tokens.getId('1')
+    const data = await client.tokens.get('1')
     expect(data.symbol).toBe('DSWAP')
     expect(data.symbolKey).toBe('DSWAP')
     expect(data.name).toBe('DSWAP')
@@ -131,15 +131,15 @@ describe('client.tokens.getId()', () => {
     expect(data.isLPS).toBe(false)
     expect(data.finalized).toBe(false)
     expect(data.minted).toBe(0)
-    expect(typeof data.creationTx).toBe('string')
-    expect(data.creationHeight).toBeGreaterThan(0)
-    expect(data.destructionTx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.destructionHeight).toBe(-1)
+    expect(typeof data.creation.tx).toBe('string')
+    expect(data.creation.height).toBeGreaterThan(0)
+    expect(data.destruction.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+    expect(data.destruction.height).toBe(-1)
     expect(typeof data.collateralAddress).toBe('string')
   })
 
   it('should fail due to id is malformed', async () => {
-    const call = async (): Promise<TokenInfo> => await client.tokens.getId('$*@')
+    const call = async (): Promise<TokenData> => await client.tokens.get('$*@')
     await expect(call).rejects
       .toThrow('400 - BadRequest (/v1/regtest/tokens/$*@)')
   })
