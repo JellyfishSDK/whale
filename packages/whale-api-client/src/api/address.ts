@@ -13,6 +13,7 @@ export class Address {
   }
 
   async getAggregation (address: string): Promise<string> {
+    // TODO(fuxingloh): typing
     return await this.client.requestData('GET', `address/${address}/aggregation`)
   }
 
@@ -29,10 +30,12 @@ export class Address {
   }
 
   async listTransactions (address: string, size: number = 30, next?: string): Promise<ApiPagedResponse<string>> {
+    // TODO(fuxingloh): typing
     return await this.client.requestList('GET', `address/${address}/transactions`, size, next)
   }
 
   async listTransactionUnspent (address: string, size: number = 30, next?: string): Promise<ApiPagedResponse<string>> {
+    // TODO(fuxingloh): typing
     return await this.client.requestList('GET', `address/${address}/transactions/unspent`, size, next)
   }
 }
