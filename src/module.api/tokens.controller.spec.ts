@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { TokensController } from '@src/module.api/tokens.controller'
-import { createToken } from '@defichain/testing'
+import { createToken, createPoolPair } from '@defichain/testing'
 
 const container = new MasterNodeRegTestContainer()
 let client: JsonRpcClient
@@ -13,7 +13,9 @@ beforeAll(async () => {
   await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
   client = new JsonRpcClient(await container.getCachedRpcUrl())
-  await createToken(container, 'DSWAP')
+  await createToken(container, 'DBTC')
+  await createToken(container, 'DETH')
+  await createPoolPair(container, 'DBTC', 'DETH')
 })
 
 afterAll(async () => {
@@ -31,48 +33,111 @@ beforeEach(async () => {
 describe('controller.list() for all tokens', () => {
   it('should listTokens', async () => {
     const result = await controller.list({ size: 100 })
+    expect(result.data.length).toBe(4)
 
-    for (let i = 0; i < result.data.length; i++) {
-      const data = result.data[i]
-      switch (data.symbol) {
-        case 'DFI':
-          expect(data.symbol).toBe('DFI')
-          expect(data.symbolKey).toBe('DFI')
-          expect(data.name).toBe('Default Defi token')
-          expect(data.decimal).toBe(8)
-          expect(data.limit).toBe(0)
-          expect(data.mintable).toBe(false)
-          expect(data.tradeable).toBe(true)
-          expect(data.isDAT).toBe(true)
-          expect(data.isLPS).toBe(false)
-          expect(data.finalized).toBe(true)
-          expect(data.minted).toBe(0)
-          expect(data.creation.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-          expect(data.creation.height).toBe(0)
-          expect(data.destruction.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-          expect(data.destruction.height).toBe(-1)
-          expect(data.collateralAddress).toBe('')
-          break
-        case 'DSWAP':
-          expect(data.symbol).toBe('DSWAP')
-          expect(data.symbolKey).toBe('DSWAP')
-          expect(data.name).toBe('DSWAP')
-          expect(data.decimal).toBe(8)
-          expect(data.limit).toBe(0)
-          expect(data.mintable).toBe(true)
-          expect(data.tradeable).toBe(true)
-          expect(data.isDAT).toBe(true)
-          expect(data.isLPS).toBe(false)
-          expect(data.finalized).toBe(false)
-          expect(data.minted).toBe(0)
-          expect(typeof data.creation.tx).toBe('string')
-          expect(data.creation.height).toBeGreaterThan(0)
-          expect(data.destruction.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-          expect(data.destruction.height).toBe(-1)
-          expect(typeof data.collateralAddress).toBe('string')
-          break
-      }
-    }
+    let data = result.data[0]
+
+    expect(data).toEqual({
+      id: '0',
+      symbol: 'DFI',
+      symbolKey: 'DFI',
+      name: 'Default Defi token',
+      decimal: 8,
+      limit: 0,
+      mintable: false,
+      tradeable: true,
+      isDAT: true,
+      isLPS: false,
+      finalized: true,
+      minted: 0,
+      creation: {
+        tx: '0000000000000000000000000000000000000000000000000000000000000000',
+        height: 0
+      },
+      destruction: {
+        tx: '0000000000000000000000000000000000000000000000000000000000000000',
+        height: -1
+      },
+      collateralAddress: ''
+    })
+
+    data = result.data[1]
+
+    expect(data).toEqual({
+      id: '1',
+      symbol: 'DBTC',
+      symbolKey: 'DBTC',
+      name: 'DBTC',
+      decimal: 8,
+      limit: 0,
+      mintable: true,
+      tradeable: true,
+      isDAT: true,
+      isLPS: false,
+      finalized: false,
+      minted: 0,
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(Number)
+      },
+      destruction: {
+        tx: '0000000000000000000000000000000000000000000000000000000000000000',
+        height: -1
+      },
+      collateralAddress: expect.any(String)
+    })
+
+    data = result.data[2]
+
+    expect(data).toEqual({
+      id: '2',
+      symbol: 'DETH',
+      symbolKey: 'DETH',
+      name: 'DETH',
+      decimal: 8,
+      limit: 0,
+      mintable: true,
+      tradeable: true,
+      isDAT: true,
+      isLPS: false,
+      finalized: false,
+      minted: 0,
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(Number)
+      },
+      destruction: {
+        tx: '0000000000000000000000000000000000000000000000000000000000000000',
+        height: -1
+      },
+      collateralAddress: expect.any(String)
+    })
+
+    data = result.data[3]
+
+    expect(data).toEqual({
+      id: '3',
+      symbol: 'DBTC-DET',
+      symbolKey: 'DBTC-DET',
+      name: 'DBTC-DETH',
+      decimal: 8,
+      limit: 0,
+      mintable: false,
+      tradeable: true,
+      isDAT: true,
+      isLPS: true,
+      finalized: true,
+      minted: 0,
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(Number)
+      },
+      destruction: {
+        tx: '0000000000000000000000000000000000000000000000000000000000000000',
+        height: -1
+      },
+      collateralAddress: expect.any(String)
+    })
   })
 
   it('should listTokens with pagination', async () => {
@@ -94,8 +159,24 @@ describe('controller.list() for all tokens', () => {
       next: second.page?.next
     })
 
-    expect(third.data.length).toBe(0)
-    expect(third.page).toBeUndefined()
+    expect(third.data.length).toBe(1)
+    expect(third.page?.next).toBe('2')
+
+    const forth = await controller.list({
+      size: 1,
+      next: third.page?.next
+    })
+
+    expect(forth.data.length).toBe(1)
+    expect(forth.page?.next).toBe('3')
+
+    const fifth = await controller.list({
+      size: 1,
+      next: forth.page?.next
+    })
+
+    expect(fifth.data.length).toBe(0)
+    expect(fifth.page).toBeUndefined()
   })
 
   it('should listTokens with an empty object if size 100 next 300 which is out of range', async () => {
@@ -106,55 +187,119 @@ describe('controller.list() for all tokens', () => {
   })
 })
 
-describe('controller.get() for DFI', () => {
-  it('should return DFI with id as param', async () => {
+describe('controller.get()', () => {
+  it('should return DFI coin with id as param', async () => {
     const data = await controller.get('0')
-
-    expect(data.symbol).toBe('DFI')
-    expect(data.symbolKey).toBe('DFI')
-    expect(data.name).toBe('Default Defi token')
-    expect(data.decimal).toBe(8)
-    expect(data.limit).toBe(0)
-    expect(data.mintable).toBe(false)
-    expect(data.tradeable).toBe(true)
-    expect(data.isDAT).toBe(true)
-    expect(data.isLPS).toBe(false)
-    expect(data.finalized).toBe(true)
-    expect(data.minted).toBe(0)
-    expect(data.creation.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.creation.height).toBe(0)
-    expect(data.destruction.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.destruction.height).toBe(-1)
-    expect(data.collateralAddress).toBe('')
+    expect(data).toEqual({
+      id: '0',
+      symbol: 'DFI',
+      symbolKey: 'DFI',
+      name: 'Default Defi token',
+      decimal: 8,
+      limit: 0,
+      mintable: false,
+      tradeable: true,
+      isDAT: true,
+      isLPS: false,
+      finalized: true,
+      minted: 0,
+      creation: {
+        tx: '0000000000000000000000000000000000000000000000000000000000000000',
+        height: 0
+      },
+      destruction: {
+        tx: '0000000000000000000000000000000000000000000000000000000000000000',
+        height: -1
+      },
+      collateralAddress: ''
+    })
   })
-})
 
-describe('controller.get() for newly created token', () => {
-  it('should return DSWAP token with id as param', async () => {
+  it('should return DBTC token with id as param', async () => {
     const data = await controller.get('1')
+    expect(data).toEqual({
+      id: '1',
+      symbol: 'DBTC',
+      symbolKey: 'DBTC',
+      name: 'DBTC',
+      decimal: 8,
+      limit: 0,
+      mintable: true,
+      tradeable: true,
+      isDAT: true,
+      isLPS: false,
+      finalized: false,
+      minted: 0,
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(Number)
+      },
+      destruction: {
+        tx: '0000000000000000000000000000000000000000000000000000000000000000',
+        height: -1
+      },
+      collateralAddress: expect.any(String)
+    })
+  })
 
-    expect(data.symbol).toBe('DSWAP')
-    expect(data.symbolKey).toBe('DSWAP')
-    expect(data.name).toBe('DSWAP')
-    expect(data.decimal).toBe(8)
-    expect(data.limit).toBe(0)
-    expect(data.mintable).toBe(true)
-    expect(data.tradeable).toBe(true)
-    expect(data.isDAT).toBe(true)
-    expect(data.isLPS).toBe(false)
-    expect(data.finalized).toBe(false)
-    expect(data.minted).toBe(0)
-    expect(typeof data.creation.tx).toBe('string')
-    expect(data.creation.height).toBeGreaterThan(0)
-    expect(data.destruction.tx).toBe('0000000000000000000000000000000000000000000000000000000000000000')
-    expect(data.destruction.height).toBe(-1)
-    expect(typeof data.collateralAddress).toBe('string')
+  it('should return DETH token with id as param', async () => {
+    const data = await controller.get('2')
+    expect(data).toEqual({
+      id: '2',
+      symbol: 'DETH',
+      symbolKey: 'DETH',
+      name: 'DETH',
+      decimal: 8,
+      limit: 0,
+      mintable: true,
+      tradeable: true,
+      isDAT: true,
+      isLPS: false,
+      finalized: false,
+      minted: 0,
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(Number)
+      },
+      destruction: {
+        tx: '0000000000000000000000000000000000000000000000000000000000000000',
+        height: -1
+      },
+      collateralAddress: expect.any(String)
+    })
+  })
+
+  it('should return DBTC-DETH LP token with id as param', async () => {
+    const data = await controller.get('3')
+    expect(data).toEqual({
+      id: '3',
+      symbol: 'DBTC-DET',
+      symbolKey: 'DBTC-DET',
+      name: 'DBTC-DETH',
+      decimal: 8,
+      limit: 0,
+      mintable: false,
+      tradeable: true,
+      isDAT: true,
+      isLPS: true,
+      finalized: true,
+      minted: 0,
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(Number)
+      },
+      destruction: {
+        tx: '0000000000000000000000000000000000000000000000000000000000000000',
+        height: -1
+      },
+      collateralAddress: expect.any(String)
+    })
   })
 })
 
-describe('controller.get() for token which does not exist', () => {
+describe('controller.get() for token which is not found', () => {
   it('should fail with id as param', async () => {
-    await expect(controller.get('2'))
+    await expect(controller.get('4'))
       .rejects
       .toThrow('Token not found')
   })

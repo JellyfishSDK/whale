@@ -16,7 +16,7 @@ export class TokensController {
    * @param {PaginationQuery} query
    * @return {Promise<ApiPagedResponse<TokenData>>}
    */
-  @Get('/')
+  @Get('')
   async list (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<TokenData>> {
@@ -25,10 +25,12 @@ export class TokensController {
       including_start: query.next === undefined,
       limit: query.size
     }, true)
+
     const tokens: TokenData[] = Object.entries(data)
       .map(([id, value]): TokenData => {
         return mapTokenData(id, value)
       }).sort(a => Number.parseInt(a.id))
+
     return ApiPagedResponse.of(tokens, query.size, item => {
       return item.id
     })
@@ -43,7 +45,7 @@ export class TokensController {
   @Get('/:id')
   async get (@Param('id', ParseIntPipe) id: string): Promise<TokenData> {
     const data = await this.client.token.getToken(id)
-    return mapTokenData('0', data[Object.keys(data)[0]])
+    return mapTokenData(String(id), data[Object.keys(data)[0]])
   }
 }
 
