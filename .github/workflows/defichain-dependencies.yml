@@ -28,6 +28,8 @@ jobs:
           @defichain/jellyfish-json \
           @defichain/jellyfish-crypto \
           @defichain/jellyfish-transaction \
+          @defichain/jellyfish-transaction-builder \
+          @defichain/jellyfish-wallet \
           @defichain/testcontainers \
           @defichain/testing
 
