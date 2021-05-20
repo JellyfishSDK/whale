@@ -1,7 +1,7 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common'
 import { Cache } from 'cache-manager'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { PoolPairInfoDto } from '@whale-api-client/api/poolpair'
+import { PoolPairData } from '@whale-api-client/api/poolpair'
 
 @Injectable()
 export class PoolPairInfoCache {
@@ -17,10 +17,10 @@ export class PoolPairInfoCache {
    * Get poolpair from cache
    *
    * @param {string} id
-   * @return {Promise<PoolPairInfoDto | undefined>}
+   * @return {Promise<PoolPairData | undefined>}
    */
-  async get (id: string): Promise<PoolPairInfoDto | undefined> {
-    return await this.cacheManager.get<PoolPairInfoDto>(id)
+  async get (id: string): Promise<PoolPairData | undefined> {
+    return await this.cacheManager.get<PoolPairData>(id)
   }
 
   /**
@@ -29,8 +29,8 @@ export class PoolPairInfoCache {
    * @param {string} id
    * @return {Promise<void>}
    */
-  async set (id: string, poolPairInfoDto: PoolPairInfoDto): Promise<void> {
-    await this.cacheManager.set(id, poolPairInfoDto, {
+  async set (id: string, PoolPairData: PoolPairData): Promise<void> {
+    await this.cacheManager.set(id, PoolPairData, {
       ttl: PoolPairInfoCache.TTL_SECONDS
     })
   }

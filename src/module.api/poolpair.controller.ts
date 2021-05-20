@@ -2,7 +2,7 @@ import { NotFoundException, Controller, Get, Query, Param } from '@nestjs/common
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PoolPairInfoCache } from '@src/module.api/cache/poolpair.info.cache'
-import { PoolPairInfoDto } from '@whale-api-client/api/poolpair'
+import { PoolPairData } from '@whale-api-client/api/poolpair'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 
@@ -18,12 +18,12 @@ export class PoolPairController {
    * @param {PaginationQuery} query
    * @param {number} query.size
    * @param {string} [query.next]
-   * @return {Promise<ApiPagedResponse<PoolPairInfoDto>>}
+   * @return {Promise<ApiPagedResponse<PoolPairData>>}
    */
   @Get('')
   async list (
     @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<PoolPairInfoDto>> {
+  ): Promise<ApiPagedResponse<PoolPairData>> {
     const poolPairResult = await this.rpcClient.poolpair.listPoolPairs({
       start: query.next !== undefined ? Number(query.next) : 0,
       including_start: query.next === undefined, // TODO(fuxingloh): open issue at DeFiCh/ain, rpc_accounts.cpp#388
@@ -41,28 +41,28 @@ export class PoolPairController {
 
   /**
    * @param {string} id
-   * @return {Promise<PoolPairInfoDto>}
+   * @return {Promise<poolPairData>}
    */
   @Get('/:id')
-  async get (@Param('id') id: string): Promise<PoolPairInfoDto> {
-    let poolPairInfoDto = await this.poolPairInfoCache.get(id)
-    if (poolPairInfoDto !== undefined) {
-      return poolPairInfoDto
+  async get (@Param('id') id: string): Promise<PoolPairData> {
+    let poolPairData = await this.poolPairInfoCache.get(id)
+    if (poolPairData !== undefined) {
+      return poolPairData
     }
 
     const poolPairResult = await this.rpcClient.poolpair.getPoolPair(id)
     if (poolPairResult === undefined) {
       throw new NotFoundException('unable to find poolpair')
     }
-    poolPairInfoDto = mapPoolPair(id, poolPairResult[id])
+    poolPairData = mapPoolPair(id, poolPairResult[id])
 
-    await this.poolPairInfoCache.set(id, poolPairInfoDto)
+    await this.poolPairInfoCache.set(id, poolPairData)
 
-    return poolPairInfoDto
+    return poolPairData
   }
 }
 
-function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairInfoDto {
+function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairData {
   return {
     id,
     symbol: poolPairInfo.symbol,
