@@ -1,4 +1,4 @@
-import { NotFoundException, Controller, Get, Query, Param } from '@nestjs/common'
+import { NotFoundException, Controller, Get, Query, Param, ParseIntPipe } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PoolPairInfoCache } from '@src/module.api/cache/poolpair.info.cache'
@@ -44,7 +44,7 @@ export class PoolPairController {
    * @return {Promise<poolPairData>}
    */
   @Get('/:id')
-  async get (@Param('id') id: string): Promise<PoolPairData> {
+  async get (@Param('id', ParseIntPipe) id: string): Promise<PoolPairData> {
     let poolPairData = await this.poolPairInfoCache.get(id)
     if (poolPairData !== undefined) {
       return poolPairData

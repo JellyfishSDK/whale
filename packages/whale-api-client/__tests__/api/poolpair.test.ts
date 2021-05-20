@@ -162,6 +162,11 @@ describe('get', () => {
     })
   })
 
+  it('shoud throw error as numeric string is expected', async () => {
+    await expect(client.poolpair.get('A-B')).rejects.toThrow(WhaleApiException)
+    await expect(client.poolpair.get('A-B')).rejects.toThrow('Validation failed (numeric string is expected)')
+  })
+
   it('should throw error while getting non-existent poolpair', async () => {
     await expect(client.poolpair.get('999')).rejects.toThrow(WhaleApiException)
     await expect(client.poolpair.get('999')).rejects.toThrow('unable to find poolpair')
