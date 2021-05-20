@@ -36,7 +36,7 @@ describe('client.tokens.list()', () => {
     const result = await client.tokens.list()
     expect(result.length).toBe(4)
 
-    expect(result[0]).toEqual({
+    expect(result[0]).toStrictEqual({
       id: '0',
       symbol: 'DFI',
       symbolKey: 'DFI',
@@ -68,11 +68,17 @@ describe('client.tokens.list()', () => {
     expect(first.hasNext).toBe(true)
     expect(first.nextToken).toBe('1')
 
+    expect(first[0]).toStrictEqual(expect.objectContaining({ id: '0', symbol: 'DFI', symbolKey: 'DFI' }))
+    expect(first[1]).toStrictEqual(expect.objectContaining({ id: '1', symbol: 'DBTC', symbolKey: 'DBTC' }))
+
     const next = await client.paginate(first)
 
     expect(next.length).toBe(2)
     expect(next.hasNext).toBe(true)
     expect(next.nextToken).toBe('3')
+
+    expect(next[0]).toStrictEqual(expect.objectContaining({ id: '2', symbol: 'DETH', symbolKey: 'DETH' }))
+    expect(next[1]).toStrictEqual(expect.objectContaining({ id: '3', symbol: 'DBTC-DET', symbolKey: 'DBTC-DET' }))
 
     const last = await client.paginate(next)
 
@@ -85,7 +91,7 @@ describe('client.tokens.list()', () => {
 describe('client.tokens.get()', () => {
   it('should return DFI coin with id as param', async () => {
     const data = await client.tokens.get('0')
-    expect(data).toEqual({
+    expect(data).toStrictEqual({
       id: '0',
       symbol: 'DFI',
       symbolKey: 'DFI',

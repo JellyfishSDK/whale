@@ -36,7 +36,7 @@ describe('controller.list() for all tokens', () => {
     const result = await controller.list({ size: 100 })
     expect(result.data.length).toBe(4)
 
-    expect(result.data[0]).toEqual({
+    expect(result.data[0]).toStrictEqual({
       id: '0',
       symbol: 'DFI',
       symbolKey: 'DFI',
@@ -60,7 +60,7 @@ describe('controller.list() for all tokens', () => {
       collateralAddress: ''
     })
 
-    expect(result.data[1]).toEqual({
+    expect(result.data[1]).toStrictEqual({
       id: '1',
       symbol: 'DBTC',
       symbolKey: 'DBTC',
@@ -84,7 +84,7 @@ describe('controller.list() for all tokens', () => {
       collateralAddress: expect.any(String)
     })
 
-    expect(result.data[2]).toEqual({
+    expect(result.data[2]).toStrictEqual({
       id: '2',
       symbol: 'DETH',
       symbolKey: 'DETH',
@@ -108,7 +108,7 @@ describe('controller.list() for all tokens', () => {
       collateralAddress: expect.any(String)
     })
 
-    expect(result.data[3]).toEqual({
+    expect(result.data[3]).toStrictEqual({
       id: '3',
       symbol: 'DBTC-DET',
       symbolKey: 'DBTC-DET',
@@ -139,8 +139,8 @@ describe('controller.list() for all tokens', () => {
     expect(first.data.length).toBe(2)
     expect(first.page?.next).toBe('1')
 
-    expect(first.data[0]).toEqual(expect.objectContaining({ id: '0', symbol: 'DFI', symbolKey: 'DFI' }))
-    expect(first.data[1]).toEqual(expect.objectContaining({ id: '1', symbol: 'DBTC', symbolKey: 'DBTC' }))
+    expect(first.data[0]).toStrictEqual(expect.objectContaining({ id: '0', symbol: 'DFI', symbolKey: 'DFI' }))
+    expect(first.data[1]).toStrictEqual(expect.objectContaining({ id: '1', symbol: 'DBTC', symbolKey: 'DBTC' }))
 
     const next = await controller.list({
       size: 2,
@@ -150,8 +150,8 @@ describe('controller.list() for all tokens', () => {
     expect(next.data.length).toBe(2)
     expect(next.page?.next).toBe('3')
 
-    expect(next.data[0]).toEqual(expect.objectContaining({ id: '2', symbol: 'DETH', symbolKey: 'DETH' }))
-    expect(next.data[1]).toEqual(expect.objectContaining({ id: '3', symbol: 'DBTC-DET', symbolKey: 'DBTC-DET' }))
+    expect(next.data[0]).toStrictEqual(expect.objectContaining({ id: '2', symbol: 'DETH', symbolKey: 'DETH' }))
+    expect(next.data[1]).toStrictEqual(expect.objectContaining({ id: '3', symbol: 'DBTC-DET', symbolKey: 'DBTC-DET' }))
 
     const last = await controller.list({
       size: 1,
@@ -173,7 +173,7 @@ describe('controller.list() for all tokens', () => {
 describe('controller.get()', () => {
   it('should return DFI coin with id as param', async () => {
     const data = await controller.get('0')
-    expect(data).toEqual({
+    expect(data).toStrictEqual({
       id: '0',
       symbol: 'DFI',
       symbolKey: 'DFI',
@@ -200,7 +200,7 @@ describe('controller.get()', () => {
 
   it('should return DBTC token with id as param', async () => {
     const data = await controller.get('1')
-    expect(data).toEqual({
+    expect(data).toStrictEqual({
       id: '1',
       symbol: 'DBTC',
       symbolKey: 'DBTC',
@@ -227,7 +227,7 @@ describe('controller.get()', () => {
 
   it('should return DETH token with id as param', async () => {
     const data = await controller.get('2')
-    expect(data).toEqual({
+    expect(data).toStrictEqual({
       id: '2',
       symbol: 'DETH',
       symbolKey: 'DETH',
@@ -254,7 +254,7 @@ describe('controller.get()', () => {
 
   it('should return DBTC-DETH LP token with id as param', async () => {
     const data = await controller.get('3')
-    expect(data).toEqual({
+    expect(data).toStrictEqual({
       id: '3',
       symbol: 'DBTC-DET',
       symbolKey: 'DBTC-DET',
