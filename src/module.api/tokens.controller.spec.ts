@@ -3,6 +3,7 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { TokensController } from '@src/module.api/tokens.controller'
 import { createToken, createPoolPair } from '@defichain/testing'
+import { NotFoundException } from '@nestjs/common'
 
 const container = new MasterNodeRegTestContainer()
 let client: JsonRpcClient
@@ -35,9 +36,7 @@ describe('controller.list() for all tokens', () => {
     const result = await controller.list({ size: 100 })
     expect(result.data.length).toBe(4)
 
-    let data = result.data[0]
-
-    expect(data).toEqual({
+    expect(result.data[0]).toEqual({
       id: '0',
       symbol: 'DFI',
       symbolKey: 'DFI',
@@ -61,9 +60,7 @@ describe('controller.list() for all tokens', () => {
       collateralAddress: ''
     })
 
-    data = result.data[1]
-
-    expect(data).toEqual({
+    expect(result.data[1]).toEqual({
       id: '1',
       symbol: 'DBTC',
       symbolKey: 'DBTC',
@@ -87,9 +84,7 @@ describe('controller.list() for all tokens', () => {
       collateralAddress: expect.any(String)
     })
 
-    data = result.data[2]
-
-    expect(data).toEqual({
+    expect(result.data[2]).toEqual({
       id: '2',
       symbol: 'DETH',
       symbolKey: 'DETH',
@@ -113,9 +108,7 @@ describe('controller.list() for all tokens', () => {
       collateralAddress: expect.any(String)
     })
 
-    data = result.data[3]
-
-    expect(data).toEqual({
+    expect(result.data[3]).toEqual({
       id: '3',
       symbol: 'DBTC-DET',
       symbolKey: 'DBTC-DET',
@@ -141,42 +134,32 @@ describe('controller.list() for all tokens', () => {
   })
 
   it('should listTokens with pagination', async () => {
-    const first = await controller.list({ size: 1 })
+    const first = await controller.list({ size: 2 })
 
-    expect(first.data.length).toBe(1)
-    expect(first.page?.next).toBe('0')
+    expect(first.data.length).toBe(2)
+    expect(first.page?.next).toBe('1')
 
-    const second = await controller.list({
-      size: 1,
+    expect(first.data[0]).toEqual(expect.objectContaining({ id: '0', symbol: 'DFI', symbolKey: 'DFI' }))
+    expect(first.data[1]).toEqual(expect.objectContaining({ id: '1', symbol: 'DBTC', symbolKey: 'DBTC' }))
+
+    const next = await controller.list({
+      size: 2,
       next: first.page?.next
     })
 
-    expect(second.data.length).toBe(1)
-    expect(second.page?.next).toBe('1')
+    expect(next.data.length).toBe(2)
+    expect(next.page?.next).toBe('3')
 
-    const third = await controller.list({
+    expect(next.data[0]).toEqual(expect.objectContaining({ id: '2', symbol: 'DETH', symbolKey: 'DETH' }))
+    expect(next.data[1]).toEqual(expect.objectContaining({ id: '3', symbol: 'DBTC-DET', symbolKey: 'DBTC-DET' }))
+
+    const last = await controller.list({
       size: 1,
-      next: second.page?.next
+      next: next.page?.next
     })
 
-    expect(third.data.length).toBe(1)
-    expect(third.page?.next).toBe('2')
-
-    const forth = await controller.list({
-      size: 1,
-      next: third.page?.next
-    })
-
-    expect(forth.data.length).toBe(1)
-    expect(forth.page?.next).toBe('3')
-
-    const fifth = await controller.list({
-      size: 1,
-      next: forth.page?.next
-    })
-
-    expect(fifth.data.length).toBe(0)
-    expect(fifth.page).toBeUndefined()
+    expect(last.data.length).toBe(0)
+    expect(last.page).toBeUndefined()
   })
 
   it('should listTokens with an empty object if size 100 next 300 which is out of range', async () => {
@@ -299,8 +282,7 @@ describe('controller.get()', () => {
 
 describe('controller.get() for token which is not found', () => {
   it('should fail with id as param', async () => {
-    await expect(controller.get('4'))
-      .rejects
-      .toThrow('Token not found')
+    await expect(controller.get('4')).rejects.toThrow(NotFoundException)
+    await expect(controller.get('4')).rejects.toThrow('Unable to find token')
   })
 })

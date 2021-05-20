@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, ParseIntPipe } from '@nestjs/common'
+import { Controller, Get, Param, Query, ParseIntPipe, NotFoundException } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
@@ -44,8 +44,12 @@ export class TokensController {
    */
   @Get('/:id')
   async get (@Param('id', ParseIntPipe) id: string): Promise<TokenData> {
-    const data = await this.client.token.getToken(id)
-    return mapTokenData(String(id), data[Object.keys(data)[0]])
+    try {
+      const data = await this.client.token.getToken(id)
+      return mapTokenData(String(id), data[Object.keys(data)[0]])
+    } catch (e) {
+      throw new NotFoundException('Unable to find token')
+    }
   }
 }
 
