@@ -4,4 +4,8 @@
 # @defichain/whale-api-wallet
 
 While `jellyfish-wallet` is a managed wallet, `whale-api-wallet` uses `whale-api-client` for DeFi light wallet
-implementation. 
+implementation.
+
+### Development
+
+> This is currently not e2e tested, due to blocked issues.
