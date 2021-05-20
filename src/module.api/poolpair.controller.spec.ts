@@ -4,7 +4,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { PoolPairController } from '@src/module.api/poolpair.controller'
 import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintTokens } from '@defichain/testing'
 import { PoolPairInfoCache } from '@src/module.api/cache/poolpair.info.cache'
-import { CacheModule } from '@nestjs/common'
+import { CacheModule, NotFoundException } from '@nestjs/common'
 import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
@@ -178,6 +178,7 @@ describe('get', () => {
   })
 
   it('should throw error while getting non-existent poolpair', async () => {
-    await expect(controller.get('999')).rejects.toThrow()
+    await expect(controller.get('999')).rejects.toThrow(NotFoundException)
+    await expect(controller.get('999')).rejects.toThrow('unable to find poolpair')
   })
 })

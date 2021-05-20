@@ -1,7 +1,7 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
-import { WhaleApiClient } from '../../src'
+import { WhaleApiClient, WhaleApiException } from '../../src'
 import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintTokens } from '@defichain/testing'
 
 let container: MasterNodeRegTestContainer
@@ -163,6 +163,7 @@ describe('get', () => {
   })
 
   it('should throw error while getting non-existent poolpair', async () => {
-    await expect(client.poolpair.get('999')).rejects.toThrow()
+    await expect(client.poolpair.get('999')).rejects.toThrow(WhaleApiException)
+    await expect(client.poolpair.get('999')).rejects.toThrow('unable to find poolpair')
   })
 })

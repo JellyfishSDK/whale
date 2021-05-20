@@ -50,15 +50,14 @@ export class PoolPairController {
       return poolPairData
     }
 
-    const poolPairResult = await this.rpcClient.poolpair.getPoolPair(id)
-    if (poolPairResult === undefined) {
+    try {
+      const poolPairResult = await this.rpcClient.poolpair.getPoolPair(id)
+      poolPairData = mapPoolPair(id, poolPairResult[id])
+      await this.poolPairInfoCache.set(id, poolPairData)
+      return poolPairData
+    } catch (e) {
       throw new NotFoundException('unable to find poolpair')
     }
-    poolPairData = mapPoolPair(id, poolPairResult[id])
-
-    await this.poolPairInfoCache.set(id, poolPairData)
-
-    return poolPairData
   }
 }
 
