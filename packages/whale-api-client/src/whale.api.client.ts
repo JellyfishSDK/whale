@@ -4,6 +4,7 @@ import { URLSearchParams } from 'url'
 import { raiseIfError, WhaleClientException, WhaleClientTimeoutException } from './errors'
 import { WhaleApiResponse, ApiPagedResponse } from './whale.api.response'
 import { Address } from './api/address'
+import { PoolPair } from './api/poolpair'
 import { Rpc } from './api/rpc'
 import { Transactions } from './api/transactions'
 import { Tokens } from './api/tokens'
@@ -53,6 +54,7 @@ export interface ResponseAsString {
 
 export class WhaleApiClient {
   public readonly address = new Address(this)
+  public readonly poolpair = new PoolPair(this)
   public readonly rpc = new Rpc(this)
   public readonly transactions = new Transactions(this)
   public readonly tokens = new Tokens(this)
