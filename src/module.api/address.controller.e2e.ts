@@ -85,7 +85,7 @@ describe('aggregation', () => {
     await waitForAddressTxCount(app, address, 3)
 
     const agg = await controller.getAggregation('regtest', address)
-    expect(agg).toEqual({
+    expect(agg).toStrictEqual({
       amount: {
         txIn: '17.38471695',
         txOut: '0.00000000',
@@ -152,7 +152,7 @@ describe('transactions', () => {
       expect(response.data.length).toBe(8)
       expect(response.page).toBeUndefined()
 
-      expect(response.data[5]).toEqual({
+      expect(response.data[5]).toStrictEqual({
         block: {
           hash: expect.stringMatching(/[0-f]{64}/),
           height: expect.any(Number)
@@ -227,7 +227,7 @@ describe('transactions', () => {
       expect(response.data.length).toBe(4)
       expect(response.page).toBeUndefined()
 
-      expect(response.data[3]).toEqual({
+      expect(response.data[3]).toStrictEqual({
         block: {
           hash: expect.stringMatching(/[0-f]{64}/),
           height: expect.any(Number)
@@ -288,7 +288,7 @@ describe('transactions', () => {
       expect(response.data.length).toBe(2)
       expect(response.page).toBeUndefined()
 
-      expect(response.data[1]).toEqual({
+      expect(response.data[1]).toStrictEqual({
         block: {
           hash: expect.stringMatching(/[0-f]{64}/),
           height: expect.any(Number)
@@ -321,7 +321,7 @@ describe('transactions', () => {
       expect(response.data.length).toBe(2)
       expect(response.page).toBeUndefined()
 
-      expect(response.data[1]).toEqual({
+      expect(response.data[1]).toStrictEqual({
         block: {
           hash: expect.stringMatching(/[0-f]{64}/),
           height: expect.any(Number)

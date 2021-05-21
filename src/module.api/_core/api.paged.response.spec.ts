@@ -4,7 +4,7 @@ it('should create with ApiPagedResponse.next', () => {
   const items = [{ id: '1', sort: 'a' }, { id: '2', sort: 'b' }]
 
   expect(ApiPagedResponse.next(items).page).toBeUndefined()
-  expect(ApiPagedResponse.next(items, 'b').page?.next).toEqual('b')
+  expect(ApiPagedResponse.next(items, 'b').page?.next).toStrictEqual('b')
 })
 
 it('should not create next with ApiPagedResponse.of using provider with limit = 3', () => {

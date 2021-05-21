@@ -72,7 +72,7 @@ describe('raw transaction send/test', () => {
       const txid = await client.transactions.send({
         hex: hex
       })
-      expect(txid.length).toEqual(64)
+      expect(txid.length).toStrictEqual(64)
 
       await container.generate(1)
       const out = await container.call('gettxout', [txid, 0])
@@ -84,7 +84,7 @@ describe('raw transaction send/test', () => {
       const txid = await client.transactions.send({
         hex: hex, maxFeeRate: 0.05
       })
-      expect(txid.length).toEqual(64)
+      expect(txid.length).toStrictEqual(64)
 
       await container.generate(1)
       const out = await container.call('gettxout', [txid, 0])
@@ -120,7 +120,7 @@ describe('raw transaction send/test', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(WhaleApiValidationException)
         expect(err.message).toBe('422 - ValidationError (/v1/regtest/transactions)')
-        expect(err.properties).toEqual([{
+        expect(err.properties).toStrictEqual([{
           constraints: [
             'hex must be a hexadecimal number',
             'hex should not be empty'
@@ -140,7 +140,7 @@ describe('raw transaction send/test', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(WhaleApiValidationException)
         expect(err.message).toBe('422 - ValidationError (/v1/regtest/transactions)')
-        expect(err.properties).toEqual([{
+        expect(err.properties).toStrictEqual([{
           constraints: [
             'hex must be a hexadecimal number'
           ],
@@ -159,7 +159,7 @@ describe('raw transaction send/test', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(WhaleApiValidationException)
         expect(err.message).toBe('422 - ValidationError (/v1/regtest/transactions)')
-        expect(err.properties).toEqual([{
+        expect(err.properties).toStrictEqual([{
           constraints: [
             'maxFeeRate must not be less than 0'
           ],
@@ -179,7 +179,7 @@ describe('raw transaction send/test', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(WhaleApiValidationException)
         expect(err.message).toBe('422 - ValidationError (/v1/regtest/transactions)')
-        expect(err.properties).toEqual([{
+        expect(err.properties).toStrictEqual([{
           constraints: [
             'maxFeeRate must not be less than 0',
             'maxFeeRate must be a number conforming to the specified constraints'

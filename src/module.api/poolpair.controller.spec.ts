@@ -82,7 +82,7 @@ describe('list', () => {
     expect(response.data.length).toBe(8)
     expect(response.page).toBeUndefined()
 
-    expect(response.data[1]).toEqual({
+    expect(response.data[1]).toStrictEqual({
       id: '8',
       symbol: 'A-C',
       name: 'A-C',
@@ -149,7 +149,7 @@ describe('get', () => {
   it('should get', async () => {
     const response = await controller.get('7')
 
-    expect(response).toEqual({
+    expect(response).toStrictEqual({
       id: '7',
       symbol: 'A-B',
       name: 'A-B',

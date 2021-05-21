@@ -74,7 +74,7 @@ describe('list', () => {
     expect(response.length).toBe(8)
     expect(response.hasNext).toBe(false)
 
-    expect(response[1]).toEqual({
+    expect(response[1]).toStrictEqual({
       id: '8',
       symbol: 'A-C',
       name: 'A-C',
@@ -94,7 +94,6 @@ describe('list', () => {
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       rewardPct: 0,
-      customRewards: undefined,
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
@@ -135,7 +134,7 @@ describe('get', () => {
   it('should get', async () => {
     const response = await client.poolpair.get('7')
 
-    expect(response).toEqual({
+    expect(response).toStrictEqual({
       id: 7,
       symbol: 'A-B',
       name: 'A-B',

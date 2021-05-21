@@ -24,7 +24,7 @@ it('WhaleApiValidationException should includes properties', () => {
   expect(exception.message).toBe('422 - ValidationError (/link/to/validation/error)')
   expect(exception.code).toBe(422)
   expect(exception.type).toBe('ValidationError')
-  expect(exception.properties).toEqual([
+  expect(exception.properties).toStrictEqual([
     {
       property: 'key',
       value: 'value',

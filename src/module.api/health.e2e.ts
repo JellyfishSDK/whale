@@ -27,7 +27,7 @@ describe('/_health/probes/liveness', () => {
     })
 
     expect(res.statusCode).toBe(200)
-    expect(res.json()).toEqual({
+    expect(res.json()).toStrictEqual({
       details: {
         defid: {
           status: 'up'
@@ -54,7 +54,7 @@ describe('/_health/probes/readiness', () => {
     })
 
     expect(res.statusCode).toBe(503)
-    expect(res.json()).toEqual({
+    expect(res.json()).toStrictEqual({
       details: {
         defid: {
           blocks: expect.any(Number),

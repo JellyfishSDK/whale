@@ -69,7 +69,7 @@ describe('tokens', () => {
     expect(response.data.length).toBe(6)
     expect(response.page).toBeUndefined()
 
-    expect(response.data[5]).toEqual({
+    expect(response.data[5]).toStrictEqual({
       id: '6',
       amount: '10.00000000',
       symbol: 'F',

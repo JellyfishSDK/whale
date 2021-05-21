@@ -22,7 +22,7 @@ it('should 404 with invalid network', async () => {
   })
 
   expect(res.statusCode).toBe(404)
-  expect(res.json()).toEqual({
+  expect(res.json()).toStrictEqual({
     error: {
       code: 404,
       type: 'NotFound',
