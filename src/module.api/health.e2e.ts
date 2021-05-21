@@ -26,7 +26,7 @@ describe('/_health/probes/liveness', () => {
       url: '/_health/probes/liveness'
     })
 
-    expect(res.statusCode).toBe(200)
+    expect(res.statusCode).toStrictEqual(200)
     expect(res.json()).toStrictEqual({
       details: {
         defid: {
@@ -53,7 +53,7 @@ describe('/_health/probes/readiness', () => {
       url: '/_health/probes/readiness'
     })
 
-    expect(res.statusCode).toBe(503)
+    expect(res.statusCode).toStrictEqual(503)
     expect(res.json()).toStrictEqual({
       details: {
         defid: {

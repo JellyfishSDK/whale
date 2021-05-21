@@ -21,7 +21,7 @@ describe('provided module: level', () => {
   })
 
   it('dynamically injected database should be level database', () => {
-    expect(database instanceof LevelDatabase).toBe(true)
+    expect(database instanceof LevelDatabase).toStrictEqual(true)
   })
 
   it('should be a singleton module', () => {
@@ -46,7 +46,7 @@ describe('provided module: memory', () => {
   })
 
   it('dynamically injected database should be memory database', () => {
-    expect(database instanceof MemoryDatabase).toBe(true)
+    expect(database instanceof MemoryDatabase).toStrictEqual(true)
   })
 
   it('should be a singleton module', () => {

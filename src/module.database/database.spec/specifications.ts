@@ -197,20 +197,20 @@ export async function shouldQueryWithAscDesc (database: Database): Promise<void>
     order: SortOrder.DESC
   })
   expect(partitionADesc.length).toStrictEqual(4)
-  expect(partitionADesc[0].a).toBe('0003')
-  expect(partitionADesc[1].a).toBe('0002')
-  expect(partitionADesc[2].a).toBe('0001')
-  expect(partitionADesc[3].a).toBe('0000')
+  expect(partitionADesc[0].a).toStrictEqual('0003')
+  expect(partitionADesc[1].a).toStrictEqual('0002')
+  expect(partitionADesc[2].a).toStrictEqual('0001')
+  expect(partitionADesc[3].a).toStrictEqual('0000')
 
   const partitionAAsc = await database.query(PartitionMapping.index.partition_a, {
     limit: 100,
     order: SortOrder.ASC
   })
   expect(partitionAAsc.length).toStrictEqual(4)
-  expect(partitionAAsc[0].a).toBe('0000')
-  expect(partitionAAsc[1].a).toBe('0001')
-  expect(partitionAAsc[2].a).toBe('0002')
-  expect(partitionAAsc[3].a).toBe('0003')
+  expect(partitionAAsc[0].a).toStrictEqual('0000')
+  expect(partitionAAsc[1].a).toStrictEqual('0001')
+  expect(partitionAAsc[2].a).toStrictEqual('0002')
+  expect(partitionAAsc[3].a).toStrictEqual('0003')
 
   const compositeBDesc = await database.query(PartitionSortMapping.index.composite_b, {
     partitionKey: 2000,
@@ -218,10 +218,10 @@ export async function shouldQueryWithAscDesc (database: Database): Promise<void>
     order: SortOrder.DESC
   })
   expect(compositeBDesc.length).toStrictEqual(4)
-  expect(compositeBDesc[0].b_sort).toBe(4000)
-  expect(compositeBDesc[1].b_sort).toBe(3000)
-  expect(compositeBDesc[2].b_sort).toBe(2000)
-  expect(compositeBDesc[3].b_sort).toBe(1000)
+  expect(compositeBDesc[0].b_sort).toStrictEqual(4000)
+  expect(compositeBDesc[1].b_sort).toStrictEqual(3000)
+  expect(compositeBDesc[2].b_sort).toStrictEqual(2000)
+  expect(compositeBDesc[3].b_sort).toStrictEqual(1000)
 
   const compositeBAsc = await database.query(PartitionSortMapping.index.composite_b, {
     partitionKey: 2000,
@@ -229,10 +229,10 @@ export async function shouldQueryWithAscDesc (database: Database): Promise<void>
     order: SortOrder.ASC
   })
   expect(compositeBAsc.length).toStrictEqual(4)
-  expect(compositeBAsc[0].b_sort).toBe(1000)
-  expect(compositeBAsc[1].b_sort).toBe(2000)
-  expect(compositeBAsc[2].b_sort).toBe(3000)
-  expect(compositeBAsc[3].b_sort).toBe(4000)
+  expect(compositeBAsc[0].b_sort).toStrictEqual(1000)
+  expect(compositeBAsc[1].b_sort).toStrictEqual(2000)
+  expect(compositeBAsc[2].b_sort).toStrictEqual(3000)
+  expect(compositeBAsc[3].b_sort).toStrictEqual(4000)
 }
 
 export async function shouldQueryWithOperatorGT (database: Database): Promise<void> {

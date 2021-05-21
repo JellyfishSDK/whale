@@ -27,5 +27,5 @@ it('should create next with ApiPagedResponse.of using provider with limit = 3', 
 
   expect(ApiPagedResponse.of(items, 3, item => {
     return item.sort
-  }).page?.next).toBe('c')
+  }).page?.next).toStrictEqual('c')
 })
