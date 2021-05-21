@@ -135,7 +135,7 @@ describe('get', () => {
     const response = await client.poolpair.get('7')
 
     expect(response).toStrictEqual({
-      id: 7,
+      id: '7',
       symbol: 'A-B',
       name: 'A-B',
       status: true,
