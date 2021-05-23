@@ -30,16 +30,16 @@ beforeEach(async () => {
       hash: hash,
       height: height,
       masternode: '',
-      median_time: 0,
+      medianTime: 0,
       merkleroot: '',
       minter: '',
-      minter_block_count: 0,
-      previous_hash: '',
+      minterBlockCount: 0,
+      previousHash: '',
       size: 0,
-      size_stripped: 0,
-      stake_modifier: '',
+      sizeStripped: 0,
+      stakeModifier: '',
       time: 0,
-      transaction_count: 0,
+      transactionCount: 0,
       version: 0,
       weight: 0
     })
@@ -56,31 +56,31 @@ afterEach(async () => {
 
 it('should getByHash', async () => {
   const block = await mapper.getByHash('1000000000000000000000000000000000000000000000000000000000000000')
-  expect(block?.height).toBe(1)
+  expect(block?.height).toStrictEqual(1)
 })
 
 it('should getByHeight', async () => {
   const block = await mapper.getByHeight(0)
-  expect(block?.hash).toBe('0000000000000000000000000000000000000000000000000000000000000000')
+  expect(block?.hash).toStrictEqual('0000000000000000000000000000000000000000000000000000000000000000')
 })
 
 it('should getHighest', async () => {
   const block = await mapper.getHighest()
-  expect(block?.height).toBe(2)
-  expect(block?.hash).toBe('1000000000000000000000000000000010000000000000000000000000000000')
+  expect(block?.height).toStrictEqual(2)
+  expect(block?.hash).toStrictEqual('1000000000000000000000000000000010000000000000000000000000000000')
 })
 
 it('should queryByHeight', async () => {
   const blocks = await mapper.queryByHeight(10)
-  expect(blocks.length).toBe(3)
+  expect(blocks.length).toStrictEqual(3)
 
-  expect(blocks[0].height).toBe(2)
-  expect(blocks[1].height).toBe(1)
-  expect(blocks[2].height).toBe(0)
+  expect(blocks[0].height).toStrictEqual(2)
+  expect(blocks[1].height).toStrictEqual(1)
+  expect(blocks[2].height).toStrictEqual(0)
 
   const after2 = await mapper.queryByHeight(10, 2)
-  expect(after2[0].height).toBe(1)
-  expect(after2[1].height).toBe(0)
+  expect(after2[0].height).toStrictEqual(1)
+  expect(after2[1].height).toStrictEqual(0)
 })
 
 it('should put', async () => {
@@ -90,7 +90,7 @@ it('should put', async () => {
   await mapper.put(block)
 
   const updated = await mapper.getByHeight(0)
-  expect(updated?.size).toBe(100)
+  expect(updated?.size).toStrictEqual(100)
 })
 
 it('should put but deleted', async () => {

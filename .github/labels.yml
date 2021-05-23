@@ -53,6 +53,10 @@
 - color: fbca04
   name: area/core
 - color: fbca04
+  name: area/whale-api-client
+- color: fbca04
+  name: area/whale-api-wallet
+- color: fbca04
   name: area/workflow
 - color: fbca04
   name: area/module-api

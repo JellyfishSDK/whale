@@ -10,8 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: Docker Release
     steps:
-      - name: Set up Semver
-        uses: actions/github-script@v4
+      - uses: actions/github-script@a3e7071a34d7e1f219a8a4de9a5e0a34d1ee1293
         id: version
         with:
           script: |
@@ -24,20 +23,20 @@ jobs:
           result-encoding: string
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v1.1.0
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v1.3.0
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v1.9.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v2.4.0
         with:
           push: true
           platforms: |
@@ -46,3 +45,47 @@ jobs:
           tags: |
             ghcr.io/defich/whale:latest
             ghcr.io/defich/whale:${{ steps.version.outputs.result }}
+
+
+  npm:
+    name: NPM
+    runs-on: ubuntu-latest
+    environment: NPM Release
+    steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: actions/setup-node@46071b5c7a2e0c34e49c3cb8a0e792e86e18d5ea
+        with:
+          node-version: '15'
+
+      - uses: actions/github-script@a3e7071a34d7e1f219a8a4de9a5e0a34d1ee1293
+        id: version
+        with:
+          script: |
+            const semver = context.ref.replace('refs/tags/v', '')
+            if (semver.match(/[0-9]\.[0-9]\.[0-9]/)) {
+              return semver
+            }
+
+            throw new Error('not semver')
+          result-encoding: string
+
+      - run: npm ci
+      - run: npm run packages:build
+      - run: npm run packages:version ${{ steps.version.outputs.result }}
+
+      - name: Publish Next
+        if: github.event.release.prerelease
+        run: |
+          npm config set //registry.npmjs.org/:_authToken=$NPM_AUTH_TOKEN
+          npm run packages:publish:next
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
+      - name: Publish Latest
+        if: "!github.event.release.prerelease"
+        run: |
+          npm config set //registry.npmjs.org/:_authToken=$NPM_AUTH_TOKEN
+          npm run packages:publish:latest
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+

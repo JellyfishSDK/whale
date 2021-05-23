@@ -9,6 +9,10 @@
 
 /website/                                       @fuxingloh
 
+/packages/                                      @fuxingloh
+/packages/whale-api-client/                     @fuxingloh @canonbrother @jingyi2811
+/packages/whale-api-wallet/                     @fuxingloh
+
 /src/                                           @fuxingloh
 /src/module.api/                                @fuxingloh @canonbrother @jingyi2811
 /src/module.database/                           @fuxingloh
