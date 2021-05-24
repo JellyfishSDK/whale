@@ -6,6 +6,8 @@ updates:
       interval: 'weekly'
     labels:
       - "kind/dependencies"
+    ignore:
+      - dependency-name: "@defichain/*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
