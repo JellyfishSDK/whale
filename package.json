@@ -19,7 +19,7 @@
     "start:prod": "node dist/main",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:ci": "jest --ci --coverage",
+    "test:ci": "jest --ci --coverage --maxWorkers=4",
     "packages:build": "lerna run build",
     "packages:version": "lerna version $1 --yes --no-push --no-git-tag-version",
     "packages:publish:next": "lerna exec -- npm publish --tag next --access public",
