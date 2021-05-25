@@ -37,7 +37,7 @@ export interface WhaleApiClientOptions {
  * WhaleApiClient default options
  */
 export const DefaultOptions: WhaleApiClientOptions = {
-  url: 'https://whale.ocean.defichain.com',
+  url: 'https://ocean.defichain.com',
   timeout: 60000,
   version: 'v1',
   network: 'mainnet'
