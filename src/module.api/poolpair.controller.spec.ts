@@ -179,6 +179,6 @@ describe('get', () => {
 
   it('should throw error while getting non-existent poolpair', async () => {
     await expect(controller.get('999')).rejects.toThrow(NotFoundException)
-    await expect(controller.get('999')).rejects.toThrow('unable to find poolpair')
+    await expect(controller.get('999')).rejects.toThrow('Unable to find poolpair')
   })
 })
