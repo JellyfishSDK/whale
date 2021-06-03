@@ -60,18 +60,35 @@ describe('transactions', () => {
     })
 
     it('should throw BadRequestError due to invalid txn', async () => {
-      const hex = '0400000100881133bb11aa00cc'
-      await expect(controller.test({
-        hex: hex
-      })).rejects.toThrow(BadRequestApiException)
+      try {
+        await controller.test({ hex: '0400000100881133bb11aa00cc' })
+      } catch (err) {
+        expect(err).toBeInstanceOf(BadRequestApiException)
+        expect(err.error).toStrictEqual({
+          code: 400,
+          type: 'BadRequest',
+          message: 'Transaction decode failed',
+          at: expect.any(Number)
+        })
+      }
     })
 
     it('should throw BadRequestError due to high fees', async () => {
       const hex = await createSignedTxnHex(container, 10, 9)
-      await expect(controller.test({
-        hex: hex,
-        maxFeeRate: 1.0
-      })).rejects.toThrow(BadRequestApiException)
+
+      try {
+        await controller.test({
+          hex: hex, maxFeeRate: 1.0
+        })
+      } catch (err) {
+        expect(err).toBeInstanceOf(BadRequestApiException)
+        expect(err.error).toStrictEqual({
+          code: 400,
+          type: 'BadRequest',
+          at: expect.any(Number),
+          message: 'Transaction is not allowed to be inserted'
+        })
+      }
     })
   })
 
@@ -104,18 +121,36 @@ describe('transactions', () => {
     })
 
     it('should throw BadRequestException due to invalid txn', async () => {
-      const hex = '0400000100881133bb11aa00cc'
-      await expect(controller.send({
-        hex: hex
-      })).rejects.toThrow(BadRequestApiException)
+      try {
+        await controller.send({
+          hex: '0400000100881133bb11aa00cc'
+        })
+      } catch (err) {
+        expect(err).toBeInstanceOf(BadRequestApiException)
+        expect(err.error).toStrictEqual({
+          code: 400,
+          type: 'BadRequest',
+          at: expect.any(Number),
+          message: undefined
+        })
+      }
     })
 
     it('should throw BadRequestException due to high fees', async () => {
       const hex = await createSignedTxnHex(container, 10, 9)
-      await expect(controller.send({
-        hex: hex,
-        maxFeeRate: 1.0
-      })).rejects.toThrow(BadRequestApiException)
+      try {
+        await controller.send({
+          hex: hex, maxFeeRate: 1
+        })
+      } catch (err) {
+        expect(err).toBeInstanceOf(BadRequestApiException)
+        expect(err.error).toStrictEqual({
+          code: 400,
+          type: 'BadRequest',
+          at: expect.any(Number),
+          message: undefined
+        })
+      }
     })
   })
 })

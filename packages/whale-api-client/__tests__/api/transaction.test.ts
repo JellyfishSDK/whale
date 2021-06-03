@@ -119,7 +119,8 @@ describe('transaction', () => {
           code: 400,
           type: 'BadRequest',
           at: expect.any(Number),
-          url: '/v1/regtest/transactions'
+          url: '/v1/regtest/transactions',
+          message: undefined
         })
       }
     })
@@ -136,7 +137,8 @@ describe('transaction', () => {
           code: 400,
           type: 'BadRequest',
           at: expect.any(Number),
-          url: '/v1/regtest/transactions'
+          url: '/v1/regtest/transactions',
+          message: undefined
         })
       }
     })
