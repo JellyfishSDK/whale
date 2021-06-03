@@ -282,7 +282,16 @@ describe('controller.get()', () => {
 
 describe('controller.get() for token which is not found', () => {
   it('should fail with id as param', async () => {
-    await expect(controller.get('4')).rejects.toThrow(NotFoundException)
-    await expect(controller.get('4')).rejects.toThrow('Unable to find token')
+    try {
+      await controller.get('4')
+      expect('must fail').toBeUndefined()
+    } catch (err) {
+      expect(err).toBeInstanceOf(NotFoundException)
+      expect(err.response).toStrictEqual({
+        statusCode: 404,
+        message: 'Unable to find token',
+        error: 'Not Found'
+      })
+    }
   })
 })
