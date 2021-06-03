@@ -56,6 +56,7 @@ export class PoolPairController {
       await this.poolPairInfoCache.set(id, poolPairData)
       return poolPairData
     } catch (e) {
+      /* istanbul ignore else */
       if (e.payload.message === 'Pool not found') {
         throw new NotFoundException('Unable to find poolpair')
       } else {

@@ -48,6 +48,7 @@ export class TokensController {
       const data = await this.client.token.getToken(id)
       return mapTokenData(String(id), data[Object.keys(data)[0]])
     } catch (e) {
+      /* istanbul ignore else */
       if (e.payload.message === 'Token not found') {
         throw new NotFoundException('Unable to find token')
       } else {
