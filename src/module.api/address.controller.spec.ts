@@ -10,6 +10,7 @@ import { DatabaseModule } from '@src/module.database/_module'
 import { ModelModule } from '@src/module.model/_module'
 import { DeFiDModule } from '@src/module.defid/_module'
 import { IndexerModule } from '@src/module.indexer/_module'
+import { RpcApiError } from '@defichain/jellyfish-api-core'
 
 const container = new MasterNodeRegTestContainer()
 let controller: AddressController
@@ -110,5 +111,13 @@ describe('tokens', () => {
 
     expect(first.data.length).toStrictEqual(2)
     expect(first.page?.next).toStrictEqual('2')
+  })
+
+  it('should throw error while listToken with invalid address', async () => {
+    await expect(controller.listToken('invalid', { size: 30 }))
+      .rejects.toThrow(RpcApiError)
+
+    await expect(controller.listToken('invalid', { size: 30 }))
+      .rejects.toThrow('recipient (invalid) does not refer to any valid address')
   })
 })

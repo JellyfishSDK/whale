@@ -59,7 +59,7 @@ export class PoolPairController {
       if (e.payload.message === 'Pool not found') {
         throw new NotFoundException('Unable to find poolpair')
       } else {
-        throw new BadRequestException()
+        throw new BadRequestException(e)
       }
     }
   }

@@ -51,7 +51,7 @@ export class TokensController {
       if (e.payload.message === 'Token not found') {
         throw new NotFoundException('Unable to find token')
       } else {
-        throw new BadRequestException()
+        throw new BadRequestException(e)
       }
     }
   }

@@ -31,6 +31,7 @@ export class AddressController {
       @Param('address') address: string
   ): Promise<string> {
     const aggregation = await this.getAggregation(network, address)
+    console.log('aggregation: ', aggregation)
     return aggregation?.amount.unspent ?? '0.00000000'
   }
 

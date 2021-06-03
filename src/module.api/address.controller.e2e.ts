@@ -2,8 +2,9 @@ import { AddressController } from '@src/module.api/address.controller'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForAddressTxCount, waitForIndexedHeight } from '@src/e2e.module'
-import { createSignedTxnHex } from '@defichain/testing'
+import { createSignedTxnHex, createToken, mintTokens, sendTokensToAddress } from '@defichain/testing'
 import { WIF } from '@defichain/jellyfish-crypto'
+import { RpcApiError } from '@defichain/jellyfish-api-core'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -62,6 +63,10 @@ describe('balance', () => {
     expect(balance).toStrictEqual('10.99999999')
   })
 
+  it('should throw error if getBalance with invalid address', async () => {
+    await expect(controller.getBalance('regtest', 'invalid')).rejects.toThrow('InvalidDefiAddress')
+  })
+
   it('should sum getBalance', async () => {
     const address = 'bcrt1qeq2g82kj99mqfvnwc2g5w0azzd298q0t84tc6s'
 
@@ -107,6 +112,10 @@ describe('aggregation', () => {
         txOutCount: 0
       }
     })
+  })
+
+  it('should throw error if getAggregation with invalid address', async () => {
+    await expect(controller.getAggregation('regtest', 'invalid')).rejects.toThrow('InvalidDefiAddress')
   })
 })
 
@@ -215,6 +224,11 @@ describe('transactions', () => {
 
       expect(first.data.length).toStrictEqual(2)
       expect(first.page?.next).toMatch(/[0-f]{82}/)
+    })
+
+    it('should throw error if listTransaction with invalid address', async () => {
+      await expect(controller.listTransaction('regtest', 'invalid', { size: 30 }))
+        .rejects.toThrow('InvalidDefiAddress')
     })
   })
 
@@ -341,5 +355,79 @@ describe('transactions', () => {
         }
       })
     })
+  })
+})
+
+describe('tokens', () => {
+  const address = 'bcrt1qf5v8n3kfe6v5mharuvj0qnr7g74xnu9leut39r'
+  const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
+
+  beforeAll(async () => {
+    for (const token of tokens) {
+      await container.waitForWalletBalanceGTE(110)
+      await createToken(container, token)
+      await mintTokens(container, token, { mintAmount: 1000 })
+      await sendTokensToAddress(container, address, 10, token)
+    }
+    await container.generate(1)
+  })
+
+  it('should listToken', async () => {
+    const response = await controller.listToken(address, {
+      size: 30
+    })
+
+    expect(response.data.length).toStrictEqual(6)
+    expect(response.page).toBeUndefined()
+
+    expect(response.data[5]).toStrictEqual({
+      id: '6',
+      amount: '10.00000000',
+      symbol: 'F',
+      symbolKey: 'F',
+      name: 'F',
+      isDAT: true,
+      isLPS: false
+    })
+  })
+
+  it('should listToken with pagination', async () => {
+    const first = await controller.listToken(address, {
+      size: 2
+    })
+    expect(first.data.length).toStrictEqual(2)
+    expect(first.page?.next).toStrictEqual('2')
+    expect(first.data[0].symbol).toStrictEqual('A')
+    expect(first.data[1].symbol).toStrictEqual('B')
+
+    const next = await controller.listToken(address, {
+      size: 10,
+      next: first.page?.next
+    })
+
+    expect(next.data.length).toStrictEqual(4)
+    expect(next.page?.next).toBeUndefined()
+    expect(next.data[0].symbol).toStrictEqual('C')
+    expect(next.data[1].symbol).toStrictEqual('D')
+    expect(next.data[2].symbol).toStrictEqual('E')
+    expect(next.data[3].symbol).toStrictEqual('F')
+  })
+
+  it('should listToken with undefined next pagination', async () => {
+    const first = await controller.listToken(address, {
+      size: 2,
+      next: undefined
+    })
+
+    expect(first.data.length).toStrictEqual(2)
+    expect(first.page?.next).toStrictEqual('2')
+  })
+
+  it('should throw error while listToken with invalid address', async () => {
+    await expect(controller.listToken('invalid', { size: 30 }))
+      .rejects.toThrow(RpcApiError)
+
+    await expect(controller.listToken('invalid', { size: 30 }))
+      .rejects.toThrow('recipient (invalid) does not refer to any valid address')
   })
 })
