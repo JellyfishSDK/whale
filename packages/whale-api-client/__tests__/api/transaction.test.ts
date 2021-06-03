@@ -2,9 +2,9 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { createSignedTxnHex } from '@defichain/testing'
 import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
-import { WhaleApiClient, WhaleApiValidationException } from '../../src'
+import { WhaleApiClient, WhaleApiException, WhaleApiValidationException } from '../../src'
 
-describe('raw transaction send/test', () => {
+describe('transaction', () => {
   let container: MasterNodeRegTestContainer
   let service: StubService
   let client: WhaleApiClient
@@ -32,7 +32,7 @@ describe('raw transaction send/test', () => {
     await container.waitForWalletBalanceGTE(15)
   })
 
-  describe('transactions.test()', () => {
+  describe('test', () => {
     it('should accept valid txn', async () => {
       const hex = await createSignedTxnHex(container, 10, 9.9999)
       await client.transactions.send({
@@ -48,25 +48,42 @@ describe('raw transaction send/test', () => {
     })
 
     it('should reject due to invalid txn', async () => {
-      const hex = '0400000100881133bb11aa00cc'
-      const call = async (): Promise<void> => await client.transactions.test({
-        hex: hex
-      })
-      await expect(call).rejects
-        .toThrow('400 - BadRequest (/v1/regtest/transactions/test)')
+      try {
+        await client.transactions.test({ hex: '0400000100881133bb11aa00cc' })
+        throw new Error('should not reach here')
+      } catch (err) {
+        expect(err).toBeInstanceOf(WhaleApiException)
+        expect(err.error).toStrictEqual({
+          code: 400,
+          type: 'BadRequest',
+          message: 'Transaction decode failed',
+          at: expect.any(Number),
+          url: '/v1/regtest/transactions/test'
+        })
+      }
     })
 
     it('should reject due to high fees', async () => {
       const hex = await createSignedTxnHex(container, 10, 9)
-      const call = async (): Promise<void> => await client.transactions.test({
-        hex: hex, maxFeeRate: 1
-      })
-      await expect(call).rejects
-        .toThrow('400 - BadRequest (/v1/regtest/transactions/test)')
+
+      try {
+        await client.transactions.test({
+          hex: hex, maxFeeRate: 1
+        })
+      } catch (err) {
+        expect(err).toBeInstanceOf(WhaleApiException)
+        expect(err.error).toStrictEqual({
+          code: 400,
+          type: 'BadRequest',
+          at: expect.any(Number),
+          message: 'Transaction is not allowed to be inserted',
+          url: '/v1/regtest/transactions/test'
+        })
+      }
     })
   })
 
-  describe('transactions.send()', () => {
+  describe('send', () => {
     it('should send valid txn', async () => {
       const hex = await createSignedTxnHex(container, 10, 9.9999)
       const txid = await client.transactions.send({
@@ -92,25 +109,38 @@ describe('raw transaction send/test', () => {
     })
 
     it('should fail due to invalid txn', async () => {
-      const hex = '0400000100881133bb11aa00cc'
-      const call = async (): Promise<string> => await client.transactions.send({
-        hex: hex
-      })
-      await expect(call).rejects
-        .toThrow('400 - BadRequest (/v1/regtest/transactions)')
+      try {
+        await client.transactions.send({
+          hex: '0400000100881133bb11aa00cc'
+        })
+      } catch (err) {
+        expect(err).toBeInstanceOf(WhaleApiException)
+        expect(err.error).toStrictEqual({
+          code: 400,
+          type: 'BadRequest',
+          at: expect.any(Number),
+          url: '/v1/regtest/transactions'
+        })
+      }
     })
 
     it('should fail due to high fees', async () => {
       const hex = await createSignedTxnHex(container, 10, 9)
-      const call = async (): Promise<string> => await client.transactions.send({
-        hex: hex, maxFeeRate: 1
-      })
-      await expect(call).rejects
-        .toThrow('400 - BadRequest (/v1/regtest/transactions)')
+      try {
+        await client.transactions.send({
+          hex: hex, maxFeeRate: 1
+        })
+      } catch (err) {
+        expect(err).toBeInstanceOf(WhaleApiException)
+        expect(err.error).toStrictEqual({
+          code: 400,
+          type: 'BadRequest',
+          at: expect.any(Number),
+          url: '/v1/regtest/transactions'
+        })
+      }
     })
-  })
 
-  describe('transactions.[test/send]() validations', () => {
     it('should fail validation (empty hex)', async () => {
       try {
         await client.transactions.send({
@@ -190,33 +220,11 @@ describe('raw transaction send/test', () => {
       }
     })
   })
-})
 
-describe('estimate fee rate', () => {
-  let container: MasterNodeRegTestContainer
-  let service: StubService
-  let client: WhaleApiClient
-
-  beforeAll(async () => {
-    container = new MasterNodeRegTestContainer()
-    service = new StubService(container)
-    client = new StubWhaleApiClient(service)
-
-    await container.start()
-    await container.waitForReady()
-    await service.start()
-  })
-
-  afterAll(async () => {
-    try {
-      await service.stop()
-    } finally {
-      await container.stop()
-    }
-  })
-
-  it('should be fixed fee of 0.00005000 when there are no transactions', async () => {
-    const feeRate = await client.transactions.estimateFee(10)
-    expect(feeRate).toStrictEqual(0.00005000)
+  describe('estimateFee', () => {
+    it('should be fixed fee of 0.00005000 when there are no transactions', async () => {
+      const feeRate = await client.transactions.estimateFee(10)
+      expect(feeRate).toStrictEqual(0.00005000)
+    })
   })
 })

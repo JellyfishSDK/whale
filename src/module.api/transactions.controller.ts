@@ -4,6 +4,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { IsHexadecimal, IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator'
 import { BadRequestApiException } from '@src/module.api/_core/api.error'
 import { EstimateMode } from '@defichain/jellyfish-api-core/dist/category/mining'
+import { grabValueByKey } from './shared/utils'
 
 class RawTxDto {
   @IsNotEmpty()
@@ -74,12 +75,20 @@ export class TransactionsController {
     const maxFeeRate = this.getMaxFeeRate(tx)
     try {
       const result = await this.client.rawtx.testMempoolAccept(tx.hex, maxFeeRate)
-      if (result.allowed) {
-        return
+      if (!result.allowed) {
+        throw new BadRequestApiException('Transaction is not allowed to be inserted')
       }
     } catch (e) {
+      const message = grabValueByKey(e, 'message')
+      if (message === 'TX decode failed') {
+        throw new BadRequestApiException('Transaction decode failed')
+      }
+      if (message === 'Transaction is not allowed to be inserted') {
+        throw new BadRequestApiException('Transaction is not allowed to be inserted')
+      }
+      /* istanbul ignore next */
+      throw new BadRequestApiException()
     }
-    throw new BadRequestApiException()
   }
 
   private getMaxFeeRate (tx: RawTxDto): BigNumber {

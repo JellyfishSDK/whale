@@ -1,9 +1,8 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
-import { WhaleApiClient } from '../../src'
+import { WhaleApiClient, WhaleApiException } from '../../src'
 import { createToken, createPoolPair } from '@defichain/testing'
-import { TokenData } from '../../src/api/tokens'
 
 let container: MasterNodeRegTestContainer
 let service: StubService
@@ -31,7 +30,7 @@ afterAll(async () => {
   }
 })
 
-describe('client.tokens.list()', () => {
+describe('list', () => {
   it('should listTokens', async () => {
     const result = await client.tokens.list()
     expect(result.length).toStrictEqual(4)
@@ -88,7 +87,7 @@ describe('client.tokens.list()', () => {
   })
 })
 
-describe('client.tokens.get()', () => {
+describe('get', () => {
   it('should return DFI coin with id as param', async () => {
     const data = await client.tokens.get('0')
     expect(data).toStrictEqual({
@@ -116,15 +115,35 @@ describe('client.tokens.get()', () => {
     })
   })
 
-  it('should fail due to id is not found', async () => {
-    const call = async (): Promise<TokenData> => await client.tokens.get('4')
-    await expect(call).rejects
-      .toThrow('404 - NotFound (/v1/regtest/tokens/4): Unable to find token')
+  it('should fail due to getting non-existent token', async () => {
+    try {
+      await client.tokens.get('999')
+      throw new Error('should not reach here')
+    } catch (err) {
+      expect(err).toBeInstanceOf(WhaleApiException)
+      expect(err.error).toStrictEqual({
+        code: 404,
+        type: 'NotFound',
+        at: expect.any(Number),
+        message: 'Unable to find token',
+        url: '/v1/regtest/tokens/999'
+      })
+    }
   })
 
   it('should fail due to id is malformed', async () => {
-    const call = async (): Promise<TokenData> => await client.tokens.get('$*@')
-    await expect(call).rejects
-      .toThrow('400 - BadRequest (/v1/regtest/tokens/$*@): Validation failed (numeric string is expected)')
+    try {
+      await client.tokens.get('$*@')
+      throw new Error('should not reach here')
+    } catch (err) {
+      expect(err).toBeInstanceOf(WhaleApiException)
+      expect(err.error).toStrictEqual({
+        code: 400,
+        type: 'BadRequest',
+        at: expect.any(Number),
+        message: 'Validation failed (numeric string is expected)',
+        url: '/v1/regtest/tokens/$*@'
+      })
+    }
   })
 })

@@ -180,7 +180,7 @@ describe('get', () => {
   it('should throw error while getting non-existent poolpair', async () => {
     try {
       await controller.get('999')
-      throw new Error('should not come here')
+      throw new Error('should not reach here')
     } catch (err) {
       expect(err).toBeInstanceOf(NotFoundException)
       expect(err.response).toStrictEqual({
