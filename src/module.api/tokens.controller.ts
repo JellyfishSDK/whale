@@ -4,6 +4,7 @@ import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { TokenData } from '@whale-api-client/api/tokens'
+import { grabValueByKey } from './shared/utils'
 
 @Controller('/v1/:network/tokens')
 export class TokensController {
@@ -49,7 +50,7 @@ export class TokensController {
       return mapTokenData(String(id), data[Object.keys(data)[0]])
     } catch (e) {
       /* istanbul ignore else */
-      if (e.payload.message === 'Token not found') {
+      if (grabValueByKey(e, 'message') === 'Token not found') {
         throw new NotFoundException('Unable to find token')
       } else {
         throw new BadRequestException(e)

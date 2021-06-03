@@ -228,7 +228,6 @@ describe('get', () => {
       await controller.get('999')
       throw new Error('should not reach here')
     } catch (err) {
-      console.log('err: ', err)
       expect(err).toBeInstanceOf(NotFoundException)
       expect(err.response).toStrictEqual({
         statusCode: 404,

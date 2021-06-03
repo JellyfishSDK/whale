@@ -6,36 +6,32 @@ import { TransactionsController } from '@src/module.api/transactions.controller'
 import { Bech32, Elliptic, HRP } from '@defichain/jellyfish-crypto'
 import { RegTest } from '@defichain/jellyfish-network'
 import { BadRequestApiException } from '@src/module.api/_core/api.error'
+import { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 
 describe('transactions', () => {
   const container = new MasterNodeRegTestContainer()
-  let client: JsonRpcClient
+  let app: NestFastifyApplication
   let controller: TransactionsController
 
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
     await container.waitForWalletCoinbaseMaturity()
-    client = new JsonRpcClient(await container.getCachedRpcUrl())
+    await container.waitForWalletBalanceGTE(100)
+
+    app = await createTestingApp(container)
+    controller = app.get<TransactionsController>(TransactionsController)
+
+    await waitForIndexedHeight(app, 100)
   })
 
   afterAll(async () => {
-    await container.stop()
-  })
-
-  beforeEach(async () => {
-    await container.waitForWalletBalanceGTE(11)
-
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [TransactionsController],
-      providers: [{ provide: JsonRpcClient, useValue: client }]
-    }).compile()
-
-    controller = app.get<TransactionsController>(TransactionsController)
+    await stopTestingApp(container, app)
   })
 
   async function expectTxn (txid: string, amount: number, pubKey: Buffer): Promise<void> {
-    const details = await client.blockchain.getTxOut(txid, 0)
+    const details = await container.call('gettxout', [txid, 0])
 
     expect(details.value.toString(10)).toStrictEqual(amount.toString())
     expect(details.scriptPubKey.addresses[0]).toStrictEqual(

@@ -5,6 +5,7 @@ import { PoolPairInfoCache } from '@src/module.api/cache/poolpair.info.cache'
 import { PoolPairData } from '@whale-api-client/api/poolpair'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
+import { grabValueByKey } from './shared/utils'
 
 @Controller('/v1/:network/poolpairs')
 export class PoolPairController {
@@ -57,7 +58,7 @@ export class PoolPairController {
       return poolPairData
     } catch (e) {
       /* istanbul ignore else */
-      if (e.payload.message === 'Pool not found') {
+      if (grabValueByKey(e, 'message') === 'Pool not found') {
         throw new NotFoundException('Unable to find poolpair')
       } else {
         throw new BadRequestException(e)

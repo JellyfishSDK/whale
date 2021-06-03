@@ -120,7 +120,7 @@ describe('transaction', () => {
           type: 'BadRequest',
           at: expect.any(Number),
           url: '/v1/regtest/transactions',
-          message: undefined
+          message: 'Transaction decode failed'
         })
       }
     })
@@ -138,7 +138,7 @@ describe('transaction', () => {
           type: 'BadRequest',
           at: expect.any(Number),
           url: '/v1/regtest/transactions',
-          message: undefined
+          message: 'Absurdly high fee'
         })
       }
     })

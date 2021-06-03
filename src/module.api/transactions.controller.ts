@@ -60,6 +60,15 @@ export class TransactionsController {
       return await this.client.rawtx.sendRawTransaction(tx.hex, maxFeeRate)
     } catch (e) {
       // TODO(fuxingloh): more meaningful error
+      const message = grabValueByKey(e, 'message')
+      if (message === 'TX decode failed') {
+        throw new BadRequestApiException('Transaction decode failed')
+      }
+      if (message.indexOf('absurdly-high-fee') !== -1) {
+        // message: 'absurdly-high-fee, 100000000 > 11100000 (code 256)'
+        throw new BadRequestApiException('Absurdly high fee')
+      }
+      /* istanbul ignore next */
       throw new BadRequestApiException()
     }
   }
