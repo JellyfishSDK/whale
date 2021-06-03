@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
+import { createSignedTxnHex } from '@defichain/testing'
 import { TransactionsController } from '@src/module.api/transactions.controller'
-import BigNumber from 'bignumber.js'
-import { EllipticPair, Bech32, WIF, Elliptic, HRP } from '@defichain/jellyfish-crypto'
+import { Bech32, Elliptic, HRP } from '@defichain/jellyfish-crypto'
 import { RegTest } from '@defichain/jellyfish-network'
 import { BadRequestApiException } from '@src/module.api/_core/api.error'
 
-describe('raw transactions test/send', () => {
+describe('transactions', () => {
   const container = new MasterNodeRegTestContainer()
   let client: JsonRpcClient
   let controller: TransactionsController
@@ -34,27 +34,6 @@ describe('raw transactions test/send', () => {
     controller = app.get<TransactionsController>(TransactionsController)
   })
 
-  async function createSignedTxnHex (
-    aAmount: number,
-    bAmount: number,
-    a: EllipticPair = Elliptic.fromPrivKey(Buffer.alloc(32, Math.random().toString(), 'ascii')),
-    b: EllipticPair = Elliptic.fromPrivKey(Buffer.alloc(32, Math.random().toString(), 'ascii'))
-  ): Promise<string> {
-    const aBech32 = Bech32.fromPubKey(await a.publicKey(), RegTest.bech32.hrp as HRP)
-    const bBech32 = Bech32.fromPubKey(await b.publicKey(), RegTest.bech32.hrp as HRP)
-
-    const { txid, vout } = await container.fundAddress(aBech32, aAmount)
-    const inputs = [{ txid: txid, vout: vout }]
-
-    const unsigned = await client.rawtx.createRawTransaction(inputs, {
-      [bBech32]: new BigNumber(bAmount)
-    })
-    const signed = await client.rawtx.signRawTransactionWithKey(unsigned, [
-      WIF.encode(RegTest.wifPrefix, await a.privateKey())
-    ])
-    return signed.hex
-  }
-
   async function expectTxn (txid: string, amount: number, pubKey: Buffer): Promise<void> {
     const details = await client.blockchain.getTxOut(txid, 0)
 
@@ -64,16 +43,16 @@ describe('raw transactions test/send', () => {
     )
   }
 
-  describe('controller.test()', () => {
+  describe('test', () => {
     it('should accept valid txn', async () => {
-      const hex = await createSignedTxnHex(10, 9.9999)
+      const hex = await createSignedTxnHex(container, 10, 9.9999)
       await controller.test({
         hex: hex
       })
     })
 
     it('should accept valid txn with given maxFeeRate', async () => {
-      const hex = await createSignedTxnHex(10, 9.995)
+      const hex = await createSignedTxnHex(container, 10, 9.995)
       await controller.test({
         hex: hex,
         maxFeeRate: 0.05
@@ -88,7 +67,7 @@ describe('raw transactions test/send', () => {
     })
 
     it('should throw BadRequestError due to high fees', async () => {
-      const hex = await createSignedTxnHex(10, 9)
+      const hex = await createSignedTxnHex(container, 10, 9)
       await expect(controller.test({
         hex: hex,
         maxFeeRate: 1.0
@@ -96,12 +75,12 @@ describe('raw transactions test/send', () => {
     })
   })
 
-  describe('controller.send()', () => {
+  describe('send', () => {
     it('should send valid txn and validate tx out', async () => {
       const aPair = Elliptic.fromPrivKey(Buffer.alloc(32, Math.random().toString(), 'ascii'))
       const bPair = Elliptic.fromPrivKey(Buffer.alloc(32, Math.random().toString(), 'ascii'))
 
-      const hex = await createSignedTxnHex(10, 9.9999, aPair, bPair)
+      const hex = await createSignedTxnHex(container, 10, 9.9999, { aEllipticPair: aPair, bEllipticPair: bPair })
       const txid = await controller.send({
         hex: hex
       })
@@ -114,7 +93,7 @@ describe('raw transactions test/send', () => {
       const aPair = Elliptic.fromPrivKey(Buffer.alloc(32, Math.random().toString(), 'ascii'))
       const bPair = Elliptic.fromPrivKey(Buffer.alloc(32, Math.random().toString(), 'ascii'))
 
-      const hex = await createSignedTxnHex(10, 9.995, aPair, bPair)
+      const hex = await createSignedTxnHex(container, 10, 9.995, { aEllipticPair: aPair, bEllipticPair: bPair })
       const txid = await controller.send({
         hex: hex,
         maxFeeRate: 0.05
@@ -132,7 +111,7 @@ describe('raw transactions test/send', () => {
     })
 
     it('should throw BadRequestException due to high fees', async () => {
-      const hex = await createSignedTxnHex(10, 9)
+      const hex = await createSignedTxnHex(container, 10, 9)
       await expect(controller.send({
         hex: hex,
         maxFeeRate: 1.0
@@ -141,7 +120,7 @@ describe('raw transactions test/send', () => {
   })
 })
 
-describe('estimate fee rate', () => {
+describe('estimateFeeRate', () => {
   const container = new MasterNodeRegTestContainer()
   let client: JsonRpcClient
   let controller: TransactionsController
