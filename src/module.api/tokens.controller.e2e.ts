@@ -1,32 +1,32 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { TokensController } from '@src/module.api/tokens.controller'
-import { createToken, createPoolPair } from '@defichain/testing'
+import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
+import { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
+import { createPoolPair, createToken } from '@defichain/testing'
 import { NotFoundException } from '@nestjs/common'
 
 const container = new MasterNodeRegTestContainer()
-let client: JsonRpcClient
+let app: NestFastifyApplication
 let controller: TokensController
 
 beforeAll(async () => {
   await container.start()
   await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
-  client = new JsonRpcClient(await container.getCachedRpcUrl())
+  await container.waitForWalletBalanceGTE(100)
+
+  app = await createTestingApp(container)
+  controller = app.get(TokensController)
+
+  await waitForIndexedHeight(app, 100)
+
   await createToken(container, 'DBTC')
   await createToken(container, 'DETH')
   await createPoolPair(container, 'DBTC', 'DETH')
-
-  const app: TestingModule = await Test.createTestingModule({
-    controllers: [TokensController],
-    providers: [{ provide: JsonRpcClient, useValue: client }]
-  }).compile()
-  controller = app.get<TokensController>(TokensController)
 })
 
 afterAll(async () => {
-  await container.stop()
+  await stopTestingApp(container, app)
 })
 
 describe('list', () => {
@@ -196,60 +196,6 @@ describe('get', () => {
     })
   })
 
-  it('should return DBTC token with id as param', async () => {
-    const data = await controller.get('1')
-    expect(data).toStrictEqual({
-      id: '1',
-      symbol: 'DBTC',
-      symbolKey: 'DBTC',
-      name: 'DBTC',
-      decimal: 8,
-      limit: 0,
-      mintable: true,
-      tradeable: true,
-      isDAT: true,
-      isLPS: false,
-      finalized: false,
-      minted: 0,
-      creation: {
-        tx: expect.any(String),
-        height: expect.any(Number)
-      },
-      destruction: {
-        tx: '0000000000000000000000000000000000000000000000000000000000000000',
-        height: -1
-      },
-      collateralAddress: expect.any(String)
-    })
-  })
-
-  it('should return DETH token with id as param', async () => {
-    const data = await controller.get('2')
-    expect(data).toStrictEqual({
-      id: '2',
-      symbol: 'DETH',
-      symbolKey: 'DETH',
-      name: 'DETH',
-      decimal: 8,
-      limit: 0,
-      mintable: true,
-      tradeable: true,
-      isDAT: true,
-      isLPS: false,
-      finalized: false,
-      minted: 0,
-      creation: {
-        tx: expect.any(String),
-        height: expect.any(Number)
-      },
-      destruction: {
-        tx: '0000000000000000000000000000000000000000000000000000000000000000',
-        height: -1
-      },
-      collateralAddress: expect.any(String)
-    })
-  })
-
   it('should return DBTC-DETH LP token with id as param', async () => {
     const data = await controller.get('3')
     expect(data).toStrictEqual({
@@ -282,6 +228,7 @@ describe('get', () => {
       await controller.get('999')
       throw new Error('should not come here')
     } catch (err) {
+      console.log('err: ', err)
       expect(err).toBeInstanceOf(NotFoundException)
       expect(err.response).toStrictEqual({
         statusCode: 404,
