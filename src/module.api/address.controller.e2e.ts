@@ -26,7 +26,7 @@ afterAll(async () => {
   await stopTestingApp(container, app)
 })
 
-describe('balance', () => {
+describe('getBalance', () => {
   it('getBalance should be zero', async () => {
     const address = await container.getNewAddress()
     const balance = await controller.getBalance('regtest', address)
@@ -80,7 +80,7 @@ describe('balance', () => {
   })
 })
 
-describe('aggregation', () => {
+describe('getAggregation', () => {
   it('should aggregate 3 txn', async () => {
     const address = 'bcrt1qxvvp3tz5u8t90nwwjzsalha66zk9em95tgn3fk'
 
@@ -119,7 +119,7 @@ describe('aggregation', () => {
   })
 })
 
-describe('transactions', () => {
+describe('listTransactions', () => {
   const addressA = {
     bech32: 'bcrt1qykj5fsrne09yazx4n72ue4fwtpx8u65zac9zhn',
     privKey: 'cQSsfYvYkK5tx3u1ByK2ywTTc9xJrREc1dd67ZrJqJUEMwgktPWN'
@@ -151,214 +151,237 @@ describe('transactions', () => {
     await container.generate(1)
     await waitForAddressTxCount(app, addressB.bech32, 2)
   })
-
-  describe('listTransaction addressA', () => {
-    it('should listTransaction', async () => {
-      const response = await controller.listTransaction('regtest', addressA.bech32, {
-        size: 30
-      })
-
-      expect(response.data.length).toStrictEqual(8)
-      expect(response.page).toBeUndefined()
-
-      expect(response.data[5]).toStrictEqual({
-        block: {
-          hash: expect.stringMatching(/[0-f]{64}/),
-          height: expect.any(Number)
-        },
-        hid: expect.stringMatching(/[0-f]{64}/),
-        id: expect.stringMatching(/[0-f]{72}/),
-        script: {
-          hex: '001425a544c073cbca4e88d59f95ccd52e584c7e6a82',
-          type: 'witness_v0_keyhash'
-        },
-        tokenId: 0,
-        txid: expect.stringMatching(/[0-f]{64}/),
-        type: 'vout',
-        typeHex: '01',
-        value: '1.32412313',
-        vout: {
-          n: expect.any(Number),
-          txid: expect.stringMatching(/[0-f]{64}/)
-        }
-      })
+  it('(addressA) should listTransactions', async () => {
+    const response = await controller.listTransactions('regtest', addressA.bech32, {
+      size: 30
     })
 
-    it('should listTransaction with pagination', async () => {
-      const first = await controller.listTransaction('regtest', addressA.bech32, {
-        size: 2
-      })
-      expect(first.data.length).toStrictEqual(2)
-      expect(first.page?.next).toMatch(/[0-f]{82}/)
-      expect(first.data[0].value).toStrictEqual('1.12300000')
-      expect(first.data[0].type).toStrictEqual('vin')
-      expect(first.data[1].value).toStrictEqual('1.12300000')
-      expect(first.data[1].type).toStrictEqual('vout')
+    expect(response.data.length).toStrictEqual(8)
+    expect(response.page).toBeUndefined()
 
-      const next = await controller.listTransaction('regtest', addressA.bech32, {
-        size: 10,
-        next: first.page?.next
-      })
-
-      expect(next.data.length).toStrictEqual(6)
-      expect(next.page?.next).toBeUndefined()
-      expect(next.data[0].value).toStrictEqual('9.50000000')
-      expect(next.data[0].type).toStrictEqual('vin')
-      expect(next.data[1].value).toStrictEqual('9.50000000')
-      expect(next.data[1].type).toStrictEqual('vout')
-      expect(next.data[2].value).toStrictEqual('2.93719381')
-      expect(next.data[2].type).toStrictEqual('vout')
-      expect(next.data[3].value).toStrictEqual('1.32412313')
-      expect(next.data[3].type).toStrictEqual('vout')
-      expect(next.data[4].value).toStrictEqual('0.12340001')
-      expect(next.data[4].type).toStrictEqual('vout')
-      expect(next.data[5].value).toStrictEqual('34.00000000')
-      expect(next.data[5].type).toStrictEqual('vout')
-    })
-
-    it('should listTransaction with undefined next pagination', async () => {
-      const first = await controller.listTransaction('regtest', addressA.bech32, {
-        size: 2,
-        next: undefined
-      })
-
-      expect(first.data.length).toStrictEqual(2)
-      expect(first.page?.next).toMatch(/[0-f]{82}/)
-    })
-
-    it('should throw error if listTransaction with invalid address', async () => {
-      await expect(controller.listTransaction('regtest', 'invalid', { size: 30 }))
-        .rejects.toThrow('InvalidDefiAddress')
+    expect(response.data[5]).toStrictEqual({
+      block: {
+        hash: expect.stringMatching(/[0-f]{64}/),
+        height: expect.any(Number)
+      },
+      hid: expect.stringMatching(/[0-f]{64}/),
+      id: expect.stringMatching(/[0-f]{72}/),
+      script: {
+        hex: '001425a544c073cbca4e88d59f95ccd52e584c7e6a82',
+        type: 'witness_v0_keyhash'
+      },
+      tokenId: 0,
+      txid: expect.stringMatching(/[0-f]{64}/),
+      type: 'vout',
+      typeHex: '01',
+      value: '1.32412313',
+      vout: {
+        n: expect.any(Number),
+        txid: expect.stringMatching(/[0-f]{64}/)
+      }
     })
   })
 
-  describe('listTransactionUnspent addressA', () => {
-    it('should listTransactionUnspent', async () => {
-      const response = await controller.listTransactionUnspent('regtest', addressA.bech32, {
-        size: 30
-      })
+  it('(addressA) should listTransactions with pagination', async () => {
+    const first = await controller.listTransactions('regtest', addressA.bech32, {
+      size: 2
+    })
+    expect(first.data.length).toStrictEqual(2)
+    expect(first.page?.next).toMatch(/[0-f]{82}/)
+    expect(first.data[0].value).toStrictEqual('1.12300000')
+    expect(first.data[0].type).toStrictEqual('vin')
+    expect(first.data[1].value).toStrictEqual('1.12300000')
+    expect(first.data[1].type).toStrictEqual('vout')
 
-      expect(response.data.length).toStrictEqual(4)
-      expect(response.page).toBeUndefined()
-
-      expect(response.data[3]).toStrictEqual({
-        block: {
-          hash: expect.stringMatching(/[0-f]{64}/),
-          height: expect.any(Number)
-        },
-        hid: expect.stringMatching(/[0-f]{64}/),
-        id: expect.stringMatching(/[0-f]{72}/),
-        script: {
-          hex: '001425a544c073cbca4e88d59f95ccd52e584c7e6a82',
-          type: 'witness_v0_keyhash'
-        },
-        sort: expect.stringMatching(/[0-f]{80}/),
-        vout: {
-          n: expect.any(Number),
-          tokenId: 0,
-          txid: expect.stringMatching(/[0-f]{64}/),
-          value: '2.93719381'
-        }
-      })
+    const next = await controller.listTransactions('regtest', addressA.bech32, {
+      size: 10,
+      next: first.page?.next
     })
 
-    it('should listTransactionUnspent with pagination', async () => {
-      const first = await controller.listTransactionUnspent('regtest', addressA.bech32, {
-        size: 2
-      })
-      expect(first.data.length).toStrictEqual(2)
-      expect(first.page?.next).toMatch(/[0-f]{72}/)
-      expect(first.data[0].vout.value).toStrictEqual('34.00000000')
-      expect(first.data[1].vout.value).toStrictEqual('0.12340001')
+    expect(next.data.length).toStrictEqual(6)
+    expect(next.page?.next).toBeUndefined()
+    expect(next.data[0].value).toStrictEqual('9.50000000')
+    expect(next.data[0].type).toStrictEqual('vin')
+    expect(next.data[1].value).toStrictEqual('9.50000000')
+    expect(next.data[1].type).toStrictEqual('vout')
+    expect(next.data[2].value).toStrictEqual('2.93719381')
+    expect(next.data[2].type).toStrictEqual('vout')
+    expect(next.data[3].value).toStrictEqual('1.32412313')
+    expect(next.data[3].type).toStrictEqual('vout')
+    expect(next.data[4].value).toStrictEqual('0.12340001')
+    expect(next.data[4].type).toStrictEqual('vout')
+    expect(next.data[5].value).toStrictEqual('34.00000000')
+    expect(next.data[5].type).toStrictEqual('vout')
+  })
 
-      const next = await controller.listTransactionUnspent('regtest', addressA.bech32, {
-        size: 10,
-        next: first.page?.next
-      })
+  it('should throw error if listTransactions with invalid address', async () => {
+    await expect(controller.listTransactions('regtest', 'invalid', { size: 30 }))
+      .rejects.toThrow('InvalidDefiAddress')
+  })
 
-      expect(next.data.length).toStrictEqual(2)
-      expect(next.page?.next).toBeUndefined()
-      expect(next.data[0].vout.value).toStrictEqual('1.32412313')
-      expect(next.data[1].vout.value).toStrictEqual('2.93719381')
+  it('(addressB) should listTransactions', async () => {
+    const response = await controller.listTransactions('regtest', addressB.bech32, {
+      size: 30
     })
 
-    it('should listTransactionUnspent with undefined next pagination', async () => {
-      const first = await controller.listTransactionUnspent('regtest', addressA.bech32, {
-        size: 2,
-        next: undefined
-      })
+    expect(response.data.length).toStrictEqual(2)
+    expect(response.page).toBeUndefined()
 
-      expect(first.data.length).toStrictEqual(2)
-      expect(first.page?.next).toMatch(/[0-f]{72}/)
+    expect(response.data[1]).toStrictEqual({
+      block: {
+        hash: expect.stringMatching(/[0-f]{64}/),
+        height: expect.any(Number)
+      },
+      hid: expect.stringMatching(/[0-f]{64}/),
+      id: expect.stringMatching(/[0-f]{72}/),
+      script: {
+        hex: '00144ab4391ce5a732e36139e72d79a28e01b7b08034',
+        type: 'witness_v0_keyhash'
+      },
+      tokenId: 0,
+      txid: expect.stringMatching(/[0-f]{64}/),
+      type: 'vout',
+      typeHex: '01',
+      value: '9.49990000',
+      vout: {
+        n: 0,
+        txid: expect.stringMatching(/[0-f]{64}/)
+      }
     })
   })
 
-  describe('listTransaction addressB', () => {
-    it('should listTransaction', async () => {
-      const response = await controller.listTransaction('regtest', addressB.bech32, {
-        size: 30
-      })
-
-      expect(response.data.length).toStrictEqual(2)
-      expect(response.page).toBeUndefined()
-
-      expect(response.data[1]).toStrictEqual({
-        block: {
-          hash: expect.stringMatching(/[0-f]{64}/),
-          height: expect.any(Number)
-        },
-        hid: expect.stringMatching(/[0-f]{64}/),
-        id: expect.stringMatching(/[0-f]{72}/),
-        script: {
-          hex: '00144ab4391ce5a732e36139e72d79a28e01b7b08034',
-          type: 'witness_v0_keyhash'
-        },
-        tokenId: 0,
-        txid: expect.stringMatching(/[0-f]{64}/),
-        type: 'vout',
-        typeHex: '01',
-        value: '9.49990000',
-        vout: {
-          n: 0,
-          txid: expect.stringMatching(/[0-f]{64}/)
-        }
-      })
+  it('(addressA) should listTransactions with undefined next pagination', async () => {
+    const first = await controller.listTransactions('regtest', addressA.bech32, {
+      size: 2,
+      next: undefined
     })
-  })
 
-  describe('listTransactionUnspent addressB', () => {
-    it('should listTransactionUnspent', async () => {
-      const response = await controller.listTransactionUnspent('regtest', addressB.bech32, {
-        size: 30
-      })
-
-      expect(response.data.length).toStrictEqual(2)
-      expect(response.page).toBeUndefined()
-
-      expect(response.data[1]).toStrictEqual({
-        block: {
-          hash: expect.stringMatching(/[0-f]{64}/),
-          height: expect.any(Number)
-        },
-        hid: expect.stringMatching(/[0-f]{64}/),
-        id: expect.stringMatching(/[0-f]{72}/),
-        script: {
-          hex: '00144ab4391ce5a732e36139e72d79a28e01b7b08034',
-          type: 'witness_v0_keyhash'
-        },
-        sort: expect.stringMatching(/[0-f]{80}/),
-        vout: {
-          n: expect.any(Number),
-          tokenId: 0,
-          txid: expect.stringMatching(/[0-f]{64}/),
-          value: '1.12280000'
-        }
-      })
-    })
+    expect(first.data.length).toStrictEqual(2)
+    expect(first.page?.next).toMatch(/[0-f]{82}/)
   })
 })
 
-describe('tokens', () => {
+describe('listTransactionsUnspent', () => {
+  const addressA = {
+    bech32: 'bcrt1qykj5fsrne09yazx4n72ue4fwtpx8u65zac9zhn',
+    privKey: 'cQSsfYvYkK5tx3u1ByK2ywTTc9xJrREc1dd67ZrJqJUEMwgktPWN'
+  }
+  const addressB = {
+    bech32: 'bcrt1qf26rj8895uewxcfeuukhng5wqxmmpqp555z5a7',
+    privKey: 'cQbfHFbdJNhg3UGaBczir2m5D4hiFRVRKgoU8GJoxmu2gEhzqHtV'
+  }
+  const options = {
+    aEllipticPair: WIF.asEllipticPair(addressA.privKey),
+    bEllipticPair: WIF.asEllipticPair(addressB.privKey)
+  }
+
+  beforeAll(async () => {
+    await container.waitForWalletBalanceGTE(100)
+    await container.fundAddress(addressA.bech32, 34)
+    await container.fundAddress(addressA.bech32, 0.12340001)
+    await container.fundAddress(addressA.bech32, 1.32412313)
+    await container.fundAddress(addressA.bech32, 2.93719381)
+
+    await container.call('sendrawtransaction', [
+      // This create vin & vout with 9.5
+      await createSignedTxnHex(container, 9.5, 9.4999, options)
+    ])
+    await container.call('sendrawtransaction', [
+      // This create vin & vout with 1.123
+      await createSignedTxnHex(container, 1.123, 1.1228, options)
+    ])
+    await container.generate(1)
+    await waitForAddressTxCount(app, addressB.bech32, 2)
+  })
+  it('(addressA) should listTransactionsUnspent', async () => {
+    const response = await controller.listTransactionsUnspent('regtest', addressA.bech32, {
+      size: 30
+    })
+
+    expect(response.data.length).toStrictEqual(4)
+    expect(response.page).toBeUndefined()
+
+    expect(response.data[3]).toStrictEqual({
+      block: {
+        hash: expect.stringMatching(/[0-f]{64}/),
+        height: expect.any(Number)
+      },
+      hid: expect.stringMatching(/[0-f]{64}/),
+      id: expect.stringMatching(/[0-f]{72}/),
+      script: {
+        hex: '001425a544c073cbca4e88d59f95ccd52e584c7e6a82',
+        type: 'witness_v0_keyhash'
+      },
+      sort: expect.stringMatching(/[0-f]{80}/),
+      vout: {
+        n: expect.any(Number),
+        tokenId: 0,
+        txid: expect.stringMatching(/[0-f]{64}/),
+        value: '2.93719381'
+      }
+    })
+  })
+
+  it('(addressA) should listTransactionsUnspent with pagination', async () => {
+    const first = await controller.listTransactionsUnspent('regtest', addressA.bech32, {
+      size: 2
+    })
+    expect(first.data.length).toStrictEqual(2)
+    expect(first.page?.next).toMatch(/[0-f]{72}/)
+    expect(first.data[0].vout.value).toStrictEqual('34.00000000')
+    expect(first.data[1].vout.value).toStrictEqual('0.12340001')
+
+    const next = await controller.listTransactionsUnspent('regtest', addressA.bech32, {
+      size: 10,
+      next: first.page?.next
+    })
+
+    expect(next.data.length).toStrictEqual(2)
+    expect(next.page?.next).toBeUndefined()
+    expect(next.data[0].vout.value).toStrictEqual('1.32412313')
+    expect(next.data[1].vout.value).toStrictEqual('2.93719381')
+  })
+  it('(addressB) should listTransactionsUnspent', async () => {
+    const response = await controller.listTransactionsUnspent('regtest', addressB.bech32, {
+      size: 30
+    })
+
+    expect(response.data.length).toStrictEqual(2)
+    expect(response.page).toBeUndefined()
+
+    expect(response.data[1]).toStrictEqual({
+      block: {
+        hash: expect.stringMatching(/[0-f]{64}/),
+        height: expect.any(Number)
+      },
+      hid: expect.stringMatching(/[0-f]{64}/),
+      id: expect.stringMatching(/[0-f]{72}/),
+      script: {
+        hex: '00144ab4391ce5a732e36139e72d79a28e01b7b08034',
+        type: 'witness_v0_keyhash'
+      },
+      sort: expect.stringMatching(/[0-f]{80}/),
+      vout: {
+        n: expect.any(Number),
+        tokenId: 0,
+        txid: expect.stringMatching(/[0-f]{64}/),
+        value: '1.12280000'
+      }
+    })
+  })
+
+  it('should listTransactionsUnspent with undefined next pagination', async () => {
+    const first = await controller.listTransactionsUnspent('regtest', addressA.bech32, {
+      size: 2,
+      next: undefined
+    })
+
+    expect(first.data.length).toStrictEqual(2)
+    expect(first.page?.next).toMatch(/[0-f]{72}/)
+  })
+})
+
+describe('listTokens', () => {
   const address = 'bcrt1qf5v8n3kfe6v5mharuvj0qnr7g74xnu9leut39r'
   const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
 
@@ -372,8 +395,8 @@ describe('tokens', () => {
     await container.generate(1)
   })
 
-  it('should listToken', async () => {
-    const response = await controller.listToken(address, {
+  it('should listTokens', async () => {
+    const response = await controller.listTokens(address, {
       size: 30
     })
 
@@ -391,8 +414,8 @@ describe('tokens', () => {
     })
   })
 
-  it('should listToken with pagination', async () => {
-    const first = await controller.listToken(address, {
+  it('should listTokens with pagination', async () => {
+    const first = await controller.listTokens(address, {
       size: 2
     })
     expect(first.data.length).toStrictEqual(2)
@@ -400,7 +423,7 @@ describe('tokens', () => {
     expect(first.data[0].symbol).toStrictEqual('A')
     expect(first.data[1].symbol).toStrictEqual('B')
 
-    const next = await controller.listToken(address, {
+    const next = await controller.listTokens(address, {
       size: 10,
       next: first.page?.next
     })
@@ -413,8 +436,8 @@ describe('tokens', () => {
     expect(next.data[3].symbol).toStrictEqual('F')
   })
 
-  it('should listToken with undefined next pagination', async () => {
-    const first = await controller.listToken(address, {
+  it('should listTokens with undefined next pagination', async () => {
+    const first = await controller.listTokens(address, {
       size: 2,
       next: undefined
     })
@@ -423,11 +446,11 @@ describe('tokens', () => {
     expect(first.page?.next).toStrictEqual('2')
   })
 
-  it('should throw error while listToken with invalid address', async () => {
-    await expect(controller.listToken('invalid', { size: 30 }))
+  it('should throw error while listTokens with invalid address', async () => {
+    await expect(controller.listTokens('invalid', { size: 30 }))
       .rejects.toThrow(RpcApiError)
 
-    await expect(controller.listToken('invalid', { size: 30 }))
+    await expect(controller.listTokens('invalid', { size: 30 }))
       .rejects.toThrow('recipient (invalid) does not refer to any valid address')
   })
 })

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { TokensController } from '@src/module.api/tokens.controller'
+import { TokensController } from '@src/module.api/token.controller'
 import { createToken, createPoolPair } from '@defichain/testing'
 import { NotFoundException } from '@nestjs/common'
 
