@@ -1,4 +1,4 @@
-import { TokensController } from '@src/module.api/tokens.controller'
+import { TokensController } from '@src/module.api/token.controller'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'

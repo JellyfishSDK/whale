@@ -1,7 +1,7 @@
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { createSignedTxnHex } from '@defichain/testing'
-import { TransactionsController } from '@src/module.api/transactions.controller'
+import { TransactionsController } from '@src/module.api/transaction.controller'
 import { Bech32, Elliptic, HRP } from '@defichain/jellyfish-crypto'
 import { RegTest } from '@defichain/jellyfish-network'
 import { BadRequestApiException } from '@src/module.api/_core/api.error'
