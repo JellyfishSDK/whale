@@ -10,23 +10,23 @@ const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
 let controller: AddressController
 
-beforeAll(async () => {
-  await container.start()
-  await container.waitForReady()
-  await container.waitForWalletCoinbaseMaturity()
-  await container.waitForWalletBalanceGTE(100)
-
-  app = await createTestingApp(container)
-  controller = app.get(AddressController)
-
-  await waitForIndexedHeight(app, 100)
-})
-
-afterAll(async () => {
-  await stopTestingApp(container, app)
-})
-
 describe('getBalance', () => {
+  beforeAll(async () => {
+    await container.start()
+    await container.waitForReady()
+    await container.waitForWalletCoinbaseMaturity()
+    await container.waitForWalletBalanceGTE(100)
+
+    app = await createTestingApp(container)
+    controller = app.get(AddressController)
+
+    await waitForIndexedHeight(app, 100)
+  })
+
+  afterAll(async () => {
+    await stopTestingApp(container, app)
+  })
+
   it('getBalance should be zero', async () => {
     const address = await container.getNewAddress()
     const balance = await controller.getBalance('regtest', address)
@@ -81,6 +81,22 @@ describe('getBalance', () => {
 })
 
 describe('getAggregation', () => {
+  beforeAll(async () => {
+    await container.start()
+    await container.waitForReady()
+    await container.waitForWalletCoinbaseMaturity()
+    await container.waitForWalletBalanceGTE(100)
+
+    app = await createTestingApp(container)
+    controller = app.get(AddressController)
+
+    await waitForIndexedHeight(app, 100)
+  })
+
+  afterAll(async () => {
+    await stopTestingApp(container, app)
+  })
+
   it('should aggregate 3 txn', async () => {
     const address = 'bcrt1qxvvp3tz5u8t90nwwjzsalha66zk9em95tgn3fk'
 
@@ -120,20 +136,17 @@ describe('getAggregation', () => {
 })
 
 describe('listTransactions', () => {
-  const addressA = {
-    bech32: 'bcrt1qykj5fsrne09yazx4n72ue4fwtpx8u65zac9zhn',
-    privKey: 'cQSsfYvYkK5tx3u1ByK2ywTTc9xJrREc1dd67ZrJqJUEMwgktPWN'
-  }
-  const addressB = {
-    bech32: 'bcrt1qf26rj8895uewxcfeuukhng5wqxmmpqp555z5a7',
-    privKey: 'cQbfHFbdJNhg3UGaBczir2m5D4hiFRVRKgoU8GJoxmu2gEhzqHtV'
-  }
-  const options = {
-    aEllipticPair: WIF.asEllipticPair(addressA.privKey),
-    bEllipticPair: WIF.asEllipticPair(addressB.privKey)
-  }
-
   beforeAll(async () => {
+    await container.start()
+    await container.waitForReady()
+    await container.waitForWalletCoinbaseMaturity()
+    await container.waitForWalletBalanceGTE(100)
+
+    app = await createTestingApp(container)
+    controller = app.get(AddressController)
+
+    await waitForIndexedHeight(app, 100)
+
     await container.waitForWalletBalanceGTE(100)
     await container.fundAddress(addressA.bech32, 34)
     await container.fundAddress(addressA.bech32, 0.12340001)
@@ -151,6 +164,24 @@ describe('listTransactions', () => {
     await container.generate(1)
     await waitForAddressTxCount(app, addressB.bech32, 2)
   })
+
+  afterAll(async () => {
+    await stopTestingApp(container, app)
+  })
+
+  const addressA = {
+    bech32: 'bcrt1qykj5fsrne09yazx4n72ue4fwtpx8u65zac9zhn',
+    privKey: 'cQSsfYvYkK5tx3u1ByK2ywTTc9xJrREc1dd67ZrJqJUEMwgktPWN'
+  }
+  const addressB = {
+    bech32: 'bcrt1qf26rj8895uewxcfeuukhng5wqxmmpqp555z5a7',
+    privKey: 'cQbfHFbdJNhg3UGaBczir2m5D4hiFRVRKgoU8GJoxmu2gEhzqHtV'
+  }
+  const options = {
+    aEllipticPair: WIF.asEllipticPair(addressA.privKey),
+    bEllipticPair: WIF.asEllipticPair(addressB.privKey)
+  }
+
   it('(addressA) should listTransactions', async () => {
     const response = await controller.listTransactions('regtest', addressA.bech32, {
       size: 30
@@ -262,20 +293,17 @@ describe('listTransactions', () => {
 })
 
 describe('listTransactionsUnspent', () => {
-  const addressA = {
-    bech32: 'bcrt1qykj5fsrne09yazx4n72ue4fwtpx8u65zac9zhn',
-    privKey: 'cQSsfYvYkK5tx3u1ByK2ywTTc9xJrREc1dd67ZrJqJUEMwgktPWN'
-  }
-  const addressB = {
-    bech32: 'bcrt1qf26rj8895uewxcfeuukhng5wqxmmpqp555z5a7',
-    privKey: 'cQbfHFbdJNhg3UGaBczir2m5D4hiFRVRKgoU8GJoxmu2gEhzqHtV'
-  }
-  const options = {
-    aEllipticPair: WIF.asEllipticPair(addressA.privKey),
-    bEllipticPair: WIF.asEllipticPair(addressB.privKey)
-  }
-
   beforeAll(async () => {
+    await container.start()
+    await container.waitForReady()
+    await container.waitForWalletCoinbaseMaturity()
+    await container.waitForWalletBalanceGTE(100)
+
+    app = await createTestingApp(container)
+    controller = app.get(AddressController)
+
+    await waitForIndexedHeight(app, 100)
+
     await container.waitForWalletBalanceGTE(100)
     await container.fundAddress(addressA.bech32, 34)
     await container.fundAddress(addressA.bech32, 0.12340001)
@@ -293,6 +321,24 @@ describe('listTransactionsUnspent', () => {
     await container.generate(1)
     await waitForAddressTxCount(app, addressB.bech32, 2)
   })
+
+  afterAll(async () => {
+    await stopTestingApp(container, app)
+  })
+
+  const addressA = {
+    bech32: 'bcrt1qykj5fsrne09yazx4n72ue4fwtpx8u65zac9zhn',
+    privKey: 'cQSsfYvYkK5tx3u1ByK2ywTTc9xJrREc1dd67ZrJqJUEMwgktPWN'
+  }
+  const addressB = {
+    bech32: 'bcrt1qf26rj8895uewxcfeuukhng5wqxmmpqp555z5a7',
+    privKey: 'cQbfHFbdJNhg3UGaBczir2m5D4hiFRVRKgoU8GJoxmu2gEhzqHtV'
+  }
+  const options = {
+    aEllipticPair: WIF.asEllipticPair(addressA.privKey),
+    bEllipticPair: WIF.asEllipticPair(addressB.privKey)
+  }
+
   it('(addressA) should listTransactionsUnspent', async () => {
     const response = await controller.listTransactionsUnspent('regtest', addressA.bech32, {
       size: 30
@@ -382,10 +428,17 @@ describe('listTransactionsUnspent', () => {
 })
 
 describe('listTokens', () => {
-  const address = 'bcrt1qf5v8n3kfe6v5mharuvj0qnr7g74xnu9leut39r'
-  const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
-
   beforeAll(async () => {
+    await container.start()
+    await container.waitForReady()
+    await container.waitForWalletCoinbaseMaturity()
+    await container.waitForWalletBalanceGTE(100)
+
+    app = await createTestingApp(container)
+    controller = app.get(AddressController)
+
+    await waitForIndexedHeight(app, 100)
+
     for (const token of tokens) {
       await container.waitForWalletBalanceGTE(110)
       await createToken(container, token)
@@ -394,6 +447,13 @@ describe('listTokens', () => {
     }
     await container.generate(1)
   })
+
+  afterAll(async () => {
+    await stopTestingApp(container, app)
+  })
+
+  const address = 'bcrt1qf5v8n3kfe6v5mharuvj0qnr7g74xnu9leut39r'
+  const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
 
   it('should listTokens', async () => {
     const response = await controller.listTokens(address, {
