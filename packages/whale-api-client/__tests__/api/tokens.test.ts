@@ -88,7 +88,7 @@ describe('list', () => {
 })
 
 describe('get', () => {
-  it('should return DFI coin with id as param', async () => {
+  it('should get DFI by DFI numeric id', async () => {
     const data = await client.tokens.get('0')
     expect(data).toStrictEqual({
       id: '0',

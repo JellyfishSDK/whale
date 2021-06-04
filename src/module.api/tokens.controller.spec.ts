@@ -30,7 +30,7 @@ afterAll(async () => {
 })
 
 describe('list', () => {
-  it('should listTokens', async () => {
+  it('should list', async () => {
     const result = await controller.list({ size: 100 })
     expect(result.data.length).toStrictEqual(4)
 
@@ -131,7 +131,7 @@ describe('list', () => {
     })
   })
 
-  it('should listTokens with pagination', async () => {
+  it('should list with pagination', async () => {
     const first = await controller.list({ size: 2 })
 
     expect(first.data.length).toStrictEqual(2)
@@ -160,7 +160,7 @@ describe('list', () => {
     expect(last.page).toBeUndefined()
   })
 
-  it('should listTokens with an empty object if size 100 next 300 which is out of range', async () => {
+  it('should list empty object as out of range', async () => {
     const result = await controller.list({ size: 100, next: '300' })
 
     expect(result.data.length).toStrictEqual(0)
@@ -169,7 +169,7 @@ describe('list', () => {
 })
 
 describe('get', () => {
-  it('should return DFI coin with id as param', async () => {
+  it('should get DFI with by DFI numeric id', async () => {
     const data = await controller.get('0')
     expect(data).toStrictEqual({
       id: '0',
@@ -196,7 +196,7 @@ describe('get', () => {
     })
   })
 
-  it('should return DBTC token with id as param', async () => {
+  it('should get DBTC by DBTC numeric id', async () => {
     const data = await controller.get('1')
     expect(data).toStrictEqual({
       id: '1',
@@ -223,7 +223,7 @@ describe('get', () => {
     })
   })
 
-  it('should return DETH token with id as param', async () => {
+  it('should get DETH by DETH numeric id', async () => {
     const data = await controller.get('2')
     expect(data).toStrictEqual({
       id: '2',
@@ -250,7 +250,7 @@ describe('get', () => {
     })
   })
 
-  it('should return DBTC-DETH LP token with id as param', async () => {
+  it('should get DBTC-DETH by DBTC-DETH numeric id', async () => {
     const data = await controller.get('3')
     expect(data).toStrictEqual({
       id: '3',

@@ -169,7 +169,7 @@ describe('list', () => {
 })
 
 describe('get', () => {
-  it('should return DFI coin with id as param', async () => {
+  it('should get DFI by DFI numeric id', async () => {
     const data = await controller.get('0')
     expect(data).toStrictEqual({
       id: '0',
@@ -196,7 +196,7 @@ describe('get', () => {
     })
   })
 
-  it('should return DBTC-DETH LP token with id as param', async () => {
+  it('should get DBTC-DETH by DBTC-DETH numeric id', async () => {
     const data = await controller.get('3')
     expect(data).toStrictEqual({
       id: '3',
