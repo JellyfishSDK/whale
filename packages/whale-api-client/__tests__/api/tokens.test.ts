@@ -116,6 +116,7 @@ describe('get', () => {
   })
 
   it('should fail due to getting non-existent token', async () => {
+    expect.assertions(2)
     try {
       await client.tokens.get('999')
       throw new Error('should not reach here')
@@ -132,6 +133,7 @@ describe('get', () => {
   })
 
   it('should fail due to id is malformed', async () => {
+    expect.assertions(2)
     try {
       await client.tokens.get('$*@')
       throw new Error('should not reach here')

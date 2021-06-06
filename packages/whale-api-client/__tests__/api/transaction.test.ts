@@ -48,6 +48,7 @@ describe('transaction', () => {
     })
 
     it('should reject due to invalid txn', async () => {
+      expect.assertions(2)
       try {
         await client.transactions.test({ hex: '0400000100881133bb11aa00cc' })
         throw new Error('should not reach here')
@@ -65,7 +66,7 @@ describe('transaction', () => {
 
     it('should reject due to high fees', async () => {
       const hex = await createSignedTxnHex(container, 10, 9)
-
+      expect.assertions(2)
       try {
         await client.transactions.test({
           hex: hex, maxFeeRate: 1
@@ -109,6 +110,7 @@ describe('transaction', () => {
     })
 
     it('should fail due to invalid txn', async () => {
+      expect.assertions(2)
       try {
         await client.transactions.send({
           hex: '0400000100881133bb11aa00cc'
@@ -127,6 +129,8 @@ describe('transaction', () => {
 
     it('should fail due to high fees', async () => {
       const hex = await createSignedTxnHex(container, 10, 9)
+
+      expect.assertions(2)
       try {
         await client.transactions.send({
           hex: hex, maxFeeRate: 1
@@ -144,6 +148,7 @@ describe('transaction', () => {
     })
 
     it('should fail validation (empty hex)', async () => {
+      expect.assertions(2)
       try {
         await client.transactions.send({
           hex: ''
@@ -164,6 +169,7 @@ describe('transaction', () => {
     })
 
     it('should fail validation (not hex)', async () => {
+      expect.assertions(2)
       try {
         await client.transactions.send({
           hex: 'fuxingloh'
@@ -183,6 +189,7 @@ describe('transaction', () => {
     })
 
     it('should fail validation (negative fee)', async () => {
+      expect.assertions(2)
       try {
         await client.transactions.send({
           hex: '00', maxFeeRate: -1.5
@@ -202,6 +209,7 @@ describe('transaction', () => {
     })
 
     it('should fail validation (not number fee)', async () => {
+      expect.assertions(2)
       try {
         await client.transactions.send({
           // @ts-expect-error

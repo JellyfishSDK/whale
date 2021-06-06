@@ -162,6 +162,7 @@ describe('get', () => {
   })
 
   it('should throw error as numeric string is expected', async () => {
+    expect.assertions(2)
     try {
       await client.poolpair.get('A-B')
       throw new Error('should not reach here')
@@ -178,6 +179,7 @@ describe('get', () => {
   })
 
   it('should throw error while getting non-existent poolpair', async () => {
+    expect.assertions(2)
     try {
       await client.poolpair.get('999')
       throw new Error('should not reach here')

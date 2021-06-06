@@ -224,6 +224,7 @@ describe('get', () => {
   })
 
   it('should throw error while getting non-existent token', async () => {
+    expect.assertions(2)
     try {
       await controller.get('999')
       throw new Error('should not reach here')

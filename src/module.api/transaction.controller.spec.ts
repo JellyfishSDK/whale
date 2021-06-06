@@ -60,6 +60,7 @@ describe('transactions', () => {
     })
 
     it('should throw BadRequestError due to invalid txn', async () => {
+      expect.assertions(2)
       try {
         await controller.test({ hex: '0400000100881133bb11aa00cc' })
         throw new Error('should not reach here')
@@ -76,7 +77,7 @@ describe('transactions', () => {
 
     it('should throw BadRequestError due to high fees', async () => {
       const hex = await createSignedTxnHex(container, 10, 9)
-
+      expect.assertions(2)
       try {
         await controller.test({
           hex: hex, maxFeeRate: 1.0
@@ -123,6 +124,7 @@ describe('transactions', () => {
     })
 
     it('should throw BadRequestException due to invalid txn', async () => {
+      expect.assertions(2)
       try {
         await controller.send({
           hex: '0400000100881133bb11aa00cc'
@@ -141,6 +143,7 @@ describe('transactions', () => {
 
     it('should throw BadRequestException due to high fees', async () => {
       const hex = await createSignedTxnHex(container, 10, 9)
+      expect.assertions(2)
       try {
         await controller.send({
           hex: hex, maxFeeRate: 1
