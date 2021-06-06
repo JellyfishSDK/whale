@@ -148,7 +148,7 @@ describe('transaction', () => {
     })
 
     it('should fail validation (empty hex)', async () => {
-      expect.assertions(2)
+      expect.assertions(3)
       try {
         await client.transactions.send({
           hex: ''
@@ -169,7 +169,7 @@ describe('transaction', () => {
     })
 
     it('should fail validation (not hex)', async () => {
-      expect.assertions(2)
+      expect.assertions(3)
       try {
         await client.transactions.send({
           hex: 'fuxingloh'
@@ -189,7 +189,7 @@ describe('transaction', () => {
     })
 
     it('should fail validation (negative fee)', async () => {
-      expect.assertions(2)
+      expect.assertions(3)
       try {
         await client.transactions.send({
           hex: '00', maxFeeRate: -1.5
@@ -209,7 +209,7 @@ describe('transaction', () => {
     })
 
     it('should fail validation (not number fee)', async () => {
-      expect.assertions(2)
+      expect.assertions(3)
       try {
         await client.transactions.send({
           // @ts-expect-error
