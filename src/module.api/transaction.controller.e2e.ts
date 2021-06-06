@@ -59,6 +59,7 @@ describe('transactions', () => {
     it('should throw BadRequestError due to invalid txn', async () => {
       try {
         await controller.test({ hex: '0400000100881133bb11aa00cc' })
+        throw new Error('should not reach here')
       } catch (err) {
         expect(err).toBeInstanceOf(BadRequestApiException)
         expect(err.response.error).toStrictEqual({
@@ -77,6 +78,7 @@ describe('transactions', () => {
         await controller.test({
           hex: hex, maxFeeRate: 1.0
         })
+        throw new Error('should not reach here')
       } catch (err) {
         expect(err).toBeInstanceOf(BadRequestApiException)
         expect(err.response.error).toStrictEqual({
@@ -122,6 +124,7 @@ describe('transactions', () => {
         await controller.send({
           hex: '0400000100881133bb11aa00cc'
         })
+        throw new Error('should not reach here')
       } catch (err) {
         expect(err).toBeInstanceOf(BadRequestApiException)
         expect(err.response.error).toStrictEqual({
@@ -139,6 +142,7 @@ describe('transactions', () => {
         await controller.send({
           hex: hex, maxFeeRate: 1
         })
+        throw new Error('should not reach here')
       } catch (err) {
         expect(err).toBeInstanceOf(BadRequestApiException)
         expect(err.response.error).toStrictEqual({
