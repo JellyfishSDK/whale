@@ -119,7 +119,6 @@ describe('get', () => {
     expect.assertions(2)
     try {
       await client.tokens.get('999')
-      throw new Error('should not reach here')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
@@ -136,7 +135,6 @@ describe('get', () => {
     expect.assertions(2)
     try {
       await client.tokens.get('$*@')
-      throw new Error('should not reach here')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({

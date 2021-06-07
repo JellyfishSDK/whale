@@ -51,7 +51,6 @@ describe('transaction', () => {
       expect.assertions(2)
       try {
         await client.transactions.test({ hex: '0400000100881133bb11aa00cc' })
-        throw new Error('should not reach here')
       } catch (err) {
         expect(err).toBeInstanceOf(WhaleApiException)
         expect(err.error).toStrictEqual({

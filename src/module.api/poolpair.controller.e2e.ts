@@ -173,7 +173,6 @@ describe('get', () => {
     expect.assertions(2)
     try {
       await controller.get('999')
-      throw new Error('should not reach here')
     } catch (err) {
       expect(err).toBeInstanceOf(NotFoundException)
       expect(err.response).toStrictEqual({
