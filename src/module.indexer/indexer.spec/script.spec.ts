@@ -68,13 +68,13 @@ it('should wait for block height 1', async () => {
   expect(aggregation?.block.height).toStrictEqual(1)
   expect(aggregation?.script.hex).toStrictEqual(scriptHex)
 
-  expect(aggregation?.statistic.txCount).toStrictEqual(2)
-  expect(aggregation?.statistic.txInCount).toStrictEqual(2)
+  expect(aggregation?.statistic.txCount).toStrictEqual(3)
+  expect(aggregation?.statistic.txInCount).toStrictEqual(3)
   expect(aggregation?.statistic.txOutCount).toStrictEqual(0)
 
   expect(aggregation?.amount.txOut).toStrictEqual('0.00000000')
-  expect(aggregation?.amount.txIn).toStrictEqual('48.00000000')
-  expect(aggregation?.amount.unspent).toStrictEqual('48.00000000')
+  expect(aggregation?.amount.txIn).toStrictEqual('100000086.00000000')
+  expect(aggregation?.amount.unspent).toStrictEqual('100000086.00000000')
 })
 
 it('should wait for block height 2', async () => {
@@ -93,13 +93,13 @@ it('should wait for block height 2', async () => {
   expect(aggregation?.block.height).toStrictEqual(2)
   expect(aggregation?.script.hex).toStrictEqual(scriptHex)
 
-  expect(aggregation?.statistic.txCount).toStrictEqual(1)
-  expect(aggregation?.statistic.txInCount).toStrictEqual(1)
+  expect(aggregation?.statistic.txCount).toStrictEqual(2)
+  expect(aggregation?.statistic.txInCount).toStrictEqual(2)
   expect(aggregation?.statistic.txOutCount).toStrictEqual(0)
 
   expect(aggregation?.amount.txOut).toStrictEqual('0.00000000')
-  expect(aggregation?.amount.txIn).toStrictEqual('38.00000000')
-  expect(aggregation?.amount.unspent).toStrictEqual('38.00000000')
+  expect(aggregation?.amount.txIn).toStrictEqual('100000076.00000000')
+  expect(aggregation?.amount.unspent).toStrictEqual('100000076.00000000')
 })
 
 it('should wait for block height 3', async () => {
@@ -118,11 +118,11 @@ it('should wait for block height 3', async () => {
   expect(aggregation?.block.height).toStrictEqual(3)
   expect(aggregation?.script.hex).toStrictEqual(scriptHex)
 
-  expect(aggregation?.statistic.txCount).toStrictEqual(2)
-  expect(aggregation?.statistic.txInCount).toStrictEqual(2)
+  expect(aggregation?.statistic.txCount).toStrictEqual(3)
+  expect(aggregation?.statistic.txInCount).toStrictEqual(3)
   expect(aggregation?.statistic.txOutCount).toStrictEqual(0)
 
   expect(aggregation?.amount.txOut).toStrictEqual('0.00000000')
-  expect(aggregation?.amount.txIn).toStrictEqual('76.00000000')
-  expect(aggregation?.amount.unspent).toStrictEqual('76.00000000')
+  expect(aggregation?.amount.txIn).toStrictEqual('100000152.00000000')
+  expect(aggregation?.amount.unspent).toStrictEqual('100000152.00000000')
 })
