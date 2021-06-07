@@ -63,7 +63,7 @@
     "@types/level": "^6.0.0",
     "@types/lossless-json": "^1.0.0",
     "@types/memdown": "^3.0.0",
-    "@types/node": "^14.14.36",
+    "@types/node": "^15.12.1",
     "@types/subleveldown": "^4.1.0",
     "husky": "^6.0.0",
     "jest": "^26.6.3",
