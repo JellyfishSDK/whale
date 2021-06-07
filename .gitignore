@@ -52,3 +52,4 @@ lerna-debug.log*
 
 # Level
 .level
+.leveldb
