@@ -5,6 +5,7 @@ import { PoolPairData } from '@whale-api-client/api/poolpair'
 
 @Injectable()
 export class PoolPairInfoCache {
+  private readonly PREFIX: string = 'POOL_PAIR-'
   static TTL_SECONDS = 600
 
   constructor (
@@ -20,7 +21,7 @@ export class PoolPairInfoCache {
    * @return {Promise<PoolPairData | undefined>}
    */
   async get (id: string): Promise<PoolPairData | undefined> {
-    return await this.cacheManager.get<PoolPairData>(id)
+    return await this.cacheManager.get<PoolPairData>(`${this.PREFIX}${id}`)
   }
 
   /**
@@ -30,7 +31,7 @@ export class PoolPairInfoCache {
    * @return {Promise<void>}
    */
   async set (id: string, PoolPairData: PoolPairData): Promise<void> {
-    await this.cacheManager.set(id, PoolPairData, {
+    await this.cacheManager.set(`${this.PREFIX}${id}`, PoolPairData, {
       ttl: PoolPairInfoCache.TTL_SECONDS
     })
   }

@@ -5,6 +5,7 @@ import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 
 @Injectable()
 export class TokenInfoCache {
+  private readonly PREFIX: string = 'TOKEN-'
   static TTL_SECONDS = 600
 
   constructor (
@@ -25,7 +26,7 @@ export class TokenInfoCache {
   }
 
   async get (id: string): Promise<TokenInfo | undefined> {
-    const key = `${id}`
+    const key = `${this.PREFIX}${id}`
     let tokenInfo = await this.cacheManager.get<TokenInfo>(key)
 
     if (tokenInfo !== undefined) {
