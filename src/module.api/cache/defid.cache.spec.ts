@@ -64,7 +64,7 @@ describe('getPoolPairInfo', () => {
   })
 })
 
-describe.only('batchTokenInfo', () => {
+describe('batchTokenInfo', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
