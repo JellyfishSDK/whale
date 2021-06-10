@@ -38,6 +38,8 @@ export class GlobalCache {
     }
 
     const fetched = await fetch(id)
+
+    /* istanbul ignore if  */
     if (fetched === undefined) {
       // TODO(fuxingloh): we need a circuit breaker pattern to prevent cache miss flood & poisoning
       return undefined

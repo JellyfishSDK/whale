@@ -47,10 +47,11 @@ export class PoolPairController {
   async get (@Param('id', ParseIntPipe) id: string): Promise<PoolPairData> {
     try {
       const info = await this.deFiDCache.getPoolPairInfo(id)
-      if (info !== undefined) {
-        return mapPoolPair(String(id), info)
+      /* istanbul ignore if  */
+      if (info === undefined) {
+        throw new NotFoundException()
       }
-      throw new NotFoundException()
+      return mapPoolPair(String(id), info)
     } catch (e) {
       /* istanbul ignore else */
       if (e.payload.message === 'Pool not found') {

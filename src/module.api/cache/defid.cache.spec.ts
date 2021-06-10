@@ -102,10 +102,10 @@ describe('batchTokenInfo', () => {
     expect(dfi?.symbol).toStrictEqual('DFI')
     expect(dfi?.name).toStrictEqual('Default Defi token')
 
-    const batKey = `${CachePrefix.TOKEN_INFO} 2`
-    const bat = await cache.get<TokenInfo>(batKey)
-    expect(bat?.symbol).toStrictEqual('BAT')
-    expect(bat?.name).toStrictEqual('BAT')
+    const catKey = `${CachePrefix.TOKEN_INFO} 2`
+    const cat = await cache.get<TokenInfo>(catKey)
+    expect(cat?.symbol).toStrictEqual('CAT')
+    expect(cat?.name).toStrictEqual('CAT')
   })
 })
 
@@ -147,9 +147,9 @@ describe('getTokenInfo', () => {
     expect(dfi?.symbol).toStrictEqual('DFI')
     expect(dfi?.name).toStrictEqual('Default Defi token')
 
-    const batKey = `${CachePrefix.TOKEN_INFO} 2`
-    const bat = await cache.get<TokenInfo>(batKey)
-    expect(bat?.symbol).toStrictEqual('BAT')
-    expect(bat?.name).toStrictEqual('BAT')
+    const catKey = `${CachePrefix.TOKEN_INFO} 2`
+    const cat = await cache.get<TokenInfo>(catKey)
+    expect(cat?.symbol).toStrictEqual('CAT')
+    expect(cat?.name).toStrictEqual('CAT')
   })
 })

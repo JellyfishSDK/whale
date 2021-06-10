@@ -36,6 +36,7 @@ export class DeFiDCache extends GlobalCache {
 
     const tokens = Object.values(result)
 
+    /* istanbul ignore if  */
     if (tokens.length === 0) {
       return undefined
     }
@@ -50,10 +51,11 @@ export class DeFiDCache extends GlobalCache {
   private async fetchPoolPairInfo (id: string): Promise<PoolPairInfo | undefined> {
     const result = await this.rpcClient.poolpair.getPoolPair(id)
 
-    if (result[id] !== undefined) {
-      return result[id]
+    /* istanbul ignore if  */
+    if (result[id] === undefined) {
+      return undefined
     }
 
-    return undefined
+    return result[id]
   }
 }
