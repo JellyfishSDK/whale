@@ -49,7 +49,7 @@ export class TokensController {
       return mapTokenData(String(id), data[Object.keys(data)[0]])
     } catch (e) {
       /* istanbul ignore else */
-      if (e.payload.message === 'Token not found') {
+      if (e?.payload?.message === 'Token not found') {
         throw new NotFoundException('Unable to find token')
       } else {
         throw new BadRequestException(e)

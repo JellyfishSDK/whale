@@ -36,6 +36,7 @@ export class DeFiDCache extends GlobalCache {
 
     const tokens = Object.values(result)
 
+    // Note(canonbrother): Not reachable even after kill the cache and RPC on test
     /* istanbul ignore if  */
     if (tokens.length === 0) {
       return undefined
@@ -51,6 +52,7 @@ export class DeFiDCache extends GlobalCache {
   private async fetchPoolPairInfo (id: string): Promise<PoolPairInfo | undefined> {
     const result = await this.rpcClient.poolpair.getPoolPair(id)
 
+    // Note(canonbrother): Not reachable even after kill the cache and RPC on test
     /* istanbul ignore if  */
     if (result[id] === undefined) {
       return undefined

@@ -66,6 +66,23 @@ describe('getPoolPairInfo', () => {
     expect(bcPoolPair?.symbol).toStrictEqual('B-C')
     expect(bcPoolPair?.name).toStrictEqual('B-C')
   })
+
+  it('should throw error while cache and container RPC are killed', async () => {
+    await cache.reset()
+
+    expect.assertions(3)
+
+    const abKey = `${CachePrefix.POOL_PAIR_INFO} 4`
+    const abPoolPair = await cache.get<PoolPairInfo>(abKey)
+    expect(abPoolPair).toBeUndefined()
+
+    try {
+      await defiCache.getPoolPairInfo('4')
+    } catch (err) {
+      expect(err.code).toStrictEqual('ECONNREFUSED')
+      expect(err.type).toStrictEqual('system')
+    }
+  })
 })
 
 describe('batchTokenInfo', () => {
@@ -106,6 +123,23 @@ describe('batchTokenInfo', () => {
     const cat = await cache.get<TokenInfo>(catKey)
     expect(cat?.symbol).toStrictEqual('CAT')
     expect(cat?.name).toStrictEqual('CAT')
+  })
+
+  it('should throw error while cache and container RPC are killed', async () => {
+    await cache.reset()
+
+    expect.assertions(3)
+
+    const dfiKey = `${CachePrefix.TOKEN_INFO} 0`
+    const dfi = await cache.get<TokenInfo>(dfiKey)
+    expect(dfi).toBeUndefined()
+
+    try {
+      await defiCache.batchTokenInfo(['0', '1', '2', '3'])
+    } catch (err) {
+      expect(err.code).toStrictEqual('ECONNREFUSED')
+      expect(err.type).toStrictEqual('system')
+    }
   })
 })
 
@@ -151,5 +185,22 @@ describe('getTokenInfo', () => {
     const cat = await cache.get<TokenInfo>(catKey)
     expect(cat?.symbol).toStrictEqual('CAT')
     expect(cat?.name).toStrictEqual('CAT')
+  })
+
+  it('should throw error while cache and container RPC are killed', async () => {
+    await cache.reset()
+
+    expect.assertions(3)
+
+    const dfiKey = `${CachePrefix.TOKEN_INFO} 0`
+    const dfi = await cache.get<TokenInfo>(dfiKey)
+    expect(dfi).toBeUndefined()
+
+    try {
+      await defiCache.getTokenInfo('0')
+    } catch (err) {
+      expect(err.code).toStrictEqual('ECONNREFUSED')
+      expect(err.type).toStrictEqual('system')
+    }
   })
 })

@@ -39,6 +39,7 @@ export class GlobalCache {
 
     const fetched = await fetch(id)
 
+    // Note(canonbrother): Not reachable even after kill the cache and RPC on test
     /* istanbul ignore if  */
     if (fetched === undefined) {
       // TODO(fuxingloh): we need a circuit breaker pattern to prevent cache miss flood & poisoning
@@ -50,15 +51,5 @@ export class GlobalCache {
     })
 
     return fetched
-  }
-
-  /**
-   * For testing purpose
-   *
-   * @param key of cache
-   * @return {Promise<T | undefined>}
-   */
-  async testGet<T> (key: string): Promise<T | undefined> {
-    return await this.cacheManager.get<T>(key)
   }
 }
