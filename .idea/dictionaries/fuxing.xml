@@ -182,6 +182,7 @@
       <w>walletname</w>
       <w>walletversion</w>
       <w>wpkh</w>
+      <w>zynesis</w>
     </words>
   </dictionary>
 </component>

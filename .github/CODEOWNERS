@@ -4,14 +4,10 @@
 /.github/                                       @fuxingloh
 /.husky/                                        @fuxingloh
 /.idea/                                         @fuxingloh
-/.github/workflows/oss-governance-bot.yml       @fuxingloh
-/.github/governance.yml                         @fuxingloh
-
-/website/                                       @fuxingloh
 
 /packages/                                      @fuxingloh
 /packages/whale-api-client/                     @fuxingloh @canonbrother @jingyi2811
-/packages/whale-api-wallet/                     @fuxingloh
+/packages/whale-api-wallet/                     @fuxingloh @ivan-zynesis
 
 /src/                                           @fuxingloh
 /src/module.api/                                @fuxingloh @canonbrother @jingyi2811
@@ -23,12 +19,12 @@
 /src/module.indexer/                            @fuxingloh
 /src/module.model/                              @fuxingloh
 
-lerna.json                                      @fuxingloh
-tsconfig.json                                   @fuxingloh
-jest.config.js                                  @fuxingloh
+lerna.json                                      @fuxingloh @canonbrother
+tsconfig.json                                   @fuxingloh @canonbrother
+jest.config.js                                  @fuxingloh @canonbrother
 package.json                                    @fuxingloh
 package-lock.json                               @fuxingloh
 
-CONTRIBUTING.md                                 @fuxingloh
+CONTRIBUTING.md                                 @fuxingloh @canonbrother @jingyi2811
 README.md                                       @fuxingloh
 LICENSE                                         @fuxingloh
