@@ -47,15 +47,15 @@ export class PoolPairController {
   async get (@Param('id', ParseIntPipe) id: string): Promise<PoolPairData> {
     try {
       const info = await this.deFiDCache.getPoolPairInfo(id)
-      // Note(canonbrother): Not reachable
       /* istanbul ignore if  */
       if (info === undefined) {
-        throw new NotFoundException()
+        // sanity check: throw BadRequest due to dirty data
+        throw new BadRequestException()
       }
       return mapPoolPair(String(id), info)
     } catch (e) {
       /* istanbul ignore else */
-      if (e.message === 'Not Found' || e?.payload?.message === 'Pool not found') {
+      if (e?.payload?.message === 'Pool not found') {
         throw new NotFoundException('Unable to find poolpair')
       } else {
         throw new BadRequestException(e)
