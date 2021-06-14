@@ -2,8 +2,10 @@ import { Controller, Get, Put, Body, Param, ParseIntPipe } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import {
   AppointOracleOptions,
-  OraclePriceFeed, SetOracleDataOptions,
-  UpdateOracleOptions
+  OraclePriceFeed,
+  SetOracleDataOptions,
+  UpdateOracleOptions,
+  UTXO
 } from '@defichain/jellyfish-api-core/dist/category/oracle'
 
 @Controller('/v1/:network/oracle')
@@ -17,8 +19,8 @@ export class OracleController {
   }
 
   @Put('remove/:id')
-  async removeOracle (@Param('id', ParseIntPipe) id: string): Promise<any> {
-    return await this.client.oracle.removeOracle(id)
+  async removeOracle (@Param('id', ParseIntPipe) id: string, @Body() utxos?: UTXO[]): Promise<any> {
+    return await this.client.oracle.removeOracle(id, utxos)
   }
 
   @Put('update/:id')
