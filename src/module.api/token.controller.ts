@@ -44,11 +44,12 @@ export class TokensController {
    */
   @Get('/:id')
   async get (@Param('id', ParseIntPipe) id: string): Promise<TokenData> {
-    const data = await this.client.token.getToken(id)
-    if (data === undefined) {
+    try {
+      const data = await this.client.token.getToken(id)
+      return mapTokenData(String(id), data[Object.keys(data)[0]])
+    } catch (e) {
       throw new NotFoundException('Unable to find token')
     }
-    return mapTokenData(String(id), data[Object.keys(data)[0]])
   }
 }
 
