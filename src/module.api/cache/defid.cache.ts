@@ -28,18 +28,20 @@ export class DeFiDCache extends GlobalCache {
   }
 
   private async fetchTokenInfo (id: string): Promise<TokenInfo | undefined> {
-    const result = await this.rpcClient.token.listTokens({
-      including_start: true,
-      limit: 1,
-      start: Number.parseInt(id)
-    }, true)
+    try {
+      const result = await this.rpcClient.token.listTokens({
+        including_start: true,
+        limit: 1,
+        start: Number.parseInt(id)
+      }, true)
 
-    const tokens = Object.values(result)
+      const tokens = Object.values(result)
 
-    /* istanbul ignore if  */
-    if (tokens.length === 0) return undefined
-
-    return tokens[0]
+      return tokens[0]
+    } catch (err) {
+      // Note(canontrother): the rpc error would be handled on higher level
+      return undefined
+    }
   }
 
   async getPoolPairInfo (id: string): Promise<PoolPairInfo | undefined> {
@@ -47,11 +49,12 @@ export class DeFiDCache extends GlobalCache {
   }
 
   private async fetchPoolPairInfo (id: string): Promise<PoolPairInfo | undefined> {
-    const result = await this.rpcClient.poolpair.getPoolPair(id)
-
-    /* istanbul ignore if  */
-    if (result[id] === undefined) return undefined
-
-    return result[id]
+    try {
+      const result = await this.rpcClient.poolpair.getPoolPair(id)
+      return result[id]
+    } catch (err) {
+      // Note(canontrother): the rpc error would be handled on higher level
+      return undefined
+    }
   }
 }

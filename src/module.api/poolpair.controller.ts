@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException, Controller, Get, Query, Param, ParseIntPipe } from '@nestjs/common'
+import { NotFoundException, Controller, Get, Query, Param, ParseIntPipe } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
@@ -45,22 +45,11 @@ export class PoolPairController {
    */
   @Get('/:id')
   async get (@Param('id', ParseIntPipe) id: string): Promise<PoolPairData> {
-    try {
-      const info = await this.deFiDCache.getPoolPairInfo(id)
-      /* istanbul ignore if  */
-      if (info === undefined) {
-        // sanity check: throw BadRequest due to dirty data
-        throw new BadRequestException()
-      }
-      return mapPoolPair(String(id), info)
-    } catch (e) {
-      /* istanbul ignore else */
-      if (e?.payload?.message === 'Pool not found') {
-        throw new NotFoundException('Unable to find poolpair')
-      } else {
-        throw new BadRequestException(e)
-      }
+    const info = await this.deFiDCache.getPoolPairInfo(id)
+    if (info === undefined) {
+      throw new NotFoundException('Unable to find poolpair')
     }
+    return mapPoolPair(String(id), info)
   }
 }
 
