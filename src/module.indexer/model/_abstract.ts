@@ -12,13 +12,7 @@ export { blockchain as defid }
  * @example all transaction.vout in transaction
  */
 export abstract class Indexer {
-  /**
-   * @param {RawBlock} block from defid to index
-   */
-  abstract index (block: RawBlock): Promise<void>
+  abstract index (item: any): Promise<void>
 
-  /**
-   * @param {RawBlock} block from defid to invalidate (remove from index)
-   */
-  abstract invalidate (block: RawBlock): Promise<void>
+  abstract invalidate (item: any): Promise<void>
 }

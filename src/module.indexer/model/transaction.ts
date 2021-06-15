@@ -8,12 +8,18 @@ export class TransactionIndexer extends Indexer {
     super()
   }
 
+  /**
+   * @param {RawBlock} block from defid to index
+   */
   async index (block: RawBlock): Promise<void> {
     for (const txn of block.tx) {
       await this.mapper.put(this.map(block, txn))
     }
   }
 
+  /**
+   * @param {RawBlock} block from defid to invalidate (remove from index)
+   */
   async invalidate (block: RawBlock): Promise<void> {
     for (const txn of block.tx) {
       await this.mapper.delete(txn.txid)

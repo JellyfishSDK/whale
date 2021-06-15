@@ -7,6 +7,7 @@ import { ScriptUnspentMapper } from '@src/module.model/script.unspent'
 import { TransactionMapper } from '@src/module.model/transaction'
 import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
+import { PoolPairMapper } from '@src/module.model/poolpair'
 
 @Global()
 @Module({
@@ -18,7 +19,8 @@ import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
     ScriptUnspentMapper,
     TransactionMapper,
     TransactionVinMapper,
-    TransactionVoutMapper
+    TransactionVoutMapper,
+    PoolPairMapper
   ],
   exports: [
     RawBlockMapper,
@@ -28,7 +30,8 @@ import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
     ScriptUnspentMapper,
     TransactionMapper,
     TransactionVinMapper,
-    TransactionVoutMapper
+    TransactionVoutMapper,
+    PoolPairMapper
   ]
 })
 export class ModelModule {

@@ -4,11 +4,13 @@ import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PoolPairInfoCache } from '@src/module.api/cache/poolpair.info.cache'
 import { PoolPairData } from '@whale-api-client/api/poolpair'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
-import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
+import { PoolPairInfo, PoolPairsResult } from '@defichain/jellyfish-api-core/dist/category/poolpair'
+import { PoolPairService } from './poolpair.service'
 
 @Controller('/v1/:network/poolpairs')
 export class PoolPairController {
   constructor (
+    private readonly poolPairService: PoolPairService,
     protected readonly rpcClient: JsonRpcClient,
     protected readonly poolPairInfoCache: PoolPairInfoCache
   ) {
@@ -24,11 +26,7 @@ export class PoolPairController {
   async list (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<PoolPairData>> {
-    const poolPairResult = await this.rpcClient.poolpair.listPoolPairs({
-      start: query.next !== undefined ? Number(query.next) : 0,
-      including_start: query.next === undefined, // TODO(fuxingloh): open issue at DeFiCh/ain, rpc_accounts.cpp#388
-      limit: query.size
-    }, true)
+    const poolPairResult: PoolPairsResult = await this.poolPairService.list(query)
 
     const poolPairInfosDto = Object.entries(poolPairResult).map(([id, value]) => {
       return mapPoolPair(id, value)
