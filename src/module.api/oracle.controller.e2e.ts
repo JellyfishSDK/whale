@@ -1,25 +1,21 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { OraclesController } from '@src/module.api/oracle.controller'
+import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
+import { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { createTestingApp, stopTestingApp } from '@src/e2e.module'
 import { NotFoundException } from '@nestjs/common'
 import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
-let client: JsonRpcClient
+let app: NestFastifyApplication
 let controller: OraclesController
 
 beforeAll(async () => {
   await container.start()
   await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
-  client = new JsonRpcClient(await container.getCachedRpcUrl())
 
-  const app: TestingModule = await Test.createTestingModule({
-    controllers: [OraclesController],
-    providers: [{ provide: JsonRpcClient, useValue: client }]
-  }).compile()
-  controller = app.get<OraclesController>(OraclesController)
+  app = await createTestingApp(container)
+  controller = app.get(OraclesController)
   await setup()
 })
 
@@ -31,6 +27,8 @@ afterAll(async () => {
   }
 
   await container.generate(1)
+
+  await stopTestingApp(container, app)
   await container.stop()
 })
 
@@ -100,6 +98,10 @@ async function setup (): Promise<void> {
 
   await container.generate(1)
 }
+
+afterAll(async () => {
+  await container.stop()
+})
 
 describe('list', () => {
   it('should list', async () => {

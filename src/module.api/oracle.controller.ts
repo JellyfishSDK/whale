@@ -1,12 +1,12 @@
-import { Controller, Get, Param, Query, ParseIntPipe, NotFoundException, BadRequestException } from '@nestjs/common'
+import { Controller, Get, Param, Query, NotFoundException, BadRequestException } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { OraclePriceFeed } from '@defichain/jellyfish-api-core/dist/category/oracle'
 import BigNumber from 'bignumber.js'
 
-@Controller('/v1/:network/oracle')
-export class OracleController {
+@Controller('/v1/:network/oracles')
+export class OraclesController {
   constructor (private readonly client: JsonRpcClient) {
   }
 
@@ -58,12 +58,10 @@ export class OracleController {
    * @return {Promise<OracleData>}
    */
   @Get('/:id')
-  async get (@Param('id', ParseIntPipe) oracleid: string): Promise<OracleData> {
+  async get (@Param('id') oracleid: string): Promise<OracleData> {
     try {
       return await this.client.oracle.getOracleData(oracleid)
     } catch (e) {
-      /* istanbul ignore else */
-      console.log(e.payload.message)
       if (e.payload.message === `oracle <${oracleid}> not found`) {
         throw new NotFoundException('Unable to find oracle')
       } else {
@@ -73,13 +71,13 @@ export class OracleController {
   }
 
   /**
-   * Paginate query oracle prices.
+   * Paginate query oracle latest raw prices.
    *
    * @param {PaginationQuery} query
    * @return {Promise<ApiPagedResponse<OracleData>>}
    */
-  @Get('/rawPrices')
-  async listRawPrices (
+  @Get('/rawLatestPrices')
+  async latestRawPrices (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<OracleRawPrice>> {
     let oracles: OracleRawPrice[] = await this.client.call('listlatestrawprices', [], 'bignumber')
@@ -145,8 +143,8 @@ export class OracleController {
    * @param {string} currency
    * @return {Promise<string>}
    */
-  @Get('/price/:id')
-  async getPrice (@Param('id', ParseIntPipe) token: string, currency: string): Promise<string> {
+  @Get('/price/:token/:currency')
+  async getPrice (@Param('token') token: string, @Param('currency') currency: string): Promise<string> {
     try {
       return await this.client.call('getprice', [{ token, currency }], 'bignumber')
     } catch (e) {
@@ -162,11 +160,11 @@ export class OracleController {
 
 // Once test containers updated and includes all the RPCS, the following code will be removed
 export enum OracleRawPriceState {
-  LIVE = 'live',
+  // LIVE = 'live',
   EXPIRED = 'expired'
 }
 
-interface OracleRawPrice {
+export interface OracleRawPrice {
   oracleid: string
   priceFeeds: OraclePriceFeed
   rawprice: BigNumber
@@ -175,52 +173,24 @@ interface OracleRawPrice {
   timestamp: BigNumber
 }
 
-interface ListPricesData {
+export interface ListPricesData {
   token: string
   currency: string
   price?: BigNumber
   ok: boolean | string
 }
 
-interface OracleData {
-  oracleid: string
-  address: string
-  priceFeeds: OraclePriceFeed[]
-  tokenPrices: OracleTokenPrice[]
-  weightage: number
-}
-
-interface OracleTokenPrice {
+export interface OracleTokenPrice {
   token: string
   currency: string
   amount: number
   timestamp: number
 }
 
-interface OracleData {
+export interface OracleData {
   oracleid: string
   address: string
   priceFeeds: OraclePriceFeed[]
   tokenPrices: OracleTokenPrice[]
   weightage: number
 }
-//
-// interface OracleResult {
-//   id: string
-//   oracleid: string
-//   address: string
-//   priceFeeds: OraclePriceFeed[]
-//   tokenPrices: OracleTokenPrice[]
-//   weightage: number
-// }
-//
-// function mapOracleResult (id: string, oracleData: OracleData): OracleResult {
-//   return {
-//     id: id,
-//     oracleid: oracleData.oracleid,
-//     address: oracleData.address,
-//     priceFeeds: oracleData.priceFeeds,
-//     tokenPrices: oracleData.tokenPrices,
-//     weightage: oracleData.weightage
-//   }
-// }
