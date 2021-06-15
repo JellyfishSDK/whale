@@ -1,4 +1,4 @@
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common'
+import { CACHE_MANAGER, Inject, Injectable, NotFoundException, BadRequestException } from '@nestjs/common'
 import { Cache } from 'cache-manager'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
@@ -36,11 +36,16 @@ export class DeFiDCache extends GlobalCache {
       }, true)
 
       const tokens = Object.values(result)
-
+      if (tokens[0] === undefined) {
+        return undefined
+      }
       return tokens[0]
     } catch (err) {
-      // Note(canontrother): the rpc error would be handled on higher level
-      return undefined
+      if (err?.payload?.message === 'Token not found') {
+        throw new NotFoundException('Unable to find token')
+      } else {
+        throw new BadRequestException(err)
+      }
     }
   }
 
@@ -51,10 +56,16 @@ export class DeFiDCache extends GlobalCache {
   private async fetchPoolPairInfo (id: string): Promise<PoolPairInfo | undefined> {
     try {
       const result = await this.rpcClient.poolpair.getPoolPair(id)
+      if (result[id] === undefined) {
+        return undefined
+      }
       return result[id]
     } catch (err) {
-      // Note(canontrother): the rpc error would be handled on higher level
-      return undefined
+      if (err?.payload?.message === 'Pool not found') {
+        throw new NotFoundException('Unable to find poolpair')
+      } else {
+        throw new BadRequestException(err)
+      }
     }
   }
 }
