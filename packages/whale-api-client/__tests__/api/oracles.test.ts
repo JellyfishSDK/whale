@@ -22,13 +22,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
   try {
-    const data = await container.call('listoracles')
-
-    for (let i = 0; i < data.length; i += 1) {
-      await container.call('removeoracle', [data[i]])
-    }
-
-    await container.generate(1)
     await service.stop()
   } finally {
     await container.stop()
@@ -105,6 +98,7 @@ async function setup (): Promise<void> {
 describe('list', () => {
   it('should listOracles', async () => {
     const result = await client.oracle.list()
+
     expect(result.length).toStrictEqual(8)
 
     expect(result[0]).toStrictEqual(
@@ -294,6 +288,7 @@ describe('list', () => {
 describe('get', () => {
   it('should get oracle by oracleid', async () => {
     const data = await client.oracle.get(oracleid1)
+
     expect(data).toStrictEqual(
       {
         weightage: 1,
@@ -349,7 +344,8 @@ describe('get', () => {
 
 describe('latestRawPrice', () => {
   it('should getLatestRawPrice', async () => {
-    const result = await client.oracle.latestRawPrices()
+    const result = await client.oracle.listLatestRawPrices()
+
     expect(result.length).toStrictEqual(8)
     expect(result[0]).toStrictEqual(
       {
@@ -417,30 +413,32 @@ describe('latestRawPrice', () => {
       }
     )
 
-    expect(result[6]).toStrictEqual({
-      priceFeeds: { token: 'MFST', currency: 'SGD' },
-      oracleid: oracleid7,
-      weightage: 7,
-      timestamp,
-      rawprice: 3.5,
-      state: 'live'
-    }
+    expect(result[6]).toStrictEqual(
+      {
+        priceFeeds: { token: 'MFST', currency: 'SGD' },
+        oracleid: oracleid7,
+        weightage: 7,
+        timestamp,
+        rawprice: 3.5,
+        state: 'live'
+      }
     )
 
-    expect(result[7]).toStrictEqual({
-      priceFeeds: { token: 'MFST', currency: 'SGD' },
-      oracleid: oracleid8,
-      weightage: 8,
-      timestamp,
-      rawprice: 4,
-      state: 'live'
-    }
+    expect(result[7]).toStrictEqual(
+      {
+        priceFeeds: { token: 'MFST', currency: 'SGD' },
+        oracleid: oracleid8,
+        weightage: 8,
+        timestamp,
+        rawprice: 4,
+        state: 'live'
+      }
     )
   }
   )
 
   it('should getLatestRawPrice with pagination', async () => {
-    const first = await client.oracle.latestRawPrices(4)
+    const first = await client.oracle.listLatestRawPrices(4)
 
     expect(first.length).toStrictEqual(4)
     expect(first.hasNext).toStrictEqual(true)
@@ -471,7 +469,7 @@ describe('latestRawPrice', () => {
 })
 
 describe('prices', () => {
-  it('should list prices', async () => {
+  it('should listPrices', async () => {
     const result = await client.oracle.listPrices()
 
     expect(result[0]).toStrictEqual(
@@ -491,7 +489,7 @@ describe('prices', () => {
     )
   })
 
-  it('should getLatestRawPrice with pagination', async () => {
+  it('should listPrices with pagination', async () => {
     const first = await client.oracle.listPrices(2)
 
     expect(first.length).toStrictEqual(2)
@@ -518,8 +516,8 @@ describe('prices', () => {
   })
 })
 
-describe('getPrices', () => {
-  it('should getPrices', async () => {
+describe('getPrice', () => {
+  it('should getPrice', async () => {
     const data = await client.oracle.getPrice('APPLE', 'EUR')
     expect(data.toString()).toStrictEqual(new BigNumber('0.83333333').toString())
   })

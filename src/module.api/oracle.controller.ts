@@ -76,7 +76,7 @@ export class OraclesController {
    * @param {PaginationQuery} query
    * @return {Promise<ApiPagedResponse<OracleData>>}
    */
-  @Get('/rawLatestPrices')
+  @Get('/latestRawPrices')
   async latestRawPrices (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<OracleRawPrice>> {

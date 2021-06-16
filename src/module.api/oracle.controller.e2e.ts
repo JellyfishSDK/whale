@@ -20,14 +20,6 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  const data = await container.call('listoracles')
-
-  for (let i = 0; i < data.length; i += 1) {
-    await container.call('removeoracle', [data[i]])
-  }
-
-  await container.generate(1)
-
   await stopTestingApp(container, app)
   await container.stop()
 })
@@ -99,13 +91,10 @@ async function setup (): Promise<void> {
   await container.generate(1)
 }
 
-afterAll(async () => {
-  await container.stop()
-})
-
 describe('list', () => {
   it('should list', async () => {
     const result = await controller.list({ size: 8 })
+
     expect(result.data.length).toStrictEqual(8)
 
     expect(result.data[0]).toStrictEqual(
@@ -303,8 +292,9 @@ describe('list', () => {
 })
 
 describe('get', () => {
-  it('should get oracle1 with oracleid1', async () => {
+  it('should get oracle with oracleid1', async () => {
     const data = await controller.get(oracleid1)
+
     expect(data).toStrictEqual(
       {
         weightage: 1,
@@ -340,9 +330,10 @@ describe('get', () => {
   })
 })
 
-describe('rawPrices', () => {
+describe('latestrawPrices', () => {
   it('should getLatestRawPrice', async () => {
     const result = await controller.latestRawPrices({ size: 8 })
+
     expect(result.data.length).toStrictEqual(8)
 
     expect(result.data[0]).toStrictEqual(
@@ -474,14 +465,25 @@ describe('rawPrices', () => {
 
 describe('listPrices', () => {
   it('should listPrices', async () => {
-    const result = await controller.listPrices({ size: 2 })
-    expect(result.data.length).toStrictEqual(2)
-    // NOTE(jingyi2811): 0.83333333000000 = (0.5 * 1 + 1 * 2) / 3
-    // NOTE(jingyi2811): 1.78571428000000 = (1.5 * 3 + 2 * 4) / 7
-    expect(result.data).toStrictEqual([
-      { token: 'APPLE', currency: 'EUR', price: new BigNumber(0.83333333000000), ok: true },
-      { token: 'FB', currency: 'CNY', price: new BigNumber(2.77272727000000), ok: true }
-    ])
+    const result = await controller.listPrices({ size: 4 })
+
+    expect(result.data.length).toStrictEqual(4)
+
+    expect(result.data[0]).toStrictEqual(
+      { token: 'APPLE', currency: 'EUR', price: new BigNumber(0.83333333), ok: true }
+    )
+
+    expect(result.data[1]).toStrictEqual(
+      { token: 'FB', currency: 'CNY', price: new BigNumber(2.77272727), ok: true }
+    )
+
+    expect(result.data[2]).toStrictEqual(
+      { token: 'MFST', currency: 'SGD', price: new BigNumber(3.76666666), ok: true }
+    )
+
+    expect(result.data[3]).toStrictEqual(
+      { token: 'TESLA', currency: 'USD', price: new BigNumber(1.78571428), ok: true }
+    )
   })
 
   it('should listPrices with pagination', async () => {
@@ -522,7 +524,7 @@ describe('listPrices', () => {
 })
 
 describe('getPrice', () => {
-  it('should get APPLE / USD price with APPLE token and EUR currency', async () => {
+  it('should getPrice with token and currency', async () => {
     const data = await controller.getPrice('APPLE', 'EUR')
     expect(data.toString()).toStrictEqual(new BigNumber('0.83333333').toString())
   })

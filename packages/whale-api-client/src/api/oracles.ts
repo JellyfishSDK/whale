@@ -33,10 +33,10 @@ export class Oracles {
    *
    * @param {number} size of oracles to query
    * @param {number} next set of oracles
-   * @return {Promise<ApiPagedResponse<OracleData>>}
+   * @return {Promise<ApiPagedResponse<OracleRawPrice>>}
    */
-  async latestRawPrices (size: number = 30, next?: string): Promise<ApiPagedResponse<OracleRawPrice>> {
-    return await this.client.requestList('GET', 'oracles/rawLatestPrices', size, next)
+  async listLatestRawPrices (size: number = 30, next?: string): Promise<ApiPagedResponse<OracleRawPrice>> {
+    return await this.client.requestList('GET', 'oracles/latestRawPrices', size, next)
   }
 
   /**
@@ -51,7 +51,7 @@ export class Oracles {
   }
 
   /**
-   * Get the oracle price with id of the oracle.
+   * Get the oracle price of a token and currency.
    *
    * @param {string} token
    * @param {string} currency
