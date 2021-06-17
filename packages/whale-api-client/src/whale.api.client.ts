@@ -1,4 +1,5 @@
 import 'url-search-params-polyfill'
+import 'react-native-url-polyfill/auto'
 import AbortController from 'abort-controller'
 import fetch from 'cross-fetch'
 import { raiseIfError, WhaleClientException, WhaleClientTimeoutException } from './errors'
