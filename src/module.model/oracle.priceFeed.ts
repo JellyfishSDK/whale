@@ -33,14 +33,14 @@ export class OraclePriceFeedMapper {
     return oracles.filter(o => o.token === token && o.currency === currency)
   }
 
-  async getByCategory (category: string): Promise<OraclePriceFeed[] | undefined> {
-    const oracles = await this.database.query(OraclePriceFeedMapping.index.id, {
-      order: SortOrder.DESC,
-      limit: 100
-    })
-
-    return oracles.filter(o => o.category === category)
-  }
+  // async getByCategory (category: string): Promise<OraclePriceFeed[] | undefined> {
+  //   const oracles = await this.database.query(OraclePriceFeedMapping.index.id, {
+  //     order: SortOrder.DESC,
+  //     limit: 100
+  //   })
+  //
+  //   return oracles.filter(o => o.category === category)
+  // }
 
   async put (oraclePriceFeed: OraclePriceFeed): Promise<void> {
     return await this.database.put(OraclePriceFeedMapping, oraclePriceFeed)
@@ -55,6 +55,5 @@ export interface OraclePriceFeed extends Model {
   id: string
   token: string
   currency: string
-  category: string
   createdAt: Date
 }
