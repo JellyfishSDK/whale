@@ -97,7 +97,7 @@ describe('list', () => {
       customRewards: undefined,
       creation: {
         tx: expect.any(String),
-        height: expect.any(BigNumber)
+        height: expect.any(Number)
       }
     })
   })
@@ -164,7 +164,7 @@ describe('get', () => {
       customRewards: undefined,
       creation: {
         tx: expect.any(String),
-        height: expect.any(BigNumber)
+        height: expect.any(Number)
       }
     })
   })

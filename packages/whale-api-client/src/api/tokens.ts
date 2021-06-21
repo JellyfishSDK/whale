@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js'
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
 
@@ -36,13 +37,13 @@ export interface TokenData {
   symbolKey: string
   name: string
   decimal: number
-  limit: number
+  limit: BigNumber
   mintable: boolean
   tradeable: boolean
   isDAT: boolean
   isLPS: boolean
   finalized: boolean
-  minted: number
+  minted: BigNumber
   creation: { tx: string, height: number }
   destruction: { tx: string, height: number }
   collateralAddress: string
