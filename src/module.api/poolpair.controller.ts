@@ -74,7 +74,7 @@ function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairData {
     tradeEnabled: poolPairInfo.tradeEnabled,
     ownerAddress: poolPairInfo.ownerAddress,
     rewardPct: poolPairInfo.rewardPct,
-    customRewards: poolPairInfo.customRewards,
+    customRewards: poolPairInfo.customRewards ?? undefined,
     creation: {
       tx: poolPairInfo.creationTx,
       height: poolPairInfo.creationHeight
