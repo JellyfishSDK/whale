@@ -29,7 +29,7 @@ export interface WhaleApiClientOptions {
   /**
    * Network that whale client is configured to
    */
-  network?: 'mainnet' | 'testnet' | 'regtest' | 'playground'
+  network?: 'mainnet' | 'testnet' | 'regtest' | string
 }
 
 /**
