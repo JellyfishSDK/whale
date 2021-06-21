@@ -36,7 +36,7 @@ export interface TokenData {
   symbol: string
   symbolKey: string
   name: string
-  decimal: BigNumber
+  decimal: number
   limit: BigNumber
   mintable: boolean
   tradeable: boolean
@@ -44,7 +44,7 @@ export interface TokenData {
   isLPS: boolean
   finalized: boolean
   minted: BigNumber
-  creation: { tx: string, height: BigNumber }
-  destruction: { tx: string, height: BigNumber }
+  creation: { tx: string, height: number }
+  destruction: { tx: string, height: number }
   collateralAddress: string
 }
