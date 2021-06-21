@@ -21,6 +21,17 @@ export class PoolPair {
   }
 
   /**
+   * List pool pair price feeds
+   *
+   * @param {number} size of PoolPairPriceFeed balance to query
+   * @param {number} next set of PoolPairPriceFeed
+   * @return {Promise<ApiPagedResponse<PoolPairPriceFeed>>}
+   */
+  async listPriceFeeds (size: number = 30, next?: string): Promise<ApiPagedResponse<PoolPairPriceFeed>> {
+    return await this.client.requestList('GET', 'poolpairs/prices', size, next)
+  }
+
+  /**
    * Get pool pair
    *
    * @param {string} id
@@ -55,5 +66,15 @@ export interface PoolPairData {
   creation: {
     tx: string
     height: BigNumber
+  }
+}
+
+export interface PoolPairPriceFeed {
+  id: string
+  symbol: string
+  totalLiquidity: BigNumber
+  priceRatio: {
+    ['tokenA/tokenB']: BigNumber | string
+    ['tokenB/tokenA']: BigNumber | string
   }
 }

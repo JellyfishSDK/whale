@@ -137,6 +137,61 @@ describe('list', () => {
   })
 })
 
+describe('listPriceFeeds', () => {
+  it('should listPriceFeeds', async () => {
+    const response = await controller.listPriceFeeds({
+      size: 30
+    })
+
+    expect(response.data.length).toStrictEqual(8)
+    expect(response.page).toBeUndefined()
+
+    expect(response.data[1]).toStrictEqual({
+      id: '8',
+      symbol: 'A-C',
+      priceRatio: {
+        'tokenA/tokenB': new BigNumber('0.16666666'),
+        'tokenB/tokenA': new BigNumber('6')
+      },
+      totalLiquidity: new BigNumber('122.47448713')
+    })
+  })
+
+  it('should listPriceFeeds with pagination', async () => {
+    const first = await controller.listPriceFeeds({
+      size: 2
+    })
+    expect(first.data.length).toStrictEqual(2)
+    expect(first.page?.next).toStrictEqual('8')
+    expect(first.data[0].symbol).toStrictEqual('A-B')
+    expect(first.data[1].symbol).toStrictEqual('A-C')
+
+    const next = await controller.list({
+      size: 10,
+      next: first.page?.next
+    })
+
+    expect(next.data.length).toStrictEqual(6)
+    expect(next.page?.next).toBeUndefined()
+    expect(next.data[0].symbol).toStrictEqual('A-D')
+    expect(next.data[1].symbol).toStrictEqual('A-E')
+    expect(next.data[2].symbol).toStrictEqual('A-F')
+    expect(next.data[3].symbol).toStrictEqual('B-C')
+    expect(next.data[4].symbol).toStrictEqual('B-D')
+    expect(next.data[5].symbol).toStrictEqual('B-E')
+  })
+
+  it('should listPriceFeeds with undefined next pagination', async () => {
+    const first = await controller.listPriceFeeds({
+      size: 2,
+      next: undefined
+    })
+
+    expect(first.data.length).toStrictEqual(2)
+    expect(first.page?.next).toStrictEqual('8')
+  })
+})
+
 describe('get', () => {
   it('should get', async () => {
     const response = await controller.get('7')

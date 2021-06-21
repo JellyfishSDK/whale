@@ -130,6 +130,53 @@ describe('list', () => {
   })
 })
 
+describe('listPriceFeeds', () => {
+  it('should listPriceFeeds', async () => {
+    const response = await client.poolpair.listPriceFeeds(30)
+
+    expect(response.length).toStrictEqual(8)
+    expect(response.hasNext).toStrictEqual(false)
+
+    expect(response[1]).toStrictEqual({
+      id: '8',
+      symbol: 'A-C',
+      priceRatio: {
+        'tokenA/tokenB': 0.16666666,
+        'tokenB/tokenA': 6
+      },
+      totalLiquidity: 122.47448713
+    })
+  })
+
+  it('should listPriceFeeds with pagination', async () => {
+    const first = await client.poolpair.listPriceFeeds(3)
+    expect(first.length).toStrictEqual(3)
+    expect(first.hasNext).toStrictEqual(true)
+    expect(first.nextToken).toStrictEqual('9')
+
+    expect(first[0].symbol).toStrictEqual('A-B')
+    expect(first[1].symbol).toStrictEqual('A-C')
+    expect(first[2].symbol).toStrictEqual('A-D')
+
+    const next = await client.paginate(first)
+    expect(next.length).toStrictEqual(3)
+    expect(next.hasNext).toStrictEqual(true)
+    expect(next.nextToken).toStrictEqual('12')
+
+    expect(next[0].symbol).toStrictEqual('A-E')
+    expect(next[1].symbol).toStrictEqual('A-F')
+    expect(next[2].symbol).toStrictEqual('B-C')
+
+    const last = await client.paginate(next)
+    expect(last.length).toStrictEqual(2)
+    expect(last.hasNext).toStrictEqual(false)
+    expect(last.nextToken).toBeUndefined()
+
+    expect(last[0].symbol).toStrictEqual('B-D')
+    expect(last[1].symbol).toStrictEqual('B-E')
+  })
+})
+
 describe('get', () => {
   it('should get', async () => {
     const response = await client.poolpair.get('7')

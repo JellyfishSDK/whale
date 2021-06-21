@@ -2,7 +2,7 @@ import { NotFoundException, Controller, Get, Query, Param, ParseIntPipe } from '
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
-import { PoolPairData } from '@whale-api-client/api/poolpair'
+import { PoolPairData, PoolPairPriceFeed } from '@whale-api-client/api/poolpair'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 
@@ -35,6 +35,31 @@ export class PoolPairController {
     }).sort(a => Number.parseInt(a.id))
 
     return ApiPagedResponse.of(poolPairInfosDto, query.size, item => {
+      return item.id
+    })
+  }
+
+  /**
+   * @param {PaginationQuery} query
+   * @param {number} query.size
+   * @param {string} [query.next]
+   * @return {Promise<ApiPagedResponse<PoolPairPrice>>}
+   */
+  @Get('/prices')
+  async listPriceFeeds (
+    @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<PoolPairPriceFeed>> {
+    const poolPairResult = await this.rpcClient.poolpair.listPoolPairs({
+      start: query.next !== undefined ? Number(query.next) : 0,
+      including_start: query.next === undefined, // TODO(fuxingloh): open issue at DeFiCh/ain, rpc_accounts.cpp#388
+      limit: query.size
+    }, true)
+
+    const poolPairPriceFeedsDto = Object.entries(poolPairResult).map(([id, value]) => {
+      return mapPoolPairPriceFeed(id, value)
+    }).sort(a => Number.parseInt(a.id))
+
+    return ApiPagedResponse.of(poolPairPriceFeedsDto, query.size, item => {
       return item.id
     })
   }
@@ -78,6 +103,18 @@ function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairData {
     creation: {
       tx: poolPairInfo.creationTx,
       height: poolPairInfo.creationHeight
+    }
+  }
+}
+
+function mapPoolPairPriceFeed (id: string, poolPairInfo: PoolPairInfo): PoolPairPriceFeed {
+  return {
+    id,
+    symbol: poolPairInfo.symbol,
+    totalLiquidity: poolPairInfo.totalLiquidity,
+    priceRatio: {
+      'tokenA/tokenB': poolPairInfo['reserveA/reserveB'],
+      'tokenB/tokenA': poolPairInfo['reserveB/reserveA']
     }
   }
 }
