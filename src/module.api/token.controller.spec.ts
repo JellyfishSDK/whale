@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js'
 import { Test, TestingModule } from '@nestjs/testing'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
@@ -40,13 +41,13 @@ describe('list', () => {
       symbolKey: 'DFI',
       name: 'Default Defi token',
       decimal: 8,
-      limit: '0',
+      limit: new BigNumber('0'),
       mintable: false,
       tradeable: true,
       isDAT: true,
       isLPS: false,
       finalized: true,
-      minted: '0',
+      minted: new BigNumber('0'),
       creation: {
         tx: '0000000000000000000000000000000000000000000000000000000000000000',
         height: 0
@@ -64,13 +65,13 @@ describe('list', () => {
       symbolKey: 'DBTC',
       name: 'DBTC',
       decimal: 8,
-      limit: '0',
+      limit: new BigNumber('0'),
       mintable: true,
       tradeable: true,
       isDAT: true,
       isLPS: false,
       finalized: false,
-      minted: '0',
+      minted: new BigNumber('0'),
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
@@ -88,13 +89,13 @@ describe('list', () => {
       symbolKey: 'DETH',
       name: 'DETH',
       decimal: 8,
-      limit: '0',
+      limit: new BigNumber('0'),
       mintable: true,
       tradeable: true,
       isDAT: true,
       isLPS: false,
       finalized: false,
-      minted: '0',
+      minted: new BigNumber('0'),
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
@@ -112,13 +113,13 @@ describe('list', () => {
       symbolKey: 'DBTC-DET',
       name: 'DBTC-DETH',
       decimal: 8,
-      limit: '0',
+      limit: new BigNumber('0'),
       mintable: false,
       tradeable: true,
       isDAT: true,
       isLPS: true,
       finalized: true,
-      minted: '0',
+      minted: new BigNumber('0'),
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
@@ -177,13 +178,13 @@ describe('get', () => {
       symbolKey: 'DFI',
       name: 'Default Defi token',
       decimal: 8,
-      limit: '0',
+      limit: new BigNumber('0'),
       mintable: false,
       tradeable: true,
       isDAT: true,
       isLPS: false,
       finalized: true,
-      minted: '0',
+      minted: new BigNumber('0'),
       creation: {
         tx: '0000000000000000000000000000000000000000000000000000000000000000',
         height: 0
@@ -204,13 +205,13 @@ describe('get', () => {
       symbolKey: 'DBTC',
       name: 'DBTC',
       decimal: 8,
-      limit: '0',
+      limit: new BigNumber('0'),
       mintable: true,
       tradeable: true,
       isDAT: true,
       isLPS: false,
       finalized: false,
-      minted: '0',
+      minted: new BigNumber('0'),
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
@@ -231,13 +232,13 @@ describe('get', () => {
       symbolKey: 'DETH',
       name: 'DETH',
       decimal: 8,
-      limit: 0,
+      limit: new BigNumber('0'),
       mintable: true,
       tradeable: true,
       isDAT: true,
       isLPS: false,
       finalized: false,
-      minted: 0,
+      minted: new BigNumber('0'),
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
@@ -258,13 +259,13 @@ describe('get', () => {
       symbolKey: 'DBTC-DET',
       name: 'DBTC-DETH',
       decimal: 8,
-      limit: '0',
+      limit: new BigNumber('0'),
       mintable: false,
       tradeable: true,
       isDAT: true,
       isLPS: true,
       finalized: true,
-      minted: '0',
+      minted: new BigNumber('0'),
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
