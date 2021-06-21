@@ -77,7 +77,7 @@ function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairData {
     customRewards: poolPairInfo.customRewards ?? undefined,
     creation: {
       tx: poolPairInfo.creationTx,
-      height: poolPairInfo.creationHeight
+      height: poolPairInfo.creationHeight.toNumber()
     }
   }
 }

@@ -54,6 +54,6 @@ export interface PoolPairData {
   customRewards?: BigNumber
   creation: {
     tx: string
-    height: BigNumber
+    height: number
   }
 }
