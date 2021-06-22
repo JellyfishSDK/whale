@@ -10,6 +10,7 @@ import { TransactionVinIndexer } from '@src/module.indexer/model/transaction.vin
 import { TransactionVoutIndexer } from '@src/module.indexer/model/transaction.vout'
 import { VoutFinder } from '@src/module.indexer/model/_vout_finder'
 import { IndexStatusMapper } from '@src/module.indexer/status'
+import { OraclePriceIndexer } from '@src/module.indexer/model/oracle.price'
 
 @Module({
   providers: [
@@ -23,7 +24,8 @@ import { IndexStatusMapper } from '@src/module.indexer/status'
     ScriptUnspentIndexer,
     TransactionIndexer,
     TransactionVinIndexer,
-    TransactionVoutIndexer
+    TransactionVoutIndexer,
+    OraclePriceIndexer
   ]
 })
 export class IndexerModule {
