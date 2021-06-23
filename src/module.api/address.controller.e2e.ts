@@ -195,6 +195,7 @@ describe('listTransactions', () => {
         hash: expect.stringMatching(/[0-f]{64}/),
         height: expect.any(Number)
       },
+      medianTime: expect.any(Number),
       hid: expect.stringMatching(/[0-f]{64}/),
       id: expect.stringMatching(/[0-f]{72}/),
       script: {
@@ -263,6 +264,7 @@ describe('listTransactions', () => {
         hash: expect.stringMatching(/[0-f]{64}/),
         height: expect.any(Number)
       },
+      medianTime: expect.any(Number),
       hid: expect.stringMatching(/[0-f]{64}/),
       id: expect.stringMatching(/[0-f]{72}/),
       script: {
@@ -352,6 +354,7 @@ describe('listTransactionsUnspent', () => {
         hash: expect.stringMatching(/[0-f]{64}/),
         height: expect.any(Number)
       },
+      medianTime: expect.any(Number),
       hid: expect.stringMatching(/[0-f]{64}/),
       id: expect.stringMatching(/[0-f]{72}/),
       script: {
@@ -400,6 +403,7 @@ describe('listTransactionsUnspent', () => {
         hash: expect.stringMatching(/[0-f]{64}/),
         height: expect.any(Number)
       },
+      medianTime: expect.any(Number),
       hid: expect.stringMatching(/[0-f]{64}/),
       id: expect.stringMatching(/[0-f]{72}/),
       script: {
