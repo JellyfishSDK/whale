@@ -27,6 +27,7 @@ export class TransactionIndexer extends Indexer {
         hash: block.hash,
         height: block.height
       },
+      medianTime: block.mediantime,
       txid: txn.txid,
       hash: txn.hash,
       version: txn.version,

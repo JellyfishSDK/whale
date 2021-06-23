@@ -51,6 +51,7 @@ export interface ScriptUnspent extends Model {
     hash: string // ------------| block hash of this script unspent
     height: number // ----------| block height of this script unspent
   }
+  medianTime: number // --------| block time
 
   script: {
     type: string // ------------| known type of the script

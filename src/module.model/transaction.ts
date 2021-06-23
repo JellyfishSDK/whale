@@ -56,6 +56,7 @@ export interface Transaction extends Model {
     hash: string
     height: number
   }
+  medianTime: number // --------| block time
 
   txid: string
   hash: string

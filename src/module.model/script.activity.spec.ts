@@ -28,6 +28,7 @@ beforeEach(async () => {
       id: HexEncoder.encodeHeight(height) + ScriptActivityMapper.typeAsHex(type) + txid + HexEncoder.encodeVoutIndex(n),
       hid: HexEncoder.asSHA256(hex),
       block: { hash: '', height: height },
+      medianTime: height * 10,
       script: { hex: hex, type: '' },
       txid: txid,
       type: type,
@@ -61,15 +62,19 @@ it('should query', async () => {
 
   expect(list[0].block.height).toStrictEqual(1)
   expect(list[0].typeHex).toStrictEqual('01')
+  expect(list[0].medianTime).toStrictEqual(10)
 
   expect(list[1].block.height).toStrictEqual(1)
   expect(list[1].typeHex).toStrictEqual('00')
+  expect(list[1].medianTime).toStrictEqual(10)
 
   expect(list[2].block.height).toStrictEqual(0)
   expect(list[2].typeHex).toStrictEqual('01')
+  expect(list[2].medianTime).toStrictEqual(0)
 
   expect(list[3].block.height).toStrictEqual(0)
   expect(list[3].typeHex).toStrictEqual('00')
+  expect(list[3].medianTime).toStrictEqual(0)
 })
 
 it('should delete', async () => {

@@ -68,6 +68,7 @@ export class ScriptActivityIndexer extends Indexer {
         hash: block.hash,
         height: block.height
       },
+      medianTime: block.mediantime,
       script: {
         type: vout.script.type,
         hex: vout.script.hex
@@ -92,6 +93,7 @@ export class ScriptActivityIndexer extends Indexer {
         hash: block.hash,
         height: block.height
       },
+      medianTime: block.mediantime,
       script: {
         type: vout.scriptPubKey.type,
         hex: vout.scriptPubKey.hex

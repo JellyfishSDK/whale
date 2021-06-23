@@ -64,6 +64,7 @@ export class ScriptUnspentIndexer extends Indexer {
         hash: block.hash,
         height: block.height
       },
+      medianTime: block.mediantime,
       script: {
         type: vout.scriptPubKey.type,
         hex: vout.scriptPubKey.hex
@@ -86,6 +87,7 @@ export class ScriptUnspentIndexer extends Indexer {
         hash: txn.block.hash,
         height: txn.block.height
       },
+      medianTime: txn.medianTime,
       script: {
         type: vout.script.type,
         hex: vout.script.hex
