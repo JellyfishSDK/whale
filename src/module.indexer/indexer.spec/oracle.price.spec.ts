@@ -36,17 +36,12 @@ async function setup (): Promise<void> {
 
   const oracleid = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 1 })
 
-  // await container.generate(1)
-  //
-  // // Update oracle
-  // const updateOraclePriceFeeds = [
-  //   { token: 'FB', currency: 'CNY' },
-  // ]
-  //
-  // await client.oracle.updateOracle(oracleid, await container.getNewAddress(), {
-  //   priceFeeds: updateOraclePriceFeeds,
-  //   weightage: 2
-  // })
+  await container.generate(1)
+
+  await client.oracle.updateOracle(oracleid, await container.getNewAddress(), {
+    priceFeeds,
+    weightage: 2
+  })
 
   await container.generate(1)
 

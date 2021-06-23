@@ -3,7 +3,9 @@ import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { OraclePriceAggregation, OraclePriceAggregationMapper } from '@src/module.model/oracle.price.aggregation'
 import { SmartBuffer } from 'smart-buffer'
-import { CSetOracleData } from '@defichain/jellyfish-transaction'
+// import { CAppointOracle, CSetOracleData } from '@defichain/jellyfish-transaction'
+import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
+import { JellyfishJSON } from '@defichain/jellyfish-api-core'
 
 @Injectable()
 export class OraclePriceAggregationIndexer extends Indexer {
@@ -18,12 +20,25 @@ export class OraclePriceAggregationIndexer extends Indexer {
 
     function findOraclePriceAggregation (hex: string, type: string): OraclePriceAggregation {
       try {
-        if (hex.startsWith('6a414466547879')) {
-          const data = hex.replace('6a414466547879', '')
-          const buffer = SmartBuffer.fromBuffer(Buffer.from(data, 'hex'))
-          const composable: any = new CSetOracleData(buffer)
-          console.log(hex)
-          console.log(composable)
+        const stack: any = toOPCodes(
+          SmartBuffer.fromBuffer(Buffer.from(hex, 'hex'))
+        )
+
+        if (stack[1].tx.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
+          console.log(JellyfishJSON.stringify(stack[1].tx.data.weightage))
+          console.log(JellyfishJSON.stringify(stack[1].tx.data.priceFeeds))
+        }
+
+        if (stack[1].tx.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
+          console.log(JellyfishJSON.stringify(stack[1].tx.data.oracleId))
+          console.log(JellyfishJSON.stringify(stack[1].tx.data.weightage))
+          console.log(JellyfishJSON.stringify(stack[1].tx.data.priceFeeds))
+        }
+
+        if (stack[1].tx.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
+          console.log(JellyfishJSON.stringify(stack[1].tx.data.oracleId))
+          console.log(JellyfishJSON.stringify(stack[1].tx.data.timestamp))
+          console.log(JellyfishJSON.stringify(stack[1].tx.data.tokens))
         }
       } catch (e) {
 
@@ -55,9 +70,9 @@ export class OraclePriceAggregationIndexer extends Indexer {
       }
     }
 
-    for (const txn of block.tx) {
-      console.log(txn.hex)
-    }
+    // for (const txn of block.tx) {
+    //   console.log(txn.hex)
+    // }
 
     for (const aggregation of Object.values(records)) {
       await this.mapper.put(aggregation)
