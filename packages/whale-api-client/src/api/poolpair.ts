@@ -46,6 +46,10 @@ export interface PoolPairData {
     reserve: BigNumber
     blockCommission: BigNumber
   }
+  priceRatio: {
+    'tokenA/tokenB': BigNumber | string
+    'tokenB/tokenA': BigNumber | string
+  }
   commission: BigNumber
   totalLiquidity: BigNumber
   tradeEnabled: boolean
