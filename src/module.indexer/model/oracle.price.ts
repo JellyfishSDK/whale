@@ -1,79 +1,98 @@
 import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
+// import { VoutFinder } from '@src/module.indexer/model/_vout_finder'
+import { HexEncoder } from '@src/module.model/_hex.encoder'
+import { OraclePriceAggregation, OraclePriceAggregationMapper } from '@src/module.model/oracle.price'
 
 @Injectable()
-export class OraclePriceIndexer extends Indexer {
-  // constructor (
-  //   //private readonly mapper: OraclePriceMapper,
-  // ) {
-  //   super()
-  // }
-
-  // async index (block: RawBlock): Promise<void> {
-  // const records: Record<string, OraclePrice> = {}
-
-  //   for (const txn of block.tx) {
-  //     try {
-  //       if (txn.hex.includes('6a414466547879')) {
-  //         const buffer = SmartBuffer.fromBuffer(Buffer.from('5fe2c6c2e00f7c764d0386945fa61dccf01374b5d819efad5e9911c9f82fc60cefa369327a01000001055445534c41010355534400a3e11100000000', 'hex'))
-  //         const composable: any = new CSetOracleData(buffer)
-  //         console.log(JellyfishJSON.stringify(composable))
-  //       }
-  //     } catch (e) {
-  //       console.log(e)
-  //     }
-  //   }
-  // }
+export class OraclePriceAggregationIndexer extends Indexer {
+  constructor (
+    private readonly mapper: OraclePriceAggregationMapper
+    // private readonly voutFinder: VoutFinder
+  ) {
+    super()
+  }
 
   async index (block: RawBlock): Promise<void> {
-    // for (const txn of block.tx) {
-    //   for (const vout of txn.vout) {
+    const records: Record<string, OraclePriceAggregation> = {}
 
-    // setoracledata
-    // if(vout.scriptPubKey.hex.startsWith('6a414466547879')){
-    //   const data = vout.scriptPubKey.hex.replace('6a414466547879','')
-    //   const buffer = SmartBuffer.fromBuffer(Buffer.from(data, 'hex'))
-    //   const composable = new CSetOracleData(buffer)
-    //   const x = JellyfishJSON.stringify(composable)
-    //   console.log('setoracledata')
-    //   console.log(x)
-    // }
+    function findOraclePriceAggregation (hex: string, type: string): OraclePriceAggregation {
+      const hid = HexEncoder.asSHA256(hex)
 
-    // appointoracle
-    // if(vout.scriptPubKey.hex.includes('6a35446654786f')){
-    //   console.log(vout.scriptPubKey.hex)
-    //   // const buffer = SmartBuffer.fromBuffer(Buffer.from(data, 'hex'))
-    //   // const composable = new CAppointOracle(buffer)
-    //   // const x = JellyfishJSON.stringify(composable)
-    //   // console.log('appointoracle')
-    //   // console.log(x)
-    // }
+      // if (hex.includes('6a414466547879')) {
+      //   const buffer = SmartBuffer.fromBuffer(Buffer.from('5fe2c6c2e00f7c764d0386945fa61dccf01374b5d819efad5e9911c9f82fc60cefa369327a01000001055445534c41010355534400a3e11100000000', 'hex'))
+      //   const composable: any = new CSetOracleData(buffer)
+      // }
 
-    // updateoracle
-    // if(vout.scriptPubKey.hex.includes('6a4c5f4466547874')){
-    //   console.log(vout.scriptPubKey.hex)
-    //   // const buffer = SmartBuffer.fromBuffer(Buffer.from(data, 'hex'))
-    //   // const composable = new CAppointOracle(buffer)
-    //   // const x = JellyfishJSON.stringify(composable)
-    //   // console.log('appointoracle')
-    //   // console.log(x)
-    // }
+      if (records[hid] === undefined) {
+        records[hid] = OraclePriceAggregationIndexer.newOraclePriceAggregation(
+          block,
+          hex,
+          type,
+          'APPL',
+          'EUR',
+          0
+        )
+      }
 
-    // const x = vout.scriptPubKey.hex
-    //
-    // if(x.length > 120) {
-    //   console.log(x)
-    // }
+      return records[hid]
+    }
 
-    // console.log(vout.scriptPubKey.hex)
-    //   }
-    // }
+    for (const txn of block.tx) {
+      for (const vout of txn.vout) {
+        // const aggregation =
+        findOraclePriceAggregation(
+          vout.scriptPubKey.hex,
+          vout.scriptPubKey.type
+        )
+      }
+    }
+
+    for (const aggregation of Object.values(records)) {
+      await this.mapper.put(aggregation)
+    }
   }
 
   async invalidate (block: RawBlock): Promise<void> {
-    // const records: Record<string, OraclePrice> = {}
-    // for (const oraclePrice of Object.values(records)) {
-    //   this.mapper.delete(oraclePrice)
-    // }
+    const hidList = new Set<string>()
+
+    for (const txn of block.tx) {
+      for (const vout of txn.vout) {
+        hidList.add(HexEncoder.asSHA256(vout.scriptPubKey.hex))
+      }
+    }
+
+    for (const hid of hidList) {
+      await this.mapper.delete(HexEncoder.encodeHeight(block.height) + hid)
+    }
+  }
+
+  static newOraclePriceAggregation (
+    block: RawBlock,
+    hex: string,
+    type: string,
+    token: string,
+    currency: string,
+    timestamp: number
+  ): OraclePriceAggregation {
+    const hid = HexEncoder.asSHA256(hex)
+
+    return {
+      id: HexEncoder.encodeHeight(block.height) + hid,
+      hid: hid,
+      block: {
+        hash: block.hash,
+        height: block.height
+      },
+      script: {
+        type: type,
+        hex: hex
+      },
+      data: {
+        token,
+        currency,
+        timestamp
+      }
+    }
   }
 }
