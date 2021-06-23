@@ -8,6 +8,7 @@ import { ScriptUnspentIndexer } from '@src/module.indexer/model/script.unspent'
 import { TransactionIndexer } from '@src/module.indexer/model/transaction'
 import { TransactionVinIndexer } from '@src/module.indexer/model/transaction.vin'
 import { TransactionVoutIndexer } from '@src/module.indexer/model/transaction.vout'
+import { OraclePriceAggregationIndexer } from '@src/module.indexer/model/oracle.price.aggregation'
 import { VoutFinder } from '@src/module.indexer/model/_vout_finder'
 import { IndexStatusMapper } from '@src/module.indexer/status'
 
@@ -23,7 +24,8 @@ import { IndexStatusMapper } from '@src/module.indexer/status'
     ScriptUnspentIndexer,
     TransactionIndexer,
     TransactionVinIndexer,
-    TransactionVoutIndexer
+    TransactionVoutIndexer,
+    OraclePriceAggregationIndexer
   ]
 })
 export class IndexerModule {
