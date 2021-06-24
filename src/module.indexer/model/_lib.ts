@@ -1,5 +1,4 @@
 import {
-  isDeFiScript,
   OP_DEFI_TX,
   CUtxosToAccount,
   CAccountToUtxos,
@@ -22,7 +21,8 @@ import {
   CTokenCreate,
   CTokenUpdate,
   CTokenUpdateAny,
-  CDeFiOpUnmapped
+  CDeFiOpUnmapped,
+  OPCode
 } from '@defichain/jellyfish-transaction'
 import { ComposableBuffer } from '@defichain/jellyfish-transaction/dist/buffer/buffer_composer'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
@@ -71,6 +71,13 @@ export interface DecodedDfTx {
   object?: any
 }
 
+function isDeFiTx (opCodes: OPCode[]): boolean {
+  return (
+    opCodes.length === 2 &&
+    opCodes[0].type === 'OP_RETURN'
+  )
+}
+
 export function bufferToDfTx (hex: string | Buffer | SmartBuffer): DecodedDfTx {
   let smartBuffer: string | Buffer | SmartBuffer = hex
 
@@ -82,7 +89,7 @@ export function bufferToDfTx (hex: string | Buffer | SmartBuffer): DecodedDfTx {
   }
 
   const opCodes = toOPCodes(smartBuffer as SmartBuffer)
-  if (!isDeFiScript(opCodes)) {
+  if (!isDeFiTx(opCodes)) {
     return {
       isDfTx: false
     }
@@ -92,9 +99,9 @@ export function bufferToDfTx (hex: string | Buffer | SmartBuffer): DecodedDfTx {
 
   let mapped
   if (Object.keys(OP_CODE_DFTX_MAP).includes(`${dfTx.type}`)) {
-    mapped = new OP_CODE_DFTX_MAP[dfTx.type]().toObject()
+    mapped = new OP_CODE_DFTX_MAP[dfTx.type](dfTx.data).toObject()
   } else {
-    mapped = new CDeFiOpUnmapped(smartBuffer as SmartBuffer)
+    mapped = new CDeFiOpUnmapped(dfTx.data).toObject()
   }
 
   return {
