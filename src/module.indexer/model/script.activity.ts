@@ -9,8 +9,8 @@ import { NotFoundIndexerError } from '@src/module.indexer/error'
 @Injectable()
 export class ScriptActivityIndexer extends Indexer {
   constructor (
-    private readonly mapper: ScriptActivityMapper,
-    private readonly voutFinder: VoutFinder
+    protected readonly mapper: ScriptActivityMapper,
+    protected readonly voutFinder: VoutFinder
   ) {
     super()
   }
