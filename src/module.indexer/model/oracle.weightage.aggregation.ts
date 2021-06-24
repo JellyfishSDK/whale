@@ -3,19 +3,21 @@ import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { SmartBuffer } from 'smart-buffer'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
-import BigNumber from 'bignumber.js'
-import { OraclePriceAggregation, OraclePriceAggregationMapper } from '@src/module.model/oracle.price.aggregation'
+import {
+  OracleWeightageAggregation,
+  OracleWeightageAggregationMapper
+} from '@src/module.model/oracle.weightage.aggregation'
 
 @Injectable()
-export class OraclePriceAggregationIndexer extends Indexer {
+export class OracleWeightageAggregationIndexer extends Indexer {
   constructor (
-    private readonly mapper: OraclePriceAggregationMapper
+    private readonly mapper: OracleWeightageAggregationMapper
   ) {
     super()
   }
 
   async index (block: RawBlock): Promise<void> {
-    const records: Record<string, OraclePriceAggregation> = {}
+    const records: Record<string, OracleWeightageAggregation> = {}
 
     for (const txn of block.tx) {
       for (const vout of txn.vout) {
@@ -28,26 +30,16 @@ export class OraclePriceAggregationIndexer extends Indexer {
             SmartBuffer.fromBuffer(Buffer.from(vout.scriptPubKey.hex, 'hex'))
           )
 
-          if (stack[1].tx.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
-            const timestamp = stack[1].tx.data.timestamp
-            const data = stack[1].tx.data.tokens
+          if (stack[1].tx.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
+            const oracleId: string = stack[1].tx.data.oracleId
+            const weightage = stack[1].tx.data.weightage
+            records[`${oracleId}-${block.height.toString()}`] = OracleWeightageAggregationIndexer.newOracleWeightageAggregration(block, vout.scriptPubKey.hex, vout.scriptPubKey.type, oracleId, weightage)
+          }
 
-            for (let i = 0; i < data.length; i += 1) {
-              const token: string = data[i].token
-              const prices = data[i].prices
-
-              for (let y = 0; y < prices.length; y += 1) {
-                const price = prices[y]
-
-                const currency: string = price.currency
-                const amount = price.amount
-
-                const key = `${token}-${currency}-${block.height.toString()}`
-                // const value = amount + '-' + timestamp
-
-                records[key] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block, vout.scriptPubKey.hex, vout.scriptPubKey.type, token, currency, amount, timestamp)
-              }
-            }
+          if (stack[1].tx.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
+            const oracleId: string = stack[1].tx.data.oracleId
+            const weightage = stack[1].tx.data.weightage
+            records[`${oracleId}-${block.height.toString()}`] = OracleWeightageAggregationIndexer.newOracleWeightageAggregration(block, vout.scriptPubKey.hex, vout.scriptPubKey.type, oracleId, weightage)
           }
         } catch (e) {
 
@@ -74,15 +66,13 @@ export class OraclePriceAggregationIndexer extends Indexer {
     // }
   }
 
-  static newOraclePriceAggregation (
+  static newOracleWeightageAggregration (
     block: RawBlock,
     hex: string,
     type: string,
-    token: string,
-    currency: string,
-    amount: BigNumber,
-    timestamp: BigNumber
-  ): OraclePriceAggregation {
+    oracleId: string,
+    weightage: number
+  ): OracleWeightageAggregation {
     const hid = HexEncoder.asSHA256(hex)
 
     return {
@@ -97,10 +87,8 @@ export class OraclePriceAggregationIndexer extends Indexer {
         hex: hex
       },
       data: {
-        token,
-        currency,
-        amount,
-        timestamp
+        oracleId,
+        weightage
       }
     }
   }

@@ -8,6 +8,7 @@ import { TransactionMapper } from '@src/module.model/transaction'
 import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { OraclePriceAggregationMapper } from '@src/module.model/oracle.price.aggregation'
+import { OracleWeightageAggregationMapper } from '@src/module.model/oracle.weightage.aggregation'
 
 @Global()
 @Module({
@@ -20,6 +21,7 @@ import { OraclePriceAggregationMapper } from '@src/module.model/oracle.price.agg
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
+    OracleWeightageAggregationMapper,
     OraclePriceAggregationMapper
   ],
   exports: [
@@ -31,6 +33,7 @@ import { OraclePriceAggregationMapper } from '@src/module.model/oracle.price.agg
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
+    OracleWeightageAggregationMapper,
     OraclePriceAggregationMapper
   ]
 })

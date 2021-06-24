@@ -7,6 +7,7 @@ import { ScriptUnspentIndexer } from '@src/module.indexer/model/script.unspent'
 import { TransactionIndexer } from '@src/module.indexer/model/transaction'
 import { TransactionVinIndexer } from '@src/module.indexer/model/transaction.vin'
 import { TransactionVoutIndexer } from '@src/module.indexer/model/transaction.vout'
+import { OracleWeightageAggregationIndexer } from '@src/module.indexer/model/oracle.weightage.aggregation'
 import { OraclePriceAggregationIndexer } from '@src/module.indexer/model/oracle.price.aggregation'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { RawBlockMapper } from '@src/module.model/raw.block'
@@ -30,6 +31,7 @@ export class MainIndexer {
     private readonly transaction: TransactionIndexer,
     private readonly transactionVin: TransactionVinIndexer,
     private readonly transactionVout: TransactionVoutIndexer,
+    private readonly oracleWeightage: OracleWeightageAggregationIndexer,
     private readonly oraclePrice: OraclePriceAggregationIndexer
   ) {
     this.indexers = [
@@ -40,6 +42,7 @@ export class MainIndexer {
       transaction,
       transactionVin,
       transactionVout,
+      oracleWeightage,
       oraclePrice
     ]
   }

@@ -2,32 +2,31 @@ import { Injectable } from '@nestjs/common'
 import { Model, ModelMapping } from '@src/module.database/model'
 import { Database, SortOrder } from '@src/module.database/database'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
-import BigNumber from 'bignumber.js'
 
-const OraclePriceAggregrationMapping: ModelMapping<OraclePriceAggregation> = {
-  type: 'oracle_price_aggregation',
+const OracleWeightageAggregrationMapping: ModelMapping<OracleWeightageAggregation> = {
+  type: 'oracle_weightage_aggregation',
   index: {
     hid_height: {
-      name: 'oracle_price_aggregation_hid_height',
+      name: 'oracle_weightage_aggregation_hid_height',
       partition: {
         type: 'string',
-        key: (d: OraclePriceAggregation) => d.hid
+        key: (d: OracleWeightageAggregation) => d.hid
       },
       sort: {
         type: 'number',
-        key: (d: OraclePriceAggregation) => d.block.height
+        key: (d: OracleWeightageAggregation) => d.block.height
       }
     }
   }
 }
 
 @Injectable()
-export class OraclePriceAggregationMapper {
+export class OracleWeightageAggregationMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async getLatest (hid: string): Promise<OraclePriceAggregation | undefined> {
-    const aggregations = await this.database.query(OraclePriceAggregrationMapping.index.hid_height, {
+  async getLatest (hid: string): Promise<OracleWeightageAggregation | undefined> {
+    const aggregations = await this.database.query(OracleWeightageAggregrationMapping.index.hid_height, {
       partitionKey: hid,
       order: SortOrder.DESC,
       limit: 1
@@ -35,8 +34,8 @@ export class OraclePriceAggregationMapper {
     return aggregations.length === 0 ? undefined : aggregations[0]
   }
 
-  async query (hid: string, limit: number, lt?: number): Promise<OraclePriceAggregation[]> {
-    return await this.database.query(OraclePriceAggregrationMapping.index.hid_height, {
+  async query (hid: string, limit: number, lt?: number): Promise<OracleWeightageAggregation[]> {
+    return await this.database.query(OracleWeightageAggregrationMapping.index.hid_height, {
       partitionKey: hid,
       limit: limit,
       order: SortOrder.DESC,
@@ -44,20 +43,20 @@ export class OraclePriceAggregationMapper {
     })
   }
 
-  async get (hid: string, height: number): Promise<OraclePriceAggregation | undefined> {
-    return await this.database.get(OraclePriceAggregrationMapping, HexEncoder.encodeHeight(height) + hid)
+  async get (hid: string, height: number): Promise<OracleWeightageAggregation | undefined> {
+    return await this.database.get(OracleWeightageAggregrationMapping, HexEncoder.encodeHeight(height) + hid)
   }
 
-  async put (aggregation: OraclePriceAggregation): Promise<void> {
-    return await this.database.put(OraclePriceAggregrationMapping, aggregation)
+  async put (aggregation: OracleWeightageAggregation): Promise<void> {
+    return await this.database.put(OracleWeightageAggregrationMapping, aggregation)
   }
 
   async delete (id: string): Promise<void> {
-    return await this.database.delete(OraclePriceAggregrationMapping, id)
+    return await this.database.delete(OracleWeightageAggregrationMapping, id)
   }
 }
 
-export interface OraclePriceAggregation extends Model {
+export interface OracleWeightageAggregation extends Model {
   id: string // ------------------| unique id of this output: block height + hid
   hid: string // -----------------| hashed id, for length compatibility reasons this is the hashed id of script
 
@@ -72,9 +71,7 @@ export interface OraclePriceAggregation extends Model {
   }
 
   data: {
-    token: string
-    currency: string
-    amount: BigNumber
-    timestamp: BigNumber
+    oracleId: string
+    weightage: number
   }
 }
