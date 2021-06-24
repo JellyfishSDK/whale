@@ -8,6 +8,7 @@ import { TransactionMapper } from '@src/module.model/transaction'
 import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { ModelProbeIndicator } from '@src/module.model/_model.probes'
+import { PoolSwapAggregationMapper } from '@src/module.model/poolswap.aggregation'
 
 @Global()
 @Module({
@@ -20,7 +21,8 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     ScriptUnspentMapper,
     TransactionMapper,
     TransactionVinMapper,
-    TransactionVoutMapper
+    TransactionVoutMapper,
+    PoolSwapAggregationMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -31,7 +33,8 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     ScriptUnspentMapper,
     TransactionMapper,
     TransactionVinMapper,
-    TransactionVoutMapper
+    TransactionVoutMapper,
+    PoolSwapAggregationMapper
   ]
 })
 export class ModelModule {
