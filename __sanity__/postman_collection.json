@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "/_health/probes/liveness",
+			"name": "/_actuator/probes/liveness",
 			"event": [
 				{
 					"listen": "test",
@@ -29,14 +29,14 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:3000/_health/probes/liveness",
+					"raw": "http://localhost:3000/_actuator/probes/liveness",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"_health",
+						"_actuator",
 						"probes",
 						"liveness"
 					]
