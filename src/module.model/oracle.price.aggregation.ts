@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Model, ModelMapping } from '@src/module.database/model'
-import { Database, SortOrder } from '@src/module.database/database'
-import { HexEncoder } from '@src/module.model/_hex.encoder'
+import { Database } from '@src/module.database/database'
 import BigNumber from 'bignumber.js'
 
 const OraclePriceAggregrationMapping: ModelMapping<OraclePriceAggregation> = {
@@ -11,7 +10,7 @@ const OraclePriceAggregrationMapping: ModelMapping<OraclePriceAggregation> = {
       name: 'oracle_price_aggregation_hid_height',
       partition: {
         type: 'string',
-        key: (d: OraclePriceAggregation) => d.hid
+        key: (d: OraclePriceAggregation) => `${d.data.token}-${d.data.currency}-${d.block.height.toString()}`
       },
       sort: {
         type: 'number',
@@ -26,26 +25,8 @@ export class OraclePriceAggregationMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async getLatest (hid: string): Promise<OraclePriceAggregation | undefined> {
-    const aggregations = await this.database.query(OraclePriceAggregrationMapping.index.hid_height, {
-      partitionKey: hid,
-      order: SortOrder.DESC,
-      limit: 1
-    })
-    return aggregations.length === 0 ? undefined : aggregations[0]
-  }
-
-  async query (hid: string, limit: number, lt?: number): Promise<OraclePriceAggregation[]> {
-    return await this.database.query(OraclePriceAggregrationMapping.index.hid_height, {
-      partitionKey: hid,
-      limit: limit,
-      order: SortOrder.DESC,
-      lt: lt
-    })
-  }
-
-  async get (hid: string, height: number): Promise<OraclePriceAggregation | undefined> {
-    return await this.database.get(OraclePriceAggregrationMapping, HexEncoder.encodeHeight(height) + hid)
+  async get (token: string, currency: string, height: number): Promise<OraclePriceAggregation | undefined> {
+    return await this.database.get(OraclePriceAggregrationMapping, `${token}-${currency}-${height.toString()}`)
   }
 
   async put (aggregation: OraclePriceAggregation): Promise<void> {

@@ -41,11 +41,7 @@ export class OraclePriceAggregationIndexer extends Indexer {
 
                 const currency: string = price.currency
                 const amount = price.amount
-
-                const key = `${token}-${currency}-${block.height.toString()}`
-                // const value = amount + '-' + timestamp
-
-                records[key] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block, vout.scriptPubKey.hex, vout.scriptPubKey.type, token, currency, amount, timestamp)
+                records[`${token}-${currency}-${block.height.toString()}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block, vout.scriptPubKey.hex, vout.scriptPubKey.type, token, currency, amount, timestamp)
               }
             }
           }
@@ -86,7 +82,7 @@ export class OraclePriceAggregationIndexer extends Indexer {
     const hid = HexEncoder.asSHA256(hex)
 
     return {
-      id: HexEncoder.encodeHeight(block.height) + hid,
+      id: `${token}-${currency}-${block.height.toString()}`,
       hid: hid,
       block: {
         hash: block.hash,

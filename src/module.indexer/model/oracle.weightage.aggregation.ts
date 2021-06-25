@@ -31,15 +31,15 @@ export class OracleWeightageAggregationIndexer extends Indexer {
           )
 
           if (stack[1].tx.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
-            const oracleId: string = stack[1].tx.data.oracleId
+            const oracleid: string = txn.txid
             const weightage = stack[1].tx.data.weightage
-            records[`${oracleId}-${block.height.toString()}`] = OracleWeightageAggregationIndexer.newOracleWeightageAggregration(block, vout.scriptPubKey.hex, vout.scriptPubKey.type, oracleId, weightage)
+            records[`${oracleid}-${block.height.toString()}`] = OracleWeightageAggregationIndexer.newOracleWeightageAggregration(block, vout.scriptPubKey.hex, vout.scriptPubKey.type, oracleid, weightage)
           }
 
           if (stack[1].tx.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
-            const oracleId: string = stack[1].tx.data.oracleId
+            const oracleid: string = stack[1].tx.data.oracleId
             const weightage = stack[1].tx.data.weightage
-            records[`${oracleId}-${block.height.toString()}`] = OracleWeightageAggregationIndexer.newOracleWeightageAggregration(block, vout.scriptPubKey.hex, vout.scriptPubKey.type, oracleId, weightage)
+            records[`${oracleid}-${block.height.toString()}`] = OracleWeightageAggregationIndexer.newOracleWeightageAggregration(block, vout.scriptPubKey.hex, vout.scriptPubKey.type, oracleid, weightage)
           }
         } catch (e) {
 
@@ -70,13 +70,13 @@ export class OracleWeightageAggregationIndexer extends Indexer {
     block: RawBlock,
     hex: string,
     type: string,
-    oracleId: string,
+    oracleid: string,
     weightage: number
   ): OracleWeightageAggregation {
     const hid = HexEncoder.asSHA256(hex)
 
     return {
-      id: HexEncoder.encodeHeight(block.height) + hid,
+      id: `${oracleid}-${block.height.toString()}`,
       hid: hid,
       block: {
         hash: block.hash,
@@ -87,7 +87,7 @@ export class OracleWeightageAggregationIndexer extends Indexer {
         hex: hex
       },
       data: {
-        oracleId,
+        oracleid,
         weightage
       }
     }
