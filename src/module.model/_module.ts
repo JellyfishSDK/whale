@@ -7,8 +7,9 @@ import { ScriptUnspentMapper } from '@src/module.model/script.unspent'
 import { TransactionMapper } from '@src/module.model/transaction'
 import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
-import { OraclePriceAggregationMapper } from '@src/module.model/oracle.price.aggregation'
-import { OracleWeightageAggregationMapper } from '@src/module.model/oracle.weightage.aggregation'
+import { OracleWeightageMapper } from '@src/module.model/oracle.weightage'
+import { OraclePriceMapper } from '@src/module.model/oracle.price'
+import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
 
 @Global()
 @Module({
@@ -21,8 +22,9 @@ import { OracleWeightageAggregationMapper } from '@src/module.model/oracle.weigh
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
-    OracleWeightageAggregationMapper,
-    OraclePriceAggregationMapper
+    OracleWeightageMapper,
+    OraclePriceMapper,
+    OraclePriceAggregrationMapper
   ],
   exports: [
     RawBlockMapper,
@@ -33,8 +35,9 @@ import { OracleWeightageAggregationMapper } from '@src/module.model/oracle.weigh
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
-    OracleWeightageAggregationMapper,
-    OraclePriceAggregationMapper
+    OracleWeightageMapper,
+    OraclePriceMapper,
+    OraclePriceAggregrationMapper
   ]
 })
 export class ModelModule {

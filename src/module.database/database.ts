@@ -50,7 +50,7 @@ export interface QueryOptions {
    * Provide to indicates searching on the sort index within partition key space.
    */
   partitionKey?: ModelKey
-  limit: number
+  limit?: number
   order: SortOrder
   gt?: ModelKey
   gte?: ModelKey

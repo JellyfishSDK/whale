@@ -1,23 +1,19 @@
 import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
-import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { SmartBuffer } from 'smart-buffer'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
-import {
-  OracleWeightageAggregation,
-  OracleWeightageAggregationMapper
-} from '@src/module.model/oracle.weightage.aggregation'
+import { OracleWeightage, OracleWeightageMapper } from '@src/module.model/oracle.weightage'
 
 @Injectable()
-export class OracleWeightageAggregationIndexer extends Indexer {
+export class OracleWeightageIndexer extends Indexer {
   constructor (
-    private readonly mapper: OracleWeightageAggregationMapper
+    private readonly mapper: OracleWeightageMapper
   ) {
     super()
   }
 
   async index (block: RawBlock): Promise<void> {
-    const records: Record<string, OracleWeightageAggregation> = {}
+    const records: Record<string, OracleWeightage> = {}
 
     for (const txn of block.tx) {
       for (const vout of txn.vout) {
@@ -33,13 +29,13 @@ export class OracleWeightageAggregationIndexer extends Indexer {
           if (stack[1].tx.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
             const oracleid: string = txn.txid
             const weightage = stack[1].tx.data.weightage
-            records[`${oracleid}-${block.height.toString()}`] = OracleWeightageAggregationIndexer.newOracleWeightageAggregration(block, vout.scriptPubKey.hex, vout.scriptPubKey.type, oracleid, weightage)
+            records[oracleid] = OracleWeightageIndexer.newOracleWeightageAggregration(block, oracleid, weightage)
           }
 
           if (stack[1].tx.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
             const oracleid: string = stack[1].tx.data.oracleId
             const weightage = stack[1].tx.data.weightage
-            records[`${oracleid}-${block.height.toString()}`] = OracleWeightageAggregationIndexer.newOracleWeightageAggregration(block, vout.scriptPubKey.hex, vout.scriptPubKey.type, oracleid, weightage)
+            records[oracleid] = OracleWeightageIndexer.newOracleWeightageAggregration(block, oracleid, weightage)
           }
         } catch (e) {
 
@@ -53,41 +49,20 @@ export class OracleWeightageAggregationIndexer extends Indexer {
   }
 
   async invalidate (block: RawBlock): Promise<void> {
-    // const hidList = new Set<string>()
-    //
-    // for (const txn of block.tx) {
-    //   for (const vout of txn.vout) {
-    //     hidList.add(HexEncoder.asSHA256(vout.scriptPubKey.hex))
-    //   }
-    // }
-    //
-    // for (const hid of hidList) {
-    //   await this.mapper.delete(HexEncoder.encodeHeight(block.height) + hid)
-    // }
+
   }
 
   static newOracleWeightageAggregration (
     block: RawBlock,
-    hex: string,
-    type: string,
     oracleid: string,
     weightage: number
-  ): OracleWeightageAggregation {
-    const hid = HexEncoder.asSHA256(hex)
-
+  ): OracleWeightage {
     return {
-      id: `${oracleid}-${block.height.toString()}`,
-      hid: hid,
+      id: oracleid,
       block: {
-        hash: block.hash,
         height: block.height
       },
-      script: {
-        type: type,
-        hex: hex
-      },
       data: {
-        oracleid,
         weightage
       }
     }
