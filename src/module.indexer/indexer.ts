@@ -105,6 +105,7 @@ export class Indexer {
 
   private async index (hash: string, height: number): Promise<void> {
     this.logger.log(`Index - hash: ${hash} - height: ${height}`)
+
     const block = await this.client.blockchain.getBlock(hash, 2)
     await this.statusMapper.put(hash, height, Status.INDEXING)
 

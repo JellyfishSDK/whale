@@ -16,6 +16,7 @@ export class PoolSwapAggregationIndexer extends Indexer {
   }
 
   async index (block: RawBlock): Promise<void> {
+    // console.log('block: ', block)
     for (const txn of block.tx) {
       for (const vout of txn.vout) {
         // grab poolswap tx only
