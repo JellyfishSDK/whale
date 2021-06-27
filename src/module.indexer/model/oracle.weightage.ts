@@ -29,16 +29,16 @@ export class OracleWeightageIndexer extends Indexer {
           if (stack[1].tx.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
             const oracleid: string = txn.txid
             const weightage = stack[1].tx.data.weightage
-            records[oracleid] = OracleWeightageIndexer.newOracleWeightageAggregration(block, oracleid, weightage)
+            records[oracleid] = OracleWeightageIndexer.newOracleWeightage(block, oracleid, weightage)
           }
 
           if (stack[1].tx.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
             const oracleid: string = stack[1].tx.data.oracleId
             const weightage = stack[1].tx.data.weightage
-            records[oracleid] = OracleWeightageIndexer.newOracleWeightageAggregration(block, oracleid, weightage)
+            records[oracleid] = OracleWeightageIndexer.newOracleWeightage(block, oracleid, weightage)
           }
         } catch (e) {
-
+          // console.log(e)
         }
       }
     }
@@ -52,7 +52,7 @@ export class OracleWeightageIndexer extends Indexer {
 
   }
 
-  static newOracleWeightageAggregration (
+  static newOracleWeightage (
     block: RawBlock,
     oracleid: string,
     weightage: number
@@ -63,6 +63,7 @@ export class OracleWeightageIndexer extends Indexer {
         height: block.height
       },
       data: {
+        oracleid,
         weightage
       }
     }

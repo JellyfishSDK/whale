@@ -9,7 +9,7 @@ const OracleWeightageMapping: ModelMapping<OracleWeightage> = {
       name: 'oracle_weightage_id_height',
       partition: {
         type: 'string',
-        key: (d: OracleWeightage) => d.id
+        key: (d: OracleWeightage) => d.data.oracleid
       },
       sort: {
         type: 'number',
@@ -43,6 +43,7 @@ export interface OracleWeightage extends Model {
     height: number
   }
   data: {
+    oracleid: string
     weightage: number
   }
 }
