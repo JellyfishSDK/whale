@@ -16,7 +16,6 @@ export class PoolSwapAggregationIndexer extends Indexer {
   }
 
   async index (block: RawBlock): Promise<void> {
-    // console.log('block: ', block)
     for (const txn of block.tx) {
       for (const vout of txn.vout) {
         // grab poolswap tx only
@@ -58,16 +57,16 @@ export class PoolSwapAggregationIndexer extends Indexer {
     return {
       id: date,
       bucket: {
-        '00': { total: new BigNumber('0'), count: 0 },
-        '01': { total: new BigNumber('0'), count: 0 },
-        '02': { total: new BigNumber('0'), count: 0 },
-        '03': { total: new BigNumber('0'), count: 0 },
-        '04': { total: new BigNumber('0'), count: 0 },
-        '05': { total: new BigNumber('0'), count: 0 },
-        '06': { total: new BigNumber('0'), count: 0 },
-        '07': { total: new BigNumber('0'), count: 0 },
-        '08': { total: new BigNumber('0'), count: 0 },
-        '09': { total: new BigNumber('0'), count: 0 },
+        0: { total: new BigNumber('0'), count: 0 },
+        1: { total: new BigNumber('0'), count: 0 },
+        2: { total: new BigNumber('0'), count: 0 },
+        3: { total: new BigNumber('0'), count: 0 },
+        4: { total: new BigNumber('0'), count: 0 },
+        5: { total: new BigNumber('0'), count: 0 },
+        6: { total: new BigNumber('0'), count: 0 },
+        7: { total: new BigNumber('0'), count: 0 },
+        8: { total: new BigNumber('0'), count: 0 },
+        9: { total: new BigNumber('0'), count: 0 },
         10: { total: new BigNumber('0'), count: 0 },
         11: { total: new BigNumber('0'), count: 0 },
         12: { total: new BigNumber('0'), count: 0 },

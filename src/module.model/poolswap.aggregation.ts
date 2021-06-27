@@ -51,8 +51,10 @@ export interface PoolSwapAggregation extends Model {
 }
 
 export interface PoolSwapHourlyBucket {
-  /** use hour scale for easy first */
-  [hours: string]: TotalCount
+  /**
+   * use hour scale for easy first
+   */
+  [hour: string]: TotalCount
 }
 
 export interface TotalCount {

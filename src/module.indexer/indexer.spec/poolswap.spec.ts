@@ -2,12 +2,14 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { PoolSwapAggregationMapper } from '@src/module.model/poolswap.aggregation'
-import { getDateInString } from '@src/utils'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
+let client: JsonRpcClient
+let mapper: PoolSwapAggregationMapper
+let spy: jest.SpyInstance
 
 beforeAll(async () => {
   await container.start()
@@ -16,6 +18,10 @@ beforeAll(async () => {
 
   app = await createIndexerTestModule(container)
   await app.init()
+
+  client = app.get<JsonRpcClient>(JsonRpcClient)
+
+  mapper = app.get<PoolSwapAggregationMapper>(PoolSwapAggregationMapper)
 })
 
 afterAll(async () => {
@@ -24,6 +30,47 @@ afterAll(async () => {
   } finally {
     await container.stop()
   }
+})
+
+beforeEach(async () => {
+  spy = jest.spyOn(client.blockchain, 'getBlock')
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 5, 31, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 6, 1, 4, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 1, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 2, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 3, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 4, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 5, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 6, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 7, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 8, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 9, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 10, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 11, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 12, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 13, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 14, 14, 14)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 14, 30, 39)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 14, 30, 39)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 15, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 16, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 17, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 18, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 19, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 20, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 21, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 22, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 23, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 8, 31, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2020, 9, 1, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTs(2021, 1, 13, 0, 0, 0)))
+
+  await waitForHeight(app, 20)
+})
+
+afterEach(() => {
+  spy.mockRestore()
 })
 
 function generateBlock (timestamp: number): any {
@@ -64,35 +111,51 @@ function generateTs (
   return new Date(Date.UTC(year, month - 1, date, hours, minutes, seconds)).valueOf() / 1000
 }
 
-it('should query by date range', async () => {
-  const client = app.get(JsonRpcClient)
+describe('query', () => {
+  it('should query by date range', async () => {
+    const aggregations = await mapper.query(100, '2020-06-01', '2020-08-31')
+    expect(aggregations.length).toStrictEqual(3)
 
-  const spy = jest.spyOn(client.blockchain, 'getBlock')
-    .mockImplementationOnce(() => generateBlock(generateTs(2021, 2, 15, 14, 14, 14)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2021, 2, 15, 14, 30, 39)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2021, 3, 29, 4, 50, 14)))
-
-  await waitForHeight(app, 20)
-
-  const aggregationMapper = app.get(PoolSwapAggregationMapper)
-
-  const from = getDateInString(2021, 0, 1)
-  const to = getDateInString(2021, 8, 31)
-
-  const aggregations = await aggregationMapper.query(100, from, to)
-  // console.log('aggregations: ', aggregations)
-  // expect(aggregations.length).toStrictEqual(1)
-  for (let i = 0; i < aggregations.length; i += 1) {
-    const aggregation = aggregations[i]
-    for (const hour in aggregation.bucket) {
-      const bucket = aggregation.bucket[hour]
+    expect(aggregations[0].id).toStrictEqual('2020-08-31')
+    for (const hour in aggregations[0].bucket) {
+      const bucket = aggregations[0].bucket[hour]
       if (bucket.count !== 0) {
-        console.log('bucket: ', aggregation.id, hour, bucket)
-        // expect(bucket.total).toStrictEqual('229.39044111')
-        // expect(bucket.count).toStrictEqual(3)
+        expect(bucket.total).toStrictEqual('2.20509127')
+        expect(bucket.count).toStrictEqual(1)
+        expect(hour).toStrictEqual('0')
       }
     }
-  }
 
-  spy.mockRestore()
+    expect(aggregations[1].id).toStrictEqual('2020-07-15')
+    for (const hour in aggregations[1].bucket) {
+      const bucket = aggregations[1].bucket[hour]
+      expect(bucket.total).not.toStrictEqual(0)
+      expect(bucket.count).not.toStrictEqual(0)
+      if (hour === '14') {
+        expect(bucket.total).toStrictEqual(new BigNumber(2.20509127).times(3).toString())
+        expect(bucket.count).toStrictEqual(3)
+      }
+    }
+
+    expect(aggregations[2].id).toStrictEqual('2020-06-01')
+    for (const hour in aggregations[2].bucket) {
+      const bucket = aggregations[2].bucket[hour]
+      if (bucket.count !== 0) {
+        expect(bucket.total).toStrictEqual('2.20509127')
+        expect(bucket.count).toStrictEqual(1)
+        expect(hour).toStrictEqual('4')
+      }
+    }
+  })
+
+  it('should query with limit', async () => {
+    const aggregations = await mapper.query(1, '2020-01-01', '2020-12-31')
+    expect(aggregations.length).toStrictEqual(1)
+    expect(aggregations[0].id).toStrictEqual('2020-09-01')
+  })
+
+  it('should query and get empty data as out of range', async () => {
+    const aggregations = await mapper.query(100, '1990-01-01', '1990-12-31')
+    expect(aggregations.length).toStrictEqual(0)
+  })
 })
