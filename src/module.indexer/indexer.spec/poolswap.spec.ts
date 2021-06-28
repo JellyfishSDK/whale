@@ -98,51 +98,49 @@ function generateBlock (timestamp: number): any {
   }
 }
 
-describe('query', () => {
-  it('should query by date range', async () => {
-    const aggregations = await mapper.query(100, '2020-06-01', '2020-08-31')
-    expect(aggregations.length).toStrictEqual(3)
+it('should query by date range', async () => {
+  const aggregations = await mapper.query(100, '2020-06-01', '2020-08-31')
+  expect(aggregations.length).toStrictEqual(3)
 
-    expect(aggregations[0].id).toStrictEqual('2020-08-31')
-    for (const hour in aggregations[0].bucket) {
-      const bucket = aggregations[0].bucket[hour]
-      if (bucket.count !== 0) {
-        expect(bucket.total).toStrictEqual('2.20509127')
-        expect(bucket.count).toStrictEqual(1)
-        expect(hour).toStrictEqual('0')
-      }
+  expect(aggregations[0].id).toStrictEqual('2020-08-31')
+  for (const hour in aggregations[0].bucket) {
+    const bucket = aggregations[0].bucket[hour]
+    if (bucket.count !== 0) {
+      expect(bucket.total).toStrictEqual('2.20509127')
+      expect(bucket.count).toStrictEqual(1)
+      expect(hour).toStrictEqual('0')
     }
+  }
 
-    expect(aggregations[1].id).toStrictEqual('2020-07-15')
-    for (const hour in aggregations[1].bucket) {
-      const bucket = aggregations[1].bucket[hour]
-      expect(bucket.total).not.toStrictEqual(0)
-      expect(bucket.count).not.toStrictEqual(0)
-      if (hour === '14') {
-        expect(bucket.total).toStrictEqual(new BigNumber(2.20509127).times(3).toString())
-        expect(bucket.count).toStrictEqual(3)
-      }
+  expect(aggregations[1].id).toStrictEqual('2020-07-15')
+  for (const hour in aggregations[1].bucket) {
+    const bucket = aggregations[1].bucket[hour]
+    expect(bucket.total).not.toStrictEqual(0)
+    expect(bucket.count).not.toStrictEqual(0)
+    if (hour === '14') {
+      expect(bucket.total).toStrictEqual(new BigNumber(2.20509127).times(3).toString())
+      expect(bucket.count).toStrictEqual(3)
     }
+  }
 
-    expect(aggregations[2].id).toStrictEqual('2020-06-01')
-    for (const hour in aggregations[2].bucket) {
-      const bucket = aggregations[2].bucket[hour]
-      if (bucket.count !== 0) {
-        expect(bucket.total).toStrictEqual('2.20509127')
-        expect(bucket.count).toStrictEqual(1)
-        expect(hour).toStrictEqual('4')
-      }
+  expect(aggregations[2].id).toStrictEqual('2020-06-01')
+  for (const hour in aggregations[2].bucket) {
+    const bucket = aggregations[2].bucket[hour]
+    if (bucket.count !== 0) {
+      expect(bucket.total).toStrictEqual('2.20509127')
+      expect(bucket.count).toStrictEqual(1)
+      expect(hour).toStrictEqual('4')
     }
-  })
+  }
+})
 
-  it('should query with limit', async () => {
-    const aggregations = await mapper.query(1, '2020-01-01', '2020-12-31')
-    expect(aggregations.length).toStrictEqual(1)
-    expect(aggregations[0].id).toStrictEqual('2020-09-01')
-  })
+it('should query with limit', async () => {
+  const aggregations = await mapper.query(1, '2020-01-01', '2020-12-31')
+  expect(aggregations.length).toStrictEqual(1)
+  expect(aggregations[0].id).toStrictEqual('2020-09-01')
+})
 
-  it('should query and get empty data as out of range', async () => {
-    const aggregations = await mapper.query(100, '1990-01-01', '1990-12-31')
-    expect(aggregations.length).toStrictEqual(0)
-  })
+it('should query and get empty data as out of range', async () => {
+  const aggregations = await mapper.query(100, '1990-01-01', '1990-12-31')
+  expect(aggregations.length).toStrictEqual(0)
 })
