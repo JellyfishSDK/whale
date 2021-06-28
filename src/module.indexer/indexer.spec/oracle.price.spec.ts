@@ -54,7 +54,7 @@ async function setup (): Promise<void> {
 
   await container.generate(1)
 
-  const timestamp = new Date().getTime()
+  const timestamp = new Date().getTime() - 1800
 
   const prices1 = [{ tokenAmount: '0.5@APPL', currency: 'EUR' }]
   await client.oracle.setOracleData(oracleid1, timestamp, { prices: prices1 })

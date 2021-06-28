@@ -15,6 +15,14 @@ export class OraclePriceAggregationIndexer extends Indexer {
   }
 
   async index (block: RawBlock): Promise<void> {
+    const data = await this.priceMapper.getAllTokenCurrency() ?? []
+    const tokenCurrencySet = new Set()
+
+    for (let i = 0; i < data.length; i += 1) {
+      const result = data[i]
+      tokenCurrencySet.add(`${result.data.token}-${result.data.currency}`)
+    }
+
     const records: Record<string, OraclePriceAggregration> = {}
 
     for (const txn of block.tx) {
@@ -22,54 +30,34 @@ export class OraclePriceAggregationIndexer extends Indexer {
         if (!vout.scriptPubKey.hex.startsWith('6a')) {
           continue
         }
+        for (const tokenCurrency of tokenCurrencySet) {
+          let sum = 0
+          let token = ''
+          let currency = ''
+          let timestamp = 0
 
-        const priceSet = new Set()
+          let hasFound = false
 
-        try {
-          const prices = await this.priceMapper.getActive(block.time)
+          for (let i = 0; i < data.length; i += 1) {
+            const result = data[i]
 
-          if ((prices != null) && prices.length > 0) {
-            console.log(prices)
-          }
-
-          if (prices != null) {
-            for (let i = 0; i < prices.length; i += 1) {
-              const price = prices[i]
-              priceSet.add(`${price.data.token}-${price.data.currency}`)
-            }
-
-            for (let i = 0; i < prices.length; i += 1) {
-              const price = prices[i]
-
-              let sum = 0
-              const qty = new Map<string, number>()
-
-              for (const s of priceSet) {
-                const weightage = await this.weightageMapper.get(price.data.oracleid)
-                if (weightage != null) {
-                  if (s === `${price.data.token}-${price.data.currency}`) {
-                    sum = price.data.amount * weightage.data.weightage
-
-                    let originalNum = qty.get(`${price.data.token}-${price.data.currency}`) ?? 0
-                    originalNum++
-
-                    qty.set(`${price.data.token}-${price.data.currency}`, originalNum)
-                  }
-                }
-              }
-
-              let aggregratePrice = 0
-              const totalQty = qty.get(`${price.data.token}-${price.data.currency}`) ?? 0
-
-              if (totalQty > 0) {
-                aggregratePrice = sum / totalQty
-              }
-
-              records[`${block.height}-${price.data.token}-${price.data.currency}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block, price.data.token, price.data.currency, aggregratePrice, price.data.timestamp)
+            if (
+              tokenCurrency === `${result.data.token}-${result.data.currency}` &&
+              result.data.timestamp >= block.time - 300 &&
+              result.data.timestamp <= block.time + 300
+            ) {
+              const mapper = await this.weightageMapper.get(result.data.oracleid)
+              sum = sum + result.data.amount * ((mapper != null) ? mapper.data.weightage : 0)
+              token = result.data.token
+              currency = result.data.currency
+              timestamp = result.data.timestamp
+              hasFound = true
             }
           }
-        } catch (e) {
-          console.log(e)
+
+          if (hasFound) {
+            records[`${block.height}-${token}-${currency}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block, token, currency, sum / data.length, timestamp)
+          }
         }
       }
     }
@@ -80,6 +68,7 @@ export class OraclePriceAggregationIndexer extends Indexer {
   }
 
   async invalidate (block: RawBlock): Promise<void> {
+    return await Promise.resolve(undefined)
   }
 
   static newOraclePriceAggregation (
@@ -101,3 +90,27 @@ export class OraclePriceAggregationIndexer extends Indexer {
     }
   }
 }
+
+// class OraclePrice {
+//   private oracleid: string;
+//   private token: string;
+//   private currency: string;
+//
+//   constructor (oracleid: string, token: string, currency: string) {
+//     this.oracleid = oracleid;
+//     this.token = token;
+//     this.currency = currency;
+//   }
+//
+//   getOracleid (): string {
+//     return this.oracleid;
+//   }
+//
+//   getToken (): string {
+//     return this.token;
+//   }
+//
+//   getCurrency (): string {
+//     return this.currency;
+//   }
+// }

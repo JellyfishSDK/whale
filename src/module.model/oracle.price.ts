@@ -3,18 +3,25 @@ import { Model, ModelMapping } from '@src/module.database/model'
 import { Database, SortOrder } from '@src/module.database/database'
 
 const OraclePriceMapping: ModelMapping<OraclePrice> = {
-  type: 'token_currency',
+  type: 'Partition',
   index: {
-    token_currency_timestamp: {
-      name: 'token_currency_timestamp',
+    id: {
+      name: 'id',
       partition: {
         type: 'string',
-        key: (d: OraclePrice) => d.data.timestamp.toString()
+        key: (d: OraclePrice) => d.id
       }
-      // sort: {
-      //   type: 'string',
-      //   key: (d: OraclePrice) => d.data.timestamp.toString()
-      // }
+    },
+    oracle_token_currency_timestamp: {
+      name: 'oracle_token_currency_timestamp',
+      partition: {
+        type: 'string',
+        key: (d: OraclePrice) => d.id
+      },
+      sort: {
+        type: 'number',
+        key: (d: OraclePrice) => d.data.timestamp
+      }
     }
   }
 }
@@ -24,12 +31,18 @@ export class OraclePriceMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async getActive (timestamp: number): Promise<OraclePrice[] | undefined> {
-    return await this.database.query(OraclePriceMapping.index.token_currency_timestamp, {
+  async getAllTokenCurrency (): Promise<OraclePrice[] | undefined> {
+    return await this.database.query(OraclePriceMapping.index.id, {
+      order: SortOrder.ASC
+    })
+  }
+
+  async getActivePrice (id: string, timestamp: number): Promise<OraclePrice[] | undefined> {
+    return await this.database.query(OraclePriceMapping.index.token_timestamp, {
+      partitionKey: id,
       order: SortOrder.ASC,
-      gte: (timestamp - 3600).toString(),
-      lt: (timestamp + 3600).toString(),
-      limit: 100
+      gt: timestamp - 3600,
+      lt: timestamp + 3600
     })
   }
 

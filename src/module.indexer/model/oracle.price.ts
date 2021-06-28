@@ -42,6 +42,7 @@ export class OraclePriceIndexer extends Indexer {
                 const amount: number = price.amount
 
                 records[`${oracleid}-${token}-${currency}`] = OraclePriceIndexer.newOraclePrice(block, oracleid, timestamp, token, currency, amount)
+                // console.log(`${oracleid}-${token}-${currency}`)
               }
             }
           }
@@ -52,6 +53,7 @@ export class OraclePriceIndexer extends Indexer {
     }
 
     for (const aggregation of Object.values(records)) {
+      // console.log(aggregation)
       await this.mapper.put(aggregation)
     }
   }
