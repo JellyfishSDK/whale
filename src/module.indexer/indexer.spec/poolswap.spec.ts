@@ -3,6 +3,7 @@ import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { PoolSwapAggregationMapper } from '@src/module.model/poolswap.aggregation'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
+import { randomString, generateTimestamp } from '@src/utils'
 import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
@@ -34,37 +35,37 @@ afterAll(async () => {
 
 beforeEach(async () => {
   spy = jest.spyOn(client.blockchain, 'getBlock')
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 5, 31, 0, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 6, 1, 4, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 0, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 1, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 2, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 3, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 4, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 5, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 6, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 7, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 8, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 9, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 10, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 11, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 12, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 13, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 14, 14, 14)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 14, 30, 39)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 14, 30, 39)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 15, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 16, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 17, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 18, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 19, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 20, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 21, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 22, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 7, 15, 23, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 8, 31, 0, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2020, 9, 1, 0, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTs(2021, 1, 13, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 5, 31, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 6, 1, 4, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 1, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 2, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 3, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 4, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 5, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 6, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 7, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 8, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 9, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 10, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 11, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 12, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 13, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 14, 14, 14)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 14, 30, 39)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 14, 30, 39)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 15, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 16, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 17, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 18, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 19, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 20, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 21, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 22, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 23, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 8, 31, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 9, 1, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(generateTimestamp(2021, 1, 13, 0, 0, 0)))
 
   await waitForHeight(app, 20)
 })
@@ -82,10 +83,10 @@ function generateBlock (timestamp: number): any {
   }
 
   return {
-    hash: randomString(),
+    hash: randomString(64),
     height: 1,
     tx: [{
-      txid: randomString(),
+      txid: randomString(64),
       vin: [],
       vout: [{
         scriptPubKey: dummyScriptPubKey,
@@ -95,20 +96,6 @@ function generateBlock (timestamp: number): any {
     }],
     time: timestamp
   }
-}
-
-function randomString (): string {
-  const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-  var result = ''
-  for (var i = 64; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)]
-  return result
-}
-
-function generateTs (
-  year: number = 0, month: number = 1, date: number = 0,
-  hours: number = 0, minutes: number = 0, seconds: number = 0
-): number {
-  return new Date(Date.UTC(year, month - 1, date, hours, minutes, seconds)).valueOf() / 1000
 }
 
 describe('query', () => {
