@@ -52,6 +52,7 @@ export function randomString (length: number): string {
  * @return {number} 10 digits timestamp
  */
 export function generateTimestamp (
+  /* istanbul ignore next */
   year: number = 0, month: number = 1, date: number = 0,
   hours: number = 0, minutes: number = 0, seconds: number = 0
 ): number {

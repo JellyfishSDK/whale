@@ -44,7 +44,7 @@ export class PoolSwapAggregationIndexer extends Indexer {
   async invalidate (block: RawBlock): Promise<void> {
     for (const txn of block.tx) {
       for (const vout of txn.vout) {
-        if (!vout.scriptPubKey.hex.startsWith('6a4466547873')) {
+        if (!vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547873')) {
           continue
         }
         const { date } = tsToDateTime(block.time)
