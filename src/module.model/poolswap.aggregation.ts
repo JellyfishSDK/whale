@@ -35,10 +35,6 @@ export class PoolSwapAggregationMapper {
     })
   }
 
-  // async get (poolId: string, bucketId: string): Promise<PoolSwapAggregation | undefined> {
-  //   return await this.database.get(PoolSwapAggregationMapping.index.poolId_bucketId, poolId, bucketId)
-  // }
-
   async get (id: string): Promise<PoolSwapAggregation | undefined> {
     return await this.database.get(PoolSwapAggregationMapping, id)
   }
@@ -54,18 +50,19 @@ export class PoolSwapAggregationMapper {
 
 export interface PoolSwapAggregation extends Model {
   /**
+   * id is constructed by poolId + '@' + bucketId + 'u', eg: 1-0@2020-08-31T15:20u
+   * the 'u' is to prevent index test spy.on conflicts
+   */
+
+  /**
    * poolpair "1-0" as id
    */
   poolId: string
   /**
-   * store datetime in ISO8601 string format YYYY-MM-DDTHH:mm:ss.sssZ, eg: 2021-04-01T13:20:00Z
+   * store datetime in ISO8601 string format YYYY-MM-DDTHH:mm (minute scale), eg: 2021-04-01T13:20
    */
-  bucketId: string // sort key e.g. modded time, 10 minutes interval?
+  bucketId: string
 
-  // e.g. from TotalCount
   total: BigNumber
   count: number
 }
-// instead of this design, a better design would be having the bucket as part of the secondary sort key space
-// Instead of querying a day, you can query the last 24 hours via range operator. (Slice Window)
-// If you want to query a day you just need to construct a 24-hour range query.

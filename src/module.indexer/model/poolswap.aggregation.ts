@@ -27,37 +27,18 @@ export class PoolSwapAggregationIndexer extends Indexer {
 
         const data = (stack[1] as OP_DEFI_TX).tx.data
         const poolId = constructPoolId(data.fromTokenId, data.toTokenId)
-        const bucketId = roundMinutes(block.time)
+        // WEIRD(canonbrother): add suffix is to prevent test spy.on conflicts
+        const bucketId = roundMinutes(block.time) + 'u'
         const id = constructId(poolId, bucketId)
 
         let aggregation = await this.mapper.get(id)
         if (aggregation === undefined) {
-          console.log('aggregation undefined: ', aggregation)
           aggregation = PoolSwapAggregationIndexer.newPoolSwapAggregation(poolId, bucketId)
         }
-
         aggregation.total = new BigNumber(aggregation.total).plus(data.fromAmount)
         aggregation.count += 1
 
-        console.log('aggregation: ', aggregation)
-
         await this.mapper.put(aggregation)
-
-        // manually add 1 here and test query
-        const testagg = PoolSwapAggregationIndexer.newPoolSwapAggregation(poolId, '2020-08-31T19:20')
-        await this.mapper.put(testagg)
-
-        const testagg1 = await this.mapper.get(testagg.id)
-        console.log('testagg1: ', testagg1)
-
-        // check whether the aggregation above is stored into db - yes, but 'test' get undefined
-        const testget = await this.mapper.get(id)
-        console.log('testget: ', testget)
-
-        // query here is working correctly
-        // but query in test only return only the manual added data
-        const testquery = await this.mapper.query(poolId, 100)
-        console.log('testquery: ', testquery)
       }
     }
   }
@@ -85,7 +66,6 @@ export class PoolSwapAggregationIndexer extends Indexer {
   static newPoolSwapAggregation (poolId: string, bucketId: string): PoolSwapAggregation {
     return {
       id: constructId(poolId, bucketId),
-      // id: poolId,
       poolId: poolId,
       bucketId: bucketId,
       total: new BigNumber('0'),
@@ -96,18 +76,18 @@ export class PoolSwapAggregationIndexer extends Indexer {
 
 function roundMinutes (timestamp: number): string {
   const ts = String(timestamp).length === 10 ? timestamp * 1000 : timestamp
-
-  // date in ISO string - 2020-04-01T15:00:323Z
-  const dateTime = new Date(new Date(ts).setMinutes(0)).toISOString()
+  const round = 1000 * 60 * 10
+  const dateTime = new Date(Math.floor(ts / round) * round).toISOString()
 
   // remove seconds and milliseconds
   return dateTime.substr(0, dateTime.length - 8)
 }
 
 function constructId (poolId: string, bucketId: string): string {
-  return `${poolId}_${bucketId}`
+  return `${poolId}@${bucketId}`
 }
 
 function constructPoolId (fromTokenId: string, toTokenId: string): string {
-  return `${fromTokenId}-${toTokenId}`
+  const sortedTokenIds = [fromTokenId, toTokenId].sort((a, b) => a.localeCompare(b))
+  return `${sortedTokenIds[0]}-${sortedTokenIds[1]}`
 }

@@ -3,7 +3,7 @@ import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { PoolSwapAggregationMapper } from '@src/module.model/poolswap.aggregation'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { randomString, generateTimestamp } from '@src/utils'
+import { randomString } from '@src/utils'
 import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
@@ -35,53 +35,44 @@ afterAll(async () => {
 
 beforeEach(async () => {
   spy = jest.spyOn(client.blockchain, 'getBlock')
-    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 5, 31, 0, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 5, 31, 0, 0, 0)))
-    .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 10, 31, 0, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 6, 1, 4, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 0, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 1, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 2, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 3, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 4, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 5, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 6, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 7, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 8, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 9, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 10, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 11, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 12, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 13, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 14, 14, 14)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 14, 30, 39)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 14, 30, 39)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 15, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 16, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 17, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 18, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 19, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 20, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 21, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 22, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 7, 15, 23, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 8, 31, 0, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2020, 9, 1, 0, 0, 0)))
-    // .mockImplementationOnce(() => generateBlock(generateTimestamp(2021, 1, 13, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2020, 8, 31, 23, 59, 59)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2020, 9, 1, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2020, 9, 1, 18, 11, 23)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2020, 9, 1, 18, 12, 25)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2020, 9, 1, 18, 14, 1)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2020, 9, 1, 18, 19, 36)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2020, 9, 1, 18, 20, 1)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2020, 9, 1, 18, 21, 56)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2020, 9, 15, 15, 15, 15)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2020, 9, 30, 23, 59, 59)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2020, 10, 1, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2021, 4, 1, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[1], generateTimestamp(2020, 10, 2, 0, 0, 0)))
+    .mockImplementationOnce(() => generateBlock(dummyScripts[1], generateTimestamp(2021, 4, 1, 0, 0, 0)))
+
+  await waitForHeight(app, 5)
 })
 
 afterEach(() => {
   spy.mockRestore()
 })
 
-function generateBlock (timestamp: number): any {
-  const dummyScriptPubKey = {
+const dummyScripts = [
+  {
     // https://mainnet.defichain.io/#/DFI/mainnet/tx/700473ec7ca4f6bec261e75342f91825f3c2cf60df1bf1f335b53a2bcd95b994
-    // poolId: '1-0', fromAmount: 2.20509127
+    // poolId: '0-1', fromAmount: 2.20509127
     asm: 'OP_RETURN 446654787317a9140806eb42b6d5bb69726909fb6da34a9152afdf048701c7b3240d0000000017a9140806eb42b6d5bb69726909fb6da34a9152afdf048700ffffffffffffff7fffffffffffffff7f',
     hex: '6a4c4f446654787317a9140806eb42b6d5bb69726909fb6da34a9152afdf048701c7b3240d0000000017a9140806eb42b6d5bb69726909fb6da34a9152afdf048700ffffffffffffff7fffffffffffffff7f'
+  },
+  {
+    // https://mainnet.defichain.io/#/DFI/mainnet/tx/c2a489adbebf97fb1dd0c695ee6d1f54eca4ea60165f12fd17f90923d6181d3e
+    // poolId: '0-2', fromAmount: 1100
+    asm: 'OP_RETURN 446654787317a914fe7d87680b758782401e747f8228cadc610b2047870000cc829c190000001976a91442511183ba47347712f9f3dca5d2d003b2e78d4888ac02ffffffffffffff7fffffffffffffff7f',
+    hex: '6a4c51446654787317a914fe7d87680b758782401e747f8228cadc610b2047870000cc829c190000001976a91442511183ba47347712f9f3dca5d2d003b2e78d4888ac02ffffffffffffff7fffffffffffffff7f'
   }
+]
 
+function generateBlock (dummyScript: any, timestamp: number): any {
   return {
     hash: randomString(64),
     height: 1,
@@ -89,75 +80,70 @@ function generateBlock (timestamp: number): any {
       txid: randomString(64),
       vin: [],
       vout: [{
-        scriptPubKey: dummyScriptPubKey,
+        scriptPubKey: dummyScript,
         n: 0,
-        value: new BigNumber('26')
+        value: new BigNumber('26.78348323')
       }]
     }],
     time: timestamp
   }
 }
 
-it('should query by date range', async () => {
-  await waitForHeight(app, 5)
+function generateTimestamp (
+  year: number = 0, month: number = 1, day: number = 0,
+  hours: number = 0, minutes: number = 0, seconds: number = 0
+): number {
+  return new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds)).valueOf() / 1000
+}
 
-  // indexed data get undefined
-  const agg1 = await mapper.get('1-0_2020-10-31T00:00')
-  console.log('agg1: ', agg1)
+it('should query with date range', async () => {
+  const aggregations = await mapper.query('0-1', 100, '2020-09-01T00:00u', '2020-09-30T23:59u')
+  expect(aggregations.length).toStrictEqual(5)
 
-  // manual data can get
-  const agg2 = await mapper.get('1-0_2020-08-31T19:20')
-  console.log('agg2: ', agg2)
+  expect(aggregations[0].id).toStrictEqual('0-1@2020-09-30T23:50u')
+  expect(aggregations[0].total).toStrictEqual('2.20509127')
+  expect(aggregations[0].count).toStrictEqual(1)
 
-  const get = await mapper.get('1-0')
-  console.log('get: ', get)
+  expect(aggregations[1].id).toStrictEqual('0-1@2020-09-15T15:10u')
 
-  const aggregations = await mapper.query('1-0', 100, '2020-06-01T00:00', '2020-12-31T00:00')
-  // const aggregations = await mapper.query('1-0', 100)
-  console.log('aggregations: ', aggregations)
+  expect(aggregations[2].id).toStrictEqual('0-1@2020-09-01T18:20u')
+  expect(aggregations[2].total).toStrictEqual('4.41018254')
+  expect(aggregations[2].count).toStrictEqual(2)
 
-  // ignore below
-  // expect(aggregations.length).toStrictEqual(3)
+  expect(aggregations[3].id).toStrictEqual('0-1@2020-09-01T18:10u')
+  expect(aggregations[3].total).toStrictEqual('8.82036508')
+  expect(aggregations[3].count).toStrictEqual(4)
 
-  // expect(aggregations[0].id).toStrictEqual('2020-08-31')
-  // for (const hour in aggregations.bucket) {
-  //   const bucket = aggregations.bucket[hour]
-  //   if (bucket.count !== 0) {
-  //     expect(bucket.total).toStrictEqual('2.20509127')
-  //     expect(bucket.count).toStrictEqual(1)
-  //     expect(hour).toStrictEqual('0')
-  //   }
-  // }
-
-  // expect(aggregations[1].id).toStrictEqual('2020-07-15')
-  // for (const hour in aggregations[1].bucket) {
-  //   const bucket = aggregations[1].bucket[hour]
-  //   expect(bucket.total).not.toStrictEqual(0)
-  //   expect(bucket.count).not.toStrictEqual(0)
-  //   if (hour === '14') {
-  //     expect(bucket.total).toStrictEqual(new BigNumber(2.20509127).times(3).toString())
-  //     expect(bucket.count).toStrictEqual(3)
-  //   }
-  // }
-
-  // expect(aggregations[2].id).toStrictEqual('2020-06-01')
-  // for (const hour in aggregations[2].bucket) {
-  //   const bucket = aggregations[2].bucket[hour]
-  //   if (bucket.count !== 0) {
-  //     expect(bucket.total).toStrictEqual('2.20509127')
-  //     expect(bucket.count).toStrictEqual(1)
-  //     expect(hour).toStrictEqual('4')
-  //   }
-  // }
+  expect(aggregations[4].id).toStrictEqual('0-1@2020-09-01T00:00u')
 })
 
-// it('should query with limit', async () => {
-//   const aggregations = await mapper.query(1, '2020-01-01', '2020-12-31')
-//   expect(aggregations.length).toStrictEqual(1)
-//   expect(aggregations[0].id).toStrictEqual('2020-09-01')
-// })
+it('should query with from only', async () => {
+  const aggregations = await mapper.query('0-2', 100, '2020-10-01T00:00u')
+  expect(aggregations.length).toStrictEqual(2)
+})
 
-// it('should query and get empty data as out of range', async () => {
-//   const aggregations = await mapper.query(100, '1990-01-01', '1990-12-31')
-//   expect(aggregations.length).toStrictEqual(0)
-// })
+it('should query with to only', async () => {
+  const aggregations = await mapper.query('0-1', 100, undefined, '2020-09-12T00:00u')
+  expect(aggregations.length).toStrictEqual(4)
+})
+
+it('should query and list all', async () => {
+  const aggregations = await mapper.query('0-1', 100)
+  expect(aggregations.length).toStrictEqual(8)
+})
+
+it('should query with limit', async () => {
+  const aggregations = await mapper.query('0-1', 1, '2020-09-01T00:00', '2020-09-30T23:59')
+  expect(aggregations.length).toStrictEqual(1)
+  expect(aggregations[0].id).toStrictEqual('0-1@2020-09-30T23:50u')
+})
+
+it('should query and get empty as out of range', async () => {
+  const aggregations = await mapper.query('0-1', 100, '1990-01-01T00:00', '1990-12-31T00:00')
+  expect(aggregations.length).toStrictEqual(0)
+})
+
+it('should query and get empty as the poolpair has no trades', async () => {
+  const aggregations = await mapper.query('999-1', 100)
+  expect(aggregations.length).toStrictEqual(0)
+})

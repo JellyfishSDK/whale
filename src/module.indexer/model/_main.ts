@@ -35,12 +35,12 @@ export class MainIndexer {
   ) {
     this.indexers = [
       block,
-      // scriptActivity,
-      // scriptAggregation,
-      // scriptUnspent,
-      // transaction,
-      // transactionVin,
-      // transactionVout,
+      scriptActivity,
+      scriptAggregation,
+      scriptUnspent,
+      transaction,
+      transactionVin,
+      transactionVout,
       poolSwapAggregation
     ]
   }
