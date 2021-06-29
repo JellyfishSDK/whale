@@ -25,13 +25,11 @@ export class OraclePriceAggregationIndexer extends Indexer {
           continue
         }
 
-        // const x = await this.priceMapper.getAll() ?? []
-        //
-        // if (x.length > 3) {
-        //   for (let i = 0; i < x.length; i++) {
-        //     console.log(block.time - x[i].data.timestamp)
-        //   }
-        // }
+        const x = await this.priceMapper.getAll() ?? []
+
+        if (x.length > 1) {
+          // console.log(1)
+        }
 
         const priceFeeds = await this.priceFeedMapper.getAll() ?? []
 
@@ -62,6 +60,7 @@ export class OraclePriceAggregationIndexer extends Indexer {
 
           if (hasFound) {
             records[`${block.height}-${token}-${currency}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block, token, currency, sum / prices.length, timestamp)
+            console.log(`${block.height}-${token}-${currency}-${sum / prices.length}`)
           }
         }
       }

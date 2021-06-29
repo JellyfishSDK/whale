@@ -36,45 +36,24 @@ let blockcount: number
 async function setup (): Promise<void> {
   await container.waitForWalletCoinbaseMaturity()
 
-  const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
+  const priceFeeds1 = [{ token: 'APPL', currency: 'EUR' }]
+  oracleid1 = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds1, { weightage: 1 })
 
-  oracleid1 = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 1 })
+  const timestamp1 = Math.floor(new Date().getTime() / 1000 - 3300)
+  const timestamp2 = Math.floor(new Date().getTime() / 1000 + 3300)
 
-  await container.generate(1)
-
-  oracleid2 = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 2 })
-
-  await container.generate(1)
-
-  await client.oracle.updateOracle(oracleid2, await container.getNewAddress(), {
-    priceFeeds,
-    weightage: 3
-  })
-
-  await container.generate(1)
-
-  const timestamp1 = Math.floor(new Date().getTime() / 1000) - 7200
-  const timestamp2 = Math.floor(new Date().getTime() / 1000) - 200
-  const timestamp3 = Math.floor(new Date().getTime() / 1000) + 200
-  const timestamp4 = Math.floor(new Date().getTime() / 1000) + 7200
-
-  const prices1 = [{ tokenAmount: '0.5@APPL', currency: 'EUR' }]
+  const prices1 = [{ tokenAmount: '10.0@APPL', currency: 'EUR' }]
   await client.oracle.setOracleData(oracleid1, timestamp1, { prices: prices1 })
 
   await container.generate(1)
 
-  const prices2 = [{ tokenAmount: '1.0@APPL', currency: 'EUR' }]
+  const prices2 = [{ tokenAmount: '2.0@APPL', currency: 'EUR' }]
   await client.oracle.setOracleData(oracleid1, timestamp2, { prices: prices2 })
 
   await container.generate(1)
 
-  const prices3 = [{ tokenAmount: '1.5@APPL', currency: 'EUR' }]
-  await client.oracle.setOracleData(oracleid1, timestamp3, { prices: prices3 })
-
-  await container.generate(1)
-
-  const prices4 = [{ tokenAmount: '2.0@APPL', currency: 'EUR' }]
-  await client.oracle.setOracleData(oracleid1, timestamp4, { prices: prices4 })
+  const x = await container.call('listprices', [])
+  console.log(x)
 
   await container.generate(1)
   blockcount = await client.blockchain.getBlockCount()

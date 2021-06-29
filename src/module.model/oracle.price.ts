@@ -16,7 +16,7 @@ const OraclePriceMapping: ModelMapping<OraclePrice> = {
       name: 'oracle_id_timestamp',
       partition: {
         type: 'string',
-        key: (d: OraclePrice) => d.data.tokenCurrency
+        key: (d: OraclePrice) => d.data.token + '-' + d.data.currency
       },
       sort: {
         type: 'number',
@@ -38,7 +38,6 @@ export class OraclePriceMapper {
   }
 
   async getActivePrice (id: string, timestamp: number): Promise<OraclePrice[] | undefined> {
-    console.log(timestamp)
     return await this.database.query(OraclePriceMapping.index.id_timestamp, {
       partitionKey: id,
       order: SortOrder.ASC,
@@ -68,7 +67,6 @@ export interface OraclePrice extends Model {
   }
   data: {
     timestamp: number
-    tokenCurrency: string
     token: string
     currency: string
     oracleid: string

@@ -41,10 +41,7 @@ export class OraclePriceIndexer extends Indexer {
                 const currency: string = price.currency
                 const amount: number = price.amount
 
-                records[`${oracleid}-${token}-${currency}-${block.height}`] = OraclePriceIndexer.newOraclePrice(block, oracleid, token, currency, amount, timestamp)
-                // records[`${token}-${currency}`] = OraclePriceIndexer.newOraclePrice(block, oracleid, timestamp, token, currency, amount)
-
-                // console.log(`${oracleid}-${token}-${currency}-${block.height}-${amount}`)
+                records[`${oracleid}-${token}-${currency}`] = OraclePriceIndexer.newOraclePrice(block, oracleid, token, currency, amount, timestamp)
               }
             }
           }
@@ -83,13 +80,12 @@ export class OraclePriceIndexer extends Indexer {
     timestamp: number
   ): OraclePrice {
     return {
-      id: `${oracleid}-${token}-${currency}-${block.height}`,
+      id: `${oracleid}-${token}-${currency}`,
       block: {
         height: block.height
       },
       data: {
         timestamp,
-        tokenCurrency: token + '-' + currency,
         token,
         currency,
         oracleid,
