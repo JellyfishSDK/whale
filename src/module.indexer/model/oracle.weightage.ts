@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { SmartBuffer } from 'smart-buffer'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
-import { OracleWeightage, OracleWeightageMapper } from '@src/module.model/oracle.weightage'
+import { OracleWeightage, OracleWeightageMapper, WeightageStatus } from '@src/module.model/oracle.weightage'
 
 @Injectable()
 export class OracleWeightageIndexer extends Indexer {
@@ -11,8 +11,7 @@ export class OracleWeightageIndexer extends Indexer {
   }
 
   async index (block: RawBlock): Promise<void> {
-    const record: Record<string, OracleWeightage> = {}
-    const removedOracleIds: string[] = []
+    const records: Record<string, OracleWeightage> = {}
 
     for (const txn of block.tx) {
       for (const vout of txn.vout) {
@@ -27,28 +26,29 @@ export class OracleWeightageIndexer extends Indexer {
         if (stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
           const oracleId: string = txn.txid
           const weightage = stack[1].tx.data.weightage
-          record[oracleId] = OracleWeightageIndexer.newOracleWeightage(oracleId, weightage)
+          records[oracleId] = OracleWeightageIndexer.newOracleWeightage(block, oracleId, weightage, WeightageStatus.LIVE)
         }
 
         if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
           const oracleId: string = stack[1].tx.data.oracleId
           const weightage = stack[1].tx.data.weightage
-          record[oracleId] = OracleWeightageIndexer.newOracleWeightage(oracleId, weightage)
+          records[oracleId] = OracleWeightageIndexer.newOracleWeightage(block, oracleId, weightage, WeightageStatus.LIVE)
         }
 
         if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
           const oracleId: string = stack[1].tx.data.oracleId
-          removedOracleIds.push(oracleId)
+          records[oracleId] = OracleWeightageIndexer.newOracleWeightage(block, oracleId, 0, WeightageStatus.REMOVED)
         }
       }
     }
 
-    for (const aggregation of Object.values(record)) {
-      await this.mapper.put(aggregation)
-    }
+    for (const aggregation of Object.values(records)) {
+      // const latest = await this.mapper.getLatest(aggregation.id)
+      // if (latest !== undefined) {
+      //   aggregation.data.weightage = latest.data.weightage
+      // }
 
-    for (const oracleId of removedOracleIds) {
-      await this.mapper.delete(oracleId)
+      await this.mapper.put(aggregation)
     }
   }
 
@@ -68,14 +68,20 @@ export class OracleWeightageIndexer extends Indexer {
   }
 
   static newOracleWeightage (
+    block: RawBlock,
     oracleId: string,
-    weightage: number
+    weightage: number,
+    state: WeightageStatus
   ): OracleWeightage {
     return {
       id: oracleId,
+      block: {
+        height: block.height
+      },
       data: {
         weightage
-      }
+      },
+      state
     }
   }
 }

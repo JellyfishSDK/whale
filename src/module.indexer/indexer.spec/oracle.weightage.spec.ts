@@ -2,7 +2,7 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { OracleWeightageMapper } from '@src/module.model/oracle.weightage'
+import { OracleWeightageMapper, WeightageStatus } from '@src/module.model/oracle.weightage'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
@@ -58,37 +58,39 @@ describe('Weightage - approveOracle', () => {
 
     const weight = await weightageMapper.get(oracleid)
     expect(weight?.data.weightage).toStrictEqual(1)
+    expect(weight?.state).toStrictEqual(WeightageStatus.LIVE)
   })
 })
 
 describe('Weightage - updateOracle', () => {
-  let oracleid: string
-  let blockcount: number
+  let oracleId: string
+  let blockCount: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
-    oracleid = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 1 })
+    oracleId = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 1 })
 
     await container.generate(1)
 
-    await client.oracle.updateOracle(oracleid, await container.getNewAddress(), {
+    await client.oracle.updateOracle(oracleId, await container.getNewAddress(), {
       priceFeeds,
       weightage: 2
     })
 
     await container.generate(1)
 
-    blockcount = await client.blockchain.getBlockCount()
+    blockCount = await client.blockchain.getBlockCount()
   }
 
   it('should get weightage', async () => {
     await setup()
-    await waitForHeight(app, blockcount)
+    await waitForHeight(app, blockCount)
 
     const weightageMapper = app.get(OracleWeightageMapper)
 
-    const weight = await weightageMapper.get(oracleid)
+    const weight = await weightageMapper.get(oracleId)
     expect(weight?.data.weightage).toStrictEqual(2)
+    expect(weight?.state).toStrictEqual(WeightageStatus.LIVE)
   })
 })
 
@@ -116,6 +118,7 @@ describe('Weightage - removeOracle', () => {
     const weightageMapper = app.get(OracleWeightageMapper)
 
     const weight = await weightageMapper.get(oracleid)
-    expect(weight?.data.weightage).toStrictEqual(undefined)
+    expect(weight?.data.weightage).toStrictEqual(0)
+    expect(weight?.state).toStrictEqual(WeightageStatus.REMOVED)
   })
 })
