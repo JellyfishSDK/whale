@@ -99,19 +99,22 @@ function generateBlock (timestamp: number): any {
 }
 
 it('should query by date range', async () => {
-  await waitForHeight(app, 20)
-
-  // const aggregations = await mapper.query('1-0', 100, '2020-06-01T00:00', '2020-08-31T00:00')
-  const aggregations = await mapper.query('1-0', 100)
-  console.log('aggregations: ', aggregations)
+  await waitForHeight(app, 5)
 
   // indexed data get undefined
-  const agg1 = await mapper.get('1-0-2020-10-31T00:00')
+  const agg1 = await mapper.get('1-0_2020-10-31T00:00')
   console.log('agg1: ', agg1)
 
   // manual data can get
-  const agg2 = await mapper.get('1-0-2020-08-31T19:20')
+  const agg2 = await mapper.get('1-0_2020-08-31T19:20')
   console.log('agg2: ', agg2)
+
+  const get = await mapper.get('1-0')
+  console.log('get: ', get)
+
+  const aggregations = await mapper.query('1-0', 100, '2020-06-01T00:00', '2020-12-31T00:00')
+  // const aggregations = await mapper.query('1-0', 100)
+  console.log('aggregations: ', aggregations)
 
   // ignore below
   // expect(aggregations.length).toStrictEqual(3)

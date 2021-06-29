@@ -47,6 +47,9 @@ export class PoolSwapAggregationIndexer extends Indexer {
         const testagg = PoolSwapAggregationIndexer.newPoolSwapAggregation(poolId, '2020-08-31T19:20')
         await this.mapper.put(testagg)
 
+        const testagg1 = await this.mapper.get(testagg.id)
+        console.log('testagg1: ', testagg1)
+
         // check whether the aggregation above is stored into db - yes, but 'test' get undefined
         const testget = await this.mapper.get(id)
         console.log('testget: ', testget)
@@ -102,7 +105,7 @@ function roundMinutes (timestamp: number): string {
 }
 
 function constructId (poolId: string, bucketId: string): string {
-  return `${poolId}-${bucketId}`
+  return `${poolId}_${bucketId}`
 }
 
 function constructPoolId (fromTokenId: string, toTokenId: string): string {

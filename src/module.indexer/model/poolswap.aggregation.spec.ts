@@ -1,130 +1,148 @@
-// import { Database } from '@src/module.database/database'
-// import { Test } from '@nestjs/testing'
-// import { MemoryDatabaseModule } from '@src/module.database/provider.memory/module'
-// import { LevelDatabase } from '@src/module.database/provider.level/level.database'
-// import { PoolSwapAggregationMapper, PoolSwapHourlyBucket } from '@src/module.model/poolswap.aggregation'
-// import BigNumber from 'bignumber.js'
+import { Database } from '@src/module.database/database'
+import { Test } from '@nestjs/testing'
+import { MemoryDatabaseModule } from '@src/module.database/provider.memory/module'
+import { LevelDatabase } from '@src/module.database/provider.level/level.database'
+import { PoolSwapAggregationMapper } from '@src/module.model/poolswap.aggregation'
+import BigNumber from 'bignumber.js'
 
-// let database: Database
-// let mapper: PoolSwapAggregationMapper
+let database: Database
+let mapper: PoolSwapAggregationMapper
 
-// beforeAll(async () => {
-//   const app = await Test.createTestingModule({
-//     imports: [MemoryDatabaseModule],
-//     providers: [PoolSwapAggregationMapper]
-//   }).compile()
+beforeAll(async () => {
+  const app = await Test.createTestingModule({
+    imports: [MemoryDatabaseModule],
+    providers: [PoolSwapAggregationMapper]
+  }).compile()
 
-//   database = app.get<Database>(Database)
-//   mapper = app.get<PoolSwapAggregationMapper>(PoolSwapAggregationMapper)
-// })
+  database = app.get<Database>(Database)
+  mapper = app.get<PoolSwapAggregationMapper>(PoolSwapAggregationMapper)
+})
 
-// afterAll(async () => {
-//   await (database as LevelDatabase).close()
-// })
+afterAll(async () => {
+  await (database as LevelDatabase).close()
+})
 
-// beforeEach(async () => {
-//   async function put (date: string, bucket: PoolSwapHourlyBucket): Promise<void> {
-//     await mapper.put({
-//       id: date,
-//       bucket: {
-//         0: { total: new BigNumber('0'), count: 0 },
-//         1: { total: new BigNumber('0'), count: 0 },
-//         2: { total: new BigNumber('0'), count: 0 },
-//         3: { total: new BigNumber('0'), count: 0 },
-//         4: { total: new BigNumber('0'), count: 0 },
-//         5: { total: new BigNumber('0'), count: 0 },
-//         6: { total: new BigNumber('0'), count: 0 },
-//         7: { total: new BigNumber('0'), count: 0 },
-//         8: { total: new BigNumber('0'), count: 0 },
-//         9: { total: new BigNumber('0'), count: 0 },
-//         10: { total: new BigNumber('0'), count: 0 },
-//         11: { total: new BigNumber('0'), count: 0 },
-//         12: { total: new BigNumber('0'), count: 0 },
-//         13: { total: new BigNumber('0'), count: 0 },
-//         14: { total: new BigNumber('0'), count: 0 },
-//         15: { total: new BigNumber('0'), count: 0 },
-//         16: { total: new BigNumber('0'), count: 0 },
-//         17: { total: new BigNumber('0'), count: 0 },
-//         18: { total: new BigNumber('0'), count: 0 },
-//         19: { total: new BigNumber('0'), count: 0 },
-//         20: { total: new BigNumber('0'), count: 0 },
-//         21: { total: new BigNumber('0'), count: 0 },
-//         22: { total: new BigNumber('0'), count: 0 },
-//         23: { total: new BigNumber('0'), count: 0 },
-//         ...bucket
-//       }
-//     })
-//   }
+async function setup (): Promise<void> {
+  async function put (poolId: string, bucketId: string, total: BigNumber, count: number): Promise<void> {
+    await mapper.put({
+      id: `${poolId}_${bucketId}`,
+      poolId: poolId,
+      bucketId: bucketId,
+      total: total,
+      count: count
+    })
+  }
 
-//   await put('2020-02-09', { 0: { total: new BigNumber('2.20509127'), count: 1 } })
-//   await put('2020-03-29', { 0: { total: new BigNumber('2.20509127'), count: 1 } })
-//   await put('2020-04-01', {
-//     10: { total: new BigNumber('2.20509127'), count: 1 },
-//     13: { total: new BigNumber('8.82036508'), count: 4 },
-//     21: { total: new BigNumber('4.41018254'), count: 2 }
-//   })
-// })
+  await put('BTC-DFI', '2020-02-15T00:00', new BigNumber('2.20509127'), 1)
+  await put('BTC-DFI', '2020-02-22T22:40', new BigNumber('23.23000042'), 20)
+  await put('BTC-DFI', '2020-02-25T03:30', new BigNumber('16.24949857'), 4)
+  await put('ETH-DFI', '2020-03-14T18:30', new BigNumber('38.34120795'), 4)
+  await put('BTC-DFI', '2020-06-08T03:30', new BigNumber('6.43424635'), 15)
+  await put('BTC-DFI', '2020-06-08T03:40', new BigNumber('12.56523127'), 7)
+  await put('BTC-DFI', '2020-06-08T03:50', new BigNumber('45.58974532'), 11)
+  await put('BTC-DFI', '2020-08-03T23:50', new BigNumber('56.341888563'), 34)
+  await put('BTC-DFI', '2020-08-19T21:20', new BigNumber('78.23125745'), 56)
+  await put('BTC-DFI', '2020-11-15T12:10', new BigNumber('14.45752346'), 8)
+}
 
-// describe('get', () => {
-//   it('should get', async () => {
-//     const aggregation = await mapper.get('2020-04-01')
-//     if (aggregation === undefined) throw new Error()
+describe('query', () => {
+  beforeAll(async () => {
+    // just need build once for query manipulation
+    await setup()
+  })
 
-//     expect(aggregation.id).toStrictEqual('2020-04-01')
-//     expect(aggregation.bucket['10'].total).toStrictEqual('2.20509127')
-//     expect(aggregation.bucket['10'].count).toStrictEqual(1)
+  it('should query', async () => {
+    const from = '2020-02-15T00:00'
+    const to = '2020-08-03T23:50'
+    const aggregations = await mapper.query('BTC-DFI', 100, from, to)
+    expect(aggregations.length).toStrictEqual(7)
+    expect(aggregations[0].id).toStrictEqual('BTC-DFI_2020-08-03T23:50')
+    expect(aggregations[1].id).toStrictEqual('BTC-DFI_2020-06-08T03:50')
+    expect(aggregations[2].id).toStrictEqual('BTC-DFI_2020-06-08T03:40')
+    expect(aggregations[3].id).toStrictEqual('BTC-DFI_2020-06-08T03:30')
+    expect(aggregations[4].id).toStrictEqual('BTC-DFI_2020-02-25T03:30')
+    expect(aggregations[5].id).toStrictEqual('BTC-DFI_2020-02-22T22:40')
+    expect(aggregations[6].id).toStrictEqual('BTC-DFI_2020-02-15T00:00')
 
-//     expect(aggregation.bucket['13'].total).toStrictEqual(new BigNumber('2.20509127').times(4).toString())
-//     expect(aggregation.bucket['13'].count).toStrictEqual(4)
+    const ethAggregations = await mapper.query('ETH-DFI', 100, from, to)
+    expect(ethAggregations.length).toStrictEqual(1)
+  })
 
-//     expect(aggregation.bucket['21'].total).toStrictEqual(new BigNumber('2.20509127').times(2).toString())
-//     expect(aggregation.bucket['21'].count).toStrictEqual(2)
-//   })
+  it('should query with limit', async () => {
+    const from = '2020-02-15T00:00'
+    const to = '2020-08-03T23:50'
+    const aggregations = await mapper.query('BTC-DFI', 3, from, to)
+    expect(aggregations.length).toStrictEqual(3)
+  })
 
-//   it('should get undefined as getting non-existence data', async () => {
-//     const aggregation = await mapper.get('1990-04-01')
-//     expect(aggregation).toBeUndefined()
-//   })
-// })
+  it('should get empty as out of range', async () => {
+    const from = '1990-02-15T00:00'
+    const to = '1990-08-03T23:50'
+    const aggregations = await mapper.query('BTC-DFI', 100, from, to)
+    expect(aggregations.length).toStrictEqual(0)
+  })
+})
 
-// describe('put', () => {
-//   it('should put', async () => {
-//     const aggregationBefore = await mapper.get('2020-08-13')
-//     expect(aggregationBefore).toBeUndefined()
+describe('get', () => {
+  it('should get', async () => {
+    const aggregation = await mapper.get('BTC-DFI_2020-02-22T22:40')
+    if (aggregation === undefined) throw new Error()
 
-//     await mapper.put({
-//       id: '2020-08-13',
-//       bucket: {
-//         13: { total: new BigNumber('2.20509127'), count: 1 },
-//         19: { total: new BigNumber('422.009734'), count: 6 }
-//       }
-//     })
+    expect(aggregation.id).toStrictEqual('BTC-DFI_2020-02-22T22:40')
+    expect(aggregation.total).toStrictEqual('23.23000042')
+    expect(aggregation.count).toStrictEqual(20)
+  })
 
-//     const aggregationAfter = await mapper.get('2020-08-13')
-//     if (aggregationAfter === undefined) throw new Error()
-//     expect(aggregationAfter.id).toStrictEqual('2020-08-13')
-//     expect(aggregationAfter.bucket['13']).toStrictEqual({ total: '2.20509127', count: 1 })
-//     expect(aggregationAfter.bucket['19']).toStrictEqual({ total: '422.009734', count: 6 })
-//   })
-// })
+  it('should get undefined as getting non-existence data', async () => {
+    const aggregation = await mapper.get('BTC-DFI_1990-04-01:15:20')
+    expect(aggregation).toBeUndefined()
+  })
+})
 
-// describe('delete', () => {
-//   it('should delete', async () => {
-//     await mapper.put({
-//       id: '2020-08-18',
-//       bucket: {
-//         18: { total: new BigNumber('2.20509127'), count: 1 }
-//       }
-//     })
+describe('put', () => {
+  it('should put', async () => {
+    const aggregationBefore = await mapper.get('BTC-DFI_2020-08-13T14:20')
+    expect(aggregationBefore).toBeUndefined()
 
-//     const aggregationBefore = await mapper.get('2020-08-18')
-//     if (aggregationBefore === undefined) throw new Error()
-//     expect(aggregationBefore.id).toStrictEqual('2020-08-18')
-//     expect(aggregationBefore.bucket['18']).toStrictEqual({ total: '2.20509127', count: 1 })
+    await mapper.put({
+      id: 'BTC-DFI_2020-08-13T14:20',
+      poolId: 'BTC-DFI',
+      bucketId: '2020-08-13T14:20',
+      total: new BigNumber('422.009734'),
+      count: 98
+    })
 
-//     await mapper.delete('2020-08-18')
+    const aggregationAfter = await mapper.get('BTC-DFI_2020-08-13T14:20')
+    if (aggregationAfter === undefined) throw new Error()
+    expect(aggregationAfter.id).toStrictEqual('BTC-DFI_2020-08-13T14:20')
+    expect(aggregationAfter.poolId).toStrictEqual('BTC-DFI')
+    expect(aggregationAfter.bucketId).toStrictEqual('2020-08-13T14:20')
+    expect(aggregationAfter.total).toStrictEqual('422.009734')
+    expect(aggregationAfter.count).toStrictEqual(98)
+  })
+})
 
-//     const aggregationAfter = await mapper.get('2020-08-18')
-//     expect(aggregationAfter).toBeUndefined()
-//   })
-// })
+describe('delete', () => {
+  it('should delete', async () => {
+    await mapper.put({
+      id: 'BTC-DFI_2020-05-07T05:20',
+      poolId: 'BTC-DFI',
+      bucketId: '2020-05-07T05:20',
+      total: new BigNumber('36.56897456'),
+      count: 41
+    })
+
+    const aggregationBefore = await mapper.get('BTC-DFI_2020-05-07T05:20')
+    if (aggregationBefore === undefined) throw new Error()
+    expect(aggregationBefore.id).toStrictEqual('BTC-DFI_2020-05-07T05:20')
+    expect(aggregationBefore.poolId).toStrictEqual('BTC-DFI')
+    expect(aggregationBefore.bucketId).toStrictEqual('2020-05-07T05:20')
+    expect(aggregationBefore.total).toStrictEqual('36.56897456')
+    expect(aggregationBefore.count).toStrictEqual(41)
+
+    await mapper.delete('BTC-DFI_2020-05-07T05:20')
+
+    const aggregationAfter = await mapper.get('BTC-DFI_2020-05-07T05:20')
+    expect(aggregationAfter).toBeUndefined()
+  })
+})
