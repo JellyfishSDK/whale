@@ -7,6 +7,7 @@ import { ScriptUnspentMapper } from '@src/module.model/script.unspent'
 import { TransactionMapper } from '@src/module.model/transaction'
 import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
+import { OracleWeightageMapper } from '@src/module.model/oracle.weightage'
 import { ModelProbeIndicator } from '@src/module.model/_model.probes'
 
 @Global()
@@ -20,7 +21,8 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     ScriptUnspentMapper,
     TransactionMapper,
     TransactionVinMapper,
-    TransactionVoutMapper
+    TransactionVoutMapper,
+    OracleWeightageMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -31,7 +33,8 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     ScriptUnspentMapper,
     TransactionMapper,
     TransactionVinMapper,
-    TransactionVoutMapper
+    TransactionVoutMapper,
+    OracleWeightageMapper
   ]
 })
 export class ModelModule {
