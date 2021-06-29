@@ -88,6 +88,6 @@ function constructId (poolId: string, bucketId: string): string {
 }
 
 function constructPoolId (fromTokenId: string, toTokenId: string): string {
-  const sortedTokenIds = [fromTokenId, toTokenId].sort((a, b) => a.localeCompare(b))
+  const sortedTokenIds = [Number(fromTokenId), Number(toTokenId)].sort((a, b) => a - b)
   return `${sortedTokenIds[0]}-${sortedTokenIds[1]}`
 }
