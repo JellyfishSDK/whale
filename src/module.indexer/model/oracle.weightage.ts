@@ -20,29 +20,25 @@ export class OracleWeightageIndexer extends Indexer {
           continue
         }
 
-        try {
-          const stack: any = toOPCodes(
-            SmartBuffer.fromBuffer(Buffer.from(vout.scriptPubKey.hex, 'hex'))
-          )
+        const stack: any = toOPCodes(
+          SmartBuffer.fromBuffer(Buffer.from(vout.scriptPubKey.hex, 'hex'))
+        )
 
-          if (stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
-            const oracleId: string = txn.txid
-            const weightage = stack[1].tx.data.weightage
-            record[oracleId] = OracleWeightageIndexer.newOracleWeightage(oracleId, weightage)
-          }
+        if (stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
+          const oracleId: string = txn.txid
+          const weightage = stack[1].tx.data.weightage
+          record[oracleId] = OracleWeightageIndexer.newOracleWeightage(oracleId, weightage)
+        }
 
-          if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
-            const oracleId: string = stack[1].tx.data.oracleId
-            const weightage = stack[1].tx.data.weightage
-            record[oracleId] = OracleWeightageIndexer.newOracleWeightage(oracleId, weightage)
-          }
+        if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
+          const oracleId: string = stack[1].tx.data.oracleId
+          const weightage = stack[1].tx.data.weightage
+          record[oracleId] = OracleWeightageIndexer.newOracleWeightage(oracleId, weightage)
+        }
 
-          if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
-            const oracleId: string = stack[1].tx.data.oracleId
-            removedOracleIds.push(oracleId)
-          }
-        } catch (e) {
-          console.log(e)
+        if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
+          const oracleId: string = stack[1].tx.data.oracleId
+          removedOracleIds.push(oracleId)
         }
       }
     }
