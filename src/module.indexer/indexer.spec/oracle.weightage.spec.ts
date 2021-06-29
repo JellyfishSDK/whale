@@ -43,8 +43,6 @@ describe('Weightage - approveOracle', () => {
   let blockcount: number
 
   async function setup (): Promise<void> {
-    await container.waitForWalletCoinbaseMaturity()
-
     const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
     oracleid = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 1 })
 
@@ -99,8 +97,6 @@ describe('Weightage - removeOracle', () => {
   let blockcount: number
 
   async function setup (): Promise<void> {
-    await container.waitForWalletCoinbaseMaturity()
-
     const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
     oracleid = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 1 })
 
