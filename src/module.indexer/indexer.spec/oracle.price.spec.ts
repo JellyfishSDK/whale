@@ -4,7 +4,6 @@ import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { OracleWeightageMapper } from '@src/module.model/oracle.weightage'
 import { OraclePriceMapper } from '@src/module.model/oracle.price'
-import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
@@ -54,15 +53,28 @@ async function setup (): Promise<void> {
 
   await container.generate(1)
 
-  const timestamp = new Date().getTime() - 1800
+  const timestamp1 = Math.floor(new Date().getTime() / 1000) - 7200
+  const timestamp2 = Math.floor(new Date().getTime() / 1000) - 200
+  const timestamp3 = Math.floor(new Date().getTime() / 1000) + 200
+  const timestamp4 = Math.floor(new Date().getTime() / 1000) + 7200
 
   const prices1 = [{ tokenAmount: '0.5@APPL', currency: 'EUR' }]
-  await client.oracle.setOracleData(oracleid1, timestamp, { prices: prices1 })
+  await client.oracle.setOracleData(oracleid1, timestamp1, { prices: prices1 })
 
   await container.generate(1)
 
   const prices2 = [{ tokenAmount: '1.0@APPL', currency: 'EUR' }]
-  await client.oracle.setOracleData(oracleid2, timestamp, { prices: prices2 })
+  await client.oracle.setOracleData(oracleid1, timestamp2, { prices: prices2 })
+
+  await container.generate(1)
+
+  const prices3 = [{ tokenAmount: '1.5@APPL', currency: 'EUR' }]
+  await client.oracle.setOracleData(oracleid1, timestamp3, { prices: prices3 })
+
+  await container.generate(1)
+
+  const prices4 = [{ tokenAmount: '2.0@APPL', currency: 'EUR' }]
+  await client.oracle.setOracleData(oracleid1, timestamp4, { prices: prices4 })
 
   await container.generate(1)
   blockcount = await client.blockchain.getBlockCount()
@@ -75,11 +87,9 @@ describe('x', () => {
     const weightageMapper = app.get(OracleWeightageMapper)
 
     let weight = await weightageMapper.get(oracleid1)
-    expect(weight?.data.oracleid).toStrictEqual(oracleid1)
     expect(weight?.data.weightage).toStrictEqual(1)
 
     weight = await weightageMapper.get(oracleid2)
-    expect(weight?.data.oracleid).toStrictEqual(oracleid2)
     expect(weight?.data.weightage).toStrictEqual(3)
 
     const priceMapper = app.get(OraclePriceMapper)
@@ -96,13 +106,13 @@ describe('x', () => {
     expect(price?.data.currency).toStrictEqual('EUR')
     expect(price?.data.amount).toStrictEqual('1')
   })
-
-  it('should wait for block height 3', async () => {
-    await waitForHeight(app, blockcount)
-
-    const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
-    const priceAggregation = await priceAggregrationMapper.get('APPL-EUR')
-
-    console.log(priceAggregation)
-  })
+  //
+  // it('should wait for block height 3', async () => {
+  //   await waitForHeight(app, blockcount)
+  //
+  //   const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
+  //   const priceAggregation = await priceAggregrationMapper.get('APPL-EUR')
+  //
+  //   console.log(priceAggregation)
+  // })
 })

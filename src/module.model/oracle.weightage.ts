@@ -5,15 +5,11 @@ import { Database } from '@src/module.database/database'
 const OracleWeightageMapping: ModelMapping<OracleWeightage> = {
   type: 'oracle_weightage',
   index: {
-    id_height: {
-      name: 'oracle_weightage_id_height',
+    id: {
+      name: 'oracle_weightage_id',
       partition: {
         type: 'string',
-        key: (d: OracleWeightage) => d.data.oracleid
-      },
-      sort: {
-        type: 'number',
-        key: (d: OracleWeightage) => d.block.height
+        key: (d: OracleWeightage) => d.id // oracleid
       }
     }
   }
@@ -43,7 +39,6 @@ export interface OracleWeightage extends Model {
     height: number
   }
   data: {
-    oracleid: string
     weightage: number
   }
 }

@@ -6,17 +6,17 @@ const OraclePriceMapping: ModelMapping<OraclePrice> = {
   type: 'Partition',
   index: {
     id: {
-      name: 'id',
+      name: 'oracle_id',
       partition: {
         type: 'string',
-        key: (d: OraclePrice) => d.id
+        key: (d: OraclePrice) => d.id // oracleId-token-currency
       }
     },
-    oracle_token_currency_timestamp: {
-      name: 'oracle_token_currency_timestamp',
+    id_timestamp: {
+      name: 'oracle_id_timestamp',
       partition: {
         type: 'string',
-        key: (d: OraclePrice) => d.id
+        key: (d: OraclePrice) => d.data.tokenCurrency
       },
       sort: {
         type: 'number',
@@ -31,18 +31,20 @@ export class OraclePriceMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async getAllTokenCurrency (): Promise<OraclePrice[] | undefined> {
+  async getAll (): Promise<OraclePrice[] | undefined> {
     return await this.database.query(OraclePriceMapping.index.id, {
       order: SortOrder.ASC
     })
   }
 
   async getActivePrice (id: string, timestamp: number): Promise<OraclePrice[] | undefined> {
-    return await this.database.query(OraclePriceMapping.index.token_timestamp, {
+    console.log(timestamp)
+    return await this.database.query(OraclePriceMapping.index.id_timestamp, {
       partitionKey: id,
       order: SortOrder.ASC,
-      gt: timestamp - 3600,
-      lt: timestamp + 3600
+      gte: timestamp - 3600,
+      lte: timestamp + 3600,
+      limit: 1000
     })
   }
 
@@ -60,15 +62,16 @@ export class OraclePriceMapper {
 }
 
 export interface OraclePrice extends Model {
-  id: string // oracleid-token-currency
+  id: string // token-currency
   block: {
     height: number
   }
   data: {
     timestamp: number
-    oracleid: string
+    tokenCurrency: string
     token: string
     currency: string
+    oracleid: string
     amount: number
   }
 }

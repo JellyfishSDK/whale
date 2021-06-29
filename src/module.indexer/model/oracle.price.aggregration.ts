@@ -3,26 +3,20 @@ import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { OraclePriceMapper } from '@src/module.model/oracle.price'
 import { OraclePriceAggregration, OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
 import { OracleWeightageMapper } from '@src/module.model/oracle.weightage'
+import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 
 @Injectable()
 export class OraclePriceAggregationIndexer extends Indexer {
   constructor (
     private readonly mapper: OraclePriceAggregrationMapper,
     private readonly weightageMapper: OracleWeightageMapper,
+    private readonly priceFeedMapper: OraclePriceFeedMapper,
     private readonly priceMapper: OraclePriceMapper
   ) {
     super()
   }
 
   async index (block: RawBlock): Promise<void> {
-    const data = await this.priceMapper.getAllTokenCurrency() ?? []
-    const tokenCurrencySet = new Set()
-
-    for (let i = 0; i < data.length; i += 1) {
-      const result = data[i]
-      tokenCurrencySet.add(`${result.data.token}-${result.data.currency}`)
-    }
-
     const records: Record<string, OraclePriceAggregration> = {}
 
     for (const txn of block.tx) {
@@ -30,33 +24,44 @@ export class OraclePriceAggregationIndexer extends Indexer {
         if (!vout.scriptPubKey.hex.startsWith('6a')) {
           continue
         }
-        for (const tokenCurrency of tokenCurrencySet) {
+
+        // const x = await this.priceMapper.getAll() ?? []
+        //
+        // if (x.length > 3) {
+        //   for (let i = 0; i < x.length; i++) {
+        //     console.log(block.time - x[i].data.timestamp)
+        //   }
+        // }
+
+        const priceFeeds = await this.priceFeedMapper.getAll() ?? []
+
+        for (let i = 0; i < priceFeeds.length; i += 1) {
+          const priceFeed = priceFeeds[i]
+          const id = `${priceFeed.data.token}-${priceFeed.data.currency}`
+
+          const prices = await this.priceMapper.getActivePrice(id, block.time) ?? []
+
           let sum = 0
           let token = ''
           let currency = ''
-          let timestamp = 0
+          const timestamp = 0
 
           let hasFound = false
 
-          for (let i = 0; i < data.length; i += 1) {
-            const result = data[i]
+          for (let i = 0; i < prices.length; i += 1) {
+            const price = prices[i]
+            const mapper = await this.weightageMapper.get(price.data.oracleid)
+            const weightage = mapper?.data.weightage ?? 0
 
-            if (
-              tokenCurrency === `${result.data.token}-${result.data.currency}` &&
-              result.data.timestamp >= block.time - 300 &&
-              result.data.timestamp <= block.time + 300
-            ) {
-              const mapper = await this.weightageMapper.get(result.data.oracleid)
-              sum = sum + result.data.amount * ((mapper != null) ? mapper.data.weightage : 0)
-              token = result.data.token
-              currency = result.data.currency
-              timestamp = result.data.timestamp
-              hasFound = true
-            }
+            sum = sum + price.data.amount * weightage
+
+            token = price.data.token
+            currency = price.data.currency
+            hasFound = true
           }
 
           if (hasFound) {
-            records[`${block.height}-${token}-${currency}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block, token, currency, sum / data.length, timestamp)
+            records[`${block.height}-${token}-${currency}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block, token, currency, sum / prices.length, timestamp)
           }
         }
       }
@@ -90,27 +95,3 @@ export class OraclePriceAggregationIndexer extends Indexer {
     }
   }
 }
-
-// class OraclePrice {
-//   private oracleid: string;
-//   private token: string;
-//   private currency: string;
-//
-//   constructor (oracleid: string, token: string, currency: string) {
-//     this.oracleid = oracleid;
-//     this.token = token;
-//     this.currency = currency;
-//   }
-//
-//   getOracleid (): string {
-//     return this.oracleid;
-//   }
-//
-//   getToken (): string {
-//     return this.token;
-//   }
-//
-//   getCurrency (): string {
-//     return this.currency;
-//   }
-// }

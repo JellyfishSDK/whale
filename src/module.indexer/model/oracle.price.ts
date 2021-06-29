@@ -27,7 +27,7 @@ export class OraclePriceIndexer extends Indexer {
           )
 
           if (stack[1].tx.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
-            const timestamp = Math.floor(stack[1].tx.data.timestamp.toNumber() / 1000)
+            const timestamp = stack[1].tx.data.timestamp.toNumber()
             const oracleid: string = stack[1].tx.data.oracleId
             const data = stack[1].tx.data.tokens
 
@@ -41,8 +41,10 @@ export class OraclePriceIndexer extends Indexer {
                 const currency: string = price.currency
                 const amount: number = price.amount
 
-                records[`${oracleid}-${token}-${currency}`] = OraclePriceIndexer.newOraclePrice(block, oracleid, timestamp, token, currency, amount)
-                // console.log(`${oracleid}-${token}-${currency}`)
+                records[`${oracleid}-${token}-${currency}-${block.height}`] = OraclePriceIndexer.newOraclePrice(block, oracleid, token, currency, amount, timestamp)
+                // records[`${token}-${currency}`] = OraclePriceIndexer.newOraclePrice(block, oracleid, timestamp, token, currency, amount)
+
+                // console.log(`${oracleid}-${token}-${currency}-${block.height}-${amount}`)
               }
             }
           }
@@ -75,21 +77,22 @@ export class OraclePriceIndexer extends Indexer {
   static newOraclePrice (
     block: RawBlock,
     oracleid: string,
-    timestamp: number,
     token: string,
     currency: string,
-    amount: number
+    amount: number,
+    timestamp: number
   ): OraclePrice {
     return {
-      id: `${oracleid}-${token}-${currency}`,
+      id: `${oracleid}-${token}-${currency}-${block.height}`,
       block: {
         height: block.height
       },
       data: {
-        oracleid,
         timestamp,
+        tokenCurrency: token + '-' + currency,
         token,
         currency,
+        oracleid,
         amount
       }
     }
