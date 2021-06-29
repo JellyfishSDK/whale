@@ -4,7 +4,6 @@ import { Indexer, RawBlock } from './_abstract'
 import { OP_DEFI_TX } from '@defichain/jellyfish-transaction/dist/script/defi'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
 import { SmartBuffer } from 'smart-buffer'
-import { tsToDateTime } from '@src/utils'
 import BigNumber from 'bignumber.js'
 
 @Injectable()
@@ -27,16 +26,35 @@ export class PoolSwapAggregationIndexer extends Indexer {
         )
 
         const data = (stack[1] as OP_DEFI_TX).tx.data
+        const poolId = constructPoolId(data.fromTokenId, data.toTokenId)
+        const bucketId = roundMinutes(block.time)
+        const id = constructId(poolId, bucketId)
 
-        const { date, hours } = tsToDateTime(block.time * 1000)
-
-        let aggregation = await this.mapper.get(date)
+        let aggregation = await this.mapper.get(id)
         if (aggregation === undefined) {
-          aggregation = PoolSwapAggregationIndexer.newPoolSwapAggregation(date)
+          console.log('aggregation undefined: ', aggregation)
+          aggregation = PoolSwapAggregationIndexer.newPoolSwapAggregation(poolId, bucketId)
         }
-        aggregation.bucket[hours].total = new BigNumber(aggregation.bucket[hours].total).plus(data.fromAmount)
-        aggregation.bucket[hours].count += 1
+
+        aggregation.total = new BigNumber(aggregation.total).plus(data.fromAmount)
+        aggregation.count += 1
+
+        console.log('aggregation: ', aggregation)
+
         await this.mapper.put(aggregation)
+
+        // manually add 1 here and test query
+        const testagg = PoolSwapAggregationIndexer.newPoolSwapAggregation(poolId, '2020-08-31T19:20')
+        await this.mapper.put(testagg)
+
+        // check whether the aggregation above is stored into db - yes, but 'test' get undefined
+        const testget = await this.mapper.get(id)
+        console.log('testget: ', testget)
+
+        // query here is working correctly
+        // but query in test only return only the manual added data
+        const testquery = await this.mapper.query(poolId, 100)
+        console.log('testquery: ', testquery)
       }
     }
   }
@@ -47,41 +65,46 @@ export class PoolSwapAggregationIndexer extends Indexer {
         if (!vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547873')) {
           continue
         }
-        const { date } = tsToDateTime(block.time)
-        await this.mapper.delete(date)
+        const stack: any = toOPCodes(
+          SmartBuffer.fromBuffer(Buffer.from(vout.scriptPubKey.hex, 'hex'))
+        )
+
+        const data = (stack[1] as OP_DEFI_TX).tx.data
+        const poolId = constructPoolId(data.fromTokenId, data.toTokenId)
+        const bucketId = roundMinutes(block.time)
+        const id = constructId(poolId, bucketId)
+
+        await this.mapper.delete(id)
       }
     }
   }
 
-  static newPoolSwapAggregation (date: string): PoolSwapAggregation {
+  static newPoolSwapAggregation (poolId: string, bucketId: string): PoolSwapAggregation {
     return {
-      id: date,
-      bucket: {
-        0: { total: new BigNumber('0'), count: 0 },
-        1: { total: new BigNumber('0'), count: 0 },
-        2: { total: new BigNumber('0'), count: 0 },
-        3: { total: new BigNumber('0'), count: 0 },
-        4: { total: new BigNumber('0'), count: 0 },
-        5: { total: new BigNumber('0'), count: 0 },
-        6: { total: new BigNumber('0'), count: 0 },
-        7: { total: new BigNumber('0'), count: 0 },
-        8: { total: new BigNumber('0'), count: 0 },
-        9: { total: new BigNumber('0'), count: 0 },
-        10: { total: new BigNumber('0'), count: 0 },
-        11: { total: new BigNumber('0'), count: 0 },
-        12: { total: new BigNumber('0'), count: 0 },
-        13: { total: new BigNumber('0'), count: 0 },
-        14: { total: new BigNumber('0'), count: 0 },
-        15: { total: new BigNumber('0'), count: 0 },
-        16: { total: new BigNumber('0'), count: 0 },
-        17: { total: new BigNumber('0'), count: 0 },
-        18: { total: new BigNumber('0'), count: 0 },
-        19: { total: new BigNumber('0'), count: 0 },
-        20: { total: new BigNumber('0'), count: 0 },
-        21: { total: new BigNumber('0'), count: 0 },
-        22: { total: new BigNumber('0'), count: 0 },
-        23: { total: new BigNumber('0'), count: 0 }
-      }
+      id: constructId(poolId, bucketId),
+      // id: poolId,
+      poolId: poolId,
+      bucketId: bucketId,
+      total: new BigNumber('0'),
+      count: 0
     }
   }
+}
+
+function roundMinutes (timestamp: number): string {
+  const ts = String(timestamp).length === 10 ? timestamp * 1000 : timestamp
+
+  // date in ISO string - 2020-04-01T15:00:323Z
+  const dateTime = new Date(new Date(ts).setMinutes(0)).toISOString()
+
+  // remove seconds and milliseconds
+  return dateTime.substr(0, dateTime.length - 8)
+}
+
+function constructId (poolId: string, bucketId: string): string {
+  return `${poolId}-${bucketId}`
+}
+
+function constructPoolId (fromTokenId: string, toTokenId: string): string {
+  return `${fromTokenId}-${toTokenId}`
 }
