@@ -2,7 +2,9 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { OracleWeightageMapper, OracleWeightageStatus } from '@src/module.model/oracle.weightage'
+import { OracleStatusMapper } from '@src/module.model/oracleStatus'
+import { RpcApiError } from '@defichain/jellyfish-api-core'
+import { OracleState } from '@whale-api-client/api/oracle'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
@@ -39,26 +41,30 @@ afterAll(async () => {
 })
 
 describe('Weightage - approveOracle', () => {
-  let oracleid: string
-  let blockcount: number
+  let oracleId: string
+  let blockCount: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
-    oracleid = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 1 })
+    oracleId = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 1 })
 
     await container.generate(1)
-    blockcount = await client.blockchain.getBlockCount()
+    blockCount = await client.blockchain.getBlockCount()
   }
 
   it('should get weightage', async () => {
     await setup()
-    await waitForHeight(app, blockcount)
+    await waitForHeight(app, blockCount)
 
-    const weightageMapper = app.get(OracleWeightageMapper)
+    const oracleStatusMapper = app.get(OracleStatusMapper)
 
-    const weight = await weightageMapper.get(oracleid)
-    expect(weight?.data.weightage).toStrictEqual(1)
-    expect(weight?.state).toStrictEqual(OracleWeightageStatus.LIVE)
+    const data1 = await oracleStatusMapper.get(oracleId)
+    expect(data1?.data.weightage).toStrictEqual(1)
+    expect(data1?.state).toStrictEqual(OracleState.LIVE)
+
+    const data2 = await client.oracle.getOracleData(oracleId)
+
+    expect(data2?.weightage).toStrictEqual(1)
   })
 })
 
@@ -86,39 +92,48 @@ describe('Weightage - updateOracle', () => {
     await setup()
     await waitForHeight(app, blockCount)
 
-    const weightageMapper = app.get(OracleWeightageMapper)
+    const oracleStatusMapper = app.get(OracleStatusMapper)
 
-    const weight = await weightageMapper.get(oracleId)
-    expect(weight?.data.weightage).toStrictEqual(2)
-    expect(weight?.state).toStrictEqual(OracleWeightageStatus.LIVE)
+    const data1 = await oracleStatusMapper.get(oracleId)
+    expect(data1?.data.weightage).toStrictEqual(2)
+    expect(data1?.state).toStrictEqual(OracleState.LIVE)
+
+    const data2 = await client.oracle.getOracleData(oracleId)
+
+    expect(data2?.weightage).toStrictEqual(2)
   })
 })
 
 describe('Weightage - removeOracle', () => {
-  let oracleid: string
-  let blockcount: number
+  let oracleId: string
+  let blockCount: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
-    oracleid = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 1 })
+    oracleId = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 1 })
 
     await container.generate(1)
 
-    await client.oracle.removeOracle(oracleid)
+    await client.oracle.removeOracle(oracleId)
 
     await container.generate(1)
 
-    blockcount = await client.blockchain.getBlockCount()
+    blockCount = await client.blockchain.getBlockCount()
   }
 
   it('should remove weightage', async () => {
     await setup()
-    await waitForHeight(app, blockcount)
+    await waitForHeight(app, blockCount)
 
-    const weightageMapper = app.get(OracleWeightageMapper)
+    const oracleStatusMapper = app.get(OracleStatusMapper)
 
-    const weight = await weightageMapper.get(oracleid)
-    expect(weight?.data.weightage).toStrictEqual(0)
-    expect(weight?.state).toStrictEqual(OracleWeightageStatus.REMOVED)
+    const data1 = await oracleStatusMapper.get(oracleId)
+    expect(data1?.data.weightage).toStrictEqual(0)
+    expect(data1?.state).toStrictEqual(OracleState.REMOVED)
+
+    const promise = client.oracle.getOracleData(oracleId)
+
+    await expect(promise).rejects.toThrow(RpcApiError)
+    await expect(promise).rejects.toThrow(`RpcApiError: 'oracle <${oracleId}> not found', code: -20, method: getoracledata`)
   })
 })

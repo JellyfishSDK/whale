@@ -10,8 +10,7 @@ import { TransactionVinIndexer } from '@src/module.indexer/model/transaction.vin
 import { TransactionVoutIndexer } from '@src/module.indexer/model/transaction.vout'
 import { VoutFinder } from '@src/module.indexer/model/_vout_finder'
 import { IndexStatusMapper } from '@src/module.indexer/status'
-import { OracleWeightageIndexer } from '@src/module.indexer/model/oracle.weightage'
-import { OraclePriceFeedIndexer } from '@src/module.indexer/model/oracle.priceFeed'
+import { OracleStatusIndexer } from '@src/module.indexer/model/oracle.status'
 
 @Module({
   providers: [
@@ -26,8 +25,7 @@ import { OraclePriceFeedIndexer } from '@src/module.indexer/model/oracle.priceFe
     TransactionIndexer,
     TransactionVinIndexer,
     TransactionVoutIndexer,
-    OracleWeightageIndexer,
-    OraclePriceFeedIndexer
+    OracleStatusIndexer
   ]
 })
 export class IndexerModule {

@@ -8,6 +8,7 @@ import { PoolPair } from './api/poolpair'
 import { Rpc } from './api/rpc'
 import { Transactions } from './api/transactions'
 import { Tokens } from './api/tokens'
+import { Oracle } from './api/oracle'
 
 /**
  * WhaleApiClient Options
@@ -58,6 +59,7 @@ export class WhaleApiClient {
   public readonly rpc = new Rpc(this)
   public readonly transactions = new Transactions(this)
   public readonly tokens = new Tokens(this)
+  public readonly oracle = new Oracle(this)
 
   constructor (
     private readonly options: WhaleApiClientOptions
