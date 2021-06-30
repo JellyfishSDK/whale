@@ -62,7 +62,6 @@ export interface PoolSwapAggregation extends Model {
    */
   poolId: string
   /**
-   * store datetime in ISO8601 string format YYYY-MM-DDTHH:mm (minute scale), eg: 2021-04-01T13:20
    * act as timestamp in 10 mins scale
    */
   bucketId: number
