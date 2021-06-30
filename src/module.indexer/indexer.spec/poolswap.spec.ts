@@ -3,8 +3,8 @@ import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { PoolSwapAggregationMapper } from '@src/module.model/poolswap.aggregation'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { randomString } from '@src/utils'
 import BigNumber from 'bignumber.js'
+import crypto from 'crypto'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
@@ -57,7 +57,6 @@ beforeEach(async () => {
 })
 
 afterEach(() => {
-  console.log('afterEach')
   spy.mockRestore()
 })
 
@@ -78,10 +77,10 @@ const dummyScripts = [
 
 function generateBlock (dummyScript: any, timestamp: number): any {
   return {
-    hash: randomString(64),
+    hash: crypto.randomBytes(32).toString('hex'),
     height: 1,
     tx: [{
-      txid: randomString(64),
+      txid: crypto.randomBytes(32).toString('hex'),
       vin: [],
       vout: [{
         scriptPubKey: dummyScript,
