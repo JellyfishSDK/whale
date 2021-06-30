@@ -35,4 +35,11 @@ describe('BlockController', () => {
     expect(block?.height).toStrictEqual(100)
     expect(block?.hash).toStrictEqual(blockHash)
   })
+
+  it('get transactions from a block', async () => {
+    const blockHash = await container.call('getblockhash', [100])
+    const transactions = await controller.getBlockTransactions(blockHash)
+
+    expect(transactions.length).toStrictEqual(1)
+  })
 })
