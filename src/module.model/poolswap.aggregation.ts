@@ -50,12 +50,11 @@ export class PoolSwapAggregationMapper {
 
 export interface PoolSwapAggregation extends Model {
   /**
-   * id is constructed by poolId + '@' + bucketId + 'u', eg: 1-0@2020-08-31T15:20u
-   * the 'u' is to prevent index test spy.on conflicts
+   * id is constructed by poolId + '@' + bucketId eg: 0-1@2020-08-31T15:20
    */
 
   /**
-   * poolpair "1-0" as id
+   * poolpair "0-1" as id
    */
   poolId: string
   /**
