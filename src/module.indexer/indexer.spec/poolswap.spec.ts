@@ -34,6 +34,9 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
+  // Note(canonbrother): to prevent index got invalidated as mocking 'client.blockchain.getBlock' will never get the best chain
+  spy = jest.spyOn(mapper, 'delete').mockImplementation()
+
   spy = jest.spyOn(client.blockchain, 'getBlock')
     .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2020, 8, 31, 23, 59, 59)))
     .mockImplementationOnce(() => generateBlock(dummyScripts[0], generateTimestamp(2020, 9, 1, 0, 0, 0)))
@@ -50,10 +53,11 @@ beforeEach(async () => {
     .mockImplementationOnce(() => generateBlock(dummyScripts[1], generateTimestamp(2020, 10, 2, 0, 0, 0)))
     .mockImplementationOnce(() => generateBlock(dummyScripts[1], generateTimestamp(2021, 4, 1, 0, 0, 0)))
 
-  await waitForHeight(app, 5)
+  await waitForHeight(app, 1)
 })
 
 afterEach(() => {
+  console.log('afterEach')
   spy.mockRestore()
 })
 
@@ -97,33 +101,33 @@ function generateTimestamp (
 }
 
 it('should query with date range', async () => {
-  const aggregations = await mapper.query('0-1', 100, '2020-09-01T00:00u', '2020-09-30T23:59u')
+  const aggregations = await mapper.query('0-1', 100, '2020-09-01T00:00', '2020-09-30T23:59')
   expect(aggregations.length).toStrictEqual(5)
 
-  expect(aggregations[0].id).toStrictEqual('0-1@2020-09-30T23:50u')
+  expect(aggregations[0].id).toStrictEqual('0-1@2020-09-30T23:50')
   expect(aggregations[0].total).toStrictEqual('2.20509127')
   expect(aggregations[0].count).toStrictEqual(1)
 
-  expect(aggregations[1].id).toStrictEqual('0-1@2020-09-15T15:10u')
+  expect(aggregations[1].id).toStrictEqual('0-1@2020-09-15T15:10')
 
-  expect(aggregations[2].id).toStrictEqual('0-1@2020-09-01T18:20u')
+  expect(aggregations[2].id).toStrictEqual('0-1@2020-09-01T18:20')
   expect(aggregations[2].total).toStrictEqual('4.41018254')
   expect(aggregations[2].count).toStrictEqual(2)
 
-  expect(aggregations[3].id).toStrictEqual('0-1@2020-09-01T18:10u')
+  expect(aggregations[3].id).toStrictEqual('0-1@2020-09-01T18:10')
   expect(aggregations[3].total).toStrictEqual('8.82036508')
   expect(aggregations[3].count).toStrictEqual(4)
 
-  expect(aggregations[4].id).toStrictEqual('0-1@2020-09-01T00:00u')
+  expect(aggregations[4].id).toStrictEqual('0-1@2020-09-01T00:00')
 })
 
 it('should query with from only', async () => {
-  const aggregations = await mapper.query('0-2', 100, '2020-10-01T00:00u')
+  const aggregations = await mapper.query('0-2', 100, '2020-10-01T00:00')
   expect(aggregations.length).toStrictEqual(2)
 })
 
 it('should query with to only', async () => {
-  const aggregations = await mapper.query('0-1', 100, undefined, '2020-09-12T00:00u')
+  const aggregations = await mapper.query('0-1', 100, undefined, '2020-09-12T00:00')
   expect(aggregations.length).toStrictEqual(4)
 })
 
@@ -135,7 +139,7 @@ it('should query and list all', async () => {
 it('should query with limit', async () => {
   const aggregations = await mapper.query('0-1', 1, '2020-09-01T00:00', '2020-09-30T23:59')
   expect(aggregations.length).toStrictEqual(1)
-  expect(aggregations[0].id).toStrictEqual('0-1@2020-09-30T23:50u')
+  expect(aggregations[0].id).toStrictEqual('0-1@2020-09-30T23:50')
 })
 
 it('should query and get empty as out of range', async () => {

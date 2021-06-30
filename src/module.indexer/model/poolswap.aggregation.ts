@@ -27,8 +27,7 @@ export class PoolSwapAggregationIndexer extends Indexer {
 
         const data = (stack[1] as OP_DEFI_TX).tx.data
         const poolId = constructPoolId(data.fromTokenId, data.toTokenId)
-        // WEIRD(canonbrother): add suffix is to prevent test spy.on conflicts
-        const bucketId = roundMinutes(block.time) + 'u'
+        const bucketId = roundMinutes(block.time)
         const id = constructId(poolId, bucketId)
 
         let aggregation = await this.mapper.get(id)
