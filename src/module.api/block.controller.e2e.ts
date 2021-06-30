@@ -29,14 +29,14 @@ describe('BlockController', () => {
     expect(block?.height).toBeGreaterThan(100)
   })
 
-  it('getBlock should get block hash of block', async () => {
+  it('getBlock should get block with hash of block', async () => {
     const blockHash = await container.call('getblockhash', [100])
     const block = await controller.getBlock(blockHash)
     expect(block?.height).toStrictEqual(100)
     expect(block?.hash).toStrictEqual(blockHash)
   })
 
-  it('get transactions from a block', async () => {
+  it('getBlockTransactions should get transactions from a block by hash', async () => {
     const blockHash = await container.call('getblockhash', [100])
     const transactions = await controller.getBlockTransactions(blockHash)
 
