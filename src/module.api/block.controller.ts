@@ -14,7 +14,7 @@ export class BlockController {
   }
 
   @Get('/:id')
-  async getBlockByHash (@Param('id') hash: string): Promise<Block | undefined> {
+  async getBlock (@Param('id') hash: string): Promise<Block | undefined> {
     return await this.blockMapper.getByHash(hash)
   }
 }
