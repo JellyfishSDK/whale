@@ -9,7 +9,7 @@ export class BlockController {
   }
 
   @Get('/tip')
-  async getBlockTip (): Promise<Block | undefined> {
+  async getLatest (): Promise<Block | undefined> {
     return await this.blockMapper.getHighest()
   }
 
