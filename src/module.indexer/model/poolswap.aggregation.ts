@@ -5,6 +5,7 @@ import { OP_DEFI_TX } from '@defichain/jellyfish-transaction/dist/script/defi'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
 import { SmartBuffer } from 'smart-buffer'
 import BigNumber from 'bignumber.js'
+import { roundTimestampMinutes } from '@src/utils'
 
 @Injectable()
 export class PoolSwapAggregationIndexer extends Indexer {
@@ -27,7 +28,7 @@ export class PoolSwapAggregationIndexer extends Indexer {
 
         const data = (stack[1] as OP_DEFI_TX).tx.data
         const poolId = constructPoolId(data.fromTokenId, data.toTokenId)
-        const bucketId = roundMinutes(block.time)
+        const bucketId = roundTimestampMinutes(block.time)
         const id = constructId(poolId, bucketId)
 
         let aggregation = await this.mapper.get(id)
@@ -54,7 +55,7 @@ export class PoolSwapAggregationIndexer extends Indexer {
 
         const data = (stack[1] as OP_DEFI_TX).tx.data
         const poolId = constructPoolId(data.fromTokenId, data.toTokenId)
-        const bucketId = roundMinutes(block.time)
+        const bucketId = roundTimestampMinutes(block.time)
         const id = constructId(poolId, bucketId)
 
         await this.mapper.delete(id)
@@ -62,7 +63,7 @@ export class PoolSwapAggregationIndexer extends Indexer {
     }
   }
 
-  static newPoolSwapAggregation (poolId: string, bucketId: string): PoolSwapAggregation {
+  static newPoolSwapAggregation (poolId: string, bucketId: number): PoolSwapAggregation {
     return {
       id: constructId(poolId, bucketId),
       poolId: poolId,
@@ -73,16 +74,7 @@ export class PoolSwapAggregationIndexer extends Indexer {
   }
 }
 
-function roundMinutes (timestamp: number): string {
-  const ts = String(timestamp).length === 10 ? timestamp * 1000 : timestamp
-  const round = 1000 * 60 * 10
-  const dateTime = new Date(Math.floor(ts / round) * round).toISOString()
-
-  // remove seconds and milliseconds
-  return dateTime.substr(0, dateTime.length - 8)
-}
-
-function constructId (poolId: string, bucketId: string): string {
+function constructId (poolId: string, bucketId: number): string {
   return `${poolId}@${bucketId}`
 }
 

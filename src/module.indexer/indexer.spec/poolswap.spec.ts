@@ -103,21 +103,21 @@ it('should query with date range', async () => {
   const aggregations = await mapper.query('0-1', 100, '2020-09-01T00:00', '2020-09-30T23:59')
   expect(aggregations.length).toStrictEqual(5)
 
-  expect(aggregations[0].id).toStrictEqual('0-1@2020-09-30T23:50')
+  expect(aggregations[0].id).toStrictEqual(`0-1@${Date.parse('2020-09-30T23:50Z')}`)
   expect(aggregations[0].total).toStrictEqual('2.20509127')
   expect(aggregations[0].count).toStrictEqual(1)
 
-  expect(aggregations[1].id).toStrictEqual('0-1@2020-09-15T15:10')
+  expect(aggregations[1].id).toStrictEqual(`0-1@${Date.parse('2020-09-15T15:10Z')}`)
 
-  expect(aggregations[2].id).toStrictEqual('0-1@2020-09-01T18:20')
+  expect(aggregations[2].id).toStrictEqual(`0-1@${Date.parse('2020-09-01T18:20Z')}`)
   expect(aggregations[2].total).toStrictEqual('4.41018254')
   expect(aggregations[2].count).toStrictEqual(2)
 
-  expect(aggregations[3].id).toStrictEqual('0-1@2020-09-01T18:10')
+  expect(aggregations[3].id).toStrictEqual(`0-1@${Date.parse('2020-09-01T18:10Z')}`)
   expect(aggregations[3].total).toStrictEqual('8.82036508')
   expect(aggregations[3].count).toStrictEqual(4)
 
-  expect(aggregations[4].id).toStrictEqual('0-1@2020-09-01T00:00')
+  expect(aggregations[4].id).toStrictEqual(`0-1@${Date.parse('2020-09-01T00:00Z')}`)
 })
 
 it('should query with from only', async () => {
@@ -138,7 +138,7 @@ it('should query and list all', async () => {
 it('should query with limit', async () => {
   const aggregations = await mapper.query('0-1', 1, '2020-09-01T00:00', '2020-09-30T23:59')
   expect(aggregations.length).toStrictEqual(1)
-  expect(aggregations[0].id).toStrictEqual('0-1@2020-09-30T23:50')
+  expect(aggregations[0].id).toStrictEqual(`0-1@${Date.parse('2020-09-30T23:50Z')}`)
 })
 
 it('should query and get empty as out of range', async () => {

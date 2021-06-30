@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js'
 import { Injectable } from '@nestjs/common'
 import { Model, ModelMapping } from '@src/module.database/model'
 import { Database, SortOrder } from '@src/module.database/database'
+import { roundTimestampMinutes } from '@src/utils'
 
 const PoolSwapAggregationMapping: ModelMapping<PoolSwapAggregation> = {
   type: 'poolswap_aggregation',
@@ -13,7 +14,7 @@ const PoolSwapAggregationMapping: ModelMapping<PoolSwapAggregation> = {
         key: (p: PoolSwapAggregation) => p.poolId
       },
       sort: {
-        type: 'string',
+        type: 'number',
         key: (p: PoolSwapAggregation) => p.bucketId
       }
     }
@@ -30,8 +31,11 @@ export class PoolSwapAggregationMapper {
       partitionKey: poolId,
       limit: limit,
       order: SortOrder.DESC,
-      gte: from,
-      lte: to
+      // NOTE(canonbrother): add 'Z' to ensure UTC timezone before round
+      // 'round' is required as all bucketIds are rounded
+      // else 'lte: 2020-05-01T23:59' will not get listed in 2020-05-01T23:50 bucket
+      gte: from !== undefined ? roundTimestampMinutes(new Date(from + 'Z').valueOf()) : undefined,
+      lte: to !== undefined ? roundTimestampMinutes(new Date(to + 'Z').valueOf()) : undefined
     })
   }
 
@@ -59,8 +63,9 @@ export interface PoolSwapAggregation extends Model {
   poolId: string
   /**
    * store datetime in ISO8601 string format YYYY-MM-DDTHH:mm (minute scale), eg: 2021-04-01T13:20
+   * act as timestamp in 10 mins scale
    */
-  bucketId: string
+  bucketId: number
 
   total: BigNumber
   count: number
