@@ -9,6 +9,7 @@ import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { OracleWeightageMapper } from '@src/module.model/oracle.weightage'
 import { ModelProbeIndicator } from '@src/module.model/_model.probes'
+import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 
 @Global()
 @Module({
@@ -22,7 +23,8 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
-    OracleWeightageMapper
+    OracleWeightageMapper,
+    OraclePriceFeedMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -34,7 +36,8 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
-    OracleWeightageMapper
+    OracleWeightageMapper,
+    OraclePriceFeedMapper
   ]
 })
 export class ModelModule {

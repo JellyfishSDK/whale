@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Model, ModelMapping } from '@src/module.database/model'
 import { Database, SortOrder } from '@src/module.database/database'
+import { OracleStatus } from '@src/module.indexer/model/oracle.weightage.priceFeed'
 
 const OracleWeightageMapping: ModelMapping<OracleWeightage> = {
   type: 'oracle_weightage',
@@ -54,10 +55,5 @@ export interface OracleWeightage extends Model {
   data: {
     weightage: number
   }
-  state: WeightageStatus
-}
-
-export enum WeightageStatus {
-  LIVE = 'LIVE',
-  REMOVED = 'REMOVED'
+  state: OracleStatus
 }
