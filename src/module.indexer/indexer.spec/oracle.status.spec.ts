@@ -2,7 +2,7 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { OracleStatusMapper } from '@src/module.model/oracleStatus'
+import { OracleStatusMapper } from '@src/module.model/oracle.status'
 import { RpcApiError } from '@defichain/jellyfish-api-core'
 import { OracleState } from '@whale-api-client/api/oracle'
 

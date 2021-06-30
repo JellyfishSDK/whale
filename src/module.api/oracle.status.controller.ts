@@ -1,7 +1,7 @@
 import { Controller, Get, Param } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
-import { OracleStatus, OracleStatusMapper } from '@src/module.model/oracleStatus'
+import { OracleStatus, OracleStatusMapper } from '@src/module.model/oracle.status'
 
 @Controller('/v0/:network/oracle/:oracleid')
 export class OracleStatusController {
@@ -14,8 +14,8 @@ export class OracleStatusController {
 
   @Get('/aggregation')
   async getAggregation (
-    @Param('oracleid') id: string
+    @Param('oracleid') oracleid: string
   ): Promise<OracleStatus | undefined> {
-    return await this.statusMapper.getLatest(id)
+    return await this.statusMapper.getLatest(oracleid)
   }
 }

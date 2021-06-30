@@ -1,7 +1,7 @@
 import { WhaleApiClient } from '../whale.api.client'
 
 /**
- * DeFi whale endpoint for address related services.
+ * DeFi whale endpoint for oracle related services.
  */
 export class Oracle {
   constructor (private readonly client: WhaleApiClient) {

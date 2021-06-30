@@ -31,7 +31,6 @@ export class OracleStatusMapper {
       order: SortOrder.DESC,
       limit: 1
     })
-
     return aggregations.length === 0 ? undefined : aggregations[0]
   }
 

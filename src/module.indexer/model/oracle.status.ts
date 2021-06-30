@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { SmartBuffer } from 'smart-buffer'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
-import { OracleStatus, OracleStatusMapper } from '@src/module.model/oracleStatus'
+import { OracleStatus, OracleStatusMapper } from '@src/module.model/oracle.status'
 import { OracleState } from '@whale-api-client/api/oracle'
 
 @Injectable()
