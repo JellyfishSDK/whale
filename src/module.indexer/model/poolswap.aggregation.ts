@@ -19,7 +19,7 @@ export class PoolSwapAggregationIndexer extends Indexer {
     for (const txn of block.tx) {
       for (const vout of txn.vout) {
         // grab poolswap tx only
-        if (!vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547873')) {
+        if (!vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547873')) { // 44665478 -> DFTX, 73 -> s -> poolswap
           continue
         }
         const stack: any = toOPCodes(
@@ -46,7 +46,7 @@ export class PoolSwapAggregationIndexer extends Indexer {
   async invalidate (block: RawBlock): Promise<void> {
     for (const txn of block.tx) {
       for (const vout of txn.vout) {
-        if (!vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547873')) {
+        if (!vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547873')) { // 44665478 -> DFTX, 73 -> s -> poolswap
           continue
         }
         const stack: any = toOPCodes(
