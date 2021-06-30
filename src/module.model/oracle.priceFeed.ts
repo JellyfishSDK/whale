@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Model, ModelMapping } from '@src/module.database/model'
 import { Database, SortOrder } from '@src/module.database/database'
-import { OracleStatus } from '@src/module.indexer/model/oracle.weightage.priceFeed'
 
 const OraclePriceFeedMapping: ModelMapping<OraclePriceFeed> = {
   type: 'oracle_priceFeed',
@@ -11,6 +10,17 @@ const OraclePriceFeedMapping: ModelMapping<OraclePriceFeed> = {
       partition: {
         type: 'string',
         key: (d: OraclePriceFeed) => d.id // oracleId-token-currency
+      }
+    },
+    id_height: {
+      name: 'oracle_priceFeed_id_height',
+      partition: {
+        type: 'string',
+        key: (d: OraclePriceFeed) => d.id // oracleId-token-currency
+      },
+      sort: {
+        type: 'number',
+        key: (d: OraclePriceFeed) => d.block.height
       }
     },
     id_token_currency: {
@@ -50,6 +60,15 @@ export class OraclePriceFeedMapper {
     })
   }
 
+  async getLatest (id: string): Promise<OraclePriceFeed | undefined> {
+    const aggregations = await this.database.query(OraclePriceFeedMapping.index.id_height, {
+      partitionKey: id,
+      order: SortOrder.DESC,
+      limit: 1
+    })
+    return aggregations.length === 0 ? undefined : aggregations[0]
+  }
+
   async getByTokenCurrency (token: string, currency: string): Promise<OraclePriceFeed[] | undefined> {
     return await this.database.query(OraclePriceFeedMapping.index.token_currency, {
       partitionKey: `${token}-${currency}`,
@@ -82,7 +101,7 @@ export class OraclePriceFeedMapper {
 }
 
 export interface OraclePriceFeed extends Model {
-  id: string // token-currency
+  id: string // oracleId-token-currency
   block: {
     height: number
   }
@@ -91,5 +110,10 @@ export interface OraclePriceFeed extends Model {
     token: string
     currency: string
   }
-  state: OracleStatus
+  state: OraclePriceFeedStatus
+}
+
+export enum OraclePriceFeedStatus {
+  LIVE = 'LIVE',
+  REMOVED = 'REMOVED'
 }

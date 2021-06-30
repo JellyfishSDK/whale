@@ -2,8 +2,7 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
-import { OracleStatus } from '@src/module.indexer/model/oracle.weightage.priceFeed'
+import { OraclePriceFeedMapper, OraclePriceFeedStatus } from '@src/module.model/oracle.priceFeed'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
@@ -64,12 +63,12 @@ describe('PriceFeed - approveOracle', () => {
     const priceFeed1 = await priceFeedMapper.get(`${oracleId}-APPL-EUR`)
     expect(priceFeed1?.data.token).toStrictEqual('APPL')
     expect(priceFeed1?.data.currency).toStrictEqual('EUR')
-    expect(priceFeed1?.state).toStrictEqual(OracleStatus.LIVE)
+    expect(priceFeed1?.state).toStrictEqual(OraclePriceFeedStatus.LIVE)
 
     const priceFeed2 = await priceFeedMapper.get(`${oracleId}-APPL-EUR`)
     expect(priceFeed2?.data.token).toStrictEqual('APPL')
     expect(priceFeed2?.data.currency).toStrictEqual('EUR')
-    expect(priceFeed2?.state).toStrictEqual(OracleStatus.LIVE)
+    expect(priceFeed2?.state).toStrictEqual(OraclePriceFeedStatus.LIVE)
   })
 })
 
@@ -110,22 +109,22 @@ describe('PriceFeed - updateOracle', () => {
     const priceFeed1 = await priceFeedMapper.get(`${oracleId}-APPL-EUR`)
     expect(priceFeed1?.data.token).toStrictEqual('APPL')
     expect(priceFeed1?.data.currency).toStrictEqual('EUR')
-    expect(priceFeed1?.state).toStrictEqual(OracleStatus.REMOVED)
+    expect(priceFeed1?.state).toStrictEqual(OraclePriceFeedStatus.REMOVED)
 
     const priceFeed2 = await priceFeedMapper.get(`${oracleId}-TESL-USD`)
     expect(priceFeed2?.data.token).toStrictEqual('TESL')
     expect(priceFeed2?.data.currency).toStrictEqual('USD')
-    expect(priceFeed2?.state).toStrictEqual(OracleStatus.REMOVED)
+    expect(priceFeed2?.state).toStrictEqual(OraclePriceFeedStatus.REMOVED)
 
     const priceFeed3 = await priceFeedMapper.get(`${oracleId}-FB-CNY`)
     expect(priceFeed3?.data.token).toStrictEqual('FB')
     expect(priceFeed3?.data.currency).toStrictEqual('CNY')
-    expect(priceFeed3?.state).toStrictEqual(OracleStatus.LIVE)
+    expect(priceFeed3?.state).toStrictEqual(OraclePriceFeedStatus.LIVE)
 
     const priceFeed4 = await priceFeedMapper.get(`${oracleId}-MSFT-SGD`)
     expect(priceFeed4?.data.token).toStrictEqual('MSFT')
     expect(priceFeed4?.data.currency).toStrictEqual('SGD')
-    expect(priceFeed4?.state).toStrictEqual(OracleStatus.LIVE)
+    expect(priceFeed4?.state).toStrictEqual(OraclePriceFeedStatus.LIVE)
   })
 })
 
@@ -159,11 +158,11 @@ describe('PriceFeed - removeOracle', () => {
     const priceFeed1 = await priceFeedMapper.get(`${oracleId}-APPL-EUR`)
     expect(priceFeed1?.data.token).toStrictEqual('APPL')
     expect(priceFeed1?.data.currency).toStrictEqual('EUR')
-    expect(priceFeed1?.state).toStrictEqual(OracleStatus.REMOVED)
+    expect(priceFeed1?.state).toStrictEqual(OraclePriceFeedStatus.REMOVED)
 
     const priceFeed2 = await priceFeedMapper.get(`${oracleId}-TESL-USD`)
     expect(priceFeed2?.data.token).toStrictEqual('TESL')
     expect(priceFeed2?.data.currency).toStrictEqual('USD')
-    expect(priceFeed2?.state).toStrictEqual(OracleStatus.REMOVED)
+    expect(priceFeed2?.state).toStrictEqual(OraclePriceFeedStatus.REMOVED)
   })
 })

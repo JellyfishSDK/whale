@@ -2,8 +2,7 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { OracleWeightageMapper } from '@src/module.model/oracle.weightage'
-import { OracleStatus } from '@src/module.indexer/model/oracle.weightage.priceFeed'
+import { OracleWeightageMapper, OracleWeightageStatus } from '@src/module.model/oracle.weightage'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
@@ -59,7 +58,7 @@ describe('Weightage - approveOracle', () => {
 
     const weight = await weightageMapper.get(oracleid)
     expect(weight?.data.weightage).toStrictEqual(1)
-    expect(weight?.state).toStrictEqual(OracleStatus.LIVE)
+    expect(weight?.state).toStrictEqual(OracleWeightageStatus.LIVE)
   })
 })
 
@@ -91,7 +90,7 @@ describe('Weightage - updateOracle', () => {
 
     const weight = await weightageMapper.get(oracleId)
     expect(weight?.data.weightage).toStrictEqual(2)
-    expect(weight?.state).toStrictEqual(OracleStatus.LIVE)
+    expect(weight?.state).toStrictEqual(OracleWeightageStatus.LIVE)
   })
 })
 
@@ -120,6 +119,6 @@ describe('Weightage - removeOracle', () => {
 
     const weight = await weightageMapper.get(oracleid)
     expect(weight?.data.weightage).toStrictEqual(0)
-    expect(weight?.state).toStrictEqual(OracleStatus.REMOVED)
+    expect(weight?.state).toStrictEqual(OracleWeightageStatus.REMOVED)
   })
 })

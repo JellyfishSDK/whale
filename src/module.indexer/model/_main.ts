@@ -11,7 +11,8 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { RawBlockMapper } from '@src/module.model/raw.block'
 import { NotFoundIndexerError } from '@src/module.indexer/error'
 import { blockchain as defid } from '@defichain/jellyfish-api-core'
-import { OracleWeightagePriceFeedIndexer } from '@src/module.indexer/model/oracle.weightage.priceFeed'
+import { OracleWeightageIndexer } from '@src/module.indexer/model/oracle.weightage'
+import { OraclePriceFeedIndexer } from '@src/module.indexer/model/oracle.priceFeed'
 
 /**
  * This is a deterministic log based indexer.
@@ -30,7 +31,8 @@ export class MainIndexer {
     private readonly transaction: TransactionIndexer,
     private readonly transactionVin: TransactionVinIndexer,
     private readonly transactionVout: TransactionVoutIndexer,
-    private readonly oracleWeightage: OracleWeightagePriceFeedIndexer
+    private readonly oracleWeightage: OracleWeightageIndexer,
+    private readonly oraclePriceFeed: OraclePriceFeedIndexer
   ) {
     this.indexers = [
       block,
@@ -40,7 +42,8 @@ export class MainIndexer {
       transaction,
       transactionVin,
       transactionVout,
-      oracleWeightage
+      oracleWeightage,
+      oraclePriceFeed
     ]
   }
 

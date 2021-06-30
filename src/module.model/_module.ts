@@ -8,8 +8,8 @@ import { TransactionMapper } from '@src/module.model/transaction'
 import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { OracleWeightageMapper } from '@src/module.model/oracle.weightage'
+import { OraclePriceFeedMapper } from '@src/module.model/oracle.priceFeed'
 import { ModelProbeIndicator } from '@src/module.model/_model.probes'
-import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 
 @Global()
 @Module({
