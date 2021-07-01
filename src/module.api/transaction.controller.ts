@@ -66,8 +66,8 @@ export class TransactionsController {
         // message: 'absurdly-high-fee, 100000000 > 11100000 (code 256)'
         throw new BadRequestApiException('Absurdly high fee')
       }
-      /* istanbul ignore next */
-      throw new BadRequestApiException()
+
+      throw new BadRequestApiException(err?.payload?.message)
     }
   }
 
