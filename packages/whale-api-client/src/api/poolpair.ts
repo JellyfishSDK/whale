@@ -52,6 +52,7 @@ export interface PoolPairData {
   }
   commission: BigNumber
   totalLiquidity: BigNumber
+  totalLiquidityUsd: BigNumber
   tradeEnabled: boolean
   ownerAddress: string
   rewardPct: BigNumber

@@ -1,16 +1,19 @@
-import { NotFoundException, Controller, Get, Query, Param, ParseIntPipe } from '@nestjs/common'
+import { Controller, Get, Query, Param, ParseIntPipe } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { PoolPairData } from '@whale-api-client/api/poolpair'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
+import { PoolPairService } from './poolpair.service'
+import BigNumber from 'bignumber.js'
 
 @Controller('/v1/:network/poolpairs')
 export class PoolPairController {
   constructor (
     protected readonly rpcClient: JsonRpcClient,
-    protected readonly deFiDCache: DeFiDCache
+    protected readonly deFiDCache: DeFiDCache,
+    private readonly poolPairService: PoolPairService
   ) {
   }
 
@@ -24,17 +27,9 @@ export class PoolPairController {
   async list (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<PoolPairData>> {
-    const poolPairResult = await this.rpcClient.poolpair.listPoolPairs({
-      start: query.next !== undefined ? Number(query.next) : 0,
-      including_start: query.next === undefined, // TODO(fuxingloh): open issue at DeFiCh/ain, rpc_accounts.cpp#388
-      limit: query.size
-    }, true)
+    const poolPairsData = await this.poolPairService.list(query)
 
-    const poolPairInfosDto = Object.entries(poolPairResult).map(([id, value]) => {
-      return mapPoolPair(id, value)
-    }).sort(a => Number.parseInt(a.id))
-
-    return ApiPagedResponse.of(poolPairInfosDto, query.size, item => {
+    return ApiPagedResponse.of(poolPairsData, query.size, item => {
       return item.id
     })
   }
@@ -45,15 +40,11 @@ export class PoolPairController {
    */
   @Get('/:id')
   async get (@Param('id', ParseIntPipe) id: string): Promise<PoolPairData> {
-    const info = await this.deFiDCache.getPoolPairInfo(id)
-    if (info === undefined) {
-      throw new NotFoundException('Unable to find poolpair')
-    }
-    return mapPoolPair(String(id), info)
+    return await this.poolPairService.get(id)
   }
 }
 
-function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairData {
+export function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairData {
   return {
     id,
     symbol: poolPairInfo.symbol,
@@ -69,8 +60,13 @@ function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairData {
       reserve: poolPairInfo.reserveB,
       blockCommission: poolPairInfo.blockCommissionB
     },
+    priceRatio: {
+      'tokenA/tokenB': poolPairInfo['reserveA/reserveB'],
+      'tokenB/tokenA': poolPairInfo['reserveB/reserveA']
+    },
     commission: poolPairInfo.commission,
     totalLiquidity: poolPairInfo.totalLiquidity,
+    totalLiquidityUsd: new BigNumber(0),
     tradeEnabled: poolPairInfo.tradeEnabled,
     ownerAddress: poolPairInfo.ownerAddress,
     rewardPct: poolPairInfo.rewardPct,
