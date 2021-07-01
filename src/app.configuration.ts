@@ -16,8 +16,5 @@ export const AppConfiguration = (): any => ({
     level: {
       location: process.env.WHALE_DATABASE_LEVEL_LOCATION
     }
-  },
-  app: {
-    tvlBaseToken: process.env.DEX_TVL_BASE_TOKEN ?? 'tUSD'
   }
 })
