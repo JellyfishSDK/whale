@@ -41,15 +41,16 @@ export class OraclePriceFeedIndexer extends Indexer {
         } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
           // Removed priceFeed
           const oracleId: string = stack[1].tx.data.oracleId
-          const allPriceFeeds = await this.mapper.getAll() ?? []
+          const priceFeeds = await this.mapper.getByOracleId(oracleId) ?? []
 
-          for (let y = 0; y < allPriceFeeds.length; y += 1) {
-            const removePriceFeeds = await this.mapper.getByOracleId(allPriceFeeds[y].id, oracleId) ?? []
+          for (let i = 0; i < priceFeeds.length; i += 1) {
+            const priceFeed = priceFeeds[i]
 
-            for (let i = 0; i < removePriceFeeds.length; i += 1) {
-              const priceFeed = removePriceFeeds[i]
-              priceFeedRecords[`${priceFeed.data.oracleId}-${priceFeed.data.token}-${priceFeed.data.currency}`] = OraclePriceFeedIndexer.newOraclePriceFeed(block, oracleId, priceFeed.data.token, priceFeed.data.currency, OraclePriceFeedStatus.REMOVED)
-            }
+            const oracleId: string = priceFeed.data.oracleId
+            const token: string = priceFeed.data.token
+            const currency: string = priceFeed.data.currency
+
+            priceFeedRecords[`${oracleId}-${token}-${currency}`] = OraclePriceFeedIndexer.newOraclePriceFeed(block, oracleId, token, currency, OraclePriceFeedStatus.REMOVED)
           }
 
           // Add priceFeed
@@ -66,15 +67,16 @@ export class OraclePriceFeedIndexer extends Indexer {
         } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
           // Removed priceFeed
           const oracleId: string = stack[1].tx.data.oracleId
-          const allPriceFeeds = await this.mapper.getAll() ?? []
+          const priceFeeds = await this.mapper.getByOracleId(oracleId) ?? []
 
-          for (let y = 0; y < allPriceFeeds.length; y += 1) {
-            const removePriceFeeds = await this.mapper.getByOracleId(allPriceFeeds[y].id, oracleId) ?? []
+          for (let i = 0; i < priceFeeds.length; i += 1) {
+            const priceFeed = priceFeeds[i]
 
-            for (let i = 0; i < removePriceFeeds.length; i += 1) {
-              const priceFeed = removePriceFeeds[i]
-              priceFeedRecords[`${priceFeed.data.oracleId}-${priceFeed.data.token}-${priceFeed.data.currency}`] = OraclePriceFeedIndexer.newOraclePriceFeed(block, oracleId, priceFeed.data.token, priceFeed.data.currency, OraclePriceFeedStatus.REMOVED)
-            }
+            const oracleId: string = priceFeed.data.oracleId
+            const token: string = priceFeed.data.token
+            const currency: string = priceFeed.data.currency
+
+            priceFeedRecords[`${oracleId}-${token}-${currency}`] = OraclePriceFeedIndexer.newOraclePriceFeed(block, oracleId, token, currency, OraclePriceFeedStatus.REMOVED)
           }
         }
       }
