@@ -2,7 +2,7 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { OraclePriceDataMapper } from '@src/module.model/oracle.priceData'
+import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
@@ -28,7 +28,7 @@ afterAll(async () => {
   }
 })
 
-describe('PriceFeed - setOracleData', () => {
+describe('PriceAggregration - setOracleData', () => {
   let oracleId1: string
   let oracleId2: string
   let blockCount: number
@@ -58,22 +58,16 @@ describe('PriceFeed - setOracleData', () => {
     blockCount = await client.blockchain.getBlockCount()
   }
 
-  it('Should set oracle data', async () => {
+  it('Should get oracle aggregration price data', async () => {
     await setup()
     await waitForHeight(app, blockCount)
 
-    const priceDataMapper = app.get(OraclePriceDataMapper)
+    const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
-    let price = await priceDataMapper.get(`${oracleId1}-APPL-EUR`)
-    expect(price?.data.oracleId).toStrictEqual(oracleId1)
-    expect(price?.data.token).toStrictEqual('APPL')
-    expect(price?.data.currency).toStrictEqual('EUR')
-    expect(price?.data.amount).toStrictEqual('0.5')
+    const priceAggregration = await priceAggregrationMapper.get(`${blockCount}-APPL-EUR`)
 
-    price = await priceDataMapper.get(`${oracleId2}-APPL-EUR`)
-    expect(price?.data.oracleId).toStrictEqual(oracleId2)
-    expect(price?.data.token).toStrictEqual('APPL')
-    expect(price?.data.currency).toStrictEqual('EUR')
-    expect(price?.data.amount).toStrictEqual('1')
+    expect(priceAggregration?.data.token).toStrictEqual('APPL')
+    expect(priceAggregration?.data.currency).toStrictEqual('EUR')
+    expect(priceAggregration?.data.currency).toStrictEqual(0.75)
   })
 })

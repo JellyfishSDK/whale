@@ -10,6 +10,7 @@ import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { OracleStatusMapper } from '@src/module.model/oracle.status'
 import { OraclePriceFeedMapper } from '@src/module.model/oracle.priceFeed'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.priceData'
+import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
 import { ModelProbeIndicator } from '@src/module.model/_model.probes'
 
 @Global()
@@ -26,7 +27,8 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     TransactionVoutMapper,
     OracleStatusMapper,
     OraclePriceFeedMapper,
-    OraclePriceDataMapper
+    OraclePriceDataMapper,
+    OraclePriceAggregrationMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -40,7 +42,8 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     TransactionVoutMapper,
     OracleStatusMapper,
     OraclePriceFeedMapper,
-    OraclePriceDataMapper
+    OraclePriceDataMapper,
+    OraclePriceAggregrationMapper
   ]
 })
 export class ModelModule {

@@ -5,6 +5,13 @@ import { Database, SortOrder } from '@src/module.database/database'
 const OraclePriceFeedMapping: ModelMapping<OraclePriceFeed> = {
   type: 'oracle_price_feed',
   index: {
+    id: {
+      name: 'oracle_price_feed_id',
+      partition: {
+        type: 'string',
+        key: (d: OraclePriceFeed) => d.id
+      }
+    },
     oracleId_token_currency: {
       name: 'oracle_price_feed_oracleid_token_currency',
       partition: {
@@ -12,13 +19,6 @@ const OraclePriceFeedMapping: ModelMapping<OraclePriceFeed> = {
         key: (d: OraclePriceFeed) => d.data.oracleId
       },
       sort: {
-        type: 'string',
-        key: (d: OraclePriceFeed) => `${d.data.token}-${d.data.currency}`
-      }
-    },
-    token_currency: {
-      name: 'oracle_price_feed_token_currency',
-      partition: {
         type: 'string',
         key: (d: OraclePriceFeed) => `${d.data.token}-${d.data.currency}`
       }
@@ -39,10 +39,10 @@ export class OraclePriceFeedMapper {
     })
   }
 
-  async getByTokenCurrency (): Promise<OraclePriceFeed[] | undefined> {
-    return await this.database.query(OraclePriceFeedMapping.index.token_currency, {
-      limit: 1000000,
-      order: SortOrder.ASC
+  async getAll (): Promise<OraclePriceFeed[] | undefined> {
+    return await this.database.query(OraclePriceFeedMapping.index.id, {
+      order: SortOrder.ASC,
+      limit: 1000000
     })
   }
 

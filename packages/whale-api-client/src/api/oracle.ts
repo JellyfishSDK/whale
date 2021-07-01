@@ -19,7 +19,7 @@ export class Oracle {
 }
 
 export interface OracleStatusAggregration{
-  id: string // oracleid
+  id: string // oracleId
   block: {
     height: number
   }

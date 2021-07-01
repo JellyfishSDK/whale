@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Model, ModelMapping } from '@src/module.database/model'
-import { Database } from '@src/module.database/database'
+import { Database, SortOrder } from '@src/module.database/database'
 
 const OraclePriceDataMapping: ModelMapping<OraclePriceData> = {
   type: 'oracle_price_data',
@@ -15,6 +15,17 @@ const OraclePriceDataMapping: ModelMapping<OraclePriceData> = {
         type: 'number',
         key: (d: OraclePriceData) => d.block.height
       }
+    },
+    token_currency_timestamp: {
+      name: 'oracle_price_token_currency_timestamp',
+      partition: {
+        type: 'string',
+        key: (d: OraclePriceData) => d.data.token + '-' + d.data.currency
+      },
+      sort: {
+        type: 'number',
+        key: (d: OraclePriceData) => d.data.timestamp
+      }
     }
   }
 }
@@ -22,6 +33,16 @@ const OraclePriceDataMapping: ModelMapping<OraclePriceData> = {
 @Injectable()
 export class OraclePriceDataMapper {
   public constructor (protected readonly database: Database) {
+  }
+
+  async getActivePrices (token: string, currency: string, timestamp: number): Promise<OraclePriceData[] | undefined> {
+    return await this.database.query(OraclePriceDataMapping.index.token_currency_timestamp, {
+      partitionKey: `${token}-${currency}`,
+      order: SortOrder.ASC,
+      gte: timestamp - 300,
+      lte: timestamp,
+      limit: 1000000
+    })
   }
 
   async get (id: string): Promise<OraclePriceData | undefined> {
@@ -46,7 +67,7 @@ export interface OraclePriceData extends Model {
     timestamp: number
     token: string
     currency: string
-    oracleid: string
+    oracleId: string
     amount: number
   }
 }

@@ -27,7 +27,7 @@ export class OraclePriceDataIndexer extends Indexer {
 
         if (stack[1]?.tx?.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
           const timestamp = stack[1].tx.data.timestamp.toNumber()
-          const oracleid: string = stack[1].tx.data.oracleId
+          const oracleId: string = stack[1].tx.data.oracleId
           const data = stack[1].tx.data.tokens
 
           for (let i = 0; i < data.length; i += 1) {
@@ -40,7 +40,7 @@ export class OraclePriceDataIndexer extends Indexer {
               const currency: string = price.currency
               const amount: number = price.amount
 
-              records[`${oracleid}-${token}-${currency}`] = OraclePriceDataIndexer.newOraclePrice(block, oracleid, token, currency, amount, timestamp)
+              records[`${oracleId}-${token}-${currency}`] = OraclePriceDataIndexer.newOraclePrice(block, oracleId, token, currency, amount, timestamp)
             }
           }
         }
@@ -64,7 +64,7 @@ export class OraclePriceDataIndexer extends Indexer {
         )
 
         if (stack[1].tx.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
-          const oracleid: string = stack[1].tx.data.oracleId
+          const oracleId: string = stack[1].tx.data.oracleId
           const data = stack[1].tx.data.tokens
 
           for (let i = 0; i < data.length; i += 1) {
@@ -76,7 +76,7 @@ export class OraclePriceDataIndexer extends Indexer {
 
               const currency: string = price.currency
 
-              await this.mapper.delete(`${oracleid}-${token}-${currency}`)
+              await this.mapper.delete(`${oracleId}-${token}-${currency}`)
             }
           }
         }
@@ -86,14 +86,14 @@ export class OraclePriceDataIndexer extends Indexer {
 
   static newOraclePrice (
     block: RawBlock,
-    oracleid: string,
+    oracleId: string,
     token: string,
     currency: string,
     amount: number,
     timestamp: number
   ): OraclePriceData {
     return {
-      id: `${oracleid}-${token}-${currency}`,
+      id: `${oracleId}-${token}-${currency}`,
       block: {
         height: block.height
       },
@@ -101,7 +101,7 @@ export class OraclePriceDataIndexer extends Indexer {
         timestamp,
         token,
         currency,
-        oracleid,
+        oracleId,
         amount
       }
     }

@@ -14,6 +14,7 @@ import { blockchain as defid } from '@defichain/jellyfish-api-core'
 import { OracleStatusIndexer } from '@src/module.indexer/model/oracle.status'
 import { OraclePriceFeedIndexer } from '@src/module.indexer/model/oracle.priceFeed'
 import { OraclePriceDataIndexer } from '@src/module.indexer/model/oracle.priceData'
+import { OraclePriceAggregationIndexer } from '@src/module.indexer/model/oracle.price.aggregration'
 
 /**
  * This is a deterministic log based indexer.
@@ -34,7 +35,8 @@ export class MainIndexer {
     private readonly transactionVout: TransactionVoutIndexer,
     private readonly oracleStatus: OracleStatusIndexer,
     private readonly oraclePriceFeed: OraclePriceFeedIndexer,
-    private readonly oraclePriceData: OraclePriceDataIndexer
+    private readonly oraclePriceData: OraclePriceDataIndexer,
+    private readonly oraclePriceAggregration: OraclePriceAggregationIndexer
   ) {
     this.indexers = [
       block,
@@ -46,7 +48,8 @@ export class MainIndexer {
       transactionVout,
       oracleStatus,
       oraclePriceFeed,
-      oraclePriceData
+      oraclePriceData,
+      oraclePriceAggregration
     ]
   }
 

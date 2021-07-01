@@ -13,6 +13,7 @@ import { IndexStatusMapper } from '@src/module.indexer/status'
 import { OracleStatusIndexer } from '@src/module.indexer/model/oracle.status'
 import { OraclePriceFeedIndexer } from '@src/module.indexer/model/oracle.priceFeed'
 import { OraclePriceDataIndexer } from '@src/module.indexer/model/oracle.priceData'
+import { OraclePriceAggregationIndexer } from '@src/module.indexer/model/oracle.price.aggregration'
 
 @Module({
   providers: [
@@ -29,7 +30,8 @@ import { OraclePriceDataIndexer } from '@src/module.indexer/model/oracle.priceDa
     TransactionVoutIndexer,
     OracleStatusIndexer,
     OraclePriceFeedIndexer,
-    OraclePriceDataIndexer
+    OraclePriceDataIndexer,
+    OraclePriceAggregationIndexer
   ]
 })
 export class IndexerModule {

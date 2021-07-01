@@ -10,7 +10,7 @@ const OracleStatusMapping: ModelMapping<OracleStatus> = {
       name: 'oracle_status_id_height',
       partition: {
         type: 'string',
-        key: (d: OracleStatus) => d.id // oracleid
+        key: (d: OracleStatus) => d.id // oracleId
       },
       sort: {
         type: 'number',
@@ -48,7 +48,7 @@ export class OracleStatusMapper {
 }
 
 export interface OracleStatus extends Model {
-  id: string // oracleid
+  id: string // oracleId
   block: {
     height: number
   }
