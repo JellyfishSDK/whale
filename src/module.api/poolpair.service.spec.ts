@@ -4,7 +4,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { PoolPairService } from '@src/module.api/poolpair.service'
 import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintTokens } from '@defichain/testing'
 import { DeFiDCache } from './cache/defid.cache'
-import { CacheModule } from '@nestjs/common'
+import { CacheModule, NotFoundException } from '@nestjs/common'
 import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
@@ -86,31 +86,22 @@ describe('list', () => {
       symbol: 'A-C',
       name: 'A-C',
       status: true,
-      tokenA: {
-        id: '1',
-        reserve: new BigNumber('50'),
-        blockCommission: new BigNumber('0')
-      },
-      tokenB: {
-        id: '3',
-        reserve: new BigNumber('300'),
-        blockCommission: new BigNumber('0')
-      },
+      idTokenA: '1',
+      idTokenB: '3',
+      reserveA: new BigNumber('50'),
+      reserveB: new BigNumber('300'),
+      blockCommissionA: new BigNumber('0'),
+      blockCommissionB: new BigNumber('0'),
       commission: new BigNumber('0'),
       totalLiquidity: new BigNumber('122.47448713'),
       totalLiquidityUsd: new BigNumber('123.943738074614627569'),
       tradeEnabled: true,
       ownerAddress: expect.any(String),
-      priceRatio: {
-        'tokenA/tokenB': new BigNumber('0.16666666'),
-        'tokenB/tokenA': new BigNumber('6')
-      },
+      'reserveA/reserveB': new BigNumber('0.16666666'),
+      'reserveB/reserveA': new BigNumber('6'),
       rewardPct: new BigNumber('0'),
-      customRewards: undefined,
-      creation: {
-        tx: expect.any(String),
-        height: expect.any(Number)
-      }
+      creationTx: expect.any(String),
+      creationHeight: expect.any(BigNumber)
     })
   })
 
@@ -121,5 +112,48 @@ describe('list', () => {
     expect(pairPairsData.length).toStrictEqual(2)
     expect(pairPairsData[0].symbol).toStrictEqual('A-B')
     expect(pairPairsData[1].symbol).toStrictEqual('A-C')
+  })
+})
+
+describe('get', () => {
+  it('should get', async () => {
+    const pairPairData = await service.get('7')
+
+    expect(pairPairData).toStrictEqual({
+      id: '7',
+      symbol: 'A-B',
+      name: 'A-B',
+      status: true,
+      idTokenA: expect.any(String),
+      idTokenB: expect.any(String),
+      reserveA: new BigNumber('100'),
+      reserveB: new BigNumber('200'),
+      blockCommissionA: new BigNumber('0'),
+      blockCommissionB: new BigNumber('0'),
+      commission: new BigNumber('0'),
+      totalLiquidity: new BigNumber('141.42135623'),
+      totalLiquidityUsd: new BigNumber('235.762326049743085046'),
+      tradeEnabled: true,
+      ownerAddress: expect.any(String),
+      'reserveA/reserveB': new BigNumber('0.5'),
+      'reserveB/reserveA': new BigNumber('2'),
+      rewardPct: new BigNumber('0'),
+      creationTx: expect.any(String),
+      creationHeight: expect.any(BigNumber)
+    })
+  })
+
+  it('should throw error while getting non-existent poolpair', async () => {
+    expect.assertions(2)
+    try {
+      await service.get('999')
+    } catch (err) {
+      expect(err).toBeInstanceOf(NotFoundException)
+      expect(err.response).toStrictEqual({
+        statusCode: 404,
+        message: 'Unable to find poolpair',
+        error: 'Not Found'
+      })
+    }
   })
 })
