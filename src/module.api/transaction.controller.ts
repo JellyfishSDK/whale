@@ -93,7 +93,7 @@ export class TransactionsController {
         throw new BadRequestApiException('Transaction decode failed')
       }
       /* istanbul ignore next */
-      throw new BadRequestApiException()
+      throw new BadRequestApiException(err?.payload?.message)
     }
   }
 
