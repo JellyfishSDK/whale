@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { PoolPairData } from '@whale-api-client/api/poolpair'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import BigNumber from 'bignumber.js'
@@ -14,41 +13,39 @@ export class PoolPairService {
   ) {
   }
 
-  async list (query: PaginationQuery): Promise<PoolPairData[]> {
+  async list (query: PaginationQuery): Promise<PoolPairInfoPlus[]> {
     const poolPairResult = await this.rpcClient.poolpair.listPoolPairs({
       start: query.next !== undefined ? Number(query.next) : 0,
       including_start: query.next === undefined, // TODO(fuxingloh): open issue at DeFiCh/ain, rpc_accounts.cpp#388
       limit: query.size
     }, true)
 
-    const poolPairsData = Object.entries(poolPairResult).map(([id, value]) => {
-      return mapPoolPair(id, value)
-    }).sort(a => Number.parseInt(a.id))
-
     const dfiUsdtConversionPrice = getDfiUsdtConversionPrice()
 
-    for (let i = 0; i < poolPairsData.length; i += 1) {
-      const poolPairData: PoolPairData = poolPairsData[i]
-
-      poolPairData.totalLiquidityUsd = getTotalLiquidityUsd(poolPairData, dfiUsdtConversionPrice)
-    }
-
-    return poolPairsData
+    return Object.entries(poolPairResult).map(([id, value]) => {
+      return {
+        ...value,
+        id,
+        totalLiquidityUsd: getTotalLiquidityUsd(value, dfiUsdtConversionPrice)
+      }
+    })
   }
 
-  async get (id: string): Promise<PoolPairData> {
+  async get (id: string): Promise<PoolPairInfoPlus> {
     const info = await this.deFiDCache.getPoolPairInfo(id)
     if (info === undefined) {
       throw new NotFoundException('Unable to find poolpair')
     }
 
-    const poolPairData = mapPoolPair(String(id), info)
-
     const dfiUsdtConversionPrice = getDfiUsdtConversionPrice()
 
-    poolPairData.totalLiquidityUsd = getTotalLiquidityUsd(poolPairData, dfiUsdtConversionPrice)
+    const totalLiquidityUsd = getTotalLiquidityUsd(info, dfiUsdtConversionPrice)
 
-    return poolPairData
+    return {
+      ...info,
+      id,
+      totalLiquidityUsd
+    }
   }
 }
 
@@ -70,7 +67,7 @@ function getDfiUsdtConversionPrice (): Record<string, BigNumber> {
 }
 
 function getTotalLiquidityUsd (
-  poolPairData: PoolPairData,
+  poolPairInfo: PoolPairInfo,
   dfiUsdtConversionPrice: Record<string, BigNumber>
 ): BigNumber {
   const { usdtToDfi, dfiToUsdt } = dfiUsdtConversionPrice
@@ -95,12 +92,12 @@ function getTotalLiquidityUsd (
   let reserveBUsd: BigNumber
 
   // check which poolPairInfo.idToken{A/B} is token (eg: ETH)
-  if (tokenId === poolPairData.tokenA.id) {
-    reserveAUsd = poolPairData.tokenA.reserve.times(tokenToUsdt)
-    reserveBUsd = poolPairData.tokenB.reserve.times(dfiToUsdt)
+  if (tokenId === poolPairInfo.idTokenA) {
+    reserveAUsd = poolPairInfo.reserveA.times(tokenToUsdt)
+    reserveBUsd = poolPairInfo.reserveB.times(dfiToUsdt)
   } else {
-    reserveAUsd = poolPairData.tokenA.reserve.times(dfiToUsdt)
-    reserveBUsd = poolPairData.tokenB.reserve.times(tokenToUsdt)
+    reserveAUsd = poolPairInfo.reserveA.times(dfiToUsdt)
+    reserveBUsd = poolPairInfo.reserveB.times(tokenToUsdt)
   }
 
   // reserveA_USD (eg: BTC) = reserveA * tokenToUsdt
@@ -109,36 +106,26 @@ function getTotalLiquidityUsd (
   return reserveAUsd.plus(reserveBUsd)
 }
 
-function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairData {
-  return {
-    id,
-    symbol: poolPairInfo.symbol,
-    name: poolPairInfo.name,
-    status: poolPairInfo.status,
-    tokenA: {
-      id: poolPairInfo.idTokenA,
-      reserve: poolPairInfo.reserveA,
-      blockCommission: poolPairInfo.blockCommissionA
-    },
-    tokenB: {
-      id: poolPairInfo.idTokenB,
-      reserve: poolPairInfo.reserveB,
-      blockCommission: poolPairInfo.blockCommissionB
-    },
-    priceRatio: {
-      'tokenA/tokenB': poolPairInfo['reserveA/reserveB'],
-      'tokenB/tokenA': poolPairInfo['reserveB/reserveA']
-    },
-    commission: poolPairInfo.commission,
-    totalLiquidity: poolPairInfo.totalLiquidity,
-    totalLiquidityUsd: new BigNumber(0),
-    tradeEnabled: poolPairInfo.tradeEnabled,
-    ownerAddress: poolPairInfo.ownerAddress,
-    rewardPct: poolPairInfo.rewardPct,
-    customRewards: poolPairInfo.customRewards,
-    creation: {
-      tx: poolPairInfo.creationTx,
-      height: poolPairInfo.creationHeight.toNumber()
-    }
-  }
+export interface PoolPairInfoPlus {
+  id: string
+  symbol: string
+  name: string
+  status: string
+  idTokenA: string
+  idTokenB: string
+  reserveA: BigNumber
+  reserveB: BigNumber
+  commission: BigNumber
+  totalLiquidity: BigNumber
+  totalLiquidityUsd: BigNumber
+  'reserveA/reserveB': BigNumber | string
+  'reserveB/reserveA': BigNumber | string
+  tradeEnabled: boolean
+  ownerAddress: string
+  blockCommissionA: BigNumber
+  blockCommissionB: BigNumber
+  rewardPct: BigNumber
+  customRewards: BigNumber
+  creationTx: string
+  creationHeight: BigNumber
 }

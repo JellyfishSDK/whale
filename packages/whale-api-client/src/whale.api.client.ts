@@ -24,12 +24,12 @@ export interface WhaleApiClientOptions {
   /**
    * Version of API
    */
-  version?: 'v1'
+  version?: 'v0'
 
   /**
    * Network that whale client is configured to
    */
-  network?: 'mainnet' | 'testnet' | 'regtest'
+  network?: 'mainnet' | 'testnet' | 'regtest' | string
 }
 
 /**
@@ -38,7 +38,7 @@ export interface WhaleApiClientOptions {
 export const DefaultOptions: WhaleApiClientOptions = {
   url: 'https://ocean.defichain.com',
   timeout: 60000,
-  version: 'v1',
+  version: 'v0',
   network: 'mainnet'
 }
 

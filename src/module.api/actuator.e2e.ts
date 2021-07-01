@@ -1,6 +1,6 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp } from '@src/e2e.module'
+import { createTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -9,6 +9,8 @@ beforeAll(async () => {
   await container.start()
   await container.waitForReady()
   app = await createTestingApp(container)
+
+  await waitForIndexedHeight(app, 2)
 })
 
 afterAll(async () => {
@@ -19,11 +21,11 @@ afterAll(async () => {
   }
 })
 
-describe('/_health/probes/liveness', () => {
+describe('/_actuator/probes/liveness', () => {
   it('should wait until liveness', async () => {
     const res = await app.inject({
       method: 'GET',
-      url: '/_health/probes/liveness'
+      url: '/_actuator/probes/liveness'
     })
 
     expect(res.statusCode).toStrictEqual(200)
@@ -31,11 +33,17 @@ describe('/_health/probes/liveness', () => {
       details: {
         defid: {
           status: 'up'
+        },
+        model: {
+          status: 'up'
         }
       },
       error: {},
       info: {
         defid: {
+          status: 'up'
+        },
+        model: {
           status: 'up'
         }
       },
@@ -44,13 +52,13 @@ describe('/_health/probes/liveness', () => {
   })
 })
 
-describe('/_health/probes/readiness', () => {
-  // TODO(fuxingloh): /_health/probes/readiness tests for it to be ready
+describe('/_actuator/probes/readiness', () => {
+  // TODO(fuxingloh): /_actuator/probes/readiness tests for it to be ready
 
   it('should wait until readiness, but never will be as it lacks connections', async () => {
     const res = await app.inject({
       method: 'GET',
-      url: '/_health/probes/readiness'
+      url: '/_actuator/probes/readiness'
     })
 
     expect(res.statusCode).toStrictEqual(503)
@@ -62,6 +70,9 @@ describe('/_health/probes/readiness', () => {
           initialBlockDownload: expect.any(Boolean),
           peers: 0,
           status: 'down'
+        },
+        model: {
+          status: 'up'
         }
       },
       error: {
@@ -73,7 +84,11 @@ describe('/_health/probes/readiness', () => {
           status: 'down'
         }
       },
-      info: {},
+      info: {
+        model: {
+          status: 'up'
+        }
+      },
       status: 'error'
     })
   })

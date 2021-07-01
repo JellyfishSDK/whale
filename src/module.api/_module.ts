@@ -1,7 +1,7 @@
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { CacheModule, Module } from '@nestjs/common'
 import { RpcController } from '@src/module.api/rpc.controller'
-import { HealthController } from '@src/module.api/health.controller'
+import { ActuatorController } from '@src/module.api/actuator.controller'
 import { TransactionsController } from '@src/module.api/transaction.controller'
 import { ApiValidationPipe } from '@src/module.api/pipes/api.validation.pipe'
 import { AddressController } from '@src/module.api/address.controller'
@@ -21,14 +21,14 @@ import { TokensController } from '@src/module.api/token.controller'
   controllers: [
     RpcController,
     AddressController,
-    HealthController,
+    ActuatorController,
     TransactionsController,
     TokensController,
     PoolPairController
   ],
   providers: [
     { provide: APP_PIPE, useClass: ApiValidationPipe },
-    // APP_GUARD & APP_INTERCEPTOR are only activated for /v1/* paths
+    // APP_GUARD & APP_INTERCEPTOR are only activated for /v0/* paths
     { provide: APP_GUARD, useClass: NetworkGuard },
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
     { provide: APP_INTERCEPTOR, useClass: ExceptionInterceptor },

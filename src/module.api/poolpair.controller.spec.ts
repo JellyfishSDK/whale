@@ -5,7 +5,6 @@ import { PoolPairController } from '@src/module.api/poolpair.controller'
 import { PoolPairService } from '@src/module.api/poolpair.service'
 import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintTokens } from '@defichain/testing'
 import { CacheModule, NotFoundException } from '@nestjs/common'
-import BigNumber from 'bignumber.js'
 import { DeFiDCache } from './cache/defid.cache'
 
 const container = new MasterNodeRegTestContainer()
@@ -91,24 +90,24 @@ describe('list', () => {
       status: true,
       tokenA: {
         id: '1',
-        reserve: new BigNumber('50'),
-        blockCommission: new BigNumber('0')
+        reserve: '50',
+        blockCommission: '0'
       },
       tokenB: {
         id: '3',
-        reserve: new BigNumber('300'),
-        blockCommission: new BigNumber('0')
+        reserve: '300',
+        blockCommission: '0'
       },
-      commission: new BigNumber('0'),
-      totalLiquidity: new BigNumber('122.47448713'),
-      totalLiquidityUsd: new BigNumber('123.943738074614627569'),
+      commission: '0',
+      totalLiquidity: '122.47448713',
+      totalLiquidityUsd: '123.943738074614627569',
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
-        'tokenA/tokenB': new BigNumber('0.16666666'),
-        'tokenB/tokenA': new BigNumber('6')
+        'tokenA/tokenB': '0.16666666',
+        'tokenB/tokenA': '6'
       },
-      rewardPct: new BigNumber('0'),
+      rewardPct: '0',
       customRewards: undefined,
       creation: {
         tx: expect.any(String),
@@ -163,25 +162,24 @@ describe('get', () => {
       status: true,
       tokenA: {
         id: expect.any(String),
-        reserve: new BigNumber('100'),
-        blockCommission: new BigNumber('0')
+        reserve: '100',
+        blockCommission: '0'
       },
       tokenB: {
         id: expect.any(String),
-        reserve: new BigNumber('200'),
-        blockCommission: new BigNumber('0')
+        reserve: '200',
+        blockCommission: '0'
       },
-      priceRatio: {
-        'tokenA/tokenB': new BigNumber('0.5'),
-        'tokenB/tokenA': new BigNumber('2')
-      },
-      commission: new BigNumber('0'),
-      totalLiquidity: new BigNumber('141.42135623'),
-      // TODO(canonbrother): add get service
-      totalLiquidityUsd: new BigNumber('235.762326049743085046'),
+      commission: '0',
+      totalLiquidity: '141.42135623',
+      totalLiquidityUsd: '235.762326049743085046',
       tradeEnabled: true,
       ownerAddress: expect.any(String),
-      rewardPct: new BigNumber('0'),
+      priceRatio: {
+        'tokenA/tokenB': '0.5',
+        'tokenB/tokenA': '2'
+      },
+      rewardPct: '0',
       customRewards: undefined,
       creation: {
         tx: expect.any(String),

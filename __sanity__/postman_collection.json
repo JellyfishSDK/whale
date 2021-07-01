@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "/_health/probes/liveness",
+			"name": "/_actuator/probes/liveness",
 			"event": [
 				{
 					"listen": "test",
@@ -29,14 +29,14 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:3000/_health/probes/liveness",
+					"raw": "http://localhost:3000/_actuator/probes/liveness",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"_health",
+						"_actuator",
 						"probes",
 						"liveness"
 					]
@@ -45,7 +45,7 @@
 			"response": []
 		},
 		{
-			"name": "/v1/regtest/rpc/getblockchaininfo",
+			"name": "/v0/regtest/rpc/getblockchaininfo",
 			"event": [
 				{
 					"listen": "test",
@@ -68,14 +68,14 @@
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:3000/v1/regtest/rpc/getblockchaininfo",
+					"raw": "http://localhost:3000/v0/regtest/rpc/getblockchaininfo",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"v1",
+						"v0",
 						"regtest",
 						"rpc",
 						"getblockchaininfo"
@@ -85,7 +85,7 @@
 			"response": []
 		},
 		{
-			"name": "/v1/regtest/rpc/getblockhash",
+			"name": "/v0/regtest/rpc/getblockhash",
 			"event": [
 				{
 					"listen": "test",
@@ -117,14 +117,14 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/v1/regtest/rpc/getblockhash",
+					"raw": "http://localhost:3000/v0/regtest/rpc/getblockhash",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"v1",
+						"v0",
 						"regtest",
 						"rpc",
 						"getblockhash"

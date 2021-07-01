@@ -81,19 +81,19 @@ describe('list', () => {
       status: true,
       tokenA: {
         id: '1',
-        reserve: 50,
-        blockCommission: 0
+        reserve: '50',
+        blockCommission: '0'
       },
       tokenB: {
         id: '3',
-        reserve: 300,
-        blockCommission: 0
+        reserve: '300',
+        blockCommission: '0'
       },
-      commission: 0,
-      totalLiquidity: 122.47448713,
+      commission: '0',
+      totalLiquidity: '122.47448713',
       tradeEnabled: true,
       ownerAddress: expect.any(String),
-      rewardPct: 0,
+      rewardPct: '0',
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
@@ -141,19 +141,19 @@ describe('get', () => {
       status: true,
       tokenA: {
         id: expect.any(String),
-        reserve: 100,
-        blockCommission: 0
+        reserve: '100',
+        blockCommission: '0'
       },
       tokenB: {
         id: expect.any(String),
-        reserve: 200,
-        blockCommission: 0
+        reserve: '200',
+        blockCommission: '0'
       },
-      commission: 0,
-      totalLiquidity: 141.42135623,
+      commission: '0',
+      totalLiquidity: '141.42135623',
       tradeEnabled: true,
       ownerAddress: expect.any(String),
-      rewardPct: 0,
+      rewardPct: '0',
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
@@ -172,7 +172,7 @@ describe('get', () => {
         type: 'BadRequest',
         at: expect.any(Number),
         message: 'Validation failed (numeric string is expected)',
-        url: '/v1/regtest/poolpairs/A-B'
+        url: '/v0/regtest/poolpairs/A-B'
       })
     }
   })
@@ -188,7 +188,7 @@ describe('get', () => {
         type: 'NotFound',
         at: expect.any(Number),
         message: 'Unable to find poolpair',
-        url: '/v1/regtest/poolpairs/999'
+        url: '/v0/regtest/poolpairs/999'
       })
     }
   })

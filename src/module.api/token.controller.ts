@@ -5,7 +5,7 @@ import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { TokenData } from '@whale-api-client/api/tokens'
 
-@Controller('/v1/:network/tokens')
+@Controller('/v0/:network/tokens')
 export class TokensController {
   constructor (private readonly client: JsonRpcClient) {
   }
@@ -64,16 +64,16 @@ function mapTokenData (id: string, tokenInfo: TokenInfo): TokenData {
     symbol: tokenInfo.symbol,
     symbolKey: tokenInfo.symbolKey,
     name: tokenInfo.name,
-    decimal: tokenInfo.decimal.toNumber(),
-    limit: tokenInfo.limit,
+    decimal: tokenInfo.decimal,
+    limit: tokenInfo.limit.toFixed(),
     mintable: tokenInfo.mintable,
     tradeable: tokenInfo.tradeable,
     isDAT: tokenInfo.isDAT,
     isLPS: tokenInfo.isLPS,
     finalized: tokenInfo.finalized,
-    minted: tokenInfo.minted,
-    creation: { tx: tokenInfo.creationTx, height: tokenInfo.creationHeight.toNumber() },
-    destruction: { tx: tokenInfo.destructionTx, height: tokenInfo.destructionHeight.toNumber() },
+    minted: tokenInfo.minted.toFixed(),
+    creation: { tx: tokenInfo.creationTx, height: tokenInfo.creationHeight },
+    destruction: { tx: tokenInfo.destructionTx, height: tokenInfo.destructionHeight },
     collateralAddress: tokenInfo.collateralAddress
   }
 }

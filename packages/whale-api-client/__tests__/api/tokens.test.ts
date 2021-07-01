@@ -41,13 +41,13 @@ describe('list', () => {
       symbolKey: 'DFI',
       name: 'Default Defi token',
       decimal: 8,
-      limit: 0,
+      limit: '0',
       mintable: false,
       tradeable: true,
       isDAT: true,
       isLPS: false,
       finalized: true,
-      minted: 0,
+      minted: '0',
       creation: {
         tx: '0000000000000000000000000000000000000000000000000000000000000000',
         height: 0
@@ -96,13 +96,13 @@ describe('get', () => {
       symbolKey: 'DFI',
       name: 'Default Defi token',
       decimal: 8,
-      limit: 0,
+      limit: '0',
       mintable: false,
       tradeable: true,
       isDAT: true,
       isLPS: false,
       finalized: true,
-      minted: 0,
+      minted: '0',
       creation: {
         tx: '0000000000000000000000000000000000000000000000000000000000000000',
         height: 0
@@ -126,7 +126,7 @@ describe('get', () => {
         type: 'NotFound',
         at: expect.any(Number),
         message: 'Unable to find token',
-        url: '/v1/regtest/tokens/999'
+        url: '/v0/regtest/tokens/999'
       })
     }
   })
@@ -142,7 +142,7 @@ describe('get', () => {
         type: 'BadRequest',
         at: expect.any(Number),
         message: 'Validation failed (numeric string is expected)',
-        url: '/v1/regtest/tokens/$*@'
+        url: '/v0/regtest/tokens/$*@'
       })
     }
   })

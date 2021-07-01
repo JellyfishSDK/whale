@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js'
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
 
@@ -38,25 +37,25 @@ export interface PoolPairData {
   status: string
   tokenA: {
     id: string
-    reserve: BigNumber
-    blockCommission: BigNumber
+    reserve: string // BigNumber
+    blockCommission: string // BigNumber
   }
   tokenB: {
     id: string
-    reserve: BigNumber
-    blockCommission: BigNumber
+    reserve: string // BigNumber
+    blockCommission: string // BigNumber
   }
   priceRatio: {
-    'tokenA/tokenB': BigNumber | string
-    'tokenB/tokenA': BigNumber | string
+    'tokenA/tokenB': string // BigNumber | string
+    'tokenB/tokenA': string // BigNumber | string
   }
-  commission: BigNumber
-  totalLiquidity: BigNumber
-  totalLiquidityUsd: BigNumber
+  commission: string // BigNumber
+  totalLiquidity: string // BigNumber
+  totalLiquidityUsd: string // BigNumber
   tradeEnabled: boolean
   ownerAddress: string
-  rewardPct: BigNumber
-  customRewards?: BigNumber
+  rewardPct: string // BigNumber
+  customRewards?: string // BigNumber
   creation: {
     tx: string
     height: number

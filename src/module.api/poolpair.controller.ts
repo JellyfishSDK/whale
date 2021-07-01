@@ -4,11 +4,10 @@ import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { PoolPairData } from '@whale-api-client/api/poolpair'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
-import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
-import { PoolPairService } from './poolpair.service'
+import { PoolPairService, PoolPairInfoPlus } from './poolpair.service'
 import BigNumber from 'bignumber.js'
 
-@Controller('/v1/:network/poolpairs')
+@Controller('/v0/:network/poolpairs')
 export class PoolPairController {
   constructor (
     protected readonly rpcClient: JsonRpcClient,
@@ -27,7 +26,11 @@ export class PoolPairController {
   async list (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<PoolPairData>> {
-    const poolPairsData = await this.poolPairService.list(query)
+    const poolPairsInfoPlus = await this.poolPairService.list(query)
+
+    const poolPairsData = poolPairsInfoPlus.map(data => {
+      return mapPoolPair(data)
+    }).sort(a => Number.parseInt(a.id))
 
     return ApiPagedResponse.of(poolPairsData, query.size, item => {
       return item.id
@@ -40,40 +43,42 @@ export class PoolPairController {
    */
   @Get('/:id')
   async get (@Param('id', ParseIntPipe) id: string): Promise<PoolPairData> {
-    return await this.poolPairService.get(id)
+    const poolPairInfoPlus = await this.poolPairService.get(id)
+
+    return mapPoolPair(poolPairInfoPlus)
   }
 }
 
-export function mapPoolPair (id: string, poolPairInfo: PoolPairInfo): PoolPairData {
+export function mapPoolPair (poolPairInfoPlus: PoolPairInfoPlus): PoolPairData {
   return {
-    id,
-    symbol: poolPairInfo.symbol,
-    name: poolPairInfo.name,
-    status: poolPairInfo.status,
+    id: poolPairInfoPlus.id,
+    symbol: poolPairInfoPlus.symbol,
+    name: poolPairInfoPlus.name,
+    status: poolPairInfoPlus.status,
     tokenA: {
-      id: poolPairInfo.idTokenA,
-      reserve: poolPairInfo.reserveA,
-      blockCommission: poolPairInfo.blockCommissionA
+      id: poolPairInfoPlus.idTokenA,
+      reserve: poolPairInfoPlus.reserveA.toFixed(),
+      blockCommission: poolPairInfoPlus.blockCommissionA.toFixed()
     },
     tokenB: {
-      id: poolPairInfo.idTokenB,
-      reserve: poolPairInfo.reserveB,
-      blockCommission: poolPairInfo.blockCommissionB
+      id: poolPairInfoPlus.idTokenB,
+      reserve: poolPairInfoPlus.reserveB.toFixed(),
+      blockCommission: poolPairInfoPlus.blockCommissionB.toFixed()
     },
     priceRatio: {
-      'tokenA/tokenB': poolPairInfo['reserveA/reserveB'],
-      'tokenB/tokenA': poolPairInfo['reserveB/reserveA']
+      'tokenA/tokenB': poolPairInfoPlus['reserveA/reserveB'] instanceof BigNumber ? poolPairInfoPlus['reserveA/reserveB'].toFixed() : poolPairInfoPlus['reserveA/reserveB'],
+      'tokenB/tokenA': poolPairInfoPlus['reserveB/reserveA'] instanceof BigNumber ? poolPairInfoPlus['reserveB/reserveA'].toFixed() : poolPairInfoPlus['reserveB/reserveA']
     },
-    commission: poolPairInfo.commission,
-    totalLiquidity: poolPairInfo.totalLiquidity,
-    totalLiquidityUsd: new BigNumber(0),
-    tradeEnabled: poolPairInfo.tradeEnabled,
-    ownerAddress: poolPairInfo.ownerAddress,
-    rewardPct: poolPairInfo.rewardPct,
-    customRewards: poolPairInfo.customRewards,
+    commission: poolPairInfoPlus.commission.toFixed(),
+    totalLiquidity: poolPairInfoPlus.totalLiquidity.toFixed(),
+    totalLiquidityUsd: poolPairInfoPlus.totalLiquidityUsd.toFixed(),
+    tradeEnabled: poolPairInfoPlus.tradeEnabled,
+    ownerAddress: poolPairInfoPlus.ownerAddress,
+    rewardPct: poolPairInfoPlus.rewardPct.toFixed(),
+    customRewards: poolPairInfoPlus.customRewards?.toFixed(),
     creation: {
-      tx: poolPairInfo.creationTx,
-      height: poolPairInfo.creationHeight.toNumber()
+      tx: poolPairInfoPlus.creationTx,
+      height: poolPairInfoPlus.creationHeight.toNumber()
     }
   }
 }
