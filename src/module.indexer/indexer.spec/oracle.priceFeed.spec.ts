@@ -40,7 +40,7 @@ afterAll(async () => {
 
 describe('PriceFeed - approveOracle', () => {
   let oracleId: string
-  let blockcount: number
+  let blockCount: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [
@@ -51,12 +51,12 @@ describe('PriceFeed - approveOracle', () => {
     oracleId = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 1 })
 
     await container.generate(1)
-    blockcount = await client.blockchain.getBlockCount()
+    blockCount = await client.blockchain.getBlockCount()
   }
 
   it('should get priceFeed', async () => {
     await setup()
-    await waitForHeight(app, blockcount)
+    await waitForHeight(app, blockCount)
 
     const priceFeedMapper = app.get(OraclePriceFeedMapper)
 

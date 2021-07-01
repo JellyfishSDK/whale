@@ -9,7 +9,7 @@ const OraclePriceFeedMapping: ModelMapping<OraclePriceFeed> = {
       name: 'oracle_priceFeed_oracleid_token_currency',
       partition: {
         type: 'string',
-        key: (d: OraclePriceFeed) => d.data.oracleId // oracleId-token-currency
+        key: (d: OraclePriceFeed) => d.data.oracleId
       },
       sort: {
         type: 'string',
