@@ -41,7 +41,7 @@ export class PoolPairService {
     const totalLiquidityUsd = await this.getTotalLiquidityUsd(info, dfiUsdtConversionPrice)
 
     return {
-      ...info, id, totalLiquidityUsd
+      ...info, id: String(id), totalLiquidityUsd
     }
   }
 

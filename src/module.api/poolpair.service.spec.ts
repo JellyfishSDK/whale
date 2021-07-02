@@ -30,6 +30,25 @@ beforeAll(async () => {
 
   service = app.get(PoolPairService)
 
+  await setup()
+})
+
+afterAll(async () => {
+  await container.stop()
+})
+
+beforeEach(async () => {
+  spy = jest.spyOn(service, 'testPoolSwap').mockImplementation(
+    async (x, y) => x === 'USDT' && y === 'DFI'
+      ? await Promise.resolve('0.43151288@0') // usdt to dfi
+      : await Promise.resolve('14.23530023@777')) // token to dfi
+})
+
+afterEach(() => {
+  spy.mockRestore()
+})
+
+async function setup (): Promise<void> {
   const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
 
   for (const token of tokens) {
@@ -68,22 +87,7 @@ beforeAll(async () => {
     amountB: 360,
     shareAddress: await getNewAddress(container)
   })
-})
-
-afterAll(async () => {
-  await container.stop()
-})
-
-beforeEach(async () => {
-  spy = jest.spyOn(service, 'testPoolSwap').mockImplementation(
-    async (x, y) => x === 'USDT' && y === 'DFI'
-      ? await Promise.resolve('0.43151288@0') // usdt to dfi
-      : await Promise.resolve('14.23530023@777')) // token to dfi
-})
-
-afterEach(() => {
-  spy.mockRestore()
-})
+}
 
 describe('list', () => {
   it('should list', async () => {
