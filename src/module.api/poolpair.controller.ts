@@ -70,8 +70,10 @@ export function mapPoolPair (poolPairInfoPlus: PoolPairInfoPlus): PoolPairData {
       'tokenB/tokenA': poolPairInfoPlus['reserveB/reserveA'] instanceof BigNumber ? poolPairInfoPlus['reserveB/reserveA'].toFixed() : poolPairInfoPlus['reserveB/reserveA']
     },
     commission: poolPairInfoPlus.commission.toFixed(),
-    totalLiquidity: poolPairInfoPlus.totalLiquidity.toFixed(),
-    totalLiquidityUsd: poolPairInfoPlus.totalLiquidityUsd.toFixed(),
+    totalLiquidity: {
+      token: poolPairInfoPlus.totalLiquidity.toFixed(),
+      usd: poolPairInfoPlus.totalLiquidityUsd.toFixed()
+    },
     tradeEnabled: poolPairInfoPlus.tradeEnabled,
     ownerAddress: poolPairInfoPlus.ownerAddress,
     rewardPct: poolPairInfoPlus.rewardPct.toFixed(),

@@ -4,10 +4,13 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintTokens } from '@defichain/testing'
 import { NotFoundException } from '@nestjs/common'
+import { PoolPairService } from '@src/module.api/poolpair.service'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
 let controller: PoolPairController
+let service: PoolPairService
+let spy: jest.SpyInstance
 
 beforeAll(async () => {
   await container.start()
@@ -17,9 +20,29 @@ beforeAll(async () => {
 
   app = await createTestingApp(container)
   controller = app.get(PoolPairController)
+  service = app.get(PoolPairService) // for stubbing testPoolSwap
 
   await waitForIndexedHeight(app, 100)
 
+  await setup()
+})
+
+afterAll(async () => {
+  await stopTestingApp(container, app)
+})
+
+beforeEach(async () => {
+  spy = jest.spyOn(service, 'testPoolSwap').mockImplementation(
+    async (x, y) => x === 'USDT' && y === 'DFI'
+      ? await Promise.resolve('0.43151288@0') // usdt to dfi
+      : await Promise.resolve('14.23530023@777')) // token to dfi
+})
+
+afterEach(() => {
+  spy.mockRestore()
+})
+
+async function setup (): Promise<void> {
   const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
 
   for (const token of tokens) {
@@ -58,11 +81,7 @@ beforeAll(async () => {
     amountB: 360,
     shareAddress: await getNewAddress(container)
   })
-})
-
-afterAll(async () => {
-  await stopTestingApp(container, app)
-})
+}
 
 describe('list', () => {
   it('should list', async () => {
@@ -89,9 +108,16 @@ describe('list', () => {
         blockCommission: '0'
       },
       commission: '0',
-      totalLiquidity: '122.47448713',
+      totalLiquidity: {
+        token: '122.47448713',
+        usd: '124.965259043707276669'
+      },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
+      priceRatio: {
+        'tokenA/tokenB': '0.16666666',
+        'tokenB/tokenA': '6'
+      },
       rewardPct: '0',
       customRewards: undefined,
       creation: {
@@ -156,9 +182,16 @@ describe('get', () => {
         blockCommission: '0'
       },
       commission: '0',
-      totalLiquidity: '141.42135623',
+      totalLiquidity: {
+        token: '141.42135623',
+        usd: '237.805367987928383246'
+      },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
+      priceRatio: {
+        'tokenA/tokenB': '0.5',
+        'tokenB/tokenA': '2'
+      },
       rewardPct: '0',
       customRewards: undefined,
       creation: {

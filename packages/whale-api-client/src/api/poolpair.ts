@@ -50,8 +50,10 @@ export interface PoolPairData {
     'tokenB/tokenA': string // BigNumber | string
   }
   commission: string // BigNumber
-  totalLiquidity: string // BigNumber
-  totalLiquidityUsd: string // BigNumber
+  totalLiquidity: {
+    token: string // BigNumber
+    usd: string // BigNumber
+  }
   tradeEnabled: boolean
   ownerAddress: string
   rewardPct: string // BigNumber

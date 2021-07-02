@@ -115,8 +115,10 @@ describe('list', () => {
         blockCommission: '0'
       },
       commission: '0',
-      totalLiquidity: '122.47448713',
-      totalLiquidityUsd: '124.965259043707276669',
+      totalLiquidity: {
+        token: '122.47448713',
+        usd: '124.965259043707276669'
+      },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
@@ -180,8 +182,10 @@ describe('get', () => {
         blockCommission: '0'
       },
       commission: '0',
-      totalLiquidity: '141.42135623',
-      totalLiquidityUsd: '237.805367987928383246',
+      totalLiquidity: {
+        token: '141.42135623',
+        usd: '237.805367987928383246'
+      },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
