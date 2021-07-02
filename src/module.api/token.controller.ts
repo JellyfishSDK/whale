@@ -64,7 +64,7 @@ function mapTokenData (id: string, tokenInfo: TokenInfo): TokenData {
     symbol: tokenInfo.symbol,
     symbolKey: tokenInfo.symbolKey,
     name: tokenInfo.name,
-    decimal: tokenInfo.decimal,
+    decimal: tokenInfo.decimal.toNumber(),
     limit: tokenInfo.limit.toFixed(),
     mintable: tokenInfo.mintable,
     tradeable: tokenInfo.tradeable,
@@ -72,8 +72,8 @@ function mapTokenData (id: string, tokenInfo: TokenInfo): TokenData {
     isLPS: tokenInfo.isLPS,
     finalized: tokenInfo.finalized,
     minted: tokenInfo.minted.toFixed(),
-    creation: { tx: tokenInfo.creationTx, height: tokenInfo.creationHeight },
-    destruction: { tx: tokenInfo.destructionTx, height: tokenInfo.destructionHeight },
+    creation: { tx: tokenInfo.creationTx, height: tokenInfo.creationHeight.toNumber() },
+    destruction: { tx: tokenInfo.destructionTx, height: tokenInfo.destructionHeight.toNumber() },
     collateralAddress: tokenInfo.collateralAddress
   }
 }
