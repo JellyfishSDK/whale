@@ -1,6 +1,8 @@
-import { Controller, Get, Param } from '@nestjs/common'
+import { Controller, Get, Param, Query } from '@nestjs/common'
 import { Block, BlockMapper } from '@src/module.model/block'
 import { TransactionMapper, Transaction } from '@src/module.model/transaction'
+import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
+import { PaginationQuery } from '@src/module.api/_core/api.query'
 
 @Controller('/v0/:network/blocks')
 export class BlockController {
@@ -10,9 +12,21 @@ export class BlockController {
   ) {
   }
 
+  @Get('')
+  async listBlocks (
+    @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<Block>> {
+    const blocks = await this.blockMapper.queryByHeight(query.size, query.next)
+
+    return ApiPagedResponse.of(blocks, query.size, item => {
+      return item.id
+    })
+  }
+
   @Get('/tip')
   async getLatest (): Promise<Block | undefined> {
-    return await this.blockMapper.getHighest()
+    const blocks = await this.blockMapper.queryByHeight(1)
+    return blocks[0]
   }
 
   @Get('/:id')

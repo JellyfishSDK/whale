@@ -42,4 +42,11 @@ describe('BlockController', () => {
 
     expect(transactions.length).toStrictEqual(1)
   })
+
+  it('listBlocks should be able to get a paginated response of blocks', async () => {
+    const paginatedBlocks = await controller.listBlocks({ size: 30, next: '40' })
+
+    expect(paginatedBlocks.data.length).toStrictEqual(30)
+    expect(paginatedBlocks.data[0].height).toStrictEqual(39)
+  })
 })
