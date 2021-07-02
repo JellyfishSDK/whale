@@ -42,23 +42,23 @@ afterAll(async () => {
 
 describe('Weightage - approveOracle', () => {
   let oracleId: string
-  let blockCount: number
+  let height: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
     oracleId = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 1 })
 
     await container.generate(1)
-    blockCount = await client.blockchain.getBlockCount()
+    height = await client.blockchain.getBlockCount()
   }
 
   it('should get weightage', async () => {
     await setup()
-    await waitForHeight(app, blockCount)
+    await waitForHeight(app, height)
 
     const oracleStatusMapper = app.get(OracleStatusMapper)
 
-    const data1 = await oracleStatusMapper.get(`${oracleId}-${blockCount}`)
+    const data1 = await oracleStatusMapper.get(`${oracleId}-${height}`)
     expect(data1?.data.weightage).toStrictEqual(1)
     expect(data1?.state).toStrictEqual(OracleState.LIVE)
 
@@ -70,7 +70,7 @@ describe('Weightage - approveOracle', () => {
 
 describe('Weightage - updateOracle', () => {
   let oracleId: string
-  let blockCount: number
+  let height: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
@@ -85,16 +85,16 @@ describe('Weightage - updateOracle', () => {
 
     await container.generate(1)
 
-    blockCount = await client.blockchain.getBlockCount()
+    height = await client.blockchain.getBlockCount()
   }
 
   it('should get weightage', async () => {
     await setup()
-    await waitForHeight(app, blockCount)
+    await waitForHeight(app, height)
 
     const oracleStatusMapper = app.get(OracleStatusMapper)
 
-    const data1 = await oracleStatusMapper.get(`${oracleId}-${blockCount}`)
+    const data1 = await oracleStatusMapper.get(`${oracleId}-${height}`)
     expect(data1?.data.weightage).toStrictEqual(2)
     expect(data1?.state).toStrictEqual(OracleState.LIVE)
 
@@ -106,7 +106,7 @@ describe('Weightage - updateOracle', () => {
 
 describe('Weightage - removeOracle', () => {
   let oracleId: string
-  let blockCount: number
+  let height: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
@@ -118,16 +118,16 @@ describe('Weightage - removeOracle', () => {
 
     await container.generate(1)
 
-    blockCount = await client.blockchain.getBlockCount()
+    height = await client.blockchain.getBlockCount()
   }
 
   it('should remove weightage', async () => {
     await setup()
-    await waitForHeight(app, blockCount)
+    await waitForHeight(app, height)
 
     const oracleStatusMapper = app.get(OracleStatusMapper)
 
-    const data1 = await oracleStatusMapper.get(`${oracleId}-${blockCount}`)
+    const data1 = await oracleStatusMapper.get(`${oracleId}-${height}`)
     expect(data1?.data.weightage).toStrictEqual(0)
     expect(data1?.state).toStrictEqual(OracleState.REMOVED)
 

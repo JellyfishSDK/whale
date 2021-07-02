@@ -10,11 +10,11 @@ export class Oracle {
   /**
    * Get current aggregated weightage of an oracle
    *
-   * @param {string} oracleId
+   * @param {string} id
    * @return {Promise<OracleStatusAggregration>}
    */
-  async getAggregation (oracleId: string): Promise<OracleStatusAggregration> {
-    return await this.client.requestData('GET', `oracle/${oracleId}/aggregation`)
+  async getAggregation (id: string): Promise<OracleStatusAggregration> {
+    return await this.client.requestData('GET', `oracle/${id}/aggregation`)
   }
 }
 

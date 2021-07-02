@@ -23,7 +23,7 @@ describe('getAggregation', () => {
   })
 
   let oracleId: string
-  let blockCount: number
+  let height: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
@@ -38,7 +38,7 @@ describe('getAggregation', () => {
 
     await container.generate(1)
 
-    blockCount = await client.blockchain.getBlockCount()
+    height = await client.blockchain.getBlockCount()
   }
 
   afterAll(async () => {
@@ -47,16 +47,16 @@ describe('getAggregation', () => {
 
   describe('getAggregation', () => {
     it('should getAggregation', async () => {
-      await waitForIndexedHeight(app, blockCount)
+      await waitForIndexedHeight(app, height)
 
-      const result = await controller.getAggregation(`${oracleId}-${blockCount}`)
+      const result = await controller.getAggregation(`${oracleId}-${height}`)
       expect(result?.data.weightage).toStrictEqual(2)
     })
 
     it('should return undefined if getAggregation with invalid id', async () => {
-      await waitForIndexedHeight(app, blockCount)
+      await waitForIndexedHeight(app, height)
 
-      const result = await controller.getAggregation('invalid')
+      const result = await controller.getAggregation('invalidid')
       expect(result).toStrictEqual(undefined)
     })
   })

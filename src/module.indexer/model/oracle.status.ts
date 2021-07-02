@@ -27,14 +27,17 @@ export class OracleStatusIndexer extends Indexer {
         if (stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
           const oracleId: string = txn.txid
           const weightage = stack[1].tx.data.weightage
-          records[oracleId] = OracleStatusIndexer.newOracleStatus(block, oracleId, weightage, OracleState.LIVE)
+          const id = `${oracleId}-${block.height}`
+          records[id] = OracleStatusIndexer.newOracleStatus(block, oracleId, weightage, OracleState.LIVE)
         } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
           const oracleId: string = stack[1].tx.data.oracleId
           const weightage = stack[1].tx.data.weightage
-          records[oracleId] = OracleStatusIndexer.newOracleStatus(block, oracleId, weightage, OracleState.LIVE)
+          const id = `${oracleId}-${block.height}`
+          records[id] = OracleStatusIndexer.newOracleStatus(block, oracleId, weightage, OracleState.LIVE)
         } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
           const oracleId: string = stack[1].tx.data.oracleId
-          records[oracleId] = OracleStatusIndexer.newOracleStatus(block, oracleId, 0, OracleState.REMOVED)
+          const id = `${oracleId}-${block.height}`
+          records[id] = OracleStatusIndexer.newOracleStatus(block, oracleId, 0, OracleState.REMOVED)
         }
       }
     }
@@ -53,7 +56,8 @@ export class OracleStatusIndexer extends Indexer {
 
         if (stack[1].tx.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
           const oracleId: string = txn.txid
-          await this.mapper.delete(oracleId)
+          const id = `${oracleId}-${block.height}`
+          await this.mapper.delete(id)
         }
       }
     }

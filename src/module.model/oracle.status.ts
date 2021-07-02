@@ -29,7 +29,7 @@ export class OracleStatusMapper {
     const aggregations = await this.database.query(OracleStatusMapping.index.id_height, {
       partitionKey: id,
       order: SortOrder.DESC,
-      limit: 1
+      limit: 100
     })
     return aggregations.length === 0 ? undefined : aggregations[0]
   }

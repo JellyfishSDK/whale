@@ -21,7 +21,7 @@ beforeAll(async () => {
 })
 
 let oracleId: string
-let blockCount: number
+let height: number
 
 async function setup (): Promise<void> {
   const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
@@ -33,7 +33,7 @@ async function setup (): Promise<void> {
 
   await container.generate(1)
 
-  blockCount = await container.call('getblockcount')
+  height = await container.call('getblockcount')
 }
 
 afterAll(async () => {
@@ -45,8 +45,8 @@ afterAll(async () => {
 })
 
 it('should getAggregation', async () => {
-  await service.waitForIndexedHeight(blockCount)
-  const agg = await client.oracle.getAggregation(oracleId)
+  await service.waitForIndexedHeight(height)
+  const agg = await client.oracle.getAggregation(`${oracleId}-${height}`)
   expect(agg.data.weightage).toStrictEqual(2)
   expect(agg.state).toStrictEqual('LIVE')
 })
