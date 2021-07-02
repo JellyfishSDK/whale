@@ -49,7 +49,7 @@ describe('getStatus', () => {
     it('should getStatus', async () => {
       await waitForIndexedHeight(app, height)
 
-      const result = await controller.getStatus(`${oracleId}-${height}`)
+      const result = await controller.getStatus(oracleId)
       expect(result?.data.weightage).toStrictEqual(2)
     })
 
@@ -57,6 +57,7 @@ describe('getStatus', () => {
       await waitForIndexedHeight(app, height)
 
       const result = await controller.getStatus('invalid')
+
       expect(result).toStrictEqual(undefined)
     })
   })

@@ -46,7 +46,9 @@ afterAll(async () => {
 
 it('should getStatus', async () => {
   await service.waitForIndexedHeight(height)
-  const result = await client.oracle.getStatus(`${oracleId}-${height}`)
+
+  const result = await client.oracle.getStatus(oracleId)
+
   expect(result.data.weightage).toStrictEqual(2)
   expect(result.state).toStrictEqual('LIVE')
 })

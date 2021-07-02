@@ -6,11 +6,11 @@ import { OracleState } from '@whale-api-client/api/oracle'
 const OracleStatusMapping: ModelMapping<OracleStatus> = {
   type: 'oracle_status',
   index: {
-    id_height: {
-      name: 'oracle_status_id_height',
+    oracleId_height: {
+      name: 'oracle_status_oracleId_height',
       partition: {
         type: 'string',
-        key: (d: OracleStatus) => d.id // oracleId - height
+        key: (d: OracleStatus) => d.data.oracleId
       },
       sort: {
         type: 'number',
@@ -25,9 +25,9 @@ export class OracleStatusMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async getLatest (id: string): Promise<OracleStatus | undefined> {
-    const data = await this.database.query(OracleStatusMapping.index.id_height, {
-      partitionKey: id,
+  async getLatest (oracleId: string): Promise<OracleStatus | undefined> {
+    const data = await this.database.query(OracleStatusMapping.index.oracleId_height, {
+      partitionKey: oracleId,
       order: SortOrder.DESC,
       limit: 1
     })
@@ -53,6 +53,7 @@ export interface OracleStatus extends Model {
     height: number
   }
   data: {
+    oracleId: string
     weightage: number
   }
   state: OracleState

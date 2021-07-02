@@ -10,7 +10,7 @@ export class Oracle {
   /**
    * Get current status of an oracle.
    *
-   * @param {string} id
+   * @param {string} id oracleId
    * @return {Promise<OracleStatus>}
    */
   async getStatus (id: string): Promise<OracleStatus> {

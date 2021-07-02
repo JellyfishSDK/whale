@@ -79,6 +79,7 @@ export class OracleStatusIndexer extends Indexer {
         height: block.height
       },
       data: {
+        oracleId,
         weightage
       },
       state
