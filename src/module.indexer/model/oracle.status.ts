@@ -29,17 +29,14 @@ export class OracleStatusIndexer extends Indexer {
         if (stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
           const oracleId: string = txn.txid
           const weightage = stack[1].tx.data.weightage
-          const id = `${oracleId}-${block.height}`
-          records[id] = OracleStatusIndexer.newOracleStatus(block, oracleId, weightage, OracleState.LIVE)
+          records[`${oracleId}-${block.height}`] = OracleStatusIndexer.newOracleStatus(block, oracleId, weightage, OracleState.LIVE)
         } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
           const oracleId: string = stack[1].tx.data.oracleId
           const weightage = stack[1].tx.data.weightage
-          const id = `${oracleId}-${block.height}`
-          records[id] = OracleStatusIndexer.newOracleStatus(block, oracleId, weightage, OracleState.LIVE)
+          records[`${oracleId}-${block.height}`] = OracleStatusIndexer.newOracleStatus(block, oracleId, weightage, OracleState.LIVE)
         } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
           const oracleId: string = stack[1].tx.data.oracleId
-          const id = `${oracleId}-${block.height}`
-          records[id] = OracleStatusIndexer.newOracleStatus(block, oracleId, 0, OracleState.REMOVED)
+          records[`${oracleId}-${block.height}`] = OracleStatusIndexer.newOracleStatus(block, oracleId, 0, OracleState.REMOVED)
         }
       }
     }
