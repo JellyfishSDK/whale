@@ -9,7 +9,7 @@ let app: NestFastifyApplication
 let controller: OracleStatusController
 let client: JsonRpcClient
 
-describe('getAggregation', () => {
+describe('getStatus', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -45,18 +45,18 @@ describe('getAggregation', () => {
     await stopTestingApp(container, app)
   })
 
-  describe('getAggregation', () => {
-    it('should getAggregation', async () => {
+  describe('getStatus', () => {
+    it('should getStatus', async () => {
       await waitForIndexedHeight(app, height)
 
-      const result = await controller.getAggregation(`${oracleId}-${height}`)
+      const result = await controller.getStatus(`${oracleId}-${height}`)
       expect(result?.data.weightage).toStrictEqual(2)
     })
 
-    it('should return undefined if getAggregation with invalid id', async () => {
+    it('should return undefined if getStatus with invalid id', async () => {
       await waitForIndexedHeight(app, height)
 
-      const result = await controller.getAggregation('invalidid')
+      const result = await controller.getStatus('invalidid')
       expect(result).toStrictEqual(undefined)
     })
   })

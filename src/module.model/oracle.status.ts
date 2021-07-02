@@ -26,12 +26,12 @@ export class OracleStatusMapper {
   }
 
   async getLatest (id: string): Promise<OracleStatus | undefined> {
-    const aggregations = await this.database.query(OracleStatusMapping.index.id_height, {
+    const data = await this.database.query(OracleStatusMapping.index.id_height, {
       partitionKey: id,
       order: SortOrder.DESC,
-      limit: 100
+      limit: 1
     })
-    return aggregations.length === 0 ? undefined : aggregations[0]
+    return data.length === 0 ? undefined : data[0]
   }
 
   async get (id: string): Promise<OracleStatus | undefined> {
@@ -48,7 +48,7 @@ export class OracleStatusMapper {
 }
 
 export interface OracleStatus extends Model {
-  id: string // oracleId + height
+  id: string // oracleId - height
   block: {
     height: number
   }

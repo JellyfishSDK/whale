@@ -12,8 +12,8 @@ export class OracleStatusController {
   ) {
   }
 
-  @Get('/aggregation')
-  async getAggregation (
+  @Get('/status')
+  async getStatus (
     @Param('id') id: string
   ): Promise<OracleStatus | undefined> {
     return await this.statusMapper.getLatest(id)

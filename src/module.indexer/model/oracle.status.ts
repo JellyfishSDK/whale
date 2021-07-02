@@ -42,8 +42,8 @@ export class OracleStatusIndexer extends Indexer {
       }
     }
 
-    for (const aggregation of Object.values(records)) {
-      await this.mapper.put(aggregation)
+    for (const status of Object.values(records)) {
+      await this.mapper.put(status)
     }
   }
 
@@ -56,6 +56,10 @@ export class OracleStatusIndexer extends Indexer {
 
         if (stack[1].tx.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
           const oracleId: string = txn.txid
+          const id = `${oracleId}-${block.height}`
+          await this.mapper.delete(id)
+        } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE' || stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
+          const oracleId: string = stack[1].tx.data.oracleId
           const id = `${oracleId}-${block.height}`
           await this.mapper.delete(id)
         }
