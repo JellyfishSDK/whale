@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { SmartBuffer } from 'smart-buffer'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
-import { OracleStatus, OracleStatusMapper } from '@src/module.model/oracle.status'
-import { OracleState } from '@whale-api-client/api/oracle'
+import { OracleStatusMapper } from '@src/module.model/oracle.status'
+import { OracleState, OracleStatus } from '@whale-api-client/api/oracle'
 
 @Injectable()
 export class OracleStatusIndexer extends Indexer {
-  constructor (private readonly mapper: OracleStatusMapper) {
+  constructor (
+    private readonly mapper: OracleStatusMapper
+  ) {
     super()
   }
 
@@ -48,6 +50,8 @@ export class OracleStatusIndexer extends Indexer {
   }
 
   async invalidate (block: RawBlock): Promise<void> {
+    const ids: string[] = []
+
     for (const txn of block.tx) {
       for (const vout of txn.vout) {
         const stack: any = toOPCodes(
@@ -56,14 +60,16 @@ export class OracleStatusIndexer extends Indexer {
 
         if (stack[1].tx.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
           const oracleId: string = txn.txid
-          const id = `${oracleId}-${block.height}`
-          await this.mapper.delete(id)
+          ids.push(`${oracleId}-${block.height}`)
         } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE' || stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
           const oracleId: string = stack[1].tx.data.oracleId
-          const id = `${oracleId}-${block.height}`
-          await this.mapper.delete(id)
+          ids.push(`${oracleId}-${block.height}`)
         }
       }
+    }
+
+    for (const id of ids) {
+      await this.mapper.delete(id)
     }
   }
 

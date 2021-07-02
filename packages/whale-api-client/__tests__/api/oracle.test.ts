@@ -44,11 +44,10 @@ afterAll(async () => {
   }
 })
 
-it('should getStatus', async () => {
-  await service.waitForIndexedHeight(height)
+it('should getStatus 5 blocks after the oracle was updated', async () => {
+  await service.waitForIndexedHeight(height + 5)
 
   const result = await client.oracle.getStatus(oracleId)
-
   expect(result.data.weightage).toStrictEqual(2)
   expect(result.state).toStrictEqual('LIVE')
 })

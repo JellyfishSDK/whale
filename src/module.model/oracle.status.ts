@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { Model, ModelMapping } from '@src/module.database/model'
+import { ModelMapping } from '@src/module.database/model'
 import { Database, SortOrder } from '@src/module.database/database'
-import { OracleState } from '@whale-api-client/api/oracle'
+import { OracleStatus } from '@whale-api-client/api/oracle'
 
 const OracleStatusMapping: ModelMapping<OracleStatus> = {
   type: 'oracle_status',
@@ -34,27 +34,15 @@ export class OracleStatusMapper {
     return data.length === 0 ? undefined : data[0]
   }
 
-  async get (id: string): Promise<OracleStatus | undefined> {
-    return await this.database.get(OracleStatusMapping, id)
+  async get (oracleId: string, height: number): Promise<OracleStatus | undefined> {
+    return await this.database.get(OracleStatusMapping, `${oracleId}-${height}`)
   }
 
-  async put (id: OracleStatus): Promise<void> {
-    return await this.database.put(OracleStatusMapping, id)
+  async put (status: OracleStatus): Promise<void> {
+    return await this.database.put(OracleStatusMapping, status)
   }
 
   async delete (id: string): Promise<void> {
     return await this.database.delete(OracleStatusMapping, id)
   }
-}
-
-export interface OracleStatus extends Model {
-  id: string // oracleId - height
-  block: {
-    height: number
-  }
-  data: {
-    oracleId: string
-    weightage: number
-  }
-  state: OracleState
 }

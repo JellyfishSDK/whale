@@ -8,7 +8,7 @@ export class Oracle {
   }
 
   /**
-   * Get current status of an oracle.
+   * Get current status of an oracle
    *
    * @param {string} id oracleId
    * @return {Promise<OracleStatus>}
@@ -24,6 +24,7 @@ export interface OracleStatus {
     height: number
   }
   data: {
+    oracleId: string
     weightage: number
   }
   state: OracleState

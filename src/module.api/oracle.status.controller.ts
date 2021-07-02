@@ -1,7 +1,8 @@
 import { Controller, Get, Param } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
-import { OracleStatus, OracleStatusMapper } from '@src/module.model/oracle.status'
+import { OracleStatusMapper } from '@src/module.model/oracle.status'
+import { OracleStatus } from '@whale-api-client/api/oracle'
 
 @Controller('/v0/:network/oracle/:id')
 export class OracleStatusController {
