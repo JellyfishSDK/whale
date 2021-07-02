@@ -58,7 +58,7 @@ describe('Weightage - approveOracle', () => {
 
     const oracleStatusMapper = app.get(OracleStatusMapper)
 
-    const data1 = await oracleStatusMapper.get(oracleId)
+    const data1 = await oracleStatusMapper.get(`${oracleId}-${blockCount}`)
     expect(data1?.data.weightage).toStrictEqual(1)
     expect(data1?.state).toStrictEqual(OracleState.LIVE)
 
@@ -94,7 +94,7 @@ describe('Weightage - updateOracle', () => {
 
     const oracleStatusMapper = app.get(OracleStatusMapper)
 
-    const data1 = await oracleStatusMapper.get(oracleId)
+    const data1 = await oracleStatusMapper.get(`${oracleId}-${blockCount}`)
     expect(data1?.data.weightage).toStrictEqual(2)
     expect(data1?.state).toStrictEqual(OracleState.LIVE)
 
@@ -127,7 +127,7 @@ describe('Weightage - removeOracle', () => {
 
     const oracleStatusMapper = app.get(OracleStatusMapper)
 
-    const data1 = await oracleStatusMapper.get(oracleId)
+    const data1 = await oracleStatusMapper.get(`${oracleId}-${blockCount}`)
     expect(data1?.data.weightage).toStrictEqual(0)
     expect(data1?.state).toStrictEqual(OracleState.REMOVED)
 

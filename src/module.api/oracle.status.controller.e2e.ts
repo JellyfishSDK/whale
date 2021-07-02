@@ -49,7 +49,7 @@ describe('getAggregation', () => {
     it('should getAggregation', async () => {
       await waitForIndexedHeight(app, blockCount)
 
-      const result = await controller.getAggregation(oracleId)
+      const result = await controller.getAggregation(`${oracleId}-${blockCount}`)
       expect(result?.data.weightage).toStrictEqual(2)
     })
 

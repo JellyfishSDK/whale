@@ -3,7 +3,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { OracleStatus, OracleStatusMapper } from '@src/module.model/oracle.status'
 
-@Controller('/v0/:network/oracle/:oracleid')
+@Controller('/v0/:network/oracle/:id')
 export class OracleStatusController {
   constructor (
     protected readonly rpcClient: JsonRpcClient,
@@ -14,8 +14,8 @@ export class OracleStatusController {
 
   @Get('/aggregation')
   async getAggregation (
-    @Param('oracleid') oracleid: string
+    @Param('id') id: string
   ): Promise<OracleStatus | undefined> {
-    return await this.statusMapper.getLatest(oracleid)
+    return await this.statusMapper.getLatest(id)
   }
 }

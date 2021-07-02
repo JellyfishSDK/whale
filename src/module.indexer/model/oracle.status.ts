@@ -66,7 +66,7 @@ export class OracleStatusIndexer extends Indexer {
     state: OracleState
   ): OracleStatus {
     return {
-      id: oracleId,
+      id: `${oracleId}-${block.height}`,
       block: {
         height: block.height
       },
