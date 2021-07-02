@@ -56,7 +56,7 @@ describe('getStatus', () => {
     it('should return undefined if getStatus with invalid id', async () => {
       await waitForIndexedHeight(app, height)
 
-      const result = await controller.getStatus('invalidid')
+      const result = await controller.getStatus('invalid')
       expect(result).toStrictEqual(undefined)
     })
   })

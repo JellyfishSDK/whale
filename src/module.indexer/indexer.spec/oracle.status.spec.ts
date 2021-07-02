@@ -63,20 +63,22 @@ describe('Weightage - approveOracle', () => {
     expect(data1?.state).toStrictEqual(OracleState.LIVE)
 
     const data2 = await client.oracle.getOracleData(oracleId)
-
     expect(data2?.weightage).toStrictEqual(1)
   })
 })
 
 describe('Weightage - updateOracle', () => {
   let oracleId: string
-  let height: number
+  let height1: number
+  let height2: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
     oracleId = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds, { weightage: 1 })
 
     await container.generate(1)
+
+    height1 = await client.blockchain.getBlockCount()
 
     await client.oracle.updateOracle(oracleId, await container.getNewAddress(), {
       priceFeeds,
@@ -85,22 +87,22 @@ describe('Weightage - updateOracle', () => {
 
     await container.generate(1)
 
-    height = await client.blockchain.getBlockCount()
+    height2 = await client.blockchain.getBlockCount()
   }
 
   it('should get weightage', async () => {
     await setup()
-    await waitForHeight(app, height)
+    await waitForHeight(app, height1)
 
     const oracleStatusMapper = app.get(OracleStatusMapper)
 
-    const data1 = await oracleStatusMapper.get(`${oracleId}-${height}`)
-    expect(data1?.data.weightage).toStrictEqual(2)
+    const data1 = await oracleStatusMapper.get(`${oracleId}-${height1}`)
+    expect(data1?.data.weightage).toStrictEqual(1)
     expect(data1?.state).toStrictEqual(OracleState.LIVE)
 
-    const data2 = await client.oracle.getOracleData(oracleId)
-
-    expect(data2?.weightage).toStrictEqual(2)
+    const data2 = await oracleStatusMapper.get(`${oracleId}-${height2}`)
+    expect(data2?.data.weightage).toStrictEqual(2)
+    expect(data2?.state).toStrictEqual(OracleState.LIVE)
   })
 })
 
@@ -132,7 +134,6 @@ describe('Weightage - removeOracle', () => {
     expect(data1?.state).toStrictEqual(OracleState.REMOVED)
 
     const promise = client.oracle.getOracleData(oracleId)
-
     await expect(promise).rejects.toThrow(RpcApiError)
     await expect(promise).rejects.toThrow(`RpcApiError: 'oracle <${oracleId}> not found', code: -20, method: getoracledata`)
   })
