@@ -79,7 +79,6 @@ export class PoolPairService {
     const tokenSymbol = poolPairSymbols[0] !== 'DFI' ? poolPairSymbols[1] : poolPairSymbols[0]
     const swappedAccount = await this.testPoolSwap(tokenSymbol, 'DFI')
 
-    // const swappedAccount = '14.23530023@tokenId'
     const swappedData = swappedAccount.split('@')
     const tokenToDfi = new BigNumber(swappedData[0])
     const tokenId = swappedData[1]
