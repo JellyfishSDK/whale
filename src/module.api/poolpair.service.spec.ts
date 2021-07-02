@@ -9,6 +9,7 @@ import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
 let service: PoolPairService
+let spy: jest.SpyInstance
 
 beforeAll(async () => {
   await container.start()
@@ -73,6 +74,17 @@ afterAll(async () => {
   await container.stop()
 })
 
+beforeEach(async () => {
+  spy = jest.spyOn(service, 'testPoolSwap').mockImplementation(
+    async (x, y) => x === 'USDT' && y === 'DFI'
+      ? await Promise.resolve('0.43151288@0') // usdt to dfi
+      : await Promise.resolve('14.23530023@777')) // token to dfi
+})
+
+afterEach(() => {
+  spy.mockRestore()
+})
+
 describe('list', () => {
   it('should list', async () => {
     const pairPairsData = await service.list({
@@ -94,7 +106,7 @@ describe('list', () => {
       blockCommissionB: new BigNumber('0'),
       commission: new BigNumber('0'),
       totalLiquidity: new BigNumber('122.47448713'),
-      totalLiquidityUsd: new BigNumber('123.943738074614627569'),
+      totalLiquidityUsd: new BigNumber('124.965259043707276669'),
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       'reserveA/reserveB': new BigNumber('0.16666666'),
@@ -132,7 +144,7 @@ describe('get', () => {
       blockCommissionB: new BigNumber('0'),
       commission: new BigNumber('0'),
       totalLiquidity: new BigNumber('141.42135623'),
-      totalLiquidityUsd: new BigNumber('235.762326049743085046'),
+      totalLiquidityUsd: new BigNumber('237.805367987928383246'),
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       'reserveA/reserveB': new BigNumber('0.5'),

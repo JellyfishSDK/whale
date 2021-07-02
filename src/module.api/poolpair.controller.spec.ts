@@ -9,6 +9,8 @@ import { DeFiDCache } from './cache/defid.cache'
 
 const container = new MasterNodeRegTestContainer()
 let controller: PoolPairController
+let service: PoolPairService
+let spy: jest.SpyInstance
 
 beforeAll(async () => {
   await container.start()
@@ -29,6 +31,8 @@ beforeAll(async () => {
   }).compile()
 
   controller = app.get(PoolPairController)
+
+  service = app.get(PoolPairService) // for stubbing testPoolSwap
 
   const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
 
@@ -74,6 +78,17 @@ afterAll(async () => {
   await container.stop()
 })
 
+beforeEach(async () => {
+  spy = jest.spyOn(service, 'testPoolSwap').mockImplementation(
+    async (x, y) => x === 'USDT' && y === 'DFI'
+      ? await Promise.resolve('0.43151288@0') // usdt to dfi
+      : await Promise.resolve('14.23530023@777')) // token to dfi
+})
+
+afterEach(() => {
+  spy.mockRestore()
+})
+
 describe('list', () => {
   it('should list', async () => {
     const response = await controller.list({
@@ -100,7 +115,7 @@ describe('list', () => {
       },
       commission: '0',
       totalLiquidity: '122.47448713',
-      totalLiquidityUsd: '123.943738074614627569',
+      totalLiquidityUsd: '124.965259043707276669',
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
@@ -172,7 +187,7 @@ describe('get', () => {
       },
       commission: '0',
       totalLiquidity: '141.42135623',
-      totalLiquidityUsd: '235.762326049743085046',
+      totalLiquidityUsd: '237.805367987928383246',
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {

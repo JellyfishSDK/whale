@@ -3,7 +3,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import BigNumber from 'bignumber.js'
-import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
+import { PoolPairInfo, TestPoolSwapMetadata } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 
 @Injectable()
 export class PoolPairService {
@@ -20,15 +20,15 @@ export class PoolPairService {
       limit: query.size
     }, true)
 
-    const dfiUsdtConversionPrice = getDfiUsdtConversionPrice()
+    const dfiUsdtConversionPrice = await this.getDfiUsdtConversionPrice()
 
-    return Object.entries(poolPairResult).map(([id, value]) => {
+    return await Promise.all(Object.entries(poolPairResult).map(async ([id, value]) => {
       return {
         ...value,
         id,
-        totalLiquidityUsd: getTotalLiquidityUsd(value, dfiUsdtConversionPrice)
+        totalLiquidityUsd: await this.getTotalLiquidityUsd(value, dfiUsdtConversionPrice)
       }
-    })
+    }))
   }
 
   async get (id: string): Promise<PoolPairInfoPlus> {
@@ -37,73 +37,73 @@ export class PoolPairService {
       throw new NotFoundException('Unable to find poolpair')
     }
 
-    const dfiUsdtConversionPrice = getDfiUsdtConversionPrice()
-
-    const totalLiquidityUsd = getTotalLiquidityUsd(info, dfiUsdtConversionPrice)
+    const dfiUsdtConversionPrice = await this.getDfiUsdtConversionPrice()
+    const totalLiquidityUsd = await this.getTotalLiquidityUsd(info, dfiUsdtConversionPrice)
 
     return {
-      ...info,
-      id,
-      totalLiquidityUsd
+      ...info, id, totalLiquidityUsd
     }
   }
-}
 
-function getDfiUsdtConversionPrice (): Record<string, BigNumber> {
-  // const fromAddress = await this.rpcClient.wallet.getNewAddress()
-  // const toAddress = await this.rpcClient.wallet.getNewAddress()
-  // const usdtToDfi = await this.rpcClient.poolpair.testPoolSwap({
-  //  from: tokenAddress, tokenFrom: 'USDT, amount: 1, to: toAddress, tokenTo: 'DFI'
-  // })
-  // const usdtToDfi = new BigNumber(usdtToDfi.split('@')[0])
-  // TODO(canonbrother): use testpoolswap
-  const usdtToDfi = new BigNumber('0.43151288')
-  const dfiToUsdt = new BigNumber('2.29699751')
-
-  return {
-    usdtToDfi,
-    dfiToUsdt
-  }
-}
-
-function getTotalLiquidityUsd (
-  poolPairInfo: PoolPairInfo,
-  dfiUsdtConversionPrice: Record<string, BigNumber>
-): BigNumber {
-  const { usdtToDfi, dfiToUsdt } = dfiUsdtConversionPrice
-
-  // const poolPairSymbols = poolPairData.symbol.split('-')
-  // const symbolA = poolPairSymbols[0]
-  // const symbolB = poolPairSymbols[1]
-  // TODO(canonbrother): guess should have other DFI alternatives
-  // const tokenSymbol = symbolA !== 'DFI' ? symbolB : symbolA
-  // const swapped = await this.rpcClient.poolpair.testPoolSwap({
-  //   from: fromAddress, tokenFrom: tokenSymbol, amountFrom: 1, to: toAddress, tokenTo: 'DFI',
-  // })
-  // TODO(canonbrother): use testpoolswap
-  const swappedAccount = '14.23530023@tokenId'
-  const swappedData = swappedAccount.split('@')
-  const tokenToDfi = new BigNumber(swappedData[0])
-  const tokenId = swappedData[1]
-
-  const tokenToUsdt = usdtToDfi.div(tokenToDfi)
-
-  let reserveAUsd: BigNumber
-  let reserveBUsd: BigNumber
-
-  // check which poolPairInfo.idToken{A/B} is token (eg: ETH)
-  if (tokenId === poolPairInfo.idTokenA) {
-    reserveAUsd = poolPairInfo.reserveA.times(tokenToUsdt)
-    reserveBUsd = poolPairInfo.reserveB.times(dfiToUsdt)
-  } else {
-    reserveAUsd = poolPairInfo.reserveA.times(dfiToUsdt)
-    reserveBUsd = poolPairInfo.reserveB.times(tokenToUsdt)
+  async testPoolSwap (tokenFrom: string, tokenTo: string): Promise<string> {
+    const testAddress = await this.rpcClient.wallet.getNewAddress()
+    const metadata: TestPoolSwapMetadata = {
+      tokenFrom: tokenFrom,
+      tokenTo: tokenTo,
+      from: testAddress,
+      to: testAddress,
+      amountFrom: 1
+    }
+    return await this.rpcClient.poolpair.testPoolSwap(metadata)
   }
 
-  // reserveA_USD (eg: BTC) = reserveA * tokenToUsdt
-  // reserveB_USD (eg: DFI) = reserveB * dfiToUsdt
-  // totalLiquidity_USD = reserveA_USD + reserveB_USD
-  return reserveAUsd.plus(reserveBUsd)
+  private async getDfiUsdtConversionPrice (): Promise<Record<string, BigNumber>> {
+    const usdtToDfiAccount = await this.testPoolSwap('USDT', 'DFI')
+    const usdtToDfi = new BigNumber(usdtToDfiAccount.split('@')[0])
+    const dfiToUsdt = new BigNumber('1').div(usdtToDfi)
+
+    return {
+      usdtToDfi,
+      dfiToUsdt
+    }
+  }
+
+  private async getTotalLiquidityUsd (
+    poolPairInfo: PoolPairInfo,
+    dfiUsdtConversionPrice: Record<string, BigNumber>
+  ): Promise<BigNumber> {
+    const { usdtToDfi, dfiToUsdt } = dfiUsdtConversionPrice
+
+    const poolPairSymbols = poolPairInfo.symbol.split('-')
+    // TODO(canonbrother): guess should have other DFI alternatives in future
+    const tokenSymbol = poolPairSymbols[0] !== 'DFI' ? poolPairSymbols[1] : poolPairSymbols[0]
+    const swappedAccount = await this.testPoolSwap(tokenSymbol, 'DFI')
+
+    // const swappedAccount = '14.23530023@tokenId'
+    const swappedData = swappedAccount.split('@')
+    const tokenToDfi = new BigNumber(swappedData[0])
+    const tokenId = swappedData[1]
+
+    const tokenToUsdt = usdtToDfi.div(tokenToDfi)
+
+    let reserveAUsd: BigNumber
+    let reserveBUsd: BigNumber
+
+    // check which poolPairInfo.idToken{A/B} is token (eg: ETH)
+    if (tokenId === poolPairInfo.idTokenA) {
+      reserveAUsd = poolPairInfo.reserveA.times(tokenToUsdt)
+      reserveBUsd = poolPairInfo.reserveB.times(dfiToUsdt)
+    } else {
+      reserveAUsd = poolPairInfo.reserveA.times(dfiToUsdt)
+      reserveBUsd = poolPairInfo.reserveB.times(tokenToUsdt)
+    }
+
+    // Note(canonbrother): totalLiquidity in USD calculation
+    // reserveA_USD (eg: BTC) = reserveA * tokenToUsdt
+    // reserveB_USD (eg: DFI) = reserveB * dfiToUsdt
+    // totalLiquidity_USD = reserveA_USD + reserveB_USD
+    return reserveAUsd.plus(reserveBUsd)
+  }
 }
 
 export interface PoolPairInfoPlus {
