@@ -2,7 +2,7 @@ import { Controller, Get, Param } from '@nestjs/common'
 import { Block, BlockMapper } from '@src/module.model/block'
 import { TransactionMapper, Transaction } from '@src/module.model/transaction'
 
-@Controller('/v0/:network/block')
+@Controller('/v0/:network/blocks')
 export class BlockController {
   constructor (
     protected readonly blockMapper: BlockMapper,
