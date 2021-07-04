@@ -6,6 +6,13 @@ import { OraclePriceFeed } from '@whale-api-client/api/oracle'
 const OraclePriceFeedMapping: ModelMapping<OraclePriceFeed> = {
   type: 'oracle_price_feed',
   index: {
+    id: {
+      name: 'oracle_price_feed_id',
+      partition: {
+        type: 'string',
+        key: (d: OraclePriceFeed) => `${d.block.height}-${d.data.token}-${d.data.currency}-${d.block.height}`
+      }
+    },
     oracleId_height: {
       name: 'oracle_price_feed_oracleId_height',
       partition: {
@@ -23,6 +30,13 @@ const OraclePriceFeedMapping: ModelMapping<OraclePriceFeed> = {
 @Injectable()
 export class OraclePriceFeedMapper {
   public constructor (protected readonly database: Database) {
+  }
+
+  async getAll (): Promise<OraclePriceFeed[] | undefined> {
+    return await this.database.query(OraclePriceFeedMapping.index.id, {
+      order: SortOrder.ASC,
+      limit: 1000000
+    })
   }
 
   async getByOracleId (oracleId: string): Promise<OraclePriceFeed[] | undefined> {

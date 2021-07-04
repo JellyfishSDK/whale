@@ -13,6 +13,12 @@ export class OracleStatusController {
   ) {
   }
 
+  @Get('/')
+  async getAll (
+  ): Promise<OraclePriceFeed[] | undefined> {
+    return await this.priceFeedMapper.getAll()
+  }
+
   @Get('/priceFeed')
   async getPriceFeedById (
     @Param('id') id: string

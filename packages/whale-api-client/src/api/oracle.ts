@@ -8,7 +8,17 @@ export class Oracle {
   }
 
   /**
-   * Get current priceFeed
+   * Get all price feeds
+   *
+   * @param {string} id oracleId
+   * @return {Promise<OraclePriceFeed>}
+   */
+  async getAll (): Promise<OraclePriceFeed[]> {
+    return await this.client.requestData('GET', 'oracle/pricefeed')
+  }
+
+  /**
+   * Get price Feed for an oracleId
    *
    * @param {string} id oracleId
    * @return {Promise<OraclePriceFeed>}
