@@ -1,4 +1,4 @@
-import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
+import { DeFiDRpcError, MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
@@ -64,10 +64,13 @@ describe('PriceFeed - approveOracle', () => {
     expect(data1?.data.currency).toStrictEqual('EUR')
     expect(data1?.state).toStrictEqual(OracleState.LIVE)
 
-    const data2 = await priceFeedMapper.get(oracleId, 'APPL', 'EUR', height)
-    expect(data2?.data.token).toStrictEqual('APPL')
-    expect(data2?.data.currency).toStrictEqual('EUR')
-    expect(data2?.state).toStrictEqual(OracleState.LIVE)
+    const result = await container.call('getoracledata', [oracleId])
+    expect(result.priceFeeds).toStrictEqual(
+      [
+        { token: 'APPL', currency: 'EUR' },
+        { token: 'TESL', currency: 'USD' }
+      ]
+    )
   })
 })
 
@@ -124,6 +127,14 @@ describe('PriceFeed - updateOracle', () => {
     expect(data4?.data.token).toStrictEqual('MSFT')
     expect(data4?.data.currency).toStrictEqual('SGD')
     expect(data4?.state).toStrictEqual(OracleState.LIVE)
+
+    const result = await container.call('getoracledata', [oracleId])
+    expect(result.priceFeeds).toStrictEqual(
+      [
+        { token: 'FB', currency: 'CNY' },
+        { token: 'MSFT', currency: 'SGD' }
+      ]
+    )
   })
 })
 
@@ -163,5 +174,9 @@ describe('PriceFeed - removeOracle', () => {
     expect(data2?.data.token).toStrictEqual('TESL')
     expect(data2?.data.currency).toStrictEqual('USD')
     expect(data2?.state).toStrictEqual(OracleState.REMOVED)
+
+    const promise = container.call('getoracledata', [oracleId])
+    await expect(promise).rejects.toThrow(DeFiDRpcError)
+    await expect(promise).rejects.toThrow(`DeFiDRpcError: 'oracle <${oracleId}> not found', code: -20`)
   })
 })
