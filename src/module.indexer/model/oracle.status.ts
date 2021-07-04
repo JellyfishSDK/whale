@@ -28,15 +28,26 @@ export class OracleStatusIndexer extends Indexer {
 
         if (stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
           const oracleId: string = txn.txid
-          const weightage = stack[1].tx.data.weightage
-          records[`${oracleId}-${block.height}`] = OracleStatusIndexer.newOracleStatus(block, oracleId, weightage, OracleState.LIVE)
+          const weightage: number = stack[1].tx.data.weightage
+          records[`${oracleId}-${block.height}`] = OracleStatusIndexer.newOracleStatus(block.height, oracleId, weightage, OracleState.LIVE)
         } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
           const oracleId: string = stack[1].tx.data.oracleId
-          const weightage = stack[1].tx.data.weightage
-          records[`${oracleId}-${block.height}`] = OracleStatusIndexer.newOracleStatus(block, oracleId, weightage, OracleState.LIVE)
+
+          const oldStatus = await this.mapper.getLatest(oracleId)
+          const oldHeight: number = oldStatus?.block.height ?? 0
+          const oldWeightage: number = oldStatus?.data.weightage ?? 0
+          records[`${oracleId}-${oldHeight}`] = OracleStatusIndexer.newOracleStatus(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
+
+          const weightage: number = stack[1].tx.data.weightage
+          records[`${oracleId}-${block.height}`] = OracleStatusIndexer.newOracleStatus(block.height, oracleId, weightage, OracleState.LIVE)
         } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
           const oracleId: string = stack[1].tx.data.oracleId
-          records[`${oracleId}-${block.height}`] = OracleStatusIndexer.newOracleStatus(block, oracleId, 0, OracleState.REMOVED)
+
+          const oldStatus = await this.mapper.getLatest(oracleId)
+          const oldHeight: number = oldStatus?.block.height ?? 0
+          const oldWeightage: number = oldStatus?.data.weightage ?? 0
+
+          records[`${oracleId}-${oldHeight}`] = OracleStatusIndexer.newOracleStatus(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
         }
       }
     }
@@ -55,7 +66,7 @@ export class OracleStatusIndexer extends Indexer {
           SmartBuffer.fromBuffer(Buffer.from(vout.scriptPubKey.hex, 'hex'))
         )
 
-        if (stack[1].tx.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
+        if (stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
           const oracleId: string = txn.txid
           ids.push(`${oracleId}-${block.height}`)
         } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE' || stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
@@ -71,15 +82,15 @@ export class OracleStatusIndexer extends Indexer {
   }
 
   static newOracleStatus (
-    block: RawBlock,
+    height: number,
     oracleId: string,
     weightage: number,
     state: OracleState
   ): OracleStatus {
     return {
-      id: `${oracleId}-${block.height}`,
+      id: `${oracleId}-${height}`,
       block: {
-        height: block.height
+        height
       },
       data: {
         oracleId,

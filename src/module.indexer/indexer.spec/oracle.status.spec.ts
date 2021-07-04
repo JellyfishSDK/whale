@@ -66,7 +66,8 @@ describe('Weightage - approveOracle', () => {
 
 describe('Weightage - updateOracle', () => {
   let oracleId: string
-  let height: number
+  let height1: number
+  let height2: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
@@ -74,25 +75,31 @@ describe('Weightage - updateOracle', () => {
 
     await container.generate(1)
 
+    height1 = await container.call('getblockcount')
+
     await container.call('updateoracle', [oracleId, await container.getNewAddress(), priceFeeds, 2])
 
     await container.generate(1)
 
-    height = await container.call('getblockcount')
+    height2 = await container.call('getblockcount')
   }
 
   it('should get weightage', async () => {
     await setup()
-    await waitForHeight(app, height)
+    await waitForHeight(app, height2)
 
     const oracleStatusMapper = app.get(OracleStatusMapper)
 
-    const data = await oracleStatusMapper.get(oracleId, height)
-    expect(data?.data.weightage).toStrictEqual(2)
-    expect(data?.state).toStrictEqual(OracleState.LIVE)
+    const data1 = await oracleStatusMapper.get(oracleId, height1)
+    expect(data1?.data.weightage).toStrictEqual(1)
+    expect(data1?.state).toStrictEqual(OracleState.REMOVED)
 
-    const data2 = await container.call('getoracledata', [oracleId])
-    expect(data2?.weightage).toStrictEqual(2)
+    const data2 = await oracleStatusMapper.get(oracleId, height2)
+    expect(data2?.data.weightage).toStrictEqual(2)
+    expect(data2?.state).toStrictEqual(OracleState.LIVE)
+
+    const data3 = await container.call('getoracledata', [oracleId])
+    expect(data3?.weightage).toStrictEqual(2)
   })
 })
 
@@ -106,11 +113,11 @@ describe('Weightage - removeOracle', () => {
 
     await container.generate(1)
 
+    height = await container.call('getblockcount')
+
     await container.call('removeoracle', [oracleId])
 
     await container.generate(1)
-
-    height = await container.call('getblockcount')
   }
 
   it('should remove weightage', async () => {
@@ -120,7 +127,6 @@ describe('Weightage - removeOracle', () => {
     const oracleStatusMapper = app.get(OracleStatusMapper)
 
     const data1 = await oracleStatusMapper.get(oracleId, height)
-    expect(data1?.data.weightage).toStrictEqual(0)
     expect(data1?.state).toStrictEqual(OracleState.REMOVED)
 
     const promise = container.call('getoracledata', [oracleId])
