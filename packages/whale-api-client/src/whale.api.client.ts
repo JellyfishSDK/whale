@@ -8,6 +8,7 @@ import { PoolPair } from './api/poolpair'
 import { Rpc } from './api/rpc'
 import { Transactions } from './api/transactions'
 import { Tokens } from './api/tokens'
+import { Masternode } from './api/masternode'
 
 /**
  * WhaleApiClient Options
@@ -58,7 +59,7 @@ export class WhaleApiClient {
   public readonly rpc = new Rpc(this)
   public readonly transactions = new Transactions(this)
   public readonly tokens = new Tokens(this)
-
+  public readonly masternode = new Masternode(this)
   constructor (
     private readonly options: WhaleApiClientOptions
   ) {
