@@ -1,6 +1,9 @@
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
 
+/**
+ * DeFi whale endpoint for masternode related services.
+ */
 export class Masternode {
   constructor (private readonly client: WhaleApiClient) {
   }
