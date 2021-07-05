@@ -4,13 +4,21 @@ import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import BigNumber from 'bignumber.js'
 import { PoolPairInfo, TestPoolSwapMetadata } from '@defichain/jellyfish-api-core/dist/category/poolpair'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class PoolPairService {
+  private readonly testAddress: string
+
   constructor (
     protected readonly rpcClient: JsonRpcClient,
-    protected readonly deFiDCache: DeFiDCache
+    protected readonly deFiDCache: DeFiDCache,
+    protected readonly configService: ConfigService
   ) {
+    const network = configService.get<string>('network', 'testnet')
+    this.testAddress = network === 'mainnet'
+      ? 'dPGDdodT1CPx2J3o2bYg7585AwSp5UvLHv' // mainnet
+      : 'te1WMD1Mc6QTxhTVnB2TisrNgZCSsojfSX' // testnet
   }
 
   async list (query: PaginationQuery): Promise<PoolPairInfoPlus[]> {
@@ -46,12 +54,11 @@ export class PoolPairService {
   }
 
   async testPoolSwap (tokenFrom: string, tokenTo: string): Promise<string> {
-    const testAddress = await this.rpcClient.wallet.getNewAddress()
     const metadata: TestPoolSwapMetadata = {
       tokenFrom: tokenFrom,
       tokenTo: tokenTo,
-      from: testAddress,
-      to: testAddress,
+      from: this.testAddress,
+      to: this.testAddress,
       amountFrom: 1
     }
     return await this.rpcClient.poolpair.testPoolSwap(metadata)

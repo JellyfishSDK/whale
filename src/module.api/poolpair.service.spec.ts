@@ -6,6 +6,7 @@ import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintToken
 import { DeFiDCache } from './cache/defid.cache'
 import { CacheModule, NotFoundException } from '@nestjs/common'
 import BigNumber from 'bignumber.js'
+import { ConfigService } from '@nestjs/config'
 
 const container = new MasterNodeRegTestContainer()
 let service: PoolPairService
@@ -24,7 +25,8 @@ beforeAll(async () => {
     providers: [
       { provide: JsonRpcClient, useValue: client },
       DeFiDCache,
-      PoolPairService
+      PoolPairService,
+      ConfigService
     ]
   }).compile()
 

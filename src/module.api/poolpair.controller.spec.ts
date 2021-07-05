@@ -6,6 +6,7 @@ import { PoolPairService } from '@src/module.api/poolpair.service'
 import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintTokens } from '@defichain/testing'
 import { CacheModule, NotFoundException } from '@nestjs/common'
 import { DeFiDCache } from './cache/defid.cache'
+import { ConfigService } from '@nestjs/config'
 
 const container = new MasterNodeRegTestContainer()
 let controller: PoolPairController
@@ -26,7 +27,8 @@ beforeAll(async () => {
     providers: [
       { provide: JsonRpcClient, useValue: client },
       DeFiDCache,
-      PoolPairService
+      PoolPairService,
+      ConfigService
     ]
   }).compile()
 
