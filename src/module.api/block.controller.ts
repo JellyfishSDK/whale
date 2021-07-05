@@ -24,8 +24,16 @@ export class BlockController {
   }
 
   @Get('/:id')
-  async getBlock (@Param('id') hash: string): Promise<Block | undefined> {
-    return await this.blockMapper.getByHash(hash)
+  async getBlock (@Param('id') id: string): Promise<Block | undefined> {
+    const height = parseInt(id)
+
+    if (!isNaN(height)) {
+      // id is a number, assume user trying to get by height
+      return await this.blockMapper.getByHeight(height)
+    }
+
+    // assume valid hash string
+    return await this.blockMapper.getByHash(id)
   }
 
   @Get('/:id/transactions')
