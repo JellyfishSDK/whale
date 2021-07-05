@@ -3,8 +3,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { MasternodeData } from '@whale-api-client/api/masternode'
-import { MasternodePagination } from '@defichain/jellyfish-api-core/dist/category/masternode'
-import { MasternodeInfo } from '../../../jellyfish/packages/jellyfish-api-core/src/category/masternode'
+import { MasternodePagination, MasternodeInfo } from '@defichain/jellyfish-api-core/dist/category/masternode'
 
 @Controller('/v0/:network/masternodes')
 export class MasternodeController {
@@ -33,9 +32,7 @@ export class MasternodeController {
     const data = await this.rpcClient.masternode.listMasternodes(options, true)
 
     const masternodes: MasternodeData[] = Object.entries(data)
-      .map(([id, value]): MasternodeData => {
-        return mapMasternodeData(id, value)
-      }).sort(a => Number.parseInt(a.id))
+      .map(([id, value]): MasternodeData => mapMasternodeData(id, value))
 
     return ApiPagedResponse.of(masternodes, query.size, item => {
       return item.id
@@ -43,7 +40,7 @@ export class MasternodeController {
   }
 
   /**
-   * Queries a  masternode with given id
+   * Queries a masternode with given id
    *
    * @param {string} id
    * @return {Promise<MasternodeData>}
