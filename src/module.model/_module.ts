@@ -7,7 +7,7 @@ import { ScriptUnspentMapper } from '@src/module.model/script.unspent'
 import { TransactionMapper } from '@src/module.model/transaction'
 import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
-import { OracleStatusMapper } from '@src/module.model/oracle.status'
+import { OracleAppointedMapper } from '@src/module.model/oracle.appointed'
 import { ModelProbeIndicator } from '@src/module.model/_model.probes'
 
 @Global()
@@ -22,7 +22,7 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
-    OracleStatusMapper
+    OracleAppointedMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -34,7 +34,7 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
-    OracleStatusMapper
+    OracleAppointedMapper
   ]
 })
 export class ModelModule {

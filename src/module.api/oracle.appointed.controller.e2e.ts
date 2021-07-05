@@ -1,11 +1,11 @@
-import { OracleStatusController } from '@src/module.api/oracle.status.controller'
+import { OracleAppointedController } from '@src/module.api/oracle.appointed.controller'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
-let controller: OracleStatusController
+let controller: OracleAppointedController
 
 describe('getStatus', () => {
   beforeAll(async () => {
@@ -14,7 +14,7 @@ describe('getStatus', () => {
     await container.waitForWalletCoinbaseMaturity()
 
     app = await createTestingApp(container)
-    controller = app.get(OracleStatusController)
+    controller = app.get(OracleAppointedController)
 
     await setup()
   })

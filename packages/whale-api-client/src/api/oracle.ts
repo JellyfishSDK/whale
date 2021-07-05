@@ -11,14 +11,14 @@ export class Oracle {
    * Get current status of an oracle
    *
    * @param {string} id oracleId
-   * @return {Promise<OracleStatus>}
+   * @return {Promise<OracleAppointed>}
    */
-  async getStatus (id: string): Promise<OracleStatus> {
+  async getStatus (id: string): Promise<OracleAppointed> {
     return await this.client.requestData('GET', `oracle/${id}/status`)
   }
 }
 
-export interface OracleStatus {
+export interface OracleAppointed {
   id: string // oracleId - height
   block: {
     height: number

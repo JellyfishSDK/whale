@@ -1,7 +1,7 @@
 import { DeFiDRpcError, MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
-import { OracleStatusMapper } from '@src/module.model/oracle.status'
+import { OracleAppointedMapper } from '@src/module.model/oracle.appointed'
 import { OracleState } from '@whale-api-client/api/oracle'
 
 const container = new MasterNodeRegTestContainer()
@@ -53,7 +53,7 @@ describe('Weightage - approveOracle', () => {
     await setup()
     await waitForHeight(app, height)
 
-    const oracleStatusMapper = app.get(OracleStatusMapper)
+    const oracleStatusMapper = app.get(OracleAppointedMapper)
 
     const data1 = await oracleStatusMapper.get(oracleId, height)
     expect(data1?.data.weightage).toStrictEqual(1)
@@ -88,7 +88,7 @@ describe('Weightage - updateOracle', () => {
     await setup()
     await waitForHeight(app, height2)
 
-    const oracleStatusMapper = app.get(OracleStatusMapper)
+    const oracleStatusMapper = app.get(OracleAppointedMapper)
 
     const data1 = await oracleStatusMapper.get(oracleId, height1)
     expect(data1?.data.weightage).toStrictEqual(1)
@@ -124,7 +124,7 @@ describe('Weightage - removeOracle', () => {
     await setup()
     await waitForHeight(app, height)
 
-    const oracleStatusMapper = app.get(OracleStatusMapper)
+    const oracleStatusMapper = app.get(OracleAppointedMapper)
 
     const data1 = await oracleStatusMapper.get(oracleId, height)
     expect(data1?.state).toStrictEqual(OracleState.REMOVED)
