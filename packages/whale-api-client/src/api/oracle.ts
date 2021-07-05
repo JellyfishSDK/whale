@@ -23,7 +23,7 @@ export class Oracle {
    * @param {string} id oracleId
    * @return {Promise<OraclePriceFeed>}
    */
-  async getPriceFeedById (id: string): Promise<OraclePriceFeed[]> {
+  async getPriceFeed (id: string): Promise<OraclePriceFeed[]> {
     return await this.client.requestData('GET', `oracle/${id}/priceFeed`)
   }
 
@@ -32,8 +32,18 @@ export class Oracle {
    *
    * @return {Promise<OraclePriceFeed>}
    */
-  async getAll (): Promise<OraclePriceFeed[]> {
-    return await this.client.requestData('GET', 'oracle/pricefeed')
+  async getAllPriceFeeds (): Promise<OraclePriceFeed[]> {
+    return await this.client.requestData('GET', 'oracle/priceFeeds')
+  }
+
+  /**
+   * Get price data for an oracleId
+   *
+   * @param {string} id oracleId
+   * @return {Promise<OraclePriceData>}
+   */
+  async getPriceData (id: string): Promise<OraclePriceData[]> {
+    return await this.client.requestData('GET', `oracle/${id}/priceData`)
   }
 }
 

@@ -11,7 +11,7 @@ import { NetworkGuard } from '@src/module.api/guards/network.guard'
 import { ExceptionInterceptor } from '@src/module.api/interceptors/exception.interceptor'
 import { ResponseInterceptor } from '@src/module.api/interceptors/response.interceptor'
 import { TokensController } from '@src/module.api/token.controller'
-import { OracleAppointedController } from '@src/module.api/oracle.appointed.controller'
+import { OracleController } from '@src/module.api/oracle.controller'
 
 /**
  * Exposed ApiModule for public interfacing
@@ -25,7 +25,7 @@ import { OracleAppointedController } from '@src/module.api/oracle.appointed.cont
     TransactionsController,
     TokensController,
     PoolPairController,
-    OracleAppointedController
+    OracleController
   ],
   providers: [
     { provide: APP_PIPE, useClass: ApiValidationPipe },

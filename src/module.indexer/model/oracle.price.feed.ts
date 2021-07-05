@@ -8,7 +8,7 @@ import { OraclePriceFeed, OracleState } from '@whale-api-client/api/oracle'
 @Injectable()
 export class OraclePriceFeedIndexer extends Indexer {
   constructor (
-    private readonly priceFeedMapper: OraclePriceFeedMapper
+    private readonly mapper: OraclePriceFeedMapper
   ) {
     super()
   }
@@ -25,63 +25,64 @@ export class OraclePriceFeedIndexer extends Indexer {
         const stack: any = toOPCodes(
           SmartBuffer.fromBuffer(Buffer.from(vout.scriptPubKey.hex, 'hex'))
         )
+        if (stack[0]?.type === 'OP_RETURN' || stack[0]?.code === '106') {
+          if (stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
+            const oracleId: string = txn.txid
+            const priceFeeds = stack[1].tx.data.priceFeeds
 
-        if (stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
-          const oracleId: string = txn.txid
-          const priceFeeds = stack[1].tx.data.priceFeeds
+            for (let i = 0; i < priceFeeds.length; i += 1) {
+              const priceFeed = priceFeeds[i]
 
-          for (let i = 0; i < priceFeeds.length; i += 1) {
-            const priceFeed = priceFeeds[i]
+              const token: string = priceFeed.token
+              const currency: string = priceFeed.currency
 
-            const token: string = priceFeed.token
-            const currency: string = priceFeed.currency
+              records[`${oracleId}-${token}-${currency}-${block.height}`] = OraclePriceFeedIndexer.newOraclePriceFeed(block.height, oracleId, token, currency, OracleState.LIVE)
+            }
+          } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
+            const oracleId: string = stack[1].tx.data.oracleId
 
-            records[`${oracleId}-${token}-${currency}-${block.height}`] = OraclePriceFeedIndexer.newOraclePriceFeed(block.height, oracleId, token, currency, OracleState.LIVE)
-          }
-        } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
-          const oracleId: string = stack[1].tx.data.oracleId
+            const oldPriceFeeds = await this.mapper.getByOracleId(oracleId) ?? []
 
-          const oldPriceFeeds = await this.priceFeedMapper.getByOracleId(oracleId) ?? []
+            for (let i = 0; i < oldPriceFeeds.length; i += 1) {
+              const priceFeed = oldPriceFeeds[i]
 
-          for (let i = 0; i < oldPriceFeeds.length; i += 1) {
-            const priceFeed = oldPriceFeeds[i]
+              const token: string = priceFeed.data.token
+              const currency: string = priceFeed.data.currency
+              const height: number = priceFeed.block.height
 
-            const token: string = priceFeed.data.token
-            const currency: string = priceFeed.data.currency
-            const height: number = priceFeed.block.height
+              records[`${oracleId}-${token}-${currency}-${height}`] = OraclePriceFeedIndexer.newOraclePriceFeed(height, oracleId, token, currency, OracleState.REMOVED)
+            }
 
-            records[`${oracleId}-${token}-${currency}-${height}`] = OraclePriceFeedIndexer.newOraclePriceFeed(height, oracleId, token, currency, OracleState.REMOVED)
-          }
+            const newPriceFeeds = stack[1].tx.data.priceFeeds
 
-          const newPriceFeeds = stack[1].tx.data.priceFeeds
+            for (let i = 0; i < newPriceFeeds.length; i += 1) {
+              const priceFeed = newPriceFeeds[i]
 
-          for (let i = 0; i < newPriceFeeds.length; i += 1) {
-            const priceFeed = newPriceFeeds[i]
+              const token: string = priceFeed.token
+              const currency: string = priceFeed.currency
+              records[`${oracleId}-${token}-${currency}-${block.height}`] = OraclePriceFeedIndexer.newOraclePriceFeed(block.height, oracleId, token, currency, OracleState.LIVE)
+            }
+          } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
+            const oracleId: string = stack[1].tx.data.oracleId
 
-            const token: string = priceFeed.token
-            const currency: string = priceFeed.currency
-            records[`${oracleId}-${token}-${currency}-${block.height}`] = OraclePriceFeedIndexer.newOraclePriceFeed(block.height, oracleId, token, currency, OracleState.LIVE)
-          }
-        } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
-          const oracleId: string = stack[1].tx.data.oracleId
+            const priceFeeds = await this.mapper.getByOracleId(oracleId) ?? []
 
-          const priceFeeds = await this.priceFeedMapper.getByOracleId(oracleId) ?? []
+            for (let i = 0; i < priceFeeds.length; i += 1) {
+              const priceFeed = priceFeeds[i]
 
-          for (let i = 0; i < priceFeeds.length; i += 1) {
-            const priceFeed = priceFeeds[i]
+              const token: string = priceFeed.data.token
+              const currency: string = priceFeed.data.currency
+              const height: number = priceFeed.block.height
 
-            const token: string = priceFeed.data.token
-            const currency: string = priceFeed.data.currency
-            const height: number = priceFeed.block.height
-
-            records[`${oracleId}-${token}-${currency}-${height}`] = OraclePriceFeedIndexer.newOraclePriceFeed(height, oracleId, token, currency, OracleState.REMOVED)
+              records[`${oracleId}-${token}-${currency}-${height}`] = OraclePriceFeedIndexer.newOraclePriceFeed(height, oracleId, token, currency, OracleState.REMOVED)
+            }
           }
         }
       }
     }
 
     for (const priceFeed of Object.values(records)) {
-      await this.priceFeedMapper.put(priceFeed)
+      await this.mapper.put(priceFeed)
     }
   }
 
@@ -123,7 +124,7 @@ export class OraclePriceFeedIndexer extends Indexer {
       }
 
       for (const id of ids) {
-        await this.priceFeedMapper.delete(id)
+        await this.mapper.delete(id)
       }
     }
   }
