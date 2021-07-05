@@ -23,12 +23,6 @@ export class BlockController {
     })
   }
 
-  @Get('/tip')
-  async getLatest (): Promise<Block | undefined> {
-    const blocks = await this.blockMapper.queryByHeight(1)
-    return blocks[0]
-  }
-
   @Get('/:id')
   async getBlock (@Param('id') hash: string): Promise<Block | undefined> {
     return await this.blockMapper.getByHash(hash)
