@@ -8,8 +8,8 @@ export class Masternode {
   /**
    * Paginate query masternode.
    *
-   * @param {number} size of tokens to query
-   * @param {number} next set of tokens
+   * @param {number} size masternodes size to query
+   * @param {number} next next set of masternodes
    * @return {Promise<ApiPagedResponse<TokenData>>}
    */
   async list (size: number = 30, next?: string): Promise<ApiPagedResponse<MasternodeData>> {
@@ -17,9 +17,9 @@ export class Masternode {
   }
 
   /**
-   * Get information about a masternode with given ID.
+   * Query information about a masternode with given id.
    *
-   * @param {string} id
+   * @param {string} id masternode id to query
    * @return {Promise<MasternodeData>}
    */
   async get (id: string): Promise<MasternodeData> {
@@ -46,6 +46,9 @@ export interface MasternodeData {
   localMasternode: boolean
 }
 
+/**
+ * Masternode state
+ */
 export enum MasternodeState {
   PRE_ENABLED = 'PRE_ENABLED',
   ENABLED = 'ENABLED',

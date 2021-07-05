@@ -8,7 +8,7 @@ import { MasternodePagination, MasternodeInfo } from '@defichain/jellyfish-api-c
 @Controller('/v0/:network/masternodes')
 export class MasternodeController {
   constructor (
-    protected readonly rpcClient: JsonRpcClient
+    protected readonly client: JsonRpcClient
   ) {
   }
 
@@ -29,14 +29,12 @@ export class MasternodeController {
 
     if (query.next !== undefined) options.start = query.next
 
-    const data = await this.rpcClient.masternode.listMasternodes(options, true)
+    const data = await this.client.masternode.listMasternodes(options, true)
 
     const masternodes: MasternodeData[] = Object.entries(data)
       .map(([id, value]): MasternodeData => mapMasternodeData(id, value))
 
-    return ApiPagedResponse.of(masternodes, query.size, item => {
-      return item.id
-    })
+    return ApiPagedResponse.of(masternodes, query.size, item => item.id)
   }
 
   /**
@@ -49,7 +47,7 @@ export class MasternodeController {
   @Get('/:id')
   async get (@Param('id') id: string): Promise<MasternodeData> {
     try {
-      const data = await this.rpcClient.masternode.getMasternode(id)
+      const data = await this.client.masternode.getMasternode(id)
       return mapMasternodeData(id, data[Object.keys(data)[0]])
     } catch (err) {
       if (err?.payload?.message === 'Masternode not found') {

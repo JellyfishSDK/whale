@@ -26,16 +26,14 @@ afterAll(async () => {
 })
 
 describe('list', () => {
-  it('should listMasternodes', async () => {
+  it('should list masternodes', async () => {
     const data = await client.masternode.list()
-
     expect(Object.keys(data[0]).length).toStrictEqual(13)
     expect(data.hasNext).toStrictEqual(false)
     expect(data.nextToken).toStrictEqual(undefined)
-    expect(data.hasNext).toStrictEqual(false)
   })
 
-  it('should listMasternodes with pagination', async () => {
+  it('should list masternodes with pagination', async () => {
     // get the initial length of  masternodes.
     const initialLength = (await client.masternode.list()).length
     const paginationSize = (initialLength / 2)
@@ -58,7 +56,7 @@ describe('list', () => {
 })
 
 describe('get', () => {
-  it('should getMasternode', async () => {
+  it('should get masternode', async () => {
     // get a masternode from list
     const masternode = (await client.masternode.list(1))[0]
 
