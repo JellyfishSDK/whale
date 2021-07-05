@@ -8,17 +8,26 @@ export class Oracle {
   }
 
   /**
-   * Get current status of an oracle
+   * Get all price feeds
+   *
+   * @return {Promise<OraclePriceFeed>}
+   */
+  async getAll (): Promise<OraclePriceFeed[]> {
+    return await this.client.requestData('GET', 'oracle/pricefeed')
+  }
+
+  /**
+   * Get price Feed for an oracleId
    *
    * @param {string} id oracleId
-   * @return {Promise<OracleStatus>}
+   * @return {Promise<OraclePriceFeed>}
    */
-  async getStatus (id: string): Promise<OracleStatus> {
-    return await this.client.requestData('GET', `oracle/${id}/status`)
+  async getPriceFeedById (id: string): Promise<OraclePriceFeed[]> {
+    return await this.client.requestData('GET', `oracle/${id}/priceFeed`)
   }
 }
 
-export interface OracleStatus {
+export interface OracleAppoint {
   id: string // oracleId - height
   block: {
     height: number
@@ -26,6 +35,34 @@ export interface OracleStatus {
   data: {
     oracleId: string
     weightage: number
+  }
+  state: OracleState
+}
+
+export interface OraclePriceFeed {
+  id: string // oracleId_token_currency-height
+  block: {
+    height: number
+  }
+  data: {
+    oracleId: string
+    token: string
+    currency: string
+  }
+  state: OracleState
+}
+
+export interface OraclePriceData {
+  id: string
+  block: {
+    height: number
+  }
+  data: {
+    timestamp: number
+    token: string
+    currency: string
+    oracleId: string
+    amount: number
   }
   state: OracleState
 }
