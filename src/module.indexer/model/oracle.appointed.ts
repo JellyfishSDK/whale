@@ -32,17 +32,17 @@ export class OracleAppointedIndexer extends Indexer {
 
             const weightage: number = stack[1].tx.data.weightage
 
-            records[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleStatus(block.height, oracleId, weightage, OracleState.LIVE)
+            records[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleAppointed(block.height, oracleId, weightage, OracleState.LIVE)
           } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
             const oracleId: string = stack[1].tx.data.oracleId
 
             const oldStatus = await this.mapper.getLatest(oracleId)
             const oldHeight: number = oldStatus?.block.height ?? 0
             const oldWeightage: number = oldStatus?.data.weightage ?? 0
-            records[`${oracleId}-${oldHeight}`] = OracleAppointedIndexer.newOracleStatus(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
+            records[`${oracleId}-${oldHeight}`] = OracleAppointedIndexer.newOracleAppointed(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
 
             const weightage: number = stack[1].tx.data.weightage
-            records[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleStatus(block.height, oracleId, weightage, OracleState.LIVE)
+            records[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleAppointed(block.height, oracleId, weightage, OracleState.LIVE)
           } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
             const oracleId: string = stack[1].tx.data.oracleId
 
@@ -50,7 +50,7 @@ export class OracleAppointedIndexer extends Indexer {
             const oldHeight: number = oldStatus?.block.height ?? 0
             const oldWeightage: number = oldStatus?.data.weightage ?? 0
 
-            records[`${oracleId}-${oldHeight}`] = OracleAppointedIndexer.newOracleStatus(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
+            records[`${oracleId}-${oldHeight}`] = OracleAppointedIndexer.newOracleAppointed(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
           }
         }
       }
@@ -85,7 +85,7 @@ export class OracleAppointedIndexer extends Indexer {
     }
   }
 
-  static newOracleStatus (
+  static newOracleAppointed (
     height: number,
     oracleId: string,
     weightage: number,
