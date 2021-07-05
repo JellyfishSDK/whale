@@ -7,7 +7,7 @@ import { ScriptUnspentMapper } from '@src/module.model/script.unspent'
 import { TransactionMapper } from '@src/module.model/transaction'
 import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
-import { OracleAppointMapper } from '@src/module.model/oracle.appoint'
+import { OracleAppointedMapper } from '@src/module.model/oracle.appointed'
 import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 import { ModelProbeIndicator } from '@src/module.model/_model.probes'
@@ -24,7 +24,7 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
-    OracleAppointMapper,
+    OracleAppointedMapper,
     OraclePriceFeedMapper,
     OraclePriceDataMapper
   ],
@@ -38,7 +38,7 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
-    OracleAppointMapper,
+    OracleAppointedMapper,
     OraclePriceFeedMapper,
     OraclePriceDataMapper
   ]

@@ -8,12 +8,13 @@ export class Oracle {
   }
 
   /**
-   * Get all price feeds
+   * Get current status of an oracle
    *
-   * @return {Promise<OraclePriceFeed>}
+   * @param {string} id oracleId
+   * @return {Promise<OracleAppointed>}
    */
-  async getAll (): Promise<OraclePriceFeed[]> {
-    return await this.client.requestData('GET', 'oracle/pricefeed')
+  async getStatus (id: string): Promise<OracleAppointed> {
+    return await this.client.requestData('GET', `oracle/${id}/status`)
   }
 
   /**
@@ -25,9 +26,18 @@ export class Oracle {
   async getPriceFeedById (id: string): Promise<OraclePriceFeed[]> {
     return await this.client.requestData('GET', `oracle/${id}/priceFeed`)
   }
+
+  /**
+   * Get all price feeds
+   *
+   * @return {Promise<OraclePriceFeed>}
+   */
+  async getAll (): Promise<OraclePriceFeed[]> {
+    return await this.client.requestData('GET', 'oracle/pricefeed')
+  }
 }
 
-export interface OracleAppoint {
+export interface OracleAppointed {
   id: string // oracleId - height
   block: {
     height: number

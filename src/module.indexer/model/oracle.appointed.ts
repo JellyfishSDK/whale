@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { SmartBuffer } from 'smart-buffer'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
-import { OracleAppointed, OracleState } from '@whale-api-client/api/oracle'
 import { OracleAppointedMapper } from '@src/module.model/oracle.appointed'
+import { OracleState, OracleAppointed } from '@whale-api-client/api/oracle'
 
 @Injectable()
 export class OracleAppointedIndexer extends Indexer {
   constructor (
-    private readonly appointMapper: OracleAppointedMapper
+    private readonly mapper: OracleAppointedMapper
   ) {
     super()
   }
@@ -26,32 +26,38 @@ export class OracleAppointedIndexer extends Indexer {
           SmartBuffer.fromBuffer(Buffer.from(vout.scriptPubKey.hex, 'hex'))
         )
 
-        if (stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
-          const oracleId: string = txn.txid
-          const weightage: number = stack[1].tx.data.weightage
-          records[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleStatus(block.height, oracleId, weightage, OracleState.LIVE)
-        } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
-          const oracleId: string = stack[1].tx.data.oracleId
-          const oldStatus = await this.appointMapper.getLatest(oracleId)
-          const oldHeight: number = oldStatus?.block.height ?? 0
-          const oldWeightage: number = oldStatus?.data.weightage ?? 0
-          records[`${oracleId}-${oldHeight}`] = OracleAppointedIndexer.newOracleStatus(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
-          const weightage: number = stack[1].tx.data.weightage
-          records[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleStatus(block.height, oracleId, weightage, OracleState.LIVE)
-        } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
-          const oracleId: string = stack[1].tx.data.oracleId
+        if (stack[0]?.type === 'OP_RETURN' || stack[0]?.code === '106') {
+          if (stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
+            const oracleId: string = txn.txid
 
-          const oldStatus = await this.appointMapper.getLatest(oracleId)
-          const oldHeight: number = oldStatus?.block.height ?? 0
-          const oldWeightage: number = oldStatus?.data.weightage ?? 0
+            const weightage: number = stack[1].tx.data.weightage
 
-          records[`${oracleId}-${oldHeight}`] = OracleAppointedIndexer.newOracleStatus(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
+            records[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleStatus(block.height, oracleId, weightage, OracleState.LIVE)
+          } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
+            const oracleId: string = stack[1].tx.data.oracleId
+
+            const oldStatus = await this.mapper.getLatest(oracleId)
+            const oldHeight: number = oldStatus?.block.height ?? 0
+            const oldWeightage: number = oldStatus?.data.weightage ?? 0
+            records[`${oracleId}-${oldHeight}`] = OracleAppointedIndexer.newOracleStatus(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
+
+            const weightage: number = stack[1].tx.data.weightage
+            records[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleStatus(block.height, oracleId, weightage, OracleState.LIVE)
+          } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
+            const oracleId: string = stack[1].tx.data.oracleId
+
+            const oldStatus = await this.mapper.getLatest(oracleId)
+            const oldHeight: number = oldStatus?.block.height ?? 0
+            const oldWeightage: number = oldStatus?.data.weightage ?? 0
+
+            records[`${oracleId}-${oldHeight}`] = OracleAppointedIndexer.newOracleStatus(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
+          }
         }
       }
     }
 
     for (const status of Object.values(records)) {
-      await this.appointMapper.put(status)
+      await this.mapper.put(status)
     }
   }
 
@@ -75,7 +81,7 @@ export class OracleAppointedIndexer extends Indexer {
     }
 
     for (const id of ids) {
-      await this.appointMapper.delete(id)
+      await this.mapper.delete(id)
     }
   }
 
