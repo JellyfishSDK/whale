@@ -24,11 +24,6 @@ afterAll(async () => {
 })
 
 describe('BlockController', () => {
-  it('getLatest should get latest block', async () => {
-    const block = await controller.getLatest()
-    expect(block?.height).toBeGreaterThan(100)
-  })
-
   it('getBlock should get block with hash of block', async () => {
     const blockHash = await container.call('getblockhash', [100])
     const block = await controller.getBlock(blockHash)
