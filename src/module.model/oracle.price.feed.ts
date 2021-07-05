@@ -10,7 +10,7 @@ const OraclePriceFeedMapping: ModelMapping<OraclePriceFeed> = {
       name: 'oracle_price_feed_id',
       partition: {
         type: 'string',
-        key: (d: OraclePriceFeed) => `${d.block.height}-${d.data.token}-${d.data.currency}-${d.block.height}`
+        key: (d: OraclePriceFeed) => `${d.data.token}-${d.data.currency}-${d.block.height}`
       }
     },
     oracleId_height: {
