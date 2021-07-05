@@ -8,22 +8,23 @@ export class Oracle {
   }
 
   /**
-   * Get current aggregated weightage of an oracle
+   * Get current status of an oracle
    *
-   * @param {string} oracleId
-   * @return {Promise<OracleStatusAggregration>}
+   * @param {string} id oracleId
+   * @return {Promise<OracleStatus>}
    */
-  async getAggregation (oracleId: string): Promise<OracleStatusAggregration> {
-    return await this.client.requestData('GET', `oracle/${oracleId}/aggregation`)
+  async getStatus (id: string): Promise<OracleStatus> {
+    return await this.client.requestData('GET', `oracle/${id}/status`)
   }
 }
 
-export interface OracleStatusAggregration{
-  id: string // oracleid
+export interface OracleStatus {
+  id: string // oracleId - height
   block: {
     height: number
   }
   data: {
+    oracleId: string
     weightage: number
   }
   state: OracleState
