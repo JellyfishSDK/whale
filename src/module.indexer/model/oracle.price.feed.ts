@@ -41,7 +41,7 @@ export class OraclePriceFeedIndexer extends Indexer {
         } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
           const oracleId: string = stack[1].tx.data.oracleId
 
-          const oldPriceFeeds = await this.priceFeedMapper.getByOracleId1(oracleId) ?? []
+          const oldPriceFeeds = await this.priceFeedMapper.getByOracleId(oracleId) ?? []
 
           for (let i = 0; i < oldPriceFeeds.length; i += 1) {
             const priceFeed = oldPriceFeeds[i]
@@ -65,7 +65,7 @@ export class OraclePriceFeedIndexer extends Indexer {
         } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
           const oracleId: string = stack[1].tx.data.oracleId
 
-          const priceFeeds = await this.priceFeedMapper.getByOracleId1(oracleId) ?? []
+          const priceFeeds = await this.priceFeedMapper.getByOracleId(oracleId) ?? []
 
           for (let i = 0; i < priceFeeds.length; i += 1) {
             const priceFeed = priceFeeds[i]

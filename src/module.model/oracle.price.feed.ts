@@ -39,7 +39,7 @@ export class OraclePriceFeedMapper {
     })
   }
 
-  async getByOracleId1 (oracleId: string): Promise<OraclePriceFeed[] | undefined> {
+  async getByOracleId (oracleId: string): Promise<OraclePriceFeed[] | undefined> {
     return await this.database.query(OraclePriceFeedMapping.index.oracleId_height, {
       partitionKey: oracleId,
       order: SortOrder.ASC,

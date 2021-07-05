@@ -50,11 +50,11 @@ export class OraclePriceDataIndexer extends Indexer {
             const height = oracle.block.height
             const timestamp = oracle.data.timestamp
 
-            if (oracle.state === 'REMOVED') {
+            if (priceSet.has(`${token}-${currency}`) || oracle.state === 'REMOVED') {
               continue
             }
 
-            records[`${oracleId}-${token}-${currency}-${amount}-${height}`] = OraclePriceDataIndexer.newOraclePriceData(height, oracleId, token, currency, amount, timestamp, OracleState.REMOVED)
+            records[`${oracleId}-${token}-${currency}-${height}`] = OraclePriceDataIndexer.newOraclePriceData(height, oracleId, token, currency, amount, timestamp, OracleState.REMOVED)
           }
         } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
           const timestamp = stack[1].tx.data.timestamp.toNumber()
@@ -71,7 +71,7 @@ export class OraclePriceDataIndexer extends Indexer {
               const currency: string = price.currency
               const amount: number = price.amount
 
-              records[`${oracleId}-${token}-${currency}-${amount}-${block.height}`] = OraclePriceDataIndexer.newOraclePriceData(block.height, oracleId, token, currency, amount, timestamp, OracleState.LIVE)
+              records[`${oracleId}-${token}-${currency}-${block.height}`] = OraclePriceDataIndexer.newOraclePriceData(block.height, oracleId, token, currency, amount, timestamp, OracleState.LIVE)
 
               const oracles = await this.mapper.getByOracleIdTokenCurrency(oracleId, token, currency) ?? []
 
@@ -87,7 +87,7 @@ export class OraclePriceDataIndexer extends Indexer {
                   continue
                 }
 
-                records[`${oracleId}-${token}-${currency}-${amount}-${height}`] = OraclePriceDataIndexer.newOraclePriceData(height, oracleId, token, currency, amount, timestamp, OracleState.REMOVED)
+                records[`${oracleId}-${token}-${currency}-${height}`] = OraclePriceDataIndexer.newOraclePriceData(height, oracleId, token, currency, amount, timestamp, OracleState.REMOVED)
               }
             }
           }
@@ -122,8 +122,7 @@ export class OraclePriceDataIndexer extends Indexer {
             for (let y = 0; y < prices.length; y += 1) {
               const price = prices[y]
               const currency: string = price.currency
-              const amount: number = price.amount
-              await this.mapper.delete(`${oracleId}-${token}-${currency}-${amount}-${block.height}`)
+              await this.mapper.delete(`${oracleId}-${token}-${currency}-${block.height}`)
             }
           }
         }
@@ -141,7 +140,7 @@ export class OraclePriceDataIndexer extends Indexer {
     state: OracleState
   ): OraclePriceData {
     return {
-      id: `${oracleId}-${token}-${currency}-${amount}-${height}`,
+      id: `${oracleId}-${token}-${currency}-${height}`,
       block: {
         height
       },

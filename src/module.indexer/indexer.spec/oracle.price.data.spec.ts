@@ -1,11 +1,11 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
-import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
+import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
+import { OracleState } from '@whale-api-client/api/oracle'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
-let client: JsonRpcClient
 
 beforeAll(async () => {
   await container.start()
@@ -15,7 +15,6 @@ beforeAll(async () => {
   app = await createIndexerTestModule(container)
   await app.init()
 
-  client = new JsonRpcClient(await container.getCachedRpcUrl())
   await container.waitForWalletCoinbaseMaturity()
 })
 
@@ -37,65 +36,224 @@ afterAll(async () => {
   }
 })
 
-describe('PriceData - setOracleData', () => {
-  let oracleId1: string
-  let oracleId2: string
-  let blockCount: number
+describe('Price data - setoracledata 1', () => {
+  let oracleId: string
+  let height: number
 
   async function setup (): Promise<void> {
-    const priceFeeds1 = [
+    const priceFeeds = [
       { token: 'APPL', currency: 'EUR' },
       { token: 'TESL', currency: 'USD' }
     ]
 
-    oracleId1 = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds1, { weightage: 1 })
+    oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
 
     await container.generate(1)
 
-    oracleId2 = await client.oracle.appointOracle(await container.getNewAddress(), priceFeeds1, { weightage: 1 })
+    const timestamp = new Date().getTime()
+    const prices = [{ tokenAmount: '0.5@APPL', currency: 'EUR' }]
+
+    await container.call('setoracledata', [oracleId, timestamp, prices])
 
     await container.generate(1)
 
-    const timestamp1 = Math.floor(new Date().getTime() / 1000)
-    const timestamp2 = Math.floor(new Date().getTime() / 1000)
-
-    const prices1 = [{ tokenAmount: '0.5@APPL', currency: 'EUR' }]
-    await client.oracle.setOracleData(oracleId1, timestamp1, { prices: prices1 })
-
-    await container.generate(1)
-
-    const prices2 = [{ tokenAmount: '1.0@APPL', currency: 'EUR' }]
-    await client.oracle.setOracleData(oracleId2, timestamp2, { prices: prices2 })
-
-    await container.generate(1)
-
-    const priceFeeds2 = [
-      { token: 'APPL', currency: 'EUR' }
-    ]
-
-    await container.call('updateoracle', [oracleId1, await container.getNewAddress(), priceFeeds2, 2])
-
-    await container.generate(1)
-
-    blockCount = await client.blockchain.getBlockCount()
+    height = await container.call('getblockcount')
   }
 
-  it('Should set oracle data', async () => {
+  it('should get price data', async () => {
     await setup()
-    await waitForHeight(app, blockCount)
-    //
-    // const priceDataMapper = app.get(OraclePriceDataMapper)
-    //
-    // let price = await priceDataMapper.get(`${oracleId1}-APPL-EUR`)
-    // expect(price?.data.oracleId).toStrictEqual(oracleId1)
-    // expect(price?.data.token).toStrictEqual('APPL')
-    // expect(price?.data.currency).toStrictEqual('EUR')
-    // expect(price?.data.amount).toStrictEqual('0.5')
-    //
-    // price = await priceDataMapper.get(`${oracleId2}-APPL-EUR`)
-    // expect(price?.data.oracleId).toStrictEqual(oracleId2)
-    // expect(price?.data.token).toStrictEqual('APPL')
-    // expect(price?.data.currency).toStrictEqual('EUR')
-    // expect(price?.data.amount).toStrictEqual('1')
+    await waitForHeight(app, height)
+
+    const priceDataMapper = app.get(OraclePriceDataMapper)
+
+    const data1 = await priceDataMapper.get(oracleId, 'APPL', 'EUR', height)
+
+    expect(data1?.data.token).toStrictEqual('APPL')
+    expect(data1?.data.currency).toStrictEqual('EUR')
+    expect(data1?.data.amount).toStrictEqual('0.5')
+    expect(data1?.state).toStrictEqual(OracleState.LIVE)
   })
 })
+
+describe('Price data - setoracledata 2', () => {
+  let oracleId: string
+  let height1: number
+  let height2: number
+
+  async function setup (): Promise<void> {
+    const priceFeeds = [
+      { token: 'APPL', currency: 'EUR' },
+      { token: 'TESL', currency: 'USD' }
+    ]
+
+    oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
+
+    await container.generate(1)
+
+    const timestamp = new Date().getTime()
+    const prices1 = [{ tokenAmount: '0.5@APPL', currency: 'EUR' }]
+
+    await container.call('setoracledata', [oracleId, timestamp, prices1])
+
+    await container.generate(1)
+
+    height1 = await container.call('getblockcount')
+
+    const prices2 = [{ tokenAmount: '1.0@APPL', currency: 'EUR' }]
+
+    await container.call('setoracledata', [oracleId, timestamp, prices2])
+
+    await container.generate(1)
+
+    height2 = await container.call('getblockcount')
+  }
+
+  it('should get latest price data only if 2 prices data are set', async () => {
+    await setup()
+    await waitForHeight(app, height1)
+
+    const priceDataMapper = app.get(OraclePriceDataMapper)
+
+    const data1 = await priceDataMapper.get(oracleId, 'APPL', 'EUR', height1)
+
+    expect(data1?.data.token).toStrictEqual('APPL')
+    expect(data1?.data.currency).toStrictEqual('EUR')
+    expect(data1?.data.amount).toStrictEqual('0.5')
+    expect(data1?.state).toStrictEqual(OracleState.REMOVED)
+
+    const data2 = await priceDataMapper.get(oracleId, 'APPL', 'EUR', height2)
+
+    expect(data2?.data.token).toStrictEqual('APPL')
+    expect(data2?.data.currency).toStrictEqual('EUR')
+    expect(data2?.data.amount).toStrictEqual('1')
+    expect(data2?.state).toStrictEqual(OracleState.LIVE)
+  })
+})
+//
+// describe('Price data - updateoracle', () => {
+//   let oracleId: string
+//   let height1: number
+//   let height2: number
+//
+//   async function setup (): Promise<void> {
+//     // Apoint an oracle
+//     const priceFeeds1 = [
+//       { token: 'APPL', currency: 'EUR' },
+//       { token: 'TESL', currency: 'USD' }
+//     ]
+//
+//     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
+//
+//     await container.generate(1)
+//
+//     // Set price to AAPL/USD and TESL/USD price feeds of the oracle
+//     const timestamp = new Date().getTime()
+//
+//     const prices1 = [
+//       { tokenAmount: '0.5@APPL', currency: 'EUR' },
+//       { tokenAmount: '1.0@TESL', currency: 'USD' },
+//     ]
+//
+//     await container.call('setoracledata', [oracleId, timestamp, prices1])
+//
+//     await container.generate(1)
+//
+//     height1 = await container.call('getblockcount')
+//
+//     // Remove TESL/USD price feed from the oracle
+//     const priceFeeds2 = [
+//       { token: 'APPL', currency: 'EUR' },
+//     ]
+//
+//     await container.call('updateoracle', [oracleId, await container.getNewAddress(), priceFeeds2, 2])
+//
+//     await container.generate(1)
+//
+//     height2 = await container.call('getblockcount')
+//   }
+//
+//   it('should get price data if updateoracle call remove 1 of the price feed', async () => {
+//     await setup()
+//     await waitForHeight(app, height2)
+//
+//     const priceDataMapper = app.get(OraclePriceDataMapper)
+//
+//     const data1 = await priceDataMapper.get(oracleId, 'APPL', 'EUR', height1)
+//
+//     expect(data1?.data.token).toStrictEqual('APPL')
+//     expect(data1?.data.currency).toStrictEqual('EUR')
+//     expect(data1?.data.amount).toStrictEqual('0.5')
+//     expect(data1?.state).toStrictEqual(OracleState.LIVE)
+//
+//     const data2 = await priceDataMapper.get(oracleId, 'TESL', 'USD', height1)
+//
+//     expect(data2?.data.token).toStrictEqual('TESL')
+//     expect(data2?.data.currency).toStrictEqual('USD')
+//     expect(data2?.data.amount).toStrictEqual('1')
+//     expect(data2?.state).toStrictEqual(OracleState.REMOVED)
+//   })
+// })
+//
+// describe('Price data - removeoracle', () => {
+//   let oracleId: string
+//   let height1: number
+//   let height2: number
+//
+//   async function setup (): Promise<void> {
+//     // Apoint an oracle
+//     const priceFeeds1 = [
+//       { token: 'APPL', currency: 'EUR' },
+//       { token: 'TESL', currency: 'USD' }
+//     ]
+//
+//     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
+//
+//     await container.generate(1)
+//
+//     // Set price to AAPL/USD and TESL/USD price feeds of the oracle
+//     const timestamp = new Date().getTime()
+//
+//     const prices1 = [
+//       { tokenAmount: '0.5@APPL', currency: 'EUR' },
+//       { tokenAmount: '1.0@TESL', currency: 'USD' },
+//     ]
+//
+//     await container.call('setoracledata', [oracleId, timestamp, prices1])
+//
+//     await container.generate(1)
+//
+//     height1 = await container.call('getblockcount')
+//
+//     // Remove TESL/USD price feed from the oracle
+//     const priceFeeds2 = [
+//       { token: 'APPL', currency: 'EUR' },
+//     ]
+//
+//     await container.call('removeoracle', [oracleId])
+//
+//     await container.generate(1)
+//
+//     height2 = await container.call('getblockcount')
+//   }
+//
+//   it('should not get price data if removeoracle call', async () => {
+//     await setup()
+//     await waitForHeight(app, height2)
+//
+//     const priceDataMapper = app.get(OraclePriceDataMapper)
+//
+//     const data1 = await priceDataMapper.get(oracleId, 'APPL', 'EUR', height1)
+//
+//     expect(data1?.data.token).toStrictEqual('APPL')
+//     expect(data1?.data.currency).toStrictEqual('EUR')
+//     expect(data1?.data.amount).toStrictEqual('0.5')
+//     expect(data1?.state).toStrictEqual(OracleState.REMOVED)
+//
+//     const data2 = await priceDataMapper.get(oracleId, 'TESL', 'USD', height1)
+//
+//     expect(data2?.data.token).toStrictEqual('TESL')
+//     expect(data2?.data.currency).toStrictEqual('USD')
+//     expect(data2?.data.amount).toStrictEqual('1')
+//     expect(data2?.state).toStrictEqual(OracleState.REMOVED)
+//   })
+// })
