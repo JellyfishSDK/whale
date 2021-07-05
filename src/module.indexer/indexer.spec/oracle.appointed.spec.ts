@@ -53,9 +53,9 @@ describe('Weightage - approveOracle', () => {
     await setup()
     await waitForHeight(app, height)
 
-    const oracleStatusMapper = app.get(OracleAppointedMapper)
+    const oracleAppointedMapper = app.get(OracleAppointedMapper)
 
-    const data1 = await oracleStatusMapper.get(oracleId, height)
+    const data1 = await oracleAppointedMapper.get(oracleId, height)
     expect(data1?.data.weightage).toStrictEqual(1)
     expect(data1?.state).toStrictEqual(OracleState.LIVE)
 
@@ -88,13 +88,13 @@ describe('Weightage - updateOracle', () => {
     await setup()
     await waitForHeight(app, height2)
 
-    const oracleStatusMapper = app.get(OracleAppointedMapper)
+    const oracleAppointedMapper = app.get(OracleAppointedMapper)
 
-    const data1 = await oracleStatusMapper.get(oracleId, height1)
+    const data1 = await oracleAppointedMapper.get(oracleId, height1)
     expect(data1?.data.weightage).toStrictEqual(1)
     expect(data1?.state).toStrictEqual(OracleState.REMOVED)
 
-    const data2 = await oracleStatusMapper.get(oracleId, height2)
+    const data2 = await oracleAppointedMapper.get(oracleId, height2)
     expect(data2?.data.weightage).toStrictEqual(2)
     expect(data2?.state).toStrictEqual(OracleState.LIVE)
 
@@ -124,9 +124,9 @@ describe('Weightage - removeOracle', () => {
     await setup()
     await waitForHeight(app, height)
 
-    const oracleStatusMapper = app.get(OracleAppointedMapper)
+    const oracleAppointedMapper = app.get(OracleAppointedMapper)
 
-    const data1 = await oracleStatusMapper.get(oracleId, height)
+    const data1 = await oracleAppointedMapper.get(oracleId, height)
     expect(data1?.state).toStrictEqual(OracleState.REMOVED)
 
     const promise = container.call('getoracledata', [oracleId])
