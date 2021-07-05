@@ -1,34 +1,23 @@
-import { Test, TestingModule } from '@nestjs/testing'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
+import { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { createTestingApp, stopTestingApp } from '@src/e2e.module'
+import { NotFoundException } from '@nestjs/common'
 import { MasternodeController } from '@src/module.api/masternode.controller'
-import { CacheModule, NotFoundException } from '@nestjs/common'
-import { DeFiDCache } from './cache/defid.cache'
 
 const container = new MasterNodeRegTestContainer()
+let app: NestFastifyApplication
 let controller: MasternodeController
 
 beforeAll(async () => {
   await container.start()
   await container.waitForReady()
-  const client = new JsonRpcClient(await container.getCachedRpcUrl())
 
-  const app: TestingModule = await Test.createTestingModule({
-    imports: [
-      CacheModule.register()
-    ],
-    controllers: [MasternodeController],
-    providers: [
-      { provide: JsonRpcClient, useValue: client },
-      DeFiDCache
-    ]
-  }).compile()
-
+  app = await createTestingApp(container)
   controller = app.get(MasternodeController)
 })
 
 afterAll(async () => {
-  await container.stop()
+  await stopTestingApp(container, app)
 })
 
 describe('list', () => {
