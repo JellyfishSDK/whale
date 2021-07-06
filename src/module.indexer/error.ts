@@ -13,3 +13,12 @@ export class NotFoundIndexerError extends IndexerError {
     super(`attempting to sync:${action} but type:${type} with id:${id} cannot be found in the index`)
   }
 }
+
+/**
+ * Happens on INSERT operation which data is being added conflicts with existing data.
+ */
+export class ConflictsIndexerError extends IndexerError {
+  constructor (action: 'invalidate' | 'index', type: string, id: string) {
+    super(`attempting to sync:${action} but type:${type} with id:${id} being added conflicts with existing data`)
+  }
+}

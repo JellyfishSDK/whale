@@ -7,6 +7,8 @@ import { ScriptUnspentIndexer } from '@src/module.indexer/model/script.unspent'
 import { TransactionIndexer } from '@src/module.indexer/model/transaction'
 import { TransactionVinIndexer } from '@src/module.indexer/model/transaction.vin'
 import { TransactionVoutIndexer } from '@src/module.indexer/model/transaction.vout'
+import { TokenIndexer } from '@src/module.indexer/model/token'
+import { PoolPairIndexer } from '@src/module.indexer/model/poolpair'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { RawBlockMapper } from '@src/module.model/raw.block'
 import { NotFoundIndexerError } from '@src/module.indexer/error'
@@ -28,7 +30,9 @@ export class MainIndexer {
     private readonly scriptUnspent: ScriptUnspentIndexer,
     private readonly transaction: TransactionIndexer,
     private readonly transactionVin: TransactionVinIndexer,
-    private readonly transactionVout: TransactionVoutIndexer
+    private readonly transactionVout: TransactionVoutIndexer,
+    private readonly token: TokenIndexer,
+    private readonly poolpair: PoolPairIndexer
   ) {
     this.indexers = [
       block,
@@ -37,7 +41,9 @@ export class MainIndexer {
       scriptUnspent,
       transaction,
       transactionVin,
-      transactionVout
+      transactionVout,
+      token,
+      poolpair
     ]
   }
 
