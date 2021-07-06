@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
-import { OracleStatusMapper } from '@src/module.model/oracle.status'
-import { OraclePriceDataMapper } from '@src/module.model/oracle.priceData'
-import { OraclePriceFeedMapper } from '@src/module.model/oracle.priceFeed'
-import { OraclePriceAggregration, OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
+import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
+import { OracleAppointedMapper } from '@src/module.model/oracle.appointed'
+import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
+import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
+import { OraclePriceAggregration } from '@whale-api-client/api/oracle'
 
 @Injectable()
 export class OraclePriceAggregationIndexer extends Indexer {
   constructor (
-    private readonly statusMapper: OracleStatusMapper,
+    private readonly appointedMapper: OracleAppointedMapper,
     private readonly priceFeedMapper: OraclePriceFeedMapper,
     private readonly priceDataMapper: OraclePriceDataMapper,
     private readonly priceAggregrationMapper: OraclePriceAggregrationMapper
@@ -40,22 +41,25 @@ export class OraclePriceAggregationIndexer extends Indexer {
 
             const prices = await this.priceDataMapper.getActivePrices(token, currency, block.time) ?? []
 
-            let sum = 0
-            const timestamp = 0
-
             let hasFound = false
+
+            let sum = 0
+            let weightageSum = 0
 
             for (let i = 0; i < prices.length; i += 1) {
               const price = prices[i]
-              const mapper = await this.statusMapper.get(price.data.oracleId)
+              const mapper = await this.appointedMapper.getLatest(price.data.oracleId)
+
               const weightage = mapper?.data.weightage ?? 0
 
               sum = sum + price.data.amount * weightage
+              weightageSum += weightage
+
               hasFound = true
             }
 
             if (hasFound) {
-              records[`${block.height}-${token}-${currency}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block, token, currency, sum / prices.length, timestamp)
+              records[`${block.height}-${token}-${currency}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block, token, currency, sum / weightageSum, block.time)
             }
           }
         }

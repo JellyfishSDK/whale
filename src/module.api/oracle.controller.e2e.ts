@@ -1,39 +1,31 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { StubService } from '../stub.service'
-import { WhaleApiClient } from '../../src'
-import { OracleState } from '../../src/api/oracle'
-import { StubWhaleApiClient } from '../stub.client'
+import { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
+import { OracleController } from '@src/module.api/oracle.controller'
+import { OracleState } from '@whale-api-client/api/oracle'
 
-let container: MasterNodeRegTestContainer
-let service: StubService
-let client: WhaleApiClient
+const container = new MasterNodeRegTestContainer()
+let app: NestFastifyApplication
+let controller: OracleController
+
+beforeAll(async () => {
+  await container.start()
+  await container.waitForReady()
+  await container.waitForWalletCoinbaseMaturity()
+
+  app = await createTestingApp(container)
+  controller = app.get(OracleController)
+})
+
+afterAll(async () => {
+  await stopTestingApp(container, app)
+})
 
 describe('Status', () => {
   let oracleId: string
   let height: number
 
   beforeAll(async () => {
-    container = new MasterNodeRegTestContainer()
-    service = new StubService(container)
-    client = new StubWhaleApiClient(service)
-
-    await container.start()
-    await container.waitForReady()
-    await container.waitForWalletCoinbaseMaturity()
-    await service.start()
-
-    await setup()
-  })
-
-  afterAll(async () => {
-    try {
-      await service.stop()
-    } finally {
-      await container.stop()
-    }
-  })
-
-  async function setup (): Promise<void> {
     const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
 
@@ -44,53 +36,24 @@ describe('Status', () => {
     await container.generate(1)
 
     height = await container.call('getblockcount')
-  }
-
-  afterEach(async () => {
-    const data = await container.call('listoracles')
-
-    for (let i = 0; i < data.length; i += 1) {
-      await container.call('removeoracle', [data[i]])
-    }
-
-    await container.generate(1)
   })
 
   it('should getStatus 5 blocks after the oracle was updated', async () => {
-    await service.waitForIndexedHeight(height + 5)
+    await waitForIndexedHeight(app, height + 5)
 
-    const result = await client.oracle.getStatus(oracleId)
+    const result = await controller.getStatus(oracleId)
     expect(result?.data.weightage).toStrictEqual(2)
   })
 
   it('should return undefined if getStatus with invalid id', async () => {
-    await service.waitForIndexedHeight(height)
+    await waitForIndexedHeight(app, height)
 
-    const result = await client.oracle.getStatus('invalid')
+    const result = await controller.getStatus('invalid')
     expect(result).toStrictEqual(undefined)
   })
 })
 
-describe('Price Feed', () => {
-  beforeAll(async () => {
-    container = new MasterNodeRegTestContainer()
-    service = new StubService(container)
-    client = new StubWhaleApiClient(service)
-
-    await container.start()
-    await container.waitForReady()
-    await container.waitForWalletCoinbaseMaturity()
-    await service.start()
-  })
-
-  afterAll(async () => {
-    try {
-      await service.stop()
-    } finally {
-      await container.stop()
-    }
-  })
-
+describe('Price feed', () => {
   describe('Get all price feeds', () => {
     let height: number
 
@@ -117,9 +80,9 @@ describe('Price Feed', () => {
     })
 
     it('should get all price feeds 5 blocks after the oracle was updated', async () => {
-      await service.waitForIndexedHeight(height + 5)
+      await waitForIndexedHeight(app, height + 5)
 
-      const result = await client.oracle.getAllPriceFeeds() ?? []
+      const result = await controller.getAllPriceFeeds() ?? []
 
       // Result sort by Token, Currency and block height
       expect(result[0]?.data.token).toStrictEqual('APPL')
@@ -160,9 +123,9 @@ describe('Price Feed', () => {
     })
 
     it('should get all price feeds by oracleId 5 blocks after the oracle was updated', async () => {
-      await service.waitForIndexedHeight(height + 5)
+      await waitForIndexedHeight(app, height + 5)
 
-      const result = await client.oracle.getPriceFeed(oracleId) ?? []
+      const result = await controller.getPriceFeed(oracleId) ?? []
 
       expect(result[0]?.data.token).toStrictEqual('APPL')
       expect(result[0]?.data.currency).toStrictEqual('EUR')
@@ -174,9 +137,9 @@ describe('Price Feed', () => {
     })
 
     it('should return empty array if get price feed with invalid oracleId', async () => {
-      await service.waitForIndexedHeight(height)
+      await waitForIndexedHeight(app, height)
 
-      const result = await client.oracle.getPriceFeed('invalid')
+      const result = await controller.getPriceFeed('invalid')
 
       expect(result).toStrictEqual([])
     })
@@ -184,32 +147,11 @@ describe('Price Feed', () => {
 })
 
 describe('Price Data', () => {
-  beforeAll(async () => {
-    container = new MasterNodeRegTestContainer()
-    service = new StubService(container)
-    client = new StubWhaleApiClient(service)
-
-    await container.start()
-    await container.waitForReady()
-    await container.waitForWalletCoinbaseMaturity()
-    await service.start()
-
-    await setup()
-  })
-
-  afterAll(async () => {
-    try {
-      await service.stop()
-    } finally {
-      await container.stop()
-    }
-  })
-
   let oracleId: string
   let height: number
   let timestamp: number
 
-  async function setup (): Promise<void> {
+  beforeAll(async () => {
     const priceFeeds1 = [
       { token: 'APPL', currency: 'EUR' },
       { token: 'TESL', currency: 'USD' }
@@ -219,6 +161,7 @@ describe('Price Data', () => {
     await container.generate(1)
 
     timestamp = Math.floor(new Date().getTime() / 1000)
+
     const prices = [
       { tokenAmount: '0.5@APPL', currency: 'EUR' },
       { tokenAmount: '1.0@TESL', currency: 'USD' }
@@ -229,12 +172,12 @@ describe('Price Data', () => {
     await container.generate(1)
 
     height = await container.call('getblockcount')
-  }
+  })
 
   it('should get price data by oracleId 5 blocks after the oracle was updated', async () => {
-    await service.waitForIndexedHeight(height + 5)
+    await waitForIndexedHeight(app, height + 5)
 
-    const result = await client.oracle.getPriceData(oracleId) ?? []
+    const result = await controller.getPriceData(oracleId) ?? []
     expect(result.length).toStrictEqual(2)
 
     expect(result[0]?.data.oracleId).toStrictEqual(oracleId)
@@ -253,39 +196,18 @@ describe('Price Data', () => {
   })
 
   it('should return empty array if get price data with invalid oracleId', async () => {
-    await service.waitForIndexedHeight(height)
+    await waitForIndexedHeight(app, height)
 
-    const result = await client.oracle.getPriceData('invalid')
+    const result = await controller.getPriceData('invalid')
 
     expect(result).toStrictEqual([])
   })
 })
 
 describe('Price', () => {
-  beforeAll(async () => {
-    container = new MasterNodeRegTestContainer()
-    service = new StubService(container)
-    client = new StubWhaleApiClient(service)
-
-    await container.start()
-    await container.waitForReady()
-    await container.waitForWalletCoinbaseMaturity()
-    await service.start()
-
-    await setup()
-  })
-
-  afterAll(async () => {
-    try {
-      await service.stop()
-    } finally {
-      await container.stop()
-    }
-  })
-
   let height: number
 
-  async function setup (): Promise<void> {
+  beforeAll(async () => {
     const priceFeeds = [
       { token: 'APPL', currency: 'EUR' }
     ]
@@ -317,12 +239,12 @@ describe('Price', () => {
     await container.generate(1)
 
     height = await container.call('getblockcount')
-  }
+  })
 
   it('should get latest token and currency 5 blocks after the oracle was updated', async () => {
-    await service.waitForIndexedHeight(height + 5)
+    await waitForIndexedHeight(app, height + 5)
 
-    const result = await client.oracle.getPrice('APPL', 'EUR')
+    const result = await controller.getPrice('APPL', 'EUR')
 
     expect(result?.data.token).toStrictEqual('APPL')
     expect(result?.data.currency).toStrictEqual('EUR')
@@ -330,9 +252,9 @@ describe('Price', () => {
   })
 
   it('should return undefined if get price data with invalid token and currency', async () => {
-    await service.waitForIndexedHeight(height + 5)
+    await waitForIndexedHeight(app, height)
 
-    const result = await client.oracle.getPrice('invalid', 'invalid')
+    const result = await controller.getPrice('invalid', 'invalid')
 
     expect(result).toStrictEqual(undefined)
   })
