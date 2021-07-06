@@ -1,4 +1,4 @@
-import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
+import { DeFiDRpcError, MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
@@ -80,6 +80,12 @@ describe('PriceAggregration - 1', () => {
     expect(agg2?.data.token).toStrictEqual('TESL')
     expect(agg2?.data.currency).toStrictEqual('USD')
     expect(agg2?.data.amount).toStrictEqual(1)
+
+    const data1 = await container.call('getprice', [{ token: 'APPL', currency: 'EUR' }])
+    expect(data1).toStrictEqual(0.5)
+
+    const data2 = await container.call('getprice', [{ token: 'TESL', currency: 'USD' }])
+    expect(data2).toStrictEqual(1)
   })
 })
 
@@ -142,6 +148,12 @@ describe('PriceAggregration - 2', () => {
     expect(agg2?.data.token).toStrictEqual('TESL')
     expect(agg2?.data.currency).toStrictEqual('USD')
     expect(agg2?.data.amount).toStrictEqual(1.6666666666666667)
+
+    const data1 = await container.call('getprice', [{ token: 'APPL', currency: 'EUR' }])
+    expect(data1).toStrictEqual(1.16666666)
+
+    const data2 = await container.call('getprice', [{ token: 'TESL', currency: 'USD' }])
+    expect(data2).toStrictEqual(1.66666666)
   })
 })
 
@@ -195,5 +207,10 @@ describe('PriceAggregration - 3', () => {
     const agg = await priceAggregrationMapper.get(height, 'FB', 'CNY')
 
     expect(agg).toStrictEqual(undefined)
+
+    const promise = container.call('getprice', [{ token: 'FB', currency: 'CNY' }])
+
+    await expect(promise).rejects.toThrow(DeFiDRpcError)
+    await expect(promise).rejects.toThrow('DeFiDRpcError: \'no live oracles for specified request\', code: -1')
   })
 })
