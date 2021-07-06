@@ -27,7 +27,7 @@ afterAll(async () => {
 
 describe('list', () => {
   it('should list masternodes', async () => {
-    const data = await client.masternode.list()
+    const data = await client.masternodes.list()
     expect(Object.keys(data[0]).length).toStrictEqual(13)
     expect(data.hasNext).toStrictEqual(false)
     expect(data.nextToken).toStrictEqual(undefined)
@@ -35,11 +35,11 @@ describe('list', () => {
 
   it('should list masternodes with pagination', async () => {
     // get the initial length of  masternodes.
-    const initialLength = (await client.masternode.list()).length
+    const initialLength = (await client.masternodes.list()).length
     const paginationSize = (initialLength / 2)
     const lastIndex = (paginationSize - 1)
 
-    const first = await client.masternode.list(paginationSize)
+    const first = await client.masternodes.list(paginationSize)
     expect(first.length).toStrictEqual(paginationSize)
     expect(first.nextToken).toStrictEqual(first[lastIndex].id)
 
@@ -58,9 +58,9 @@ describe('list', () => {
 describe('get', () => {
   it('should get masternode', async () => {
     // get a masternode from list
-    const masternode = (await client.masternode.list(1))[0]
+    const masternode = (await client.masternodes.list(1))[0]
 
-    const data = await client.masternode.get(masternode.id)
+    const data = await client.masternodes.get(masternode.id)
     expect(Object.keys(data).length).toStrictEqual(13)
     expect(data).toStrictEqual(masternode)
   })
@@ -69,7 +69,7 @@ describe('get', () => {
     expect.assertions(2)
     const id = '8d4d987dee688e400a0cdc899386f243250d3656d802231755ab4d28178c9816'
     try {
-      await client.masternode.get(id)
+      await client.masternodes.get(id)
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
@@ -85,7 +85,7 @@ describe('get', () => {
   it('should fail and throw an error with malformed id', async () => {
     expect.assertions(2)
     try {
-      await client.masternode.get('sdh183')
+      await client.masternodes.get('sdh183')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({

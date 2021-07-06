@@ -6,7 +6,7 @@ import { MasternodeData } from '@whale-api-client/api/masternode'
 import { MasternodePagination, MasternodeInfo } from '@defichain/jellyfish-api-core/dist/category/masternode'
 
 @Controller('/v0/:network/masternodes')
-export class MasternodeController {
+export class MasternodesController {
   constructor (
     protected readonly client: JsonRpcClient
   ) {
@@ -30,7 +30,6 @@ export class MasternodeController {
     if (query.next !== undefined) options.start = query.next
 
     const data = await this.client.masternode.listMasternodes(options, true)
-
     const masternodes: MasternodeData[] = Object.entries(data)
       .map(([id, value]): MasternodeData => mapMasternodeData(id, value))
 

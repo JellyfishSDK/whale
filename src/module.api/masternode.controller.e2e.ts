@@ -2,18 +2,18 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp } from '@src/e2e.module'
 import { NotFoundException } from '@nestjs/common'
-import { MasternodeController } from '@src/module.api/masternode.controller'
+import { MasternodesController } from '@src/module.api/masternode.controller'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
-let controller: MasternodeController
+let controller: MasternodesController
 
 beforeAll(async () => {
   await container.start()
   await container.waitForReady()
 
   app = await createTestingApp(container)
-  controller = app.get(MasternodeController)
+  controller = app.get(MasternodesController)
 })
 
 afterAll(async () => {

@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { MasternodeController } from '@src/module.api/masternode.controller'
+import { MasternodesController } from '@src/module.api/masternode.controller'
 import { CacheModule, NotFoundException } from '@nestjs/common'
 import { DeFiDCache } from './cache/defid.cache'
 
 const container = new MasterNodeRegTestContainer()
-let controller: MasternodeController
+let controller: MasternodesController
 
 beforeAll(async () => {
   await container.start()
@@ -17,14 +17,14 @@ beforeAll(async () => {
     imports: [
       CacheModule.register()
     ],
-    controllers: [MasternodeController],
+    controllers: [MasternodesController],
     providers: [
       { provide: JsonRpcClient, useValue: client },
       DeFiDCache
     ]
   }).compile()
 
-  controller = app.get(MasternodeController)
+  controller = app.get(MasternodesController)
 })
 
 afterAll(async () => {

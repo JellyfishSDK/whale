@@ -4,12 +4,12 @@ import { ApiPagedResponse } from '../whale.api.response'
 /**
  * DeFi whale endpoint for masternode related services.
  */
-export class Masternode {
+export class Masternodes {
   constructor (private readonly client: WhaleApiClient) {
   }
 
   /**
-   * Paginate query masternode.
+   * Query list of masternodes.
    *
    * @param {number} size masternodes size to query
    * @param {number} next next set of masternodes
@@ -31,7 +31,7 @@ export class Masternode {
 }
 
 /**
- * Masternode data.
+ * Masternode data
  */
 export interface MasternodeData {
   id: string
