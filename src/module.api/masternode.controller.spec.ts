@@ -51,7 +51,7 @@ describe('list', () => {
       next: first.page?.next
     })
     expect(next.data.length).toStrictEqual(paginationSize)
-    expect(next.page.next).toStrictEqual(next.data[lastIndex].id)
+    expect(next.page?.next).toStrictEqual(next.data[lastIndex].id)
 
     const last = await controller.list({
       size: paginationSize,
