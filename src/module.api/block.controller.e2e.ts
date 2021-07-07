@@ -26,7 +26,6 @@ afterAll(async () => {
 describe('BlockController', () => {
   it('getBlock should get block with hash of block', async () => {
     const blockHash = await container.call('getblockhash', [100])
-    console.log('blockhash', blockHash)
     const block = await controller.getBlock(blockHash)
     expect(block?.height).toStrictEqual(100)
     expect(block?.hash).toStrictEqual(blockHash)
