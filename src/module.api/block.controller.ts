@@ -16,23 +16,31 @@ export class BlockController {
   async listBlocks (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<Block>> {
-    const blocks = await this.blockMapper.queryByHeight(query.size, query.next)
+    console.log('query.size', query.size)
 
-    return ApiPagedResponse.of(blocks, query.size, item => {
+    if (query.next != null && isNumber(query.next)) {
+      const next = parseInt(query.next)
+      const blocks = await this.blockMapper.queryByHeight(query.size, next)
+      return ApiPagedResponse.of(blocks, query.size, item => {
+        return item.id
+      })
+    }
+
+    return ApiPagedResponse.of(await this.blockMapper.queryByHeight(0), query.size, item => {
       return item.id
     })
   }
 
   @Get('/:id')
   async getBlock (@Param('id') id: string): Promise<Block | undefined> {
-    const height = parseInt(id)
+    const idIsNumber = isNumber(id)
 
-    if (!isNaN(height)) {
-      // id is a number, assume user trying to get by height
+    if (idIsNumber) {
+      const height = parseInt(id)
       return await this.blockMapper.getByHeight(height)
     }
+    // id is not a number
 
-    // assume valid hash string
     return await this.blockMapper.getByHash(id)
   }
 
@@ -44,4 +52,8 @@ export class BlockController {
       return transaction.id
     })
   }
+}
+
+function isNumber (str: string): boolean {
+  return /^-?\d+$/.test(str)
 }

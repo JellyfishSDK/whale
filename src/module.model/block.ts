@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { Model, ModelKey, ModelMapping } from '@src/module.database/model'
+import { Model, ModelMapping } from '@src/module.database/model'
 import { Database, SortOrder } from '@src/module.database/database'
 
 const BlockMapping: ModelMapping<Block> = {
@@ -36,7 +36,7 @@ export class BlockMapper {
     return blocks.length === 0 ? undefined : blocks[0]
   }
 
-  async queryByHeight (limit: number, lt?: ModelKey): Promise<Block[]> {
+  async queryByHeight (limit: number, lt?: number): Promise<Block[]> {
     return await this.database.query(BlockMapping.index.height, {
       limit: limit,
       order: SortOrder.DESC,
