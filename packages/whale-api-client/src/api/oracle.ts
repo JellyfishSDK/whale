@@ -10,10 +10,9 @@ export class Oracle {
   /**
    * Get all price feeds
    *
-   * @param {string} id oracleId
-   * @return {Promise<OraclePriceFeed>}
+   * @return {Promise<OraclePriceFeed[]>}
    */
-  async getAll (): Promise<OraclePriceFeed[]> {
+  async getPriceFeeds (): Promise<OraclePriceFeed[]> {
     return await this.client.requestData('GET', 'oracle/pricefeed')
   }
 

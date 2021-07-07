@@ -59,7 +59,7 @@ describe('Get all', () => {
   it('should get all price feeds 5 blocks after the oracle was updated', async () => {
     await service.waitForIndexedHeight(height + 5)
 
-    const result = await client.oracle.getAll() ?? []
+    const result = await client.oracle.getPriceFeeds() ?? []
 
     expect(result[0]?.data.token).toStrictEqual('APPL')
     expect(result[0]?.data.currency).toStrictEqual('EUR')
