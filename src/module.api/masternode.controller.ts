@@ -21,7 +21,7 @@ export class MasternodesController {
   @Get('')
   async list (
     @Query() query: PaginationQuery
-  ): Promise<any> {
+  ): Promise<ApiPagedResponse<MasternodeData>> {
     const options: MasternodePagination = {
       including_start: query.next === undefined,
       limit: query.size

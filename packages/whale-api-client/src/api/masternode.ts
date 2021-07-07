@@ -13,7 +13,7 @@ export class Masternodes {
    *
    * @param {number} size masternodes size to query
    * @param {number} next next set of masternodes
-   * @return {Promise<ApiPagedResponse<TokenData>>}
+   * @return {Promise<ApiPagedResponse<MasternodeData>>}
    */
   async list (size: number = 30, next?: string): Promise<ApiPagedResponse<MasternodeData>> {
     return await this.client.requestList('GET', 'masternodes', size, next)
