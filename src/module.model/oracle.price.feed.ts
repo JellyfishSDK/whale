@@ -32,7 +32,7 @@ export class OraclePriceFeedMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async getAll (): Promise<OraclePriceFeed[] | undefined> {
+  async getPriceFeeds (): Promise<OraclePriceFeed[] | undefined> {
     return await this.database.query(OraclePriceFeedMapping.index.id, {
       order: SortOrder.ASC,
       limit: 1000000

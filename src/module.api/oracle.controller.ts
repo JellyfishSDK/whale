@@ -28,8 +28,8 @@ export class OracleController {
   }
 
   @Get('/priceFeeds')
-  async getAllPriceFeeds (): Promise<OraclePriceFeed[] | undefined> {
-    return await this.priceFeedMapper.getAll()
+  async getPriceFeeds (): Promise<OraclePriceFeed[] | undefined> {
+    return await this.priceFeedMapper.getPriceFeeds()
   }
 
   @Get('/:id/priceFeed')

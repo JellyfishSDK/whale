@@ -82,7 +82,7 @@ describe('Price feed', () => {
     it('should get all price feeds 5 blocks after the oracle was updated', async () => {
       await waitForIndexedHeight(app, height + 5)
 
-      const result = await controller.getAllPriceFeeds() ?? []
+      const result = await controller.getPriceFeeds() ?? []
 
       // Result sort by Token, Currency and block height
       expect(result[0]?.data.token).toStrictEqual('APPL')

@@ -25,7 +25,7 @@ export class OraclePriceAggregationIndexer extends Indexer {
           continue
         }
 
-        const data = await this.priceFeedMapper.getAll() ?? []
+        const data = await this.priceFeedMapper.getPriceFeeds() ?? []
 
         if (data.length > 0) {
           const priceFeedSet: Set<string> = new Set()
