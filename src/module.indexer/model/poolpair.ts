@@ -28,21 +28,13 @@ export class PoolPairIndexer extends Indexer {
 
           const data: PoolCreatePair = (stack[1] as OP_DEFI_TX).tx.data
 
-          // poolpair is kind of token
-          const token = await this.tokenMapper.getLatest()
-          if (token === undefined) {
-            throw new NotFoundIndexerError('index', 'PoolPair->Token', 'getLatest')
-          }
+          const pairSymbol = data.pairSymbol !== ''
+            ? data.pairSymbol
+            : await this.constructPairSymbol(data.tokenA.toString(), data.tokenB.toString())
 
-          const id = (Number(token.id) + 1).toString() // id increment
+          const poolId = await this.newPoolId()
 
-          let poolpair = await this.mapper.get(id)
-          if (poolpair !== undefined) {
-            throw new ConflictsIndexerError('index', 'PoolPair', id)
-          }
-
-          const pairSymbol = data.pairSymbol !== '' ? data.pairSymbol : await this.constructPairSymbol(data.tokenA.toString(), data.tokenB.toString())
-          poolpair = PoolPairIndexer.newPoolPair(block, data, id, pairSymbol)
+          const poolpair = await this.newPoolPair(data, block, pairSymbol, poolId)
 
           const newToken = TokenIndexer.newToken(block, {
             symbol: pairSymbol,
@@ -52,7 +44,7 @@ export class PoolPairIndexer extends Indexer {
             mintable: false,
             tradeable: true,
             isDAT: true
-          }, id)
+          }, poolId, `${data.tokenA}-${data.tokenB}`)
           await this.tokenMapper.put(newToken)
 
           await this.mapper.put(poolpair)
@@ -65,9 +57,15 @@ export class PoolPairIndexer extends Indexer {
 
           const data: PoolUpdatePair = (stack[1] as OP_DEFI_TX).tx.data
 
-          const poolpair = await this.mapper.get(data.poolId.toString())
+          // find poolpair by token with data.poolId
+          const token = await this.tokenMapper.get(data.poolId.toString())
+          if (token === undefined || token.symbolId === undefined) {
+            throw new NotFoundIndexerError('index', 'UpdatePoolPair->Token', `${data.poolId}`)
+          }
+
+          const poolpair = await this.mapper.get(token.symbolId)
           if (poolpair === undefined) {
-            throw new NotFoundIndexerError('index', 'PoolPair', `${data.poolId}`)
+            throw new NotFoundIndexerError('index', 'UpdatePoolPair', `${data.poolId}`)
           }
           // TODO(canonbrother): update ownerAddress, customRewards
           poolpair.status = data.status
@@ -100,15 +98,49 @@ export class PoolPairIndexer extends Indexer {
     }
   }
 
+  private async newPoolPair (
+    data: PoolCreatePair, block: RawBlock, pairSymbol: string, poolId: string
+  ): Promise<PoolPair> {
+    // Note(canonbrother): Here can skip tokenB-tokenA checking
+    // as createpoolpair block should be definitely confirmed tokenA-tokenB order creation
+    // else block won't be generated
+    const poolpair = await this.mapper.get(`${data.tokenA}-${data.tokenB}`)
+    if (poolpair !== undefined) {
+      throw new ConflictsIndexerError('index', 'CreatePoolPair', `${data.tokenA}-${data.tokenB}`)
+    }
+
+    return PoolPairIndexer.newPoolPair(block, data, poolId, pairSymbol)
+  }
+
+  private async newPoolId (): Promise<string> {
+    // Note(canonbrother):
+    // 1. poolpair.get is by tokenA-tokenB, poolpair.query is by poolId
+    // 2. poolId is kind of tokenId as token includes poolpair
+    // 3. compare latestTokenId with latestPoolId
+    // 4. if latestTokenId > latestPoolId, poolId = latestTokenId + 1, vice versa
+    // 5. check if poolId exists, poolId++ else 0
+    const latestToken = await this.tokenMapper.getLatest()
+    if (latestToken === undefined) {
+      throw new NotFoundIndexerError('index', 'CreatePoolPair->Token', 'getLatest')
+    }
+
+    const latestTokenId = Number(latestToken.id)
+
+    const latestPoolPair = await this.mapper.getLatest()
+    const latestPoolId = latestPoolPair === undefined ? 0 : Number(latestPoolPair.poolId)
+
+    return latestTokenId > latestPoolId ? (latestTokenId + 1).toString() : (latestPoolId + 1).toString()
+  }
+
   private async constructPairSymbol (tokenAId: string, tokenBId: string): Promise<string> {
     const tokenA = await this.tokenMapper.get(tokenAId)
     if (tokenA === undefined) {
-      throw new NotFoundIndexerError('index', 'PoolPair-Token', tokenAId)
+      throw new NotFoundIndexerError('index', 'CreatePoolPair-Token', tokenAId)
     }
 
     const tokenB = await this.tokenMapper.get(tokenBId)
     if (tokenB === undefined) {
-      throw new NotFoundIndexerError('index', 'PoolPair-Token', tokenBId)
+      throw new NotFoundIndexerError('index', 'CreatePoolPair-Token', tokenBId)
     }
 
     return `${tokenA.symbol}-${tokenB.symbol}`
@@ -118,7 +150,9 @@ export class PoolPairIndexer extends Indexer {
     block: RawBlock, data: PoolCreatePair, id: string, pairSymbol: string
   ): PoolPair {
     return {
-      id: id,
+      // Note(canonbrother): the id design intentionally made, easier for poolswap block get poolpair
+      id: `${data.tokenA}-${data.tokenB}`,
+      poolId: id,
       block: {
         hash: block.hash,
         height: block.height

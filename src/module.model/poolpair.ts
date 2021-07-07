@@ -6,11 +6,11 @@ import { Database, SortOrder } from '@src/module.database/database'
 const PoolPairMapping: ModelMapping<PoolPair> = {
   type: 'poolpair',
   index: {
-    height: {
-      name: 'poolpair_height',
+    poolId: {
+      name: 'poolpair_poolId',
       partition: {
-        type: 'number',
-        key: (p: PoolPair) => p.block.height
+        type: 'string',
+        key: (p: PoolPair) => p.poolId
       }
     }
   }
@@ -22,7 +22,7 @@ export class PoolPairMapper {
   }
 
   async getLatest (): Promise<PoolPair | undefined> {
-    const aggregations = await this.database.query(PoolPairMapping.index.height, {
+    const aggregations = await this.database.query(PoolPairMapping.index.poolId, {
       order: SortOrder.DESC,
       limit: 1
     })
@@ -30,7 +30,7 @@ export class PoolPairMapper {
   }
 
   async query (limit: number, lt?: number): Promise<PoolPair[]> {
-    return await this.database.query(PoolPairMapping.index.height, {
+    return await this.database.query(PoolPairMapping.index.poolId, {
       limit: limit,
       order: SortOrder.DESC,
       lt: lt
@@ -51,7 +51,8 @@ export class PoolPairMapper {
 }
 
 export interface PoolPair extends Model {
-  id: string
+  id: string // tokenAId-tokenBId
+  poolId: string
   block: {
     hash: string
     height: number

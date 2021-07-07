@@ -63,13 +63,14 @@ export class TokenIndexer extends Indexer {
     }
   }
 
-  static newToken (block: RawBlock, data: TokenCreate, id: string): Token {
+  static newToken (block: RawBlock, data: TokenCreate, id: string, symbolId?: string): Token {
     return {
       id: id,
       block: {
         hash: block.hash,
         height: block.height
       },
+      symbolId: symbolId,
       ...data
     }
   }

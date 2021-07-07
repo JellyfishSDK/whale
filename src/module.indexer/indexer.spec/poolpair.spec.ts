@@ -17,7 +17,7 @@ let spy: jest.SpyInstance
 beforeAll(async () => {
   await container.start()
   await container.waitForReady()
-  await container.generate(25)
+  await container.generate(20)
 
   app = await createIndexerTestModule(container)
   await app.init()
@@ -136,11 +136,11 @@ it('should query at block 0', async () => {
   const poolpairs = await mapper.query(100)
   const last = poolpairs.length - 1
 
-  expect(poolpairs[last].id).toStrictEqual('16')
+  expect(poolpairs[last].id).toStrictEqual('1-0')
+  expect(poolpairs[last].poolId).toStrictEqual('16')
   expect(poolpairs[last].symbol).toStrictEqual('ETH-DFI')
   expect(poolpairs[last].status).toStrictEqual(true)
   expect(poolpairs[last].commission).toStrictEqual('0.02')
-
   expect(poolpairs[last].block.hash).toStrictEqual(expect.any(String))
   expect(poolpairs[last].block.height).toStrictEqual(16)
   expect(poolpairs[last].tokenA).toStrictEqual('1')
@@ -154,8 +154,13 @@ it('should query at block 20', async () => {
   const poolpairs = await mapper.query(100)
   const last = poolpairs.length - 1
 
-  expect(poolpairs[last].id).toStrictEqual('16')
+  expect(poolpairs[last].id).toStrictEqual('1-0')
+  expect(poolpairs[last].poolId).toStrictEqual('16')
   expect(poolpairs[last].symbol).toStrictEqual('ETH-DFI')
   expect(poolpairs[last].status).toStrictEqual(false)
   expect(poolpairs[last].commission).toStrictEqual('0.15')
+  expect(poolpairs[last].block.hash).toStrictEqual(expect.any(String))
+  expect(poolpairs[last].block.height).toStrictEqual(16)
+  expect(poolpairs[last].tokenA).toStrictEqual('1')
+  expect(poolpairs[last].tokenB).toStrictEqual('0')
 })
