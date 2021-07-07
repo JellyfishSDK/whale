@@ -36,11 +36,12 @@ describe('list', () => {
   it('should list masternodes with pagination', async () => {
     // get the initial length of  masternodes.
     const initialLength = (await client.masternodes.list()).length
-    const paginationSize = (initialLength / 2)
-    const lastIndex = (paginationSize - 1)
+    const paginationSize = initialLength / 2
+    const lastIndex = paginationSize - 1
 
     const first = await client.masternodes.list(paginationSize)
     expect(first.length).toStrictEqual(paginationSize)
+    expect(first.hasNext).toStrictEqual(true)
     expect(first.nextToken).toStrictEqual(first[lastIndex].id)
 
     const next = await client.paginate(first)

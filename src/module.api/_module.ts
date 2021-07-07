@@ -12,6 +12,7 @@ import { ExceptionInterceptor } from '@src/module.api/interceptors/exception.int
 import { ResponseInterceptor } from '@src/module.api/interceptors/response.interceptor'
 import { TokensController } from '@src/module.api/token.controller'
 import { MasternodesController } from '@src/module.api/masternode.controller'
+
 /**
  * Exposed ApiModule for public interfacing
  */
