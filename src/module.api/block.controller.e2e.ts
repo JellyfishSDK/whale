@@ -31,6 +31,11 @@ describe('BlockController', () => {
     expect(block?.hash).toStrictEqual(blockHash)
   })
 
+  it('getBlock should get undefined with invalid hash ', async () => {
+    const block = await controller.getBlock('lajsdl;kfjljklj12lk34j')
+    expect(block).toStrictEqual(undefined)
+  })
+
   it('getBlock should get block with height', async () => {
     const block = await controller.getBlock('100')
     expect(block?.height).toStrictEqual(100)
