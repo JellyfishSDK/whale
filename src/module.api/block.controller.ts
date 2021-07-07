@@ -4,6 +4,10 @@ import { TransactionMapper, Transaction } from '@src/module.model/transaction'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 
+function isNumber (str: string): boolean {
+  return /^-?\d+$/.test(str)
+}
+
 @Controller('/v0/:network/blocks')
 export class BlockController {
   constructor (
@@ -16,8 +20,6 @@ export class BlockController {
   async listBlocks (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<Block>> {
-    console.log('query.size', query.size)
-
     if (query.next != null && isNumber(query.next)) {
       const next = parseInt(query.next)
       const blocks = await this.blockMapper.queryByHeight(query.size, next)
@@ -52,8 +54,4 @@ export class BlockController {
       return transaction.id
     })
   }
-}
-
-function isNumber (str: string): boolean {
-  return /^-?\d+$/.test(str)
 }

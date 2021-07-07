@@ -55,4 +55,10 @@ describe('BlockController', () => {
     expect(paginatedBlocks.data.length).toStrictEqual(30)
     expect(paginatedBlocks.data[0].height).toStrictEqual(39)
   })
+
+  it('listBlocks should get empty array when next is 0', async () => {
+    const paginatedBlocks = await controller.listBlocks({ size: 30, next: '0' })
+
+    expect(paginatedBlocks.data.length).toStrictEqual(0)
+  })
 })
