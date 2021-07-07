@@ -57,7 +57,7 @@ export interface Token extends Model {
     height: number
   }
   symbol: string
-  symbolId?: string
+  symbolId?: string // its poolId eg: '1-0'
   name: string
   decimal: number
   limit: BigNumber

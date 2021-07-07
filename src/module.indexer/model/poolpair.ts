@@ -80,19 +80,35 @@ export class PoolPairIndexer extends Indexer {
   async invalidate (block: RawBlock): Promise<void> {
     for (const txn of block.tx) {
       for (const vout of txn.vout) {
-        if (vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547870') && // 44665478 -> DFTX, 70 -> p -> create poolpair
-          vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547875') // 44665478 -> DFTX, 75 -> u -> update poolpair
-        ) {
+        if (vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547870')) { // 44665478 -> DFTX, 70 -> p -> create poolpair
           const stack: any = toOPCodes(
             SmartBuffer.fromBuffer(Buffer.from(vout.scriptPubKey.hex, 'hex'))
           )
 
-          const data = (stack[1] as OP_DEFI_TX).tx.data
+          const data: PoolCreatePair = (stack[1] as OP_DEFI_TX).tx.data
 
-          const poolpair = await this.mapper.getLatest()
-          if (poolpair !== undefined && poolpair.symbol === data.symbol) {
-            await this.mapper.delete(poolpair.id)
+          await this.mapper.delete(`${data.tokenA}-${data.tokenB}`)
+        }
+
+        if (vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547875')) { // 44665478 -> DFTX, 75 -> u -> update poolpair
+          const stack: any = toOPCodes(
+            SmartBuffer.fromBuffer(Buffer.from(vout.scriptPubKey.hex, 'hex'))
+          )
+
+          const data: PoolUpdatePair = (stack[1] as OP_DEFI_TX).tx.data
+
+          // find poolpair by token with data.poolId
+          const token = await this.tokenMapper.get(data.poolId.toString())
+          if (token === undefined || token.symbolId === undefined) {
+            throw new NotFoundIndexerError('index', 'UpdatePoolPair->Token', `${data.poolId}`)
           }
+
+          const poolpair = await this.mapper.get(token.symbolId)
+          if (poolpair === undefined) {
+            throw new NotFoundIndexerError('index', 'UpdatePoolPair', `${data.poolId}`)
+          }
+
+          await this.mapper.delete(poolpair.id)
         }
       }
     }
