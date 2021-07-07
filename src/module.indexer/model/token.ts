@@ -4,11 +4,13 @@ import { Token, TokenMapper } from '@src/module.model/token'
 import { SmartBuffer } from 'smart-buffer'
 import { OP_DEFI_TX, TokenCreate } from '@defichain/jellyfish-transaction/dist/script/defi'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
+import { DctId, DctIdMapper } from '@src/module.model/dctid'
 
 @Injectable()
 export class TokenIndexer extends Indexer {
   constructor (
-    private readonly mapper: TokenMapper
+    private readonly mapper: TokenMapper,
+    private readonly dctMapper: DctIdMapper
   ) {
     super()
   }
@@ -23,16 +25,17 @@ export class TokenIndexer extends Indexer {
 
           const data: TokenCreate = (stack[1] as OP_DEFI_TX).tx.data
 
-          const token = await this.mapper.getLatest()
-          if (token !== undefined) {
-            const id = (Number(token.id) + 1).toString() // id increment
+          let dctId = await this.dctMapper.getLatest()
 
-            // its fine to index without checking existence
-            // as it already passed through the validation during create token in dfid
-            const newToken = TokenIndexer.newToken(block, data, id)
+          const id = dctId === undefined ? '0' : (Number(dctId.id) + 1).toString() // dctId increment
 
-            await this.mapper.put(newToken)
-          }
+          // its fine to index without checking existence
+          // as it already passed through the validation during create token in dfid
+          const newToken = TokenIndexer.newToken(block, data, id)
+          await this.mapper.put(newToken)
+
+          dctId = TokenIndexer.newDctId(id)
+          await this.dctMapper.put(dctId)
         }
 
         // TODO(canonbrother): index UpdateToken
@@ -69,6 +72,12 @@ export class TokenIndexer extends Indexer {
       },
       symbolId: symbolId,
       ...data
+    }
+  }
+
+  static newDctId (id: string): DctId {
+    return {
+      id: id
     }
   }
 }

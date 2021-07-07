@@ -6,12 +6,14 @@ import { TokenMapper } from '@src/module.model/token'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import BigNumber from 'bignumber.js'
 import crypto from 'crypto'
+import { DctIdMapper } from '@src/module.model/dctid'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
 let client: JsonRpcClient
 let mapper: PoolPairMapper
 let tokenMapper: TokenMapper
+let dctIdMapper: DctIdMapper
 let spy: jest.SpyInstance
 
 beforeAll(async () => {
@@ -26,6 +28,7 @@ beforeAll(async () => {
 
   mapper = app.get<PoolPairMapper>(PoolPairMapper)
   tokenMapper = app.get<TokenMapper>(TokenMapper)
+  dctIdMapper = app.get<DctIdMapper>(DctIdMapper)
 
   await setup()
 })
@@ -39,6 +42,8 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
+  await dctIdMapper.put({ id: '15' })
+
   // Note(canonbrother): to prevent index got invalidated as mocking 'client.blockchain.getBlock' will never get the best chain
   spy = jest.spyOn(mapper, 'delete').mockImplementation()
   spy = jest.spyOn(tokenMapper, 'delete').mockImplementation()
@@ -50,7 +55,8 @@ beforeEach(async () => {
     .mockImplementationOnce(() => generateBlock(dummyScripts[3], 19))
 })
 
-afterEach(() => {
+afterEach(async () => {
+  await dctIdMapper.put({ id: '15' })
   spy.mockRestore()
 })
 
@@ -130,37 +136,23 @@ function generateBlock (dummyScript: any, height: number): any {
   }
 }
 
-it('should query at block 0', async () => {
-  await waitForHeight(app, 0)
-
-  const poolpairs = await mapper.query(100)
-  const last = poolpairs.length - 1
-
-  expect(poolpairs[last].id).toStrictEqual('1-0')
-  expect(poolpairs[last].poolId).toStrictEqual('16')
-  expect(poolpairs[last].symbol).toStrictEqual('ETH-DFI')
-  expect(poolpairs[last].status).toStrictEqual(true)
-  expect(poolpairs[last].commission).toStrictEqual('0.02')
-  expect(poolpairs[last].block.hash).toStrictEqual(expect.any(String))
-  expect(poolpairs[last].block.height).toStrictEqual(16)
-  expect(poolpairs[last].tokenA).toStrictEqual('1')
-  expect(poolpairs[last].tokenB).toStrictEqual('0')
-})
-
-// Block 15 should be already generated UpdatePoolPair block
 it('should query at block 20', async () => {
   await waitForHeight(app, 20)
 
   const poolpairs = await mapper.query(100)
-  const last = poolpairs.length - 1
+  expect(poolpairs.length).toStrictEqual(3)
 
-  expect(poolpairs[last].id).toStrictEqual('1-0')
-  expect(poolpairs[last].poolId).toStrictEqual('16')
-  expect(poolpairs[last].symbol).toStrictEqual('ETH-DFI')
-  expect(poolpairs[last].status).toStrictEqual(false)
-  expect(poolpairs[last].commission).toStrictEqual('0.15')
-  expect(poolpairs[last].block.hash).toStrictEqual(expect.any(String))
-  expect(poolpairs[last].block.height).toStrictEqual(16)
-  expect(poolpairs[last].tokenA).toStrictEqual('1')
-  expect(poolpairs[last].tokenB).toStrictEqual('0')
+  expect(poolpairs[2].id).toStrictEqual('1-0')
+  expect(poolpairs[2].poolId).toStrictEqual('16')
+  expect(poolpairs[2].symbol).toStrictEqual('ETH-DFI')
+  expect(poolpairs[2].status).toStrictEqual(false)// updated from true
+  expect(poolpairs[2].commission).toStrictEqual('0.15') // updated from 0.2
+  expect(poolpairs[2].block.hash).toStrictEqual(expect.any(String))
+  expect(poolpairs[2].block.height).toStrictEqual(16)
+  expect(poolpairs[2].tokenA).toStrictEqual('1')
+  expect(poolpairs[2].tokenB).toStrictEqual('0')
+
+  // ensure the poolId is incremented
+  expect(poolpairs[1].poolId).toStrictEqual('17')
+  expect(poolpairs[0].poolId).toStrictEqual('18')
 })

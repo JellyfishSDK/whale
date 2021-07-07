@@ -8,12 +8,14 @@ import { OP_DEFI_TX, PoolCreatePair, PoolUpdatePair } from '@defichain/jellyfish
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
 import { TokenMapper } from '@src/module.model/token'
 import { TokenIndexer } from './token'
+import { DctIdMapper } from '@src/module.model/dctid'
 
 @Injectable()
 export class PoolPairIndexer extends Indexer {
   constructor (
     private readonly mapper: PoolPairMapper,
-    private readonly tokenMapper: TokenMapper
+    private readonly tokenMapper: TokenMapper,
+    private readonly dctIdMapper: DctIdMapper
   ) {
     super()
   }
@@ -48,6 +50,9 @@ export class PoolPairIndexer extends Indexer {
           await this.tokenMapper.put(newToken)
 
           await this.mapper.put(poolpair)
+
+          const newDctId = await TokenIndexer.newDctId(poolId)
+          await this.dctIdMapper.put(newDctId)
         }
 
         if (vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547875')) { // 44665478 -> DFTX, 75 -> u -> update poolpair
@@ -132,20 +137,13 @@ export class PoolPairIndexer extends Indexer {
     // Note(canonbrother):
     // 1. poolpair.get is by tokenA-tokenB, poolpair.query is by poolId
     // 2. poolId is kind of tokenId as token includes poolpair
-    // 3. compare latestTokenId with latestPoolId
-    // 4. if latestTokenId > latestPoolId, poolId = latestTokenId + 1, vice versa
-    // 5. check if poolId exists, poolId++ else 0
-    const latestToken = await this.tokenMapper.getLatest()
-    if (latestToken === undefined) {
+    // 3. get latest tokenId from dctId
+    const dctId = await this.dctIdMapper.getLatest()
+    if (dctId === undefined) {
       throw new NotFoundIndexerError('index', 'CreatePoolPair->Token', 'getLatest')
     }
 
-    const latestTokenId = Number(latestToken.id)
-
-    const latestPoolPair = await this.mapper.getLatest()
-    const latestPoolId = latestPoolPair === undefined ? 0 : Number(latestPoolPair.poolId)
-
-    return latestTokenId > latestPoolId ? (latestTokenId + 1).toString() : (latestPoolId + 1).toString()
+    return (Number(dctId.id) + 1).toString()
   }
 
   private async constructPairSymbol (tokenAId: string, tokenBId: string): Promise<string> {

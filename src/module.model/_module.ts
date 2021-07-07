@@ -9,6 +9,7 @@ import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { TokenMapper } from '@src/module.model/token'
 import { PoolPairMapper } from '@src/module.model/poolpair'
+import { DctIdMapper } from '@src/module.model/dctid'
 import { ModelProbeIndicator } from '@src/module.model/_model.probes'
 
 @Global()
@@ -24,7 +25,8 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     TransactionVinMapper,
     TransactionVoutMapper,
     TokenMapper,
-    PoolPairMapper
+    PoolPairMapper,
+    DctIdMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -37,7 +39,8 @@ import { ModelProbeIndicator } from '@src/module.model/_model.probes'
     TransactionVinMapper,
     TransactionVoutMapper,
     TokenMapper,
-    PoolPairMapper
+    PoolPairMapper,
+    DctIdMapper
   ]
 })
 export class ModelModule {

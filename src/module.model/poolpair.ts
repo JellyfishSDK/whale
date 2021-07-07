@@ -22,11 +22,11 @@ export class PoolPairMapper {
   }
 
   async getLatest (): Promise<PoolPair | undefined> {
-    const aggregations = await this.database.query(PoolPairMapping.index.poolId, {
+    const poolpairs = await this.database.query(PoolPairMapping.index.poolId, {
       order: SortOrder.DESC,
       limit: 1
     })
-    return aggregations.length === 0 ? undefined : aggregations[0]
+    return poolpairs.length === 0 ? undefined : poolpairs[0]
   }
 
   async query (limit: number, lt?: number): Promise<PoolPair[]> {
@@ -41,8 +41,8 @@ export class PoolPairMapper {
     return await this.database.get(PoolPairMapping, id)
   }
 
-  async put (aggregation: PoolPair): Promise<void> {
-    return await this.database.put(PoolPairMapping, aggregation)
+  async put (poolpair: PoolPair): Promise<void> {
+    return await this.database.put(PoolPairMapping, poolpair)
   }
 
   async delete (id: string): Promise<void> {
