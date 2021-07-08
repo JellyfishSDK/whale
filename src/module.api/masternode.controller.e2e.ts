@@ -28,22 +28,18 @@ describe('list', () => {
   })
 
   it('should list masternodes with pagination', async () => {
-    const initialLength = (await controller.list({ size: 100 })).data.length
-    const paginationSize = initialLength / 2
-    const lastIndex = paginationSize - 1
-
-    const first = await controller.list({ size: paginationSize })
-    expect(first.data.length).toStrictEqual(paginationSize)
+    const first = await controller.list({ size: 4 })
+    expect(first.data.length).toStrictEqual(4)
 
     const next = await controller.list({
-      size: paginationSize,
+      size: 4,
       next: first.page?.next
     })
-    expect(next.data.length).toStrictEqual(paginationSize)
-    expect(next.page?.next).toStrictEqual(next.data[lastIndex].id)
+    expect(next.data.length).toStrictEqual(4)
+    expect(next.page?.next).toStrictEqual(next.data[3].id)
 
     const last = await controller.list({
-      size: paginationSize,
+      size: 4,
       next: next.page?.next
     })
     expect(last.data.length).toStrictEqual(0)
