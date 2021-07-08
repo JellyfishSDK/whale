@@ -12,7 +12,7 @@ export class Masternodes {
    * Query list of masternodes.
    *
    * @param {number} size masternodes size to query
-   * @param {number} next next set of masternodes
+   * @param {string} next  set of masternodes to query
    * @return {Promise<ApiPagedResponse<MasternodeData>>}
    */
   async list (size: number = 30, next?: string): Promise<ApiPagedResponse<MasternodeData>> {

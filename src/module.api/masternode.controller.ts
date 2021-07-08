@@ -31,7 +31,7 @@ export class MasternodesController {
     const data = await this.client.masternode.listMasternodes(options, true)
     const masternodes: MasternodeData[] = Object.entries(data)
       .map(([id, value]): MasternodeData => mapMasternodeData(id, value))
-
+      .sort((a, b) => a.id.localeCompare(b.id))
     return ApiPagedResponse.of(masternodes, query.size, item => item.id)
   }
 
@@ -59,7 +59,7 @@ export class MasternodesController {
 
 function mapMasternodeData (id: string, info: MasternodeInfo): MasternodeData {
   return {
-    id: id,
+    id,
     state: info.state,
     mintedBlocks: info.mintedBlocks,
     owner: {
