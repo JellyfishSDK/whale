@@ -71,7 +71,13 @@ export class TokenIndexer extends Indexer {
         height: block.height
       },
       symbolId: symbolId,
-      ...data
+      symbol: data.symbol,
+      name: data.name,
+      decimal: data.decimal,
+      limit: data.limit.toFixed(),
+      mintable: data.mintable,
+      tradeable: data.tradeable,
+      isDAT: data.isDAT
     }
   }
 

@@ -3,7 +3,6 @@ import { Test } from '@nestjs/testing'
 import { MemoryDatabaseModule } from '@src/module.database/provider.memory/module'
 import { LevelDatabase } from '@src/module.database/provider.level/level.database'
 import { TokenMapper } from '@src/module.model/token'
-import BigNumber from 'bignumber.js'
 import crypto from 'crypto'
 
 let database: Database
@@ -36,7 +35,7 @@ async function put (id: string, symbol: string): Promise<void> {
     symbol: symbol,
     name: symbol,
     decimal: 8,
-    limit: new BigNumber('0'),
+    limit: '0',
     mintable: true,
     tradeable: true,
     isDAT: true
@@ -127,7 +126,7 @@ describe('put', () => {
       symbol: 'NEO',
       name: 'NEO',
       decimal: 8,
-      limit: new BigNumber('0'),
+      limit: '0',
       mintable: true,
       tradeable: true,
       isDAT: true

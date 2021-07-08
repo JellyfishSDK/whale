@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js'
 import { Injectable } from '@nestjs/common'
 import { Model, ModelMapping } from '@src/module.database/model'
 import { Database, SortOrder } from '@src/module.database/database'
@@ -59,7 +58,7 @@ export interface PoolPair extends Model {
   }
   symbol: string
   status: boolean
-  commission: BigNumber
+  commission: string // bignumber
   tokenA: string
   tokenB: string
 }

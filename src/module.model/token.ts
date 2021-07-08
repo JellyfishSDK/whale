@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js'
 import { Injectable } from '@nestjs/common'
 import { Model, ModelMapping } from '@src/module.database/model'
 import { Database, SortOrder } from '@src/module.database/database'
@@ -60,7 +59,7 @@ export interface Token extends Model {
   symbolId?: string // its poolId eg: '1-0'
   name: string
   decimal: number
-  limit: BigNumber
+  limit: string // bignumber
   mintable: boolean
   tradeable: boolean
   isDAT: boolean

@@ -3,7 +3,6 @@ import { Test } from '@nestjs/testing'
 import { MemoryDatabaseModule } from '@src/module.database/provider.memory/module'
 import { LevelDatabase } from '@src/module.database/provider.level/level.database'
 import { PoolPairMapper } from '@src/module.model/poolpair'
-import BigNumber from 'bignumber.js'
 
 let database: Database
 let mapper: PoolPairMapper
@@ -35,7 +34,7 @@ async function put (id: string, symbol: string, tokenA: string, tokenB: string):
     },
     symbol: symbol,
     status: true,
-    commission: new BigNumber('0.001'),
+    commission: '0.001',
     tokenA: tokenA,
     tokenB: tokenB
   })
@@ -120,7 +119,7 @@ describe('put', () => {
       },
       symbol: 'XRP-DFI',
       status: true,
-      commission: new BigNumber('0.001'),
+      commission: '0.001',
       tokenA: '11',
       tokenB: '0'
     })

@@ -74,7 +74,7 @@ export class PoolPairIndexer extends Indexer {
           }
           // TODO(canonbrother): update ownerAddress, customRewards
           poolpair.status = data.status
-          poolpair.commission = data.commission
+          poolpair.commission = data.commission.toFixed()
 
           await this.mapper.put(poolpair)
         }
@@ -173,7 +173,7 @@ export class PoolPairIndexer extends Indexer {
       },
       symbol: pairSymbol,
       status: data.status,
-      commission: data.commission,
+      commission: data.commission.toFixed(),
       tokenA: data.tokenA.toString(),
       tokenB: data.tokenB.toString()
     }

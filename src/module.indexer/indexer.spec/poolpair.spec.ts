@@ -70,7 +70,7 @@ async function putToken (id: string, symbol: string): Promise<void> {
     symbol: symbol,
     name: symbol,
     decimal: 8,
-    limit: new BigNumber('0'),
+    limit: '0',
     mintable: true,
     tradeable: true,
     isDAT: true
