@@ -58,20 +58,23 @@ export class MasternodesController {
   }
 }
 
-function mapMasternodeData (id: string, MasternodeInfo: MasternodeInfo): MasternodeData {
+function mapMasternodeData (id: string, info: MasternodeInfo): MasternodeData {
   return {
     id: id,
-    ownerAuthAddress: MasternodeInfo.ownerAuthAddress,
-    operatorAuthAddress: MasternodeInfo.operatorAuthAddress,
-    creationHeight: MasternodeInfo.creationHeight,
-    resignHeight: MasternodeInfo.resignHeight,
-    resignTx: MasternodeInfo.resignTx,
-    banHeight: MasternodeInfo.banHeight,
-    banTx: MasternodeInfo.banTx,
-    state: MasternodeInfo.state,
-    mintedBlocks: MasternodeInfo.mintedBlocks,
-    ownerIsMine: MasternodeInfo.ownerIsMine,
-    operatorIsMine: MasternodeInfo.operatorIsMine,
-    localMasternode: MasternodeInfo.localMasternode
+    state: info.state,
+    mintedBlocks: info.mintedBlocks,
+    owner: {
+      address: info.ownerAuthAddress
+    },
+    operator: {
+      address: info.operatorAuthAddress
+    },
+    creation: {
+      height: info.creationHeight
+    },
+    resign: {
+      tx: info.resignTx,
+      height: info.resignHeight
+    }
   }
 }

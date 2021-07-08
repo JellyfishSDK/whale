@@ -35,18 +35,21 @@ export class Masternodes {
  */
 export interface MasternodeData {
   id: string
-  ownerAuthAddress: string
-  operatorAuthAddress: string
-  creationHeight: number
-  resignHeight: number
-  resignTx: string
-  banHeight: number
-  banTx: string
   state: MasternodeState
   mintedBlocks: number
-  ownerIsMine: boolean
-  operatorIsMine: boolean
-  localMasternode: boolean
+  owner: {
+    address: string
+  }
+  operator: {
+    address: string
+  }
+  creation: {
+    height: number
+  }
+  resign: {
+    tx: string
+    height: number
+  }
 }
 
 /**

@@ -24,7 +24,7 @@ describe('list', () => {
   it('should list masternodes', async () => {
     const result = await controller.list({ size: 4 })
     expect(result.data.length).toStrictEqual(4)
-    expect(Object.keys(result.data[0]).length).toStrictEqual(13)
+    expect(Object.keys(result.data[0]).length).toStrictEqual(7)
   })
 
   it('should list masternodes with pagination', async () => {
@@ -57,7 +57,7 @@ describe('get', () => {
     const masternode = (await controller.list({ size: 1 })).data[0]
 
     const result = await controller.get(masternode.id)
-    expect(Object.keys(result).length).toStrictEqual(13)
+    expect(Object.keys(result).length).toStrictEqual(7)
     expect(result).toStrictEqual(masternode)
   })
 
