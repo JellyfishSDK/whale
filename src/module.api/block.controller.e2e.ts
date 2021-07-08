@@ -78,6 +78,13 @@ describe('BlockController', () => {
     expect(paginatedBlocks.data.length).toStrictEqual(0)
   })
 
+  it('listBlocks would return all the blocks if the size is out of range', async () => {
+    const paginatedBlocks = await controller.listBlocks({ size: 100000, next: '100' })
+
+    expect(paginatedBlocks.data.length).toStrictEqual(100)
+    expect(paginatedBlocks.data[0].height).toBeGreaterThanOrEqual(99)
+  })
+
   it('listBlocks would return the latest set if next is outside of range', async () => {
     const paginatedBlocks = await controller.listBlocks({ size: 30, next: '100000' })
 
