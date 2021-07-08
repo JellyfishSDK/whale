@@ -24,10 +24,9 @@ export class MasternodesController {
   ): Promise<ApiPagedResponse<MasternodeData>> {
     const options: MasternodePagination = {
       including_start: query.next === undefined,
-      limit: query.size
+      limit: query.size,
+      start: query.next
     }
-
-    if (query.next !== undefined) options.start = query.next
 
     const data = await this.client.masternode.listMasternodes(options, true)
     const masternodes: MasternodeData[] = Object.entries(data)
