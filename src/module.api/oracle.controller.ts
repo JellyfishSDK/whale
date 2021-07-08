@@ -53,4 +53,13 @@ export class OracleController {
   ): Promise<OraclePriceAggregration | undefined> {
     return await this.priceAggregrationMapper.getLatest(token, currency)
   }
+
+  @Get('/:token/:currency/:timestamp/price')
+  async getPriceByTimestamp (
+    @Param('token') token: string,
+      @Param('currency') currency: string,
+      @Param('timestamp') timestamp: number
+  ): Promise<OraclePriceAggregration | undefined> {
+    return await this.priceAggregrationMapper.getLatestByTimestamp(token, currency, timestamp)
+  }
 }

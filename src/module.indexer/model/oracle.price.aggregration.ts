@@ -59,7 +59,7 @@ export class OraclePriceAggregationIndexer extends Indexer {
             }
 
             if (hasFound) {
-              records[`${block.height}-${token}-${currency}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block, token, currency, sum / weightageSum, block.time)
+              records[`${token}-${currency}-${block.height}-${block.time}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block.height, token, currency, sum / weightageSum, block.time)
             }
           }
         }
@@ -76,16 +76,16 @@ export class OraclePriceAggregationIndexer extends Indexer {
   }
 
   static newOraclePriceAggregation (
-    block: RawBlock,
+    height: number,
     token: string,
     currency: string,
     amount: number,
     timestamp: number
   ): OraclePriceAggregration {
     return {
-      id: `${block.height}-${token}-${currency}`,
+      id: `${token}-${currency}-${height}-${timestamp}`,
       block: {
-        height: block.height
+        height
       },
       data: {
         timestamp,

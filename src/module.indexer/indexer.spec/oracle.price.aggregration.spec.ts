@@ -38,6 +38,7 @@ afterAll(async () => {
 describe('PriceAggregration - 1', () => {
   let oracleId: string
   let height: number
+  let time: number
 
   async function setup (): Promise<void> {
     const priceFeeds1 = [
@@ -61,6 +62,11 @@ describe('PriceAggregration - 1', () => {
     await container.generate(1)
 
     height = await container.call('getblockcount')
+
+    const hash = await container.call('getblockhash', [height])
+    const block = await await container.call('getblock', [hash, 1])
+
+    time = block.time
   }
 
   it('Should get oracle aggregration price data for an oracle', async () => {
@@ -69,13 +75,13 @@ describe('PriceAggregration - 1', () => {
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
-    const agg1 = await priceAggregrationMapper.get(height, 'APPL', 'EUR')
+    const agg1 = await priceAggregrationMapper.get('APPL', 'EUR', height, time)
 
     expect(agg1?.data.token).toStrictEqual('APPL')
     expect(agg1?.data.currency).toStrictEqual('EUR')
     expect(agg1?.data.amount).toStrictEqual(0.5)
 
-    const agg2 = await priceAggregrationMapper.get(height, 'TESL', 'USD')
+    const agg2 = await priceAggregrationMapper.get('TESL', 'USD', height, time)
 
     expect(agg2?.data.token).toStrictEqual('TESL')
     expect(agg2?.data.currency).toStrictEqual('USD')
@@ -93,6 +99,7 @@ describe('PriceAggregration - 2', () => {
   let oracleId1: string
   let oracleId2: string
   let height: number
+  let time: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [
@@ -129,6 +136,10 @@ describe('PriceAggregration - 2', () => {
     await container.generate(1)
 
     height = await container.call('getblockcount')
+
+    const hash = await container.call('getblockhash', [height])
+    const block = await await container.call('getblock', [hash, 1])
+    time = block.time
   }
 
   it('Should get oracle aggregration price data', async () => {
@@ -137,13 +148,13 @@ describe('PriceAggregration - 2', () => {
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
-    const agg1 = await priceAggregrationMapper.get(height, 'APPL', 'EUR')
+    const agg1 = await priceAggregrationMapper.get('APPL', 'EUR', height, time)
 
     expect(agg1?.data.token).toStrictEqual('APPL')
     expect(agg1?.data.currency).toStrictEqual('EUR')
     expect(agg1?.data.amount).toStrictEqual(1.1666666666666667)
 
-    const agg2 = await priceAggregrationMapper.get(height, 'TESL', 'USD')
+    const agg2 = await priceAggregrationMapper.get('TESL', 'USD', height, time)
 
     expect(agg2?.data.token).toStrictEqual('TESL')
     expect(agg2?.data.currency).toStrictEqual('USD')
@@ -161,6 +172,7 @@ describe('PriceAggregration - 3', () => {
   let oracleId1: string
   let oracleId2: string
   let height: number
+  let time: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [
@@ -196,6 +208,11 @@ describe('PriceAggregration - 3', () => {
     await container.generate(1)
 
     height = await container.call('getblockcount')
+
+    const hash = await container.call('getblockhash', [height])
+    const block = await await container.call('getblock', [hash, 1])
+
+    time = block.time
   }
 
   it('Should not get oracle aggregration price data if their timestamp is out of range', async () => {
@@ -204,7 +221,7 @@ describe('PriceAggregration - 3', () => {
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
-    const agg = await priceAggregrationMapper.get(height, 'FB', 'CNY')
+    const agg = await priceAggregrationMapper.get('FB', 'CNY', height, time)
 
     expect(agg).toStrictEqual(undefined)
 

@@ -6,15 +6,26 @@ import { OraclePriceAggregration } from '@whale-api-client/api/oracle'
 const OraclePriceAggregrationMapping: ModelMapping<OraclePriceAggregration> = {
   type: 'oracle_price_aggregration',
   index: {
-    tokenCurrency_height: {
-      name: 'oracle_tokenCurrency_height',
+    tokenCurrency_heightTimestamp: {
+      name: 'oracle_price_aggregration_timestampTokenCurrency_height',
+      partition: {
+        type: 'string',
+        key: (d: OraclePriceAggregration) => `${d.data.token}-${d.data.currency}`
+      },
+      sort: {
+        type: 'string',
+        key: (d: OraclePriceAggregration) => `${d.block.height}-${d.data.timestamp}`
+      }
+    },
+    tokenCurrency_timestamp: {
+      name: 'oracle_price_aggregration_tokenCurrency_timestamp',
       partition: {
         type: 'string',
         key: (d: OraclePriceAggregration) => `${d.data.token}-${d.data.currency}`
       },
       sort: {
         type: 'number',
-        key: (d: OraclePriceAggregration) => d.block.height
+        key: (d: OraclePriceAggregration) => d.data.timestamp
       }
     }
   }
@@ -26,7 +37,7 @@ export class OraclePriceAggregrationMapper {
   }
 
   async getLatest (token: string, currency: string): Promise<OraclePriceAggregration | undefined> {
-    const data = await this.database.query(OraclePriceAggregrationMapping.index.tokenCurrency_height, {
+    const data = await this.database.query(OraclePriceAggregrationMapping.index.tokenCurrency_heightTimestamp, {
       partitionKey: `${token}-${currency}`,
       order: SortOrder.DESC,
       limit: 1
@@ -35,8 +46,20 @@ export class OraclePriceAggregrationMapper {
     return data.length === 0 ? undefined : data[0]
   }
 
-  async get (height: number, token: string, currency: string): Promise<OraclePriceAggregration | undefined> {
-    return await this.database.get(OraclePriceAggregrationMapping, `${height}-${token}-${currency}`)
+  async getLatestByTimestamp (token: string, currency: string, timestamp: number): Promise<OraclePriceAggregration | undefined> {
+    const data = await this.database.query(OraclePriceAggregrationMapping.index.tokenCurrency_timestamp, {
+      partitionKey: `${token}-${currency}`,
+      order: SortOrder.DESC,
+      gte: timestamp,
+      lte: timestamp,
+      limit: 100
+    })
+
+    return data.length === 0 ? undefined : data[0]
+  }
+
+  async get (token: string, currency: string, height: number, timestamp: number): Promise<OraclePriceAggregration | undefined> {
+    return await this.database.get(OraclePriceAggregrationMapping, `${token}-${currency}-${height}-${timestamp}`)
   }
 
   async put (aggregation: OraclePriceAggregration): Promise<void> {

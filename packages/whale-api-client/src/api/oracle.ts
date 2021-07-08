@@ -32,7 +32,7 @@ export class Oracle {
    *
    * @return {Promise<OraclePriceFeed>}
    */
-  async getAllPriceFeeds (): Promise<OraclePriceFeed[]> {
+  async getPriceFeeds (): Promise<OraclePriceFeed[]> {
     return await this.client.requestData('GET', 'oracle/priceFeeds')
   }
 
@@ -56,10 +56,22 @@ export class Oracle {
   async getPrice (token: string, currency: string): Promise<OraclePriceAggregration> {
     return await this.client.requestData('GET', `oracle/${token}/${currency}/price`)
   }
+
+  /**
+   * Get price for a token and currency at a specific timestamp
+   *
+   * @param {string} token
+   * @param {string} currency
+   * @param {number} timestamp
+   * @return {Promise<OraclePriceAggregration>}
+   */
+  async getPriceByTimestamp (token: string, currency: string, timestamp: number): Promise<OraclePriceAggregration> {
+    return await this.client.requestData('GET', `oracle/${token}/${currency}/${timestamp}/price`)
+  }
 }
 
 export interface OracleAppointed {
-  id: string // oracleId - height
+  id: string
   block: {
     height: number
   }
@@ -71,7 +83,7 @@ export interface OracleAppointed {
 }
 
 export interface OraclePriceFeed {
-  id: string // oracleId_token_currency-height
+  id: string
   block: {
     height: number
   }

@@ -78,7 +78,7 @@ export class OraclePriceDataIndexer extends Indexer {
               }
             }
           } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
-            const timestamp = stack[1].tx.data.timestamp.toNumber()
+            const timestamp: number = stack[1].tx.data.timestamp
             const oracleId: string = stack[1].tx.data.oracleId
             const data = stack[1].tx.data.tokens
 
@@ -92,7 +92,7 @@ export class OraclePriceDataIndexer extends Indexer {
                 const currency: string = price.currency
                 const amount: number = price.amount
 
-                records[`${oracleId}-${token}-${currency}-${block.height}-${block.time}`] = OraclePriceDataIndexer.newOraclePriceData(block.height, oracleId, token, currency, amount, timestamp, OracleState.LIVE)
+                records[`${oracleId}-${token}-${currency}-${block.height}-${timestamp.toString()}`] = OraclePriceDataIndexer.newOraclePriceData(block.height, oracleId, token, currency, amount, timestamp, OracleState.LIVE)
 
                 const oracles = await this.mapper.getByOracleIdTokenCurrency(oracleId, token, currency) ?? []
 

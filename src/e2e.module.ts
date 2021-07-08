@@ -32,6 +32,18 @@ export async function createTestingApp (container: MasterNodeRegTestContainer): 
   return app
 }
 
+export async function clear (container: MasterNodeRegTestContainer): Promise<NestFastifyApplication> {
+  const url = await container.getCachedRpcUrl()
+  const module = await createTestingModule(url)
+  const app = module.createNestApplication<NestFastifyApplication>(
+    newFastifyAdapter({
+      logger: false
+    })
+  )
+  await app.init()
+  return app
+}
+
 /**
  * @param {MasterNodeRegTestContainer} container to provide defid client
  * @param {NestFastifyApplication} app to close
