@@ -15,10 +15,10 @@ export class NotFoundIndexerError extends IndexerError {
 }
 
 /**
- * Happens on INSERT operation which data is being added conflicts with existing data.
+ * Result RpcNotFoundIndexerError during module.sync calling rpc
  */
-export class ConflictsIndexerError extends IndexerError {
-  constructor (action: 'invalidate' | 'index', type: string, id: string) {
-    super(`attempting to sync:${action} but type:${type} with id:${id} being added conflicts with existing data`)
+export class RpcNotFoundIndexerError extends IndexerError {
+  constructor (action: string, item = '') {
+    super(`not found data from rpc ${action} ${item}`)
   }
 }

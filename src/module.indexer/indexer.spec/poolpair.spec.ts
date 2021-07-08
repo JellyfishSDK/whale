@@ -6,14 +6,12 @@ import { TokenMapper } from '@src/module.model/token'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import BigNumber from 'bignumber.js'
 import crypto from 'crypto'
-import { DctIdMapper } from '@src/module.model/dctid'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
 let client: JsonRpcClient
 let mapper: PoolPairMapper
 let tokenMapper: TokenMapper
-let dctIdMapper: DctIdMapper
 let spy: jest.SpyInstance
 
 beforeAll(async () => {
@@ -28,7 +26,6 @@ beforeAll(async () => {
 
   mapper = app.get<PoolPairMapper>(PoolPairMapper)
   tokenMapper = app.get<TokenMapper>(TokenMapper)
-  dctIdMapper = app.get<DctIdMapper>(DctIdMapper)
 
   await setup()
 })
@@ -42,8 +39,6 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  await dctIdMapper.put({ id: '15' })
-
   // Note(canonbrother): to prevent index got invalidated as mocking 'client.blockchain.getBlock' will never get the best chain
   spy = jest.spyOn(mapper, 'delete').mockImplementation()
   spy = jest.spyOn(tokenMapper, 'delete').mockImplementation()
@@ -53,10 +48,14 @@ beforeEach(async () => {
     .mockImplementationOnce(() => generateBlock(dummyScripts[1], 17))
     .mockImplementationOnce(() => generateBlock(dummyScripts[2], 18))
     .mockImplementationOnce(() => generateBlock(dummyScripts[3], 19))
+
+  spy = jest.spyOn(client.poolpair, 'getPoolPair')
+    .mockImplementationOnce(() => generatePoolPair('16'))
+    .mockImplementationOnce(() => generatePoolPair('17'))
+    .mockImplementationOnce(() => generatePoolPair('18'))
 })
 
 afterEach(async () => {
-  await dctIdMapper.put({ id: '15' })
   spy.mockRestore()
 })
 
@@ -133,6 +132,13 @@ function generateBlock (dummyScript: any, height: number): any {
       }]
     }],
     time: 1625547853
+  }
+}
+
+function generatePoolPair (id: string): any {
+  return {
+    [id]: {
+    }
   }
 }
 

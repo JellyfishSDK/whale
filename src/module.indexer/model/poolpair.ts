@@ -1,21 +1,21 @@
 import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import BigNumber from 'bignumber.js'
-import { ConflictsIndexerError, NotFoundIndexerError } from '@src/module.indexer/error'
+import { NotFoundIndexerError } from '@src/module.indexer/error'
 import { PoolPair, PoolPairMapper } from '@src/module.model/poolpair'
 import { SmartBuffer } from 'smart-buffer'
 import { OP_DEFI_TX, PoolCreatePair, PoolUpdatePair } from '@defichain/jellyfish-transaction/dist/script/defi'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
 import { TokenMapper } from '@src/module.model/token'
 import { TokenIndexer } from './token'
-import { DctIdMapper } from '@src/module.model/dctid'
+import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 
 @Injectable()
 export class PoolPairIndexer extends Indexer {
   constructor (
     private readonly mapper: PoolPairMapper,
     private readonly tokenMapper: TokenMapper,
-    private readonly dctIdMapper: DctIdMapper
+    private readonly client: JsonRpcClient
   ) {
     super()
   }
@@ -34,9 +34,10 @@ export class PoolPairIndexer extends Indexer {
             ? data.pairSymbol
             : await this.constructPairSymbol(data.tokenA.toString(), data.tokenB.toString())
 
-          const poolId = await this.newPoolId()
+          const rpcPoolPair = await this.client.poolpair.getPoolPair(pairSymbol)
+          const poolId = Object.keys(rpcPoolPair)[0]
 
-          const poolpair = await this.newPoolPair(data, block, pairSymbol, poolId)
+          const poolpair = await PoolPairIndexer.newPoolPair(block, data, poolId, pairSymbol)
 
           const newToken = TokenIndexer.newToken(block, {
             symbol: pairSymbol,
@@ -50,9 +51,6 @@ export class PoolPairIndexer extends Indexer {
           await this.tokenMapper.put(newToken)
 
           await this.mapper.put(poolpair)
-
-          const newDctId = await TokenIndexer.newDctId(poolId)
-          await this.dctIdMapper.put(newDctId)
         }
 
         if (vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547875')) { // 44665478 -> DFTX, 75 -> u -> update poolpair
@@ -117,33 +115,6 @@ export class PoolPairIndexer extends Indexer {
         }
       }
     }
-  }
-
-  private async newPoolPair (
-    data: PoolCreatePair, block: RawBlock, pairSymbol: string, poolId: string
-  ): Promise<PoolPair> {
-    // Note(canonbrother): Here can skip tokenB-tokenA checking
-    // as createpoolpair block should be definitely confirmed tokenA-tokenB order creation
-    // else block won't be generated
-    const poolpair = await this.mapper.get(`${data.tokenA}-${data.tokenB}`)
-    if (poolpair !== undefined) {
-      throw new ConflictsIndexerError('index', 'CreatePoolPair', `${data.tokenA}-${data.tokenB}`)
-    }
-
-    return PoolPairIndexer.newPoolPair(block, data, poolId, pairSymbol)
-  }
-
-  private async newPoolId (): Promise<string> {
-    // Note(canonbrother):
-    // 1. poolpair.get is by tokenA-tokenB, poolpair.query is by poolId
-    // 2. poolId is kind of tokenId as token includes poolpair
-    // 3. get latest tokenId from dctId
-    const dctId = await this.dctIdMapper.getLatest()
-    if (dctId === undefined) {
-      throw new NotFoundIndexerError('index', 'CreatePoolPair->Token', 'getLatest')
-    }
-
-    return (Number(dctId.id) + 1).toString()
   }
 
   private async constructPairSymbol (tokenAId: string, tokenBId: string): Promise<string> {

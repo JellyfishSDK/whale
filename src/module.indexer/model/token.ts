@@ -4,13 +4,14 @@ import { Token, TokenMapper } from '@src/module.model/token'
 import { SmartBuffer } from 'smart-buffer'
 import { OP_DEFI_TX, TokenCreate } from '@defichain/jellyfish-transaction/dist/script/defi'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
-import { DctId, DctIdMapper } from '@src/module.model/dctid'
+import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
+import { RpcNotFoundIndexerError } from '@src/module.indexer/error'
 
 @Injectable()
 export class TokenIndexer extends Indexer {
   constructor (
     private readonly mapper: TokenMapper,
-    private readonly dctMapper: DctIdMapper
+    private readonly client: JsonRpcClient
   ) {
     super()
   }
@@ -25,17 +26,21 @@ export class TokenIndexer extends Indexer {
 
           const data: TokenCreate = (stack[1] as OP_DEFI_TX).tx.data
 
-          let dctId = await this.dctMapper.getLatest()
+          // get the latest tokenId via rpc listTokens
+          const tokens = await this.client.token.listTokens()
+          if (Object.keys(tokens).length === 0) {
+            throw new RpcNotFoundIndexerError('listTokens')
+          }
 
-          const id = dctId === undefined ? '0' : (Number(dctId.id) + 1).toString() // dctId increment
+          const id = Object.keys(tokens)[Object.keys(tokens).length - 1]
+          if (tokens[id].symbol !== data.symbol) {
+            throw new RpcNotFoundIndexerError('listTokens', data.symbol)
+          }
 
           // its fine to index without checking existence
           // as it already passed through the validation during create token in dfid
           const newToken = TokenIndexer.newToken(block, data, id)
           await this.mapper.put(newToken)
-
-          dctId = TokenIndexer.newDctId(id)
-          await this.dctMapper.put(dctId)
         }
 
         // TODO(canonbrother): index UpdateToken
@@ -78,12 +83,6 @@ export class TokenIndexer extends Indexer {
       mintable: data.mintable,
       tradeable: data.tradeable,
       isDAT: data.isDAT
-    }
-  }
-
-  static newDctId (id: string): DctId {
-    return {
-      id: id
     }
   }
 }
