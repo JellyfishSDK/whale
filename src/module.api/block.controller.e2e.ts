@@ -1,4 +1,4 @@
-import { BlockController } from '@src/module.api/block.controller'
+import { BlockController, isHeight } from '@src/module.api/block.controller'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
@@ -96,5 +96,19 @@ describe('BlockController', () => {
     const paginatedBlocks = await controller.listBlocks({ size: 30 })
 
     expect(paginatedBlocks.data.length).toStrictEqual(0)
+  })
+})
+
+describe.only('isHeight', () => {
+  it('should return false for negative integer', () => {
+    expect(isHeight('-123')).toStrictEqual(false)
+  })
+
+  it('should return false for float', () => {
+    expect(isHeight('123.32')).toStrictEqual(false)
+  })
+
+  it('should return true for positive integers', () => {
+    expect(isHeight('123')).toStrictEqual(true)
   })
 })
