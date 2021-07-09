@@ -7,6 +7,7 @@ import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintToken
 import { CacheModule, NotFoundException } from '@nestjs/common'
 import { DeFiDCache } from './cache/defid.cache'
 import { ConfigService } from '@nestjs/config'
+import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
 let controller: PoolPairController
@@ -44,10 +45,7 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  spy = jest.spyOn(service, 'testPoolSwap').mockImplementation(
-    async (x, y) => x === 'USDT' && y === 'DFI'
-      ? await Promise.resolve('0.43151288@0') // usdt to dfi
-      : await Promise.resolve('14.23530023@777')) // token to dfi
+  spy = jest.spyOn(service, 'dexUsdtDfi').mockImplementation(async () => await Promise.resolve(new BigNumber('0.43151288')))
 })
 
 afterEach(() => {
@@ -122,7 +120,7 @@ describe('list', () => {
       commission: '0',
       totalLiquidity: {
         token: '122.47448713',
-        usd: '124.965259043707276669'
+        usd: '698.8243194812225612665'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
@@ -196,7 +194,7 @@ describe('get', () => {
       commission: '0',
       totalLiquidity: {
         token: '141.42135623',
-        usd: '237.805367987928383246'
+        usd: '485.0612298763705964'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),

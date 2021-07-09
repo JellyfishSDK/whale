@@ -3,22 +3,14 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import BigNumber from 'bignumber.js'
-import { PoolPairInfo, TestPoolSwapMetadata } from '@defichain/jellyfish-api-core/dist/category/poolpair'
-import { ConfigService } from '@nestjs/config'
+import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 
 @Injectable()
 export class PoolPairService {
-  private readonly testAddress: string
-
   constructor (
     protected readonly rpcClient: JsonRpcClient,
-    protected readonly deFiDCache: DeFiDCache,
-    protected readonly configService: ConfigService
+    protected readonly deFiDCache: DeFiDCache
   ) {
-    const network = configService.get<string>('network', 'testnet')
-    this.testAddress = network === 'mainnet'
-      ? 'dPGDdodT1CPx2J3o2bYg7585AwSp5UvLHv' // mainnet
-      : 'te1WMD1Mc6QTxhTVnB2TisrNgZCSsojfSX' // testnet
   }
 
   async list (query: PaginationQuery): Promise<PoolPairInfoPlus[]> {
@@ -28,46 +20,37 @@ export class PoolPairService {
       limit: query.size
     }, true)
 
-    const dfiUsdtConversionPrice = await this.getDfiUsdtConversionPrice()
+    const dfiUsdtConversion = await this.getUsdtDfiConversion()
 
     return await Promise.all(Object.entries(poolPairResult).map(async ([id, value]) => {
       return {
         ...value,
         id,
-        totalLiquidityUsd: await this.getTotalLiquidityUsd(value, dfiUsdtConversionPrice)
+        totalLiquidityUsd: await this.getTotalLiquidityUsd(value, dfiUsdtConversion)
       }
     }))
   }
 
   async get (id: string): Promise<PoolPairInfoPlus> {
     const info = await this.deFiDCache.getPoolPairInfo(id)
+    console.log('info: ', info)
     if (info === undefined) {
       throw new NotFoundException('Unable to find poolpair')
     }
 
-    const dfiUsdtConversionPrice = await this.getDfiUsdtConversionPrice()
-    const totalLiquidityUsd = await this.getTotalLiquidityUsd(info, dfiUsdtConversionPrice)
+    const dfiUsdtConversion = await this.getUsdtDfiConversion()
+    const totalLiquidityUsd = await this.getTotalLiquidityUsd(info, dfiUsdtConversion)
 
     return {
       ...info, id: String(id), totalLiquidityUsd
     }
   }
 
-  async testPoolSwap (tokenFrom: string, tokenTo: string): Promise<string> {
-    const metadata: TestPoolSwapMetadata = {
-      tokenFrom: tokenFrom,
-      tokenTo: tokenTo,
-      from: this.testAddress,
-      to: this.testAddress,
-      amountFrom: 1
-    }
-    return await this.rpcClient.poolpair.testPoolSwap(metadata)
-  }
-
-  private async getDfiUsdtConversionPrice (): Promise<Record<string, BigNumber>> {
-    const usdtToDfiAccount = await this.testPoolSwap('USDT', 'DFI')
-    const usdtToDfi = new BigNumber(usdtToDfiAccount.split('@')[0])
+  private async getUsdtDfiConversion (): Promise<Record<string, BigNumber>> {
+    const usdtToDfi = await this.dexUsdtDfi()
+    console.log('usdtToDfi: ', usdtToDfi.toString())
     const dfiToUsdt = new BigNumber('1').div(usdtToDfi)
+    console.log('dfiToUsdt: ', dfiToUsdt.toString())
 
     return {
       usdtToDfi,
@@ -75,34 +58,30 @@ export class PoolPairService {
     }
   }
 
+  async dexUsdtDfi (): Promise<BigNumber> {
+    const poolPairResult = await this.rpcClient.poolpair.getPoolPair('USDT-DFI')
+    const poolPairInfo = poolPairResult[Object.keys(poolPairResult)[0]]
+    // to find 1token = ?DFI -> reserveB(DFI)/reserveA(token)
+    return new BigNumber(poolPairInfo['reserveB/reserveA'])
+  }
+
   private async getTotalLiquidityUsd (
     poolPairInfo: PoolPairInfo,
-    dfiUsdtConversionPrice: Record<string, BigNumber>
+    dfiUsdtConversion: Record<string, BigNumber>
   ): Promise<BigNumber> {
-    const { usdtToDfi, dfiToUsdt } = dfiUsdtConversionPrice
+    const { usdtToDfi, dfiToUsdt } = dfiUsdtConversion
 
-    const poolPairSymbols = poolPairInfo.symbol.split('-')
-    // TODO(canonbrother): guess should have other DFI alternatives in future
-    const tokenSymbol = poolPairSymbols[0] !== 'DFI' ? poolPairSymbols[1] : poolPairSymbols[0]
-    const swappedAccount = await this.testPoolSwap(tokenSymbol, 'DFI')
-
-    const swappedData = swappedAccount.split('@')
-    const tokenToDfi = new BigNumber(swappedData[0])
-    const tokenId = swappedData[1]
-
+    // to find 1token = ?DFI -> reserveB(DFI)/reserveA(token)
+    const tokenToDfi = new BigNumber(poolPairInfo['reserveB/reserveA'])
+    console.log('tokenToDfi: ', tokenToDfi.toString())
     const tokenToUsdt = usdtToDfi.div(tokenToDfi)
+    console.log('tokenToUsdt: ', tokenToUsdt.toString())
 
-    let reserveAUsd: BigNumber
-    let reserveBUsd: BigNumber
-
-    // check which poolPairInfo.idToken{A/B} is token (eg: ETH)
-    if (tokenId === poolPairInfo.idTokenA) {
-      reserveAUsd = poolPairInfo.reserveA.times(tokenToUsdt)
-      reserveBUsd = poolPairInfo.reserveB.times(dfiToUsdt)
-    } else {
-      reserveAUsd = poolPairInfo.reserveA.times(dfiToUsdt)
-      reserveBUsd = poolPairInfo.reserveB.times(tokenToUsdt)
-    }
+    // logic's assuming poolpair tokenB is always DFI
+    const reserveAUsd = poolPairInfo.reserveA.times(tokenToUsdt)
+    console.log('reserveAUsd: ', reserveAUsd.toString())
+    const reserveBUsd = poolPairInfo.reserveB.times(dfiToUsdt)
+    console.log('reserveBUsd: ', reserveBUsd.toString())
 
     // Note(canonbrother): totalLiquidity in USD calculation
     // reserveA_USD (eg: BTC) = reserveA * tokenToUsdt

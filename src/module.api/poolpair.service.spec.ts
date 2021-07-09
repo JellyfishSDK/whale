@@ -40,10 +40,7 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  spy = jest.spyOn(service, 'testPoolSwap').mockImplementation(
-    async (x, y) => x === 'USDT' && y === 'DFI'
-      ? await Promise.resolve('0.43151288@0') // usdt to dfi
-      : await Promise.resolve('14.23530023@777')) // token to dfi
+  spy = jest.spyOn(service, 'dexUsdtDfi').mockImplementation(async () => await Promise.resolve(new BigNumber('0.43151288')))
 })
 
 afterEach(() => {
@@ -112,7 +109,7 @@ describe('list', () => {
       blockCommissionB: new BigNumber('0'),
       commission: new BigNumber('0'),
       totalLiquidity: new BigNumber('122.47448713'),
-      totalLiquidityUsd: new BigNumber('124.965259043707276669'),
+      totalLiquidityUsd: new BigNumber('698.8243194812225612665'),
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       'reserveA/reserveB': new BigNumber('0.16666666'),
@@ -150,7 +147,7 @@ describe('get', () => {
       blockCommissionB: new BigNumber('0'),
       commission: new BigNumber('0'),
       totalLiquidity: new BigNumber('141.42135623'),
-      totalLiquidityUsd: new BigNumber('237.805367987928383246'),
+      totalLiquidityUsd: new BigNumber('485.0612298763705964'),
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       'reserveA/reserveB': new BigNumber('0.5'),
