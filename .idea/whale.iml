@@ -4,6 +4,8 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <excludePattern pattern="*dist*" />
+      <excludePattern pattern="*.level*" />
+      <excludePattern pattern="*.leveldb*" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
