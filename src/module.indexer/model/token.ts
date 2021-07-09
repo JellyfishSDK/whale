@@ -32,15 +32,22 @@ export class TokenIndexer extends Indexer {
             throw new RpcNotFoundIndexerError('listTokens')
           }
 
-          const id = Object.keys(tokens)[Object.keys(tokens).length - 1]
-          if (tokens[id].symbol !== data.symbol) {
-            throw new RpcNotFoundIndexerError('listTokens', data.symbol)
-          }
+          const remapTokens = Object.entries(tokens).map(([id, value]) => {
+            return {
+              id,
+              ...value
+            }
+          })
 
-          // its fine to index without checking existence
-          // as it already passed through the validation during create token in dfid
-          const newToken = TokenIndexer.newToken(block, data, id)
-          await this.mapper.put(newToken)
+          const token = remapTokens.find(t => t.symbol === data.symbol)
+          if (token === undefined) {
+            throw new RpcNotFoundIndexerError('listTokens', data.symbol)
+          } else {
+            // its fine to index without checking existence
+            // as it already passed through the validation during create token in dfid
+            const newToken = TokenIndexer.newToken(block, data, token.id)
+            await this.mapper.put(newToken)
+          }
         }
 
         // TODO(canonbrother): index UpdateToken
