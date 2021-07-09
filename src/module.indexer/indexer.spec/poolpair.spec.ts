@@ -155,8 +155,6 @@ it('should query at block 20', async () => {
   expect(poolpairs[2].commission).toStrictEqual('0.15') // updated from 0.2
   expect(poolpairs[2].block.hash).toStrictEqual(expect.any(String))
   expect(poolpairs[2].block.height).toStrictEqual(16)
-  expect(poolpairs[2].tokenA).toStrictEqual('1')
-  expect(poolpairs[2].tokenB).toStrictEqual('0')
 
   // ensure the poolId is incremented
   expect(poolpairs[1].poolId).toStrictEqual('17')

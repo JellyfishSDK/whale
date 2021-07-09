@@ -144,9 +144,7 @@ export class PoolPairIndexer extends Indexer {
       },
       symbol: pairSymbol,
       status: data.status,
-      commission: data.commission.toFixed(),
-      tokenA: data.tokenA.toString(),
-      tokenB: data.tokenB.toString()
+      commission: data.commission.toFixed()
     }
   }
 }

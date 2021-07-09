@@ -59,6 +59,4 @@ export interface PoolPair extends Model {
   symbol: string
   status: boolean
   commission: string // bignumber
-  tokenA: string
-  tokenB: string
 }
