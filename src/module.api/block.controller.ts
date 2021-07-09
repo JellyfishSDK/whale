@@ -35,14 +35,12 @@ export class BlockController {
 
   @Get('/:id')
   async getBlock (@Param('id') id: string): Promise<Block | undefined> {
-    const idIsNumber = isNumber(id)
-
-    if (idIsNumber) {
+    if (isNumber(id)) {
       const height = parseInt(id)
       return await this.blockMapper.getByHeight(height)
     }
-    // id is not a number
 
+    // id is not a number
     return await this.blockMapper.getByHash(id)
   }
 
