@@ -56,16 +56,18 @@ export interface PoolSwapAggregation extends Model {
   /**
    * id is constructed by poolId + '@' + bucketId eg: 0-1@2020-08-31T15:20
    */
+  id: string
 
-  /**
-   * poolpair "0-1" as id
-   */
   poolId: string
   /**
    * act as timestamp in 10 mins scale
    */
   bucketId: number
 
-  total: BigNumber
-  count: number
+  volume: {
+    [tokenId: string]: {
+      total: BigNumber
+      count: number
+    }
+  }
 }

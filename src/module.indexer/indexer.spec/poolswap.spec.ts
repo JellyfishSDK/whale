@@ -5,11 +5,13 @@ import { PoolSwapAggregationMapper } from '@src/module.model/poolswap.aggregatio
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import BigNumber from 'bignumber.js'
 import crypto from 'crypto'
+import { PoolPairMapper } from '@src/module.model/poolpair'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
 let client: JsonRpcClient
 let mapper: PoolSwapAggregationMapper
+let poolPairMapper: PoolPairMapper
 let spy: jest.SpyInstance
 
 beforeAll(async () => {
@@ -23,6 +25,9 @@ beforeAll(async () => {
   client = app.get<JsonRpcClient>(JsonRpcClient)
 
   mapper = app.get<PoolSwapAggregationMapper>(PoolSwapAggregationMapper)
+  poolPairMapper = app.get<PoolPairMapper>(PoolPairMapper)
+
+  await setup()
 })
 
 afterAll(async () => {
@@ -63,17 +68,36 @@ afterEach(() => {
 const dummyScripts = [
   {
     // https://mainnet.defichain.io/#/DFI/mainnet/tx/700473ec7ca4f6bec261e75342f91825f3c2cf60df1bf1f335b53a2bcd95b994
-    // poolId: '0-1', fromAmount: 2.20509127
+    // poolId: '1-0', fromAmount: 2.20509127
     asm: 'OP_RETURN 446654787317a9140806eb42b6d5bb69726909fb6da34a9152afdf048701c7b3240d0000000017a9140806eb42b6d5bb69726909fb6da34a9152afdf048700ffffffffffffff7fffffffffffffff7f',
     hex: '6a4c4f446654787317a9140806eb42b6d5bb69726909fb6da34a9152afdf048701c7b3240d0000000017a9140806eb42b6d5bb69726909fb6da34a9152afdf048700ffffffffffffff7fffffffffffffff7f'
   },
   {
     // https://mainnet.defichain.io/#/DFI/mainnet/tx/c2a489adbebf97fb1dd0c695ee6d1f54eca4ea60165f12fd17f90923d6181d3e
-    // poolId: '0-2', fromAmount: 1100
+    // poolId: '2-0', fromAmount: 1100
     asm: 'OP_RETURN 446654787317a914fe7d87680b758782401e747f8228cadc610b2047870000cc829c190000001976a91442511183ba47347712f9f3dca5d2d003b2e78d4888ac02ffffffffffffff7fffffffffffffff7f',
     hex: '6a4c51446654787317a914fe7d87680b758782401e747f8228cadc610b2047870000cc829c190000001976a91442511183ba47347712f9f3dca5d2d003b2e78d4888ac02ffffffffffffff7fffffffffffffff7f'
   }
 ]
+
+async function setup (): Promise<void> {
+  await put('3', 'BTC-DFI', '1', '0')
+  await put('4', 'BTC-DFI', '2', '0')
+}
+
+async function put (id: string, symbol: string, tokenA: string, tokenB: string): Promise<void> {
+  await poolPairMapper.put({
+    id: `${tokenA}-${tokenB}`,
+    poolId: id,
+    block: {
+      hash: '',
+      height: Number(id)
+    },
+    symbol: symbol,
+    status: true,
+    commission: '0.001'
+  })
+}
 
 function generateBlock (dummyScript: any, timestamp: number): any {
   return {
@@ -100,49 +124,49 @@ function generateTimestamp (
 }
 
 it('should query with date range', async () => {
-  const aggregations = await mapper.query('0-1', 100, '2020-09-01T00:00', '2020-09-30T23:59')
+  const aggregations = await mapper.query('3', 100, '2020-09-01T00:00', '2020-09-30T23:59')
   expect(aggregations.length).toStrictEqual(5)
 
-  expect(aggregations[0].id).toStrictEqual(`0-1@${Date.parse('2020-09-30T23:50Z')}`)
-  expect(aggregations[0].total).toStrictEqual('2.20509127')
-  expect(aggregations[0].count).toStrictEqual(1)
+  expect(aggregations[0].id).toStrictEqual(`3@${Date.parse('2020-09-30T23:50Z')}`)
+  expect(aggregations[0].volume['1'].total).toStrictEqual('2.20509127')
+  expect(aggregations[0].volume['1'].count).toStrictEqual(1)
 
-  expect(aggregations[1].id).toStrictEqual(`0-1@${Date.parse('2020-09-15T15:10Z')}`)
+  expect(aggregations[1].id).toStrictEqual(`3@${Date.parse('2020-09-15T15:10Z')}`)
 
-  expect(aggregations[2].id).toStrictEqual(`0-1@${Date.parse('2020-09-01T18:20Z')}`)
-  expect(aggregations[2].total).toStrictEqual('4.41018254')
-  expect(aggregations[2].count).toStrictEqual(2)
+  expect(aggregations[2].id).toStrictEqual(`3@${Date.parse('2020-09-01T18:20Z')}`)
+  expect(aggregations[2].volume['1'].total).toStrictEqual('4.41018254')
+  expect(aggregations[2].volume['1'].count).toStrictEqual(2)
 
-  expect(aggregations[3].id).toStrictEqual(`0-1@${Date.parse('2020-09-01T18:10Z')}`)
-  expect(aggregations[3].total).toStrictEqual('8.82036508')
-  expect(aggregations[3].count).toStrictEqual(4)
+  expect(aggregations[3].id).toStrictEqual(`3@${Date.parse('2020-09-01T18:10Z')}`)
+  expect(aggregations[3].volume['1'].total).toStrictEqual('8.82036508')
+  expect(aggregations[3].volume['1'].count).toStrictEqual(4)
 
-  expect(aggregations[4].id).toStrictEqual(`0-1@${Date.parse('2020-09-01T00:00Z')}`)
+  expect(aggregations[4].id).toStrictEqual(`3@${Date.parse('2020-09-01T00:00Z')}`)
 })
 
 it('should query with from only', async () => {
-  const aggregations = await mapper.query('0-2', 100, '2020-10-01T00:00')
+  const aggregations = await mapper.query('4', 100, '2020-10-01T00:00')
   expect(aggregations.length).toStrictEqual(2)
 })
 
 it('should query with to only', async () => {
-  const aggregations = await mapper.query('0-1', 100, undefined, '2020-09-12T00:00')
+  const aggregations = await mapper.query('3', 100, undefined, '2020-09-12T00:00')
   expect(aggregations.length).toStrictEqual(4)
 })
 
 it('should query and list all', async () => {
-  const aggregations = await mapper.query('0-1', 100)
+  const aggregations = await mapper.query('3', 100)
   expect(aggregations.length).toStrictEqual(8)
 })
 
 it('should query with limit', async () => {
-  const aggregations = await mapper.query('0-1', 1, '2020-09-01T00:00', '2020-09-30T23:59')
+  const aggregations = await mapper.query('3', 1, '2020-09-01T00:00', '2020-09-30T23:59')
   expect(aggregations.length).toStrictEqual(1)
-  expect(aggregations[0].id).toStrictEqual(`0-1@${Date.parse('2020-09-30T23:50Z')}`)
+  expect(aggregations[0].id).toStrictEqual(`3@${Date.parse('2020-09-30T23:50Z')}`)
 })
 
 it('should query and get empty as out of range', async () => {
-  const aggregations = await mapper.query('0-1', 100, '1990-01-01T00:00', '1990-12-31T00:00')
+  const aggregations = await mapper.query('3', 100, '1990-01-01T00:00', '1990-12-31T00:00')
   expect(aggregations.length).toStrictEqual(0)
 })
 

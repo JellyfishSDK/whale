@@ -22,6 +22,7 @@ import { PoolSwapAggregationMapper } from '@src/module.model/poolswap.aggregatio
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
+    PoolPairMapper,
     PoolSwapAggregationMapper
   ],
   exports: [
@@ -34,6 +35,7 @@ import { PoolSwapAggregationMapper } from '@src/module.model/poolswap.aggregatio
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
+    PoolPairMapper,
     PoolSwapAggregationMapper
   ]
 })
