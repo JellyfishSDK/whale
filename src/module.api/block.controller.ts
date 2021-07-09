@@ -4,8 +4,10 @@ import { TransactionMapper, Transaction } from '@src/module.model/transaction'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 
-export function isHeight (str: string): boolean {
-  return /^\d+$/.test(str)
+export function parseHeight (str?: string): number | undefined {
+  if (str !== undefined && /^\d+$/.test(str)) {
+    return parseInt(str)
+  }
 }
 
 @Controller('/v0/:network/blocks')
@@ -20,23 +22,18 @@ export class BlockController {
   async listBlocks (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<Block>> {
-    if (query.next != null && isHeight(query.next)) {
-      const next = parseInt(query.next)
-      const blocks = await this.blockMapper.queryByHeight(query.size, next)
-      return ApiPagedResponse.of(blocks, query.size, item => {
-        return item.id
-      })
-    }
-
-    return ApiPagedResponse.of(await this.blockMapper.queryByHeight(0), query.size, item => {
+    const height = parseHeight(query.next)
+    const blocks = await this.blockMapper.queryByHeight(query.size, height)
+    return ApiPagedResponse.of(blocks, query.size, item => {
       return item.id
     })
   }
 
   @Get('/:id')
   async getBlock (@Param('id') id: string): Promise<Block | undefined> {
-    if (isHeight(id)) {
-      const height = parseInt(id)
+    const height = parseHeight(id)
+
+    if (height !== undefined) {
       return await this.blockMapper.getByHeight(height)
     }
 

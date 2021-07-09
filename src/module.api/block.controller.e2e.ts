@@ -1,4 +1,4 @@
-import { BlockController, isHeight } from '@src/module.api/block.controller'
+import { BlockController, parseHeight } from '@src/module.api/block.controller'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
@@ -95,20 +95,33 @@ describe('BlockController', () => {
   it('listBlocks would return the latest set if next is undefined', async () => {
     const paginatedBlocks = await controller.listBlocks({ size: 30 })
 
-    expect(paginatedBlocks.data.length).toStrictEqual(0)
+    expect(paginatedBlocks.data.length).toStrictEqual(30)
+    expect(paginatedBlocks.data[0].height).toBeGreaterThanOrEqual(100)
   })
 })
 
-describe.only('isHeight', () => {
-  it('should return false for negative integer', () => {
-    expect(isHeight('-123')).toStrictEqual(false)
+describe('parseHeight', () => {
+  it('should return undefined for negative integer', () => {
+    expect(parseHeight('-123')).toStrictEqual(undefined)
   })
 
-  it('should return false for float', () => {
-    expect(isHeight('123.32')).toStrictEqual(false)
+  it('should return undefined for float', () => {
+    expect(parseHeight('123.32')).toStrictEqual(undefined)
   })
 
-  it('should return true for positive integers', () => {
-    expect(isHeight('123')).toStrictEqual(true)
+  it('should return number for positive integers', () => {
+    expect(parseHeight('123')).toStrictEqual(123)
+  })
+
+  it('should return undefined for empty string', () => {
+    expect(parseHeight('')).toStrictEqual(undefined)
+  })
+
+  it('should return undefined for null', () => {
+    expect(parseHeight('')).toStrictEqual(undefined)
+  })
+
+  it('should return undefined for strings with characters', () => {
+    expect(parseHeight('123a')).toStrictEqual(undefined)
   })
 })
