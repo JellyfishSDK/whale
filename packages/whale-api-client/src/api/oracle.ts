@@ -79,8 +79,22 @@ export class Oracle {
    * @param {number} timestamp2
    * @return {Promise<BigNumber>}
    */
-  async getPricePercentage (token: string, currency: string, timestamp1: number, timestamp2: number): Promise<BigNumber> {
+  async getPricePercentageChange (token: string, currency: string, timestamp1: number, timestamp2: number): Promise<BigNumber> {
     return await this.client.requestData('GET', `oracle/${token}/${currency}/${timestamp1}/${timestamp2}/percentagePriceChange`)
+  }
+
+  /**
+   * Returns prices interval across a time range.
+   *
+   * @param {string} token
+   * @param {string} currency
+   * @param {number} timestamp1
+   * @param {number} timestamp2
+   * @param {number} interval
+   * @return {Promise<BigNumber>}
+   */
+  async getPricesInterval (token: string, currency: string, timestamp1: number, timestamp2: number, interval: number): Promise<BigNumber> {
+    return await this.client.requestData('GET', `oracle/${token}/${currency}/${timestamp1}/${timestamp2}/${interval}/pricesInterval`)
   }
 }
 

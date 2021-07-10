@@ -50,7 +50,6 @@ export class OraclePriceAggregationIndexer extends Indexer {
             for (let i = 0; i < prices.length; i += 1) {
               const price = prices[i]
               const mapper = await this.appointedMapper.getLatest(price.data.oracleId)
-
               const weightage = mapper?.data.weightage ?? 0
 
               sum = sum + price.data.amount * weightage

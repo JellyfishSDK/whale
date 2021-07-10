@@ -79,4 +79,28 @@ export class OracleController {
 
     return (amountBN2.minus(amountBN1)).div(100)
   }
+
+  @Get('/:token/:currency/:timestamp1/:timestamp2/:interval/pricesInterval')
+  async getPriceInterval (
+    @Param('token') token: string,
+      @Param('currency') currency: string,
+      @Param('timestamp1') timestamp1: number,
+      @Param('timestamp2') timestamp2: number,
+      @Param('interval') interval: number
+  ): Promise<any> {
+    const timestampDifference = timestamp2 - timestamp1
+
+    const allPrices = []
+
+    const no = timestampDifference / interval
+
+    for (let i = 0; i <= no; i += 1) {
+      const timestamp = timestamp1 + interval * i
+      const result = await this.priceAggregrationMapper.getLatestByTimestamp(token, currency, timestamp)
+      const data = { timestamp, amount: result?.data?.amount }
+      allPrices.push(data)
+    }
+
+    return allPrices
+  }
 }
