@@ -43,8 +43,8 @@ describe('Price data - setoracledata 1', () => {
 
   async function setup (): Promise<void> {
     const priceFeeds = [
-      { token: 'APPL', currency: 'EUR' },
-      { token: 'TESL', currency: 'USD' }
+      { token: 'AAPL', currency: 'EUR' },
+      { token: 'TSLA', currency: 'USD' }
     ]
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
@@ -52,7 +52,7 @@ describe('Price data - setoracledata 1', () => {
     await container.generate(1)
 
     timestamp = Math.floor(new Date().getTime() / 1000)
-    const prices = [{ tokenAmount: '0.5@APPL', currency: 'EUR' }]
+    const prices = [{ tokenAmount: '0.5@AAPL', currency: 'EUR' }]
 
     await container.call('setoracledata', [oracleId, timestamp, prices])
 
@@ -67,18 +67,18 @@ describe('Price data - setoracledata 1', () => {
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
-    const data1 = await priceDataMapper.get(oracleId, 'APPL', 'EUR', height, timestamp)
+    const data1 = await priceDataMapper.get(oracleId, 'AAPL', 'EUR', height, timestamp)
 
     expect(data1?.data.oracleId).toStrictEqual(oracleId)
-    expect(data1?.data.token).toStrictEqual('APPL')
+    expect(data1?.data.token).toStrictEqual('AAPL')
     expect(data1?.data.currency).toStrictEqual('EUR')
     expect(data1?.data.amount).toStrictEqual('0.5')
     expect(data1?.data.timestamp).toStrictEqual(timestamp)
     expect(data1?.state).toStrictEqual(OracleState.LIVE)
 
-    const data2 = await container.call('listlatestrawprices', [{ token: 'APPL', currency: 'EUR' }])
+    const data2 = await container.call('listlatestrawprices', [{ token: 'AAPL', currency: 'EUR' }])
 
-    expect(data2[0]?.priceFeeds).toStrictEqual({ token: 'APPL', currency: 'EUR' })
+    expect(data2[0]?.priceFeeds).toStrictEqual({ token: 'AAPL', currency: 'EUR' })
     expect(data2[0]?.oracleid).toStrictEqual(oracleId)
     expect(data2[0]?.rawprice).toStrictEqual(0.5)
     expect(data2[0]?.timestamp).toStrictEqual(timestamp)
@@ -93,8 +93,8 @@ describe('Price data - setoracledata 2', () => {
 
   async function setup (): Promise<void> {
     const priceFeeds = [
-      { token: 'APPL', currency: 'EUR' },
-      { token: 'TESL', currency: 'USD' }
+      { token: 'AAPL', currency: 'EUR' },
+      { token: 'TSLA', currency: 'USD' }
     ]
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
@@ -102,7 +102,7 @@ describe('Price data - setoracledata 2', () => {
     await container.generate(1)
 
     timestamp = Math.floor(new Date().getTime() / 1000)
-    const prices1 = [{ tokenAmount: '0.5@APPL', currency: 'EUR' }]
+    const prices1 = [{ tokenAmount: '0.5@AAPL', currency: 'EUR' }]
 
     await container.call('setoracledata', [oracleId, timestamp, prices1])
 
@@ -110,7 +110,7 @@ describe('Price data - setoracledata 2', () => {
 
     height1 = await container.call('getblockcount')
 
-    const prices2 = [{ tokenAmount: '1.0@APPL', currency: 'EUR' }]
+    const prices2 = [{ tokenAmount: '1.0@AAPL', currency: 'EUR' }]
 
     await container.call('setoracledata', [oracleId, timestamp, prices2])
 
@@ -125,27 +125,27 @@ describe('Price data - setoracledata 2', () => {
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
-    const data1 = await priceDataMapper.get(oracleId, 'APPL', 'EUR', height1, timestamp)
+    const data1 = await priceDataMapper.get(oracleId, 'AAPL', 'EUR', height1, timestamp)
 
     expect(data1?.data.oracleId).toStrictEqual(oracleId)
-    expect(data1?.data.token).toStrictEqual('APPL')
+    expect(data1?.data.token).toStrictEqual('AAPL')
     expect(data1?.data.currency).toStrictEqual('EUR')
     expect(data1?.data.amount).toStrictEqual('0.5')
     expect(data1?.data.timestamp).toStrictEqual(timestamp)
     expect(data1?.state).toStrictEqual(OracleState.REMOVED)
 
-    const data2 = await priceDataMapper.get(oracleId, 'APPL', 'EUR', height2, timestamp)
+    const data2 = await priceDataMapper.get(oracleId, 'AAPL', 'EUR', height2, timestamp)
 
     expect(data2?.data.oracleId).toStrictEqual(oracleId)
-    expect(data2?.data.token).toStrictEqual('APPL')
+    expect(data2?.data.token).toStrictEqual('AAPL')
     expect(data2?.data.currency).toStrictEqual('EUR')
     expect(data2?.data.amount).toStrictEqual('1')
     expect(data2?.data.timestamp).toStrictEqual(timestamp)
     expect(data2?.state).toStrictEqual(OracleState.LIVE)
 
-    const data3 = await container.call('listlatestrawprices', [{ token: 'APPL', currency: 'EUR' }])
+    const data3 = await container.call('listlatestrawprices', [{ token: 'AAPL', currency: 'EUR' }])
 
-    expect(data3[0]?.priceFeeds).toStrictEqual({ token: 'APPL', currency: 'EUR' })
+    expect(data3[0]?.priceFeeds).toStrictEqual({ token: 'AAPL', currency: 'EUR' })
     expect(data3[0]?.oracleid).toStrictEqual(oracleId)
     expect(data3[0]?.rawprice).toStrictEqual(1)
     expect(data3[0]?.timestamp).toStrictEqual(timestamp)
@@ -161,20 +161,20 @@ describe('Price data - updateoracle', () => {
   async function setup (): Promise<void> {
     // Apoint an oracle
     const priceFeeds1 = [
-      { token: 'APPL', currency: 'EUR' },
-      { token: 'TESL', currency: 'USD' }
+      { token: 'AAPL', currency: 'EUR' },
+      { token: 'TSLA', currency: 'USD' }
     ]
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
 
     await container.generate(1)
 
-    // Set price to AAPL/USD and TESL/USD price feeds of the oracle
+    // Set price to AAPL/USD and TSLA/USD price feeds of the oracle
     timestamp = Math.floor(new Date().getTime() / 1000)
 
     const prices1 = [
-      { tokenAmount: '0.5@APPL', currency: 'EUR' },
-      { tokenAmount: '1.0@TESL', currency: 'USD' }
+      { tokenAmount: '0.5@AAPL', currency: 'EUR' },
+      { tokenAmount: '1.0@TSLA', currency: 'USD' }
     ]
 
     await container.call('setoracledata', [oracleId, timestamp, prices1])
@@ -183,9 +183,9 @@ describe('Price data - updateoracle', () => {
 
     height1 = await container.call('getblockcount')
 
-    // Remove TESL/USD price feed from the oracle
+    // Remove TSLA/USD price feed from the oracle
     const priceFeeds2 = [
-      { token: 'APPL', currency: 'EUR' }
+      { token: 'AAPL', currency: 'EUR' }
     ]
 
     await container.call('updateoracle', [oracleId, await container.getNewAddress(), priceFeeds2, 2])
@@ -201,27 +201,27 @@ describe('Price data - updateoracle', () => {
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
-    const data1 = await priceDataMapper.get(oracleId, 'APPL', 'EUR', height1, timestamp)
+    const data1 = await priceDataMapper.get(oracleId, 'AAPL', 'EUR', height1, timestamp)
 
     expect(data1?.data.oracleId).toStrictEqual(oracleId)
-    expect(data1?.data.token).toStrictEqual('APPL')
+    expect(data1?.data.token).toStrictEqual('AAPL')
     expect(data1?.data.currency).toStrictEqual('EUR')
     expect(data1?.data.amount).toStrictEqual('0.5')
     expect(data1?.data.timestamp).toStrictEqual(timestamp)
     expect(data1?.state).toStrictEqual(OracleState.LIVE)
 
-    const data2 = await priceDataMapper.get(oracleId, 'TESL', 'USD', height1, timestamp)
+    const data2 = await priceDataMapper.get(oracleId, 'TSLA', 'USD', height1, timestamp)
 
     expect(data2?.data.oracleId).toStrictEqual(oracleId)
-    expect(data2?.data.token).toStrictEqual('TESL')
+    expect(data2?.data.token).toStrictEqual('TSLA')
     expect(data2?.data.currency).toStrictEqual('USD')
     expect(data2?.data.amount).toStrictEqual('1')
     expect(data2?.data.timestamp).toStrictEqual(timestamp)
     expect(data2?.state).toStrictEqual(OracleState.REMOVED)
 
-    const data3 = await container.call('listlatestrawprices', [{ token: 'APPL', currency: 'EUR' }])
+    const data3 = await container.call('listlatestrawprices', [{ token: 'AAPL', currency: 'EUR' }])
 
-    expect(data3[0]?.priceFeeds).toStrictEqual({ token: 'APPL', currency: 'EUR' })
+    expect(data3[0]?.priceFeeds).toStrictEqual({ token: 'AAPL', currency: 'EUR' })
     expect(data3[0]?.oracleid).toStrictEqual(oracleId)
     expect(data3[0]?.rawprice).toStrictEqual(0.5)
     expect(data3[0]?.timestamp).toStrictEqual(timestamp)
@@ -237,20 +237,20 @@ describe('Price data - removeoracle', () => {
   async function setup (): Promise<void> {
     // Apoint an oracle
     const priceFeeds1 = [
-      { token: 'APPL', currency: 'EUR' },
-      { token: 'TESL', currency: 'USD' }
+      { token: 'AAPL', currency: 'EUR' },
+      { token: 'TSLA', currency: 'USD' }
     ]
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
 
     await container.generate(1)
 
-    // Set price to AAPL/USD and TESL/USD price feeds of the oracle
+    // Set price to AAPL/USD and TSLA/USD price feeds of the oracle
     timestamp = Math.floor(new Date().getTime() / 1000)
 
     const prices1 = [
-      { tokenAmount: '0.5@APPL', currency: 'EUR' },
-      { tokenAmount: '1.0@TESL', currency: 'USD' }
+      { tokenAmount: '0.5@AAPL', currency: 'EUR' },
+      { tokenAmount: '1.0@TSLA', currency: 'USD' }
     ]
 
     await container.call('setoracledata', [oracleId, timestamp, prices1])
@@ -259,7 +259,7 @@ describe('Price data - removeoracle', () => {
 
     height1 = await container.call('getblockcount')
 
-    // Remove TESL/USD price feed from the oracle
+    // Remove TSLA/USD price feed from the oracle
     await container.call('removeoracle', [oracleId])
 
     await container.generate(1)
@@ -273,25 +273,25 @@ describe('Price data - removeoracle', () => {
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
-    const data1 = await priceDataMapper.get(oracleId, 'APPL', 'EUR', height1, timestamp)
+    const data1 = await priceDataMapper.get(oracleId, 'AAPL', 'EUR', height1, timestamp)
 
     expect(data1?.data.oracleId).toStrictEqual(oracleId)
-    expect(data1?.data.token).toStrictEqual('APPL')
+    expect(data1?.data.token).toStrictEqual('AAPL')
     expect(data1?.data.currency).toStrictEqual('EUR')
     expect(data1?.data.amount).toStrictEqual('0.5')
     expect(data1?.data.timestamp).toStrictEqual(timestamp)
     expect(data1?.state).toStrictEqual(OracleState.REMOVED)
 
-    const data2 = await priceDataMapper.get(oracleId, 'TESL', 'USD', height1, timestamp)
+    const data2 = await priceDataMapper.get(oracleId, 'TSLA', 'USD', height1, timestamp)
 
     expect(data2?.data.oracleId).toStrictEqual(oracleId)
-    expect(data2?.data.token).toStrictEqual('TESL')
+    expect(data2?.data.token).toStrictEqual('TSLA')
     expect(data2?.data.currency).toStrictEqual('USD')
     expect(data2?.data.amount).toStrictEqual('1')
     expect(data2?.data.timestamp).toStrictEqual(timestamp)
     expect(data2?.state).toStrictEqual(OracleState.REMOVED)
 
-    const data3 = await container.call('listlatestrawprices', [{ token: 'APPL', currency: 'EUR' }])
+    const data3 = await container.call('listlatestrawprices', [{ token: 'AAPL', currency: 'EUR' }])
     expect(data3.length).toStrictEqual(0)
   })
 })

@@ -41,7 +41,7 @@ describe('Weightage - approveOracle', () => {
   let height: number
 
   async function setup (): Promise<void> {
-    const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
+    const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
 
     await container.generate(1)
@@ -70,7 +70,7 @@ describe('Weightage - updateOracle', () => {
   let height2: number
 
   async function setup (): Promise<void> {
-    const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
+    const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
 
     await container.generate(1)
@@ -108,7 +108,7 @@ describe('Weightage - removeOracle', () => {
   let height: number
 
   async function setup (): Promise<void> {
-    const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
+    const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
 
     await container.generate(1)

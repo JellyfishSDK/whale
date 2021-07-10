@@ -42,8 +42,8 @@ describe('PriceAggregration - 1', () => {
 
   async function setup (): Promise<void> {
     const priceFeeds1 = [
-      { token: 'APPL', currency: 'EUR' },
-      { token: 'TESL', currency: 'USD' }
+      { token: 'AAPL', currency: 'EUR' },
+      { token: 'TSLA', currency: 'USD' }
     ]
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
@@ -53,8 +53,8 @@ describe('PriceAggregration - 1', () => {
     const timestamp = Math.floor(new Date().getTime() / 1000)
 
     const prices = [
-      { tokenAmount: '0.5@APPL', currency: 'EUR' },
-      { tokenAmount: '1.0@TESL', currency: 'USD' }
+      { tokenAmount: '0.5@AAPL', currency: 'EUR' },
+      { tokenAmount: '1.0@TSLA', currency: 'USD' }
     ]
 
     await container.call('setoracledata', [oracleId, timestamp, prices])
@@ -75,22 +75,22 @@ describe('PriceAggregration - 1', () => {
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
-    const agg1 = await priceAggregrationMapper.get('APPL', 'EUR', height, time)
+    const agg1 = await priceAggregrationMapper.get('AAPL', 'EUR', height, time)
 
-    expect(agg1?.data.token).toStrictEqual('APPL')
+    expect(agg1?.data.token).toStrictEqual('AAPL')
     expect(agg1?.data.currency).toStrictEqual('EUR')
     expect(agg1?.data.amount).toStrictEqual(0.5)
 
-    const agg2 = await priceAggregrationMapper.get('TESL', 'USD', height, time)
+    const agg2 = await priceAggregrationMapper.get('TSLA', 'USD', height, time)
 
-    expect(agg2?.data.token).toStrictEqual('TESL')
+    expect(agg2?.data.token).toStrictEqual('TSLA')
     expect(agg2?.data.currency).toStrictEqual('USD')
     expect(agg2?.data.amount).toStrictEqual(1)
 
-    const data1 = await container.call('getprice', [{ token: 'APPL', currency: 'EUR' }])
+    const data1 = await container.call('getprice', [{ token: 'AAPL', currency: 'EUR' }])
     expect(data1).toStrictEqual(0.5)
 
-    const data2 = await container.call('getprice', [{ token: 'TESL', currency: 'USD' }])
+    const data2 = await container.call('getprice', [{ token: 'TSLA', currency: 'USD' }])
     expect(data2).toStrictEqual(1)
   })
 })
@@ -103,8 +103,8 @@ describe('PriceAggregration - 2', () => {
 
   async function setup (): Promise<void> {
     const priceFeeds = [
-      { token: 'APPL', currency: 'EUR' },
-      { token: 'TESL', currency: 'USD' }
+      { token: 'AAPL', currency: 'EUR' },
+      { token: 'TSLA', currency: 'USD' }
     ]
 
     oracleId1 = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
@@ -118,8 +118,8 @@ describe('PriceAggregration - 2', () => {
     const timestamp = Math.floor(new Date().getTime() / 1000)
 
     const prices1 = [
-      { tokenAmount: '0.5@APPL', currency: 'EUR' },
-      { tokenAmount: '1.0@TESL', currency: 'USD' }
+      { tokenAmount: '0.5@AAPL', currency: 'EUR' },
+      { tokenAmount: '1.0@TSLA', currency: 'USD' }
     ]
 
     await container.call('setoracledata', [oracleId1, timestamp, prices1])
@@ -127,8 +127,8 @@ describe('PriceAggregration - 2', () => {
     await container.generate(1)
 
     const prices2 = [
-      { tokenAmount: '1.5@APPL', currency: 'EUR' },
-      { tokenAmount: '2.0@TESL', currency: 'USD' }
+      { tokenAmount: '1.5@AAPL', currency: 'EUR' },
+      { tokenAmount: '2.0@TSLA', currency: 'USD' }
     ]
 
     await container.call('setoracledata', [oracleId2, timestamp, prices2])
@@ -148,22 +148,22 @@ describe('PriceAggregration - 2', () => {
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
-    const agg1 = await priceAggregrationMapper.get('APPL', 'EUR', height, time)
+    const agg1 = await priceAggregrationMapper.get('AAPL', 'EUR', height, time)
 
-    expect(agg1?.data.token).toStrictEqual('APPL')
+    expect(agg1?.data.token).toStrictEqual('AAPL')
     expect(agg1?.data.currency).toStrictEqual('EUR')
     expect(agg1?.data.amount).toStrictEqual(1.1666666666666667)
 
-    const agg2 = await priceAggregrationMapper.get('TESL', 'USD', height, time)
+    const agg2 = await priceAggregrationMapper.get('TSLA', 'USD', height, time)
 
-    expect(agg2?.data.token).toStrictEqual('TESL')
+    expect(agg2?.data.token).toStrictEqual('TSLA')
     expect(agg2?.data.currency).toStrictEqual('USD')
     expect(agg2?.data.amount).toStrictEqual(1.6666666666666667)
 
-    const data1 = await container.call('getprice', [{ token: 'APPL', currency: 'EUR' }])
+    const data1 = await container.call('getprice', [{ token: 'AAPL', currency: 'EUR' }])
     expect(data1).toStrictEqual(1.16666666)
 
-    const data2 = await container.call('getprice', [{ token: 'TESL', currency: 'USD' }])
+    const data2 = await container.call('getprice', [{ token: 'TSLA', currency: 'USD' }])
     expect(data2).toStrictEqual(1.66666666)
   })
 })

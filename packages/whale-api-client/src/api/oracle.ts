@@ -1,4 +1,5 @@
 import { WhaleApiClient } from '../whale.api.client'
+import BigNumber from 'bignumber.js'
 
 /**
  * DeFi whale endpoint for oracle related services.
@@ -67,6 +68,19 @@ export class Oracle {
    */
   async getPriceByTimestamp (token: string, currency: string, timestamp: number): Promise<OraclePriceAggregration> {
     return await this.client.requestData('GET', `oracle/${token}/${currency}/${timestamp}/price`)
+  }
+
+  /**
+   * Get percentage price change based on 2 timestamps
+   *
+   * @param {string} token
+   * @param {string} currency
+   * @param {number} timestamp1
+   * @param {number} timestamp2
+   * @return {Promise<BigNumber>}
+   */
+  async getPricePercentage (token: string, currency: string, timestamp1: number, timestamp2: number): Promise<BigNumber> {
+    return await this.client.requestData('GET', `oracle/${token}/${currency}/${timestamp1}/${timestamp2}/percentagePriceChange`)
   }
 }
 

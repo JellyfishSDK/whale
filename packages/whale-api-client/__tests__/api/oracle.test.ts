@@ -50,7 +50,7 @@ describe('1 - Oracle Weightage', () => {
   })
 
   it('should return undefined if get status with invalid oracle id', async () => {
-    await service.waitForIndexedHeight(height)
+    await service.waitForIndexedHeight(height + 5)
 
     const result = await client.oracle.getStatus('invalid')
     expect(result).toStrictEqual(undefined)
@@ -165,7 +165,7 @@ describe('2 - Oracle Price Feed', () => {
   })
 
   it('should return empty array if get price feeds with invalid oracle id', async () => {
-    await service.waitForIndexedHeight(height)
+    await service.waitForIndexedHeight(height + 5)
 
     const result = await client.oracle.getPriceFeed('invalid')
 
@@ -235,7 +235,7 @@ describe('3 - Oracle Price Data', () => {
   })
 
   it('should return empty array if get price data with invalid oracle id', async () => {
-    await service.waitForIndexedHeight(height)
+    await service.waitForIndexedHeight(height + 5)
 
     const result = await client.oracle.getPriceData('invalid')
 
@@ -279,14 +279,14 @@ describe('4 - Oracle Price', () => {
 
     await container.call('setoracledata', [oracleId1, timestamp1, prices1])
 
-    await container.generate(10)
+    await container.generate(30)
+
+    stats = await container.call('getblockstats', [await container.call('getblockcount')])
+    timestamp2 = Number(stats.time) + 1
 
     const prices2 = [
       { tokenAmount: '1.0@AAPL', currency: 'EUR' }
     ]
-
-    stats = await container.call('getblockstats', [await container.call('getblockcount')])
-    timestamp2 = Number(stats.time) + 1
 
     await container.call('setoracledata', [oracleId2, timestamp2, prices2])
 
@@ -314,7 +314,7 @@ describe('4 - Oracle Price', () => {
   })
 
   it('should return undefined if get latest price with invalid token and currency', async () => {
-    await service.waitForIndexedHeight(height)
+    await service.waitForIndexedHeight(height + 5)
 
     const result = await client.oracle.getPrice('invalid', 'invalid')
 
@@ -343,5 +343,21 @@ describe('4 - Oracle Price', () => {
     const result = await client.oracle.getPriceByTimestamp('invalid', 'invalid', -1)
 
     expect(result).toStrictEqual(undefined)
+  })
+
+  it('should get price percentage changed of two timestamps for token and currency', async () => {
+    await service.waitForIndexedHeight(height + 5)
+
+    const result = await client.oracle.getPricePercentage('AAPL', 'EUR', timestamp1, timestamp2)
+
+    expect(result).toStrictEqual(0.003333333333333334)
+  })
+
+  it('should return undefined  if get latest price with invalid token, currency, timestamp1 and timestamp2', async () => {
+    await service.waitForIndexedHeight(height + 5)
+
+    const result = await client.oracle.getPricePercentage('invalid', 'invalid', -1, -1)
+
+    expect(result).toStrictEqual(0)
   })
 })

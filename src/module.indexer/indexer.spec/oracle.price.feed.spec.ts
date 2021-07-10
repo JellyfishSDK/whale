@@ -42,8 +42,8 @@ describe('PriceFeed - approveOracle', () => {
 
   async function setup (): Promise<void> {
     const priceFeeds = [
-      { token: 'APPL', currency: 'EUR' },
-      { token: 'TESL', currency: 'USD' }
+      { token: 'AAPL', currency: 'EUR' },
+      { token: 'TSLA', currency: 'USD' }
     ]
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
@@ -59,16 +59,16 @@ describe('PriceFeed - approveOracle', () => {
 
     const priceFeedMapper = app.get(OraclePriceFeedMapper)
 
-    const data1 = await priceFeedMapper.get(oracleId, 'APPL', 'EUR', height)
-    expect(data1?.data.token).toStrictEqual('APPL')
+    const data1 = await priceFeedMapper.get(oracleId, 'AAPL', 'EUR', height)
+    expect(data1?.data.token).toStrictEqual('AAPL')
     expect(data1?.data.currency).toStrictEqual('EUR')
     expect(data1?.state).toStrictEqual(OracleState.LIVE)
 
     const result = await container.call('getoracledata', [oracleId])
     expect(result.priceFeeds).toStrictEqual(
       [
-        { token: 'APPL', currency: 'EUR' },
-        { token: 'TESL', currency: 'USD' }
+        { token: 'AAPL', currency: 'EUR' },
+        { token: 'TSLA', currency: 'USD' }
       ]
     )
   })
@@ -81,8 +81,8 @@ describe('PriceFeed - updateOracle', () => {
 
   async function setup (): Promise<void> {
     const priceFeeds1 = [
-      { token: 'APPL', currency: 'EUR' },
-      { token: 'TESL', currency: 'USD' }
+      { token: 'AAPL', currency: 'EUR' },
+      { token: 'TSLA', currency: 'USD' }
     ]
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
 
@@ -108,13 +108,13 @@ describe('PriceFeed - updateOracle', () => {
 
     const priceFeedMapper = app.get(OraclePriceFeedMapper)
 
-    const data1 = await priceFeedMapper.get(oracleId, 'APPL', 'EUR', height1)
-    expect(data1?.data.token).toStrictEqual('APPL')
+    const data1 = await priceFeedMapper.get(oracleId, 'AAPL', 'EUR', height1)
+    expect(data1?.data.token).toStrictEqual('AAPL')
     expect(data1?.data.currency).toStrictEqual('EUR')
     expect(data1?.state).toStrictEqual(OracleState.REMOVED)
 
-    const data2 = await priceFeedMapper.get(oracleId, 'TESL', 'USD', height1)
-    expect(data2?.data.token).toStrictEqual('TESL')
+    const data2 = await priceFeedMapper.get(oracleId, 'TSLA', 'USD', height1)
+    expect(data2?.data.token).toStrictEqual('TSLA')
     expect(data2?.data.currency).toStrictEqual('USD')
     expect(data2?.state).toStrictEqual(OracleState.REMOVED)
 
@@ -144,8 +144,8 @@ describe('PriceFeed - removeOracle', () => {
 
   async function setup (): Promise<void> {
     const priceFeeds = [
-      { token: 'APPL', currency: 'EUR' },
-      { token: 'TESL', currency: 'USD' }
+      { token: 'AAPL', currency: 'EUR' },
+      { token: 'TSLA', currency: 'USD' }
     ]
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
@@ -165,13 +165,13 @@ describe('PriceFeed - removeOracle', () => {
 
     const priceFeedMapper = app.get(OraclePriceFeedMapper)
 
-    const data1 = await priceFeedMapper.get(oracleId, 'APPL', 'EUR', height)
-    expect(data1?.data.token).toStrictEqual('APPL')
+    const data1 = await priceFeedMapper.get(oracleId, 'AAPL', 'EUR', height)
+    expect(data1?.data.token).toStrictEqual('AAPL')
     expect(data1?.data.currency).toStrictEqual('EUR')
     expect(data1?.state).toStrictEqual(OracleState.REMOVED)
 
-    const data2 = await priceFeedMapper.get(oracleId, 'TESL', 'USD', height)
-    expect(data2?.data.token).toStrictEqual('TESL')
+    const data2 = await priceFeedMapper.get(oracleId, 'TSLA', 'USD', height)
+    expect(data2?.data.token).toStrictEqual('TSLA')
     expect(data2?.data.currency).toStrictEqual('USD')
     expect(data2?.state).toStrictEqual(OracleState.REMOVED)
 

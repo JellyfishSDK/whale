@@ -3,6 +3,7 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { OracleController } from '@src/module.api/oracle.controller'
 import { OracleState } from '@whale-api-client/api/oracle'
+import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -20,7 +21,7 @@ describe('1 - Oracle Weightage', () => {
     app = await createTestingApp(container)
     controller = app.get(OracleController)
 
-    const priceFeeds = [{ token: 'APPL', currency: 'EUR' }]
+    const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
 
     await container.generate(1)
@@ -44,7 +45,7 @@ describe('1 - Oracle Weightage', () => {
   })
 
   it('should return undefined if get status with invalid oracle id', async () => {
-    await waitForIndexedHeight(app, height)
+    await waitForIndexedHeight(app, height + 5)
 
     const result = await controller.getStatus('invalid')
     expect(result).toStrictEqual(undefined)
@@ -65,7 +66,7 @@ describe('2 - Oracle Price Feed', () => {
     controller = app.get(OracleController)
 
     const priceFeeds1 = [
-      { token: 'APPL', currency: 'EUR' }
+      { token: 'AAPL', currency: 'EUR' }
     ]
 
     oracleId1 = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
@@ -73,7 +74,7 @@ describe('2 - Oracle Price Feed', () => {
     await container.generate(1)
 
     const priceFeeds2 = [
-      { token: 'TESL', currency: 'USD' }
+      { token: 'TSLA', currency: 'USD' }
     ]
 
     await container.call('updateoracle', [oracleId1, await container.getNewAddress(), priceFeeds2, 2])
@@ -111,7 +112,7 @@ describe('2 - Oracle Price Feed', () => {
     const result = await controller.getPriceFeeds() ?? []
 
     // Result sorted by token, currency and block height
-    expect(result[0]?.data.token).toStrictEqual('APPL')
+    expect(result[0]?.data.token).toStrictEqual('AAPL')
     expect(result[0]?.data.currency).toStrictEqual('EUR')
     expect(result[0]?.state).toStrictEqual(OracleState.REMOVED)
 
@@ -123,7 +124,7 @@ describe('2 - Oracle Price Feed', () => {
     expect(result[2]?.data.currency).toStrictEqual('SGD')
     expect(result[2]?.state).toStrictEqual(OracleState.LIVE)
 
-    expect(result[3]?.data.token).toStrictEqual('TESL')
+    expect(result[3]?.data.token).toStrictEqual('TSLA')
     expect(result[3]?.data.currency).toStrictEqual('USD')
     expect(result[3]?.state).toStrictEqual(OracleState.LIVE)
   })
@@ -133,11 +134,11 @@ describe('2 - Oracle Price Feed', () => {
 
     const result1 = await controller.getPriceFeed(oracleId1) ?? []
 
-    expect(result1[0]?.data.token).toStrictEqual('APPL')
+    expect(result1[0]?.data.token).toStrictEqual('AAPL')
     expect(result1[0]?.data.currency).toStrictEqual('EUR')
     expect(result1[0]?.state).toStrictEqual(OracleState.REMOVED)
 
-    expect(result1[1]?.data.token).toStrictEqual('TESL')
+    expect(result1[1]?.data.token).toStrictEqual('TSLA')
     expect(result1[1]?.data.currency).toStrictEqual('USD')
     expect(result1[1]?.state).toStrictEqual(OracleState.LIVE)
 
@@ -153,7 +154,7 @@ describe('2 - Oracle Price Feed', () => {
   })
 
   it('should return empty array if get price feeds with invalid oracle id', async () => {
-    await waitForIndexedHeight(app, height)
+    await waitForIndexedHeight(app, height + 5)
 
     const result = await controller.getPriceFeed('invalid')
 
@@ -174,8 +175,8 @@ describe('3 - Oracle Price Data', () => {
     controller = app.get(OracleController)
 
     const priceFeeds1 = [
-      { token: 'APPL', currency: 'EUR' },
-      { token: 'TESL', currency: 'USD' }
+      { token: 'AAPL', currency: 'EUR' },
+      { token: 'TSLA', currency: 'USD' }
     ]
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
 
@@ -184,8 +185,8 @@ describe('3 - Oracle Price Data', () => {
     const timestamp = Math.floor(new Date().getTime() / 1000)
 
     const prices = [
-      { tokenAmount: '0.5@APPL', currency: 'EUR' },
-      { tokenAmount: '1.0@TESL', currency: 'USD' }
+      { tokenAmount: '0.5@AAPL', currency: 'EUR' },
+      { tokenAmount: '1.0@TSLA', currency: 'USD' }
     ]
 
     await container.call('setoracledata', [oracleId, timestamp, prices])
@@ -205,12 +206,12 @@ describe('3 - Oracle Price Data', () => {
     const result = await controller.getPriceData(oracleId) ?? []
     expect(result.length).toStrictEqual(2)
 
-    expect(result[0]?.data.token).toStrictEqual('APPL')
+    expect(result[0]?.data.token).toStrictEqual('AAPL')
     expect(result[0]?.data.currency).toStrictEqual('EUR')
     expect(result[0]?.data.amount).toStrictEqual('0.5')
     expect(result[0]?.state).toStrictEqual(OracleState.LIVE)
 
-    expect(result[1]?.data.token).toStrictEqual('TESL')
+    expect(result[1]?.data.token).toStrictEqual('TSLA')
     expect(result[1]?.data.currency).toStrictEqual('USD')
     expect(result[1]?.data.amount).toStrictEqual('1')
     expect(result[1]?.state).toStrictEqual(OracleState.LIVE)
@@ -239,7 +240,7 @@ describe('4 - Oracle Price', () => {
     controller = app.get(OracleController)
 
     const priceFeeds = [
-      { token: 'APPL', currency: 'EUR' }
+      { token: 'AAPL', currency: 'EUR' }
     ]
 
     const oracleId1 = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
@@ -254,19 +255,19 @@ describe('4 - Oracle Price', () => {
     timestamp1 = Number(stats.time) + 1
 
     const prices1 = [
-      { tokenAmount: '0.5@APPL', currency: 'EUR' }
+      { tokenAmount: '0.5@AAPL', currency: 'EUR' }
     ]
 
     await container.call('setoracledata', [oracleId1, timestamp1, prices1])
 
-    await container.generate(10)
-
-    const prices2 = [
-      { tokenAmount: '1.0@APPL', currency: 'EUR' }
-    ]
+    await container.generate(30)
 
     stats = await container.call('getblockstats', [await container.call('getblockcount')])
     timestamp2 = Number(stats.time) + 1
+
+    const prices2 = [
+      { tokenAmount: '1.0@AAPL', currency: 'EUR' }
+    ]
 
     await container.call('setoracledata', [oracleId2, timestamp2, prices2])
 
@@ -282,15 +283,15 @@ describe('4 - Oracle Price', () => {
   it('should get latest price for token and currency 5 blocks after the oracle was updated', async () => {
     await waitForIndexedHeight(app, height + 5)
 
-    const result = await controller.getPrice('APPL', 'EUR')
+    const result = await controller.getPrice('AAPL', 'EUR')
 
-    expect(result?.data.token).toStrictEqual('APPL')
+    expect(result?.data.token).toStrictEqual('AAPL')
     expect(result?.data.currency).toStrictEqual('EUR')
     expect(result?.data.amount).toStrictEqual(0.8333333333333334)
   })
 
   it('should return undefined if get latest price with invalid token and currency', async () => {
-    await waitForIndexedHeight(app, height)
+    await waitForIndexedHeight(app, height + 5)
 
     const result = await controller.getPrice('invalid', 'invalid')
 
@@ -300,15 +301,15 @@ describe('4 - Oracle Price', () => {
   it('should get price for token and currency at specific timestamp', async () => {
     await waitForIndexedHeight(app, height + 5)
 
-    const result1 = await controller.getPriceByTimestamp('APPL', 'EUR', timestamp1)
+    const result1 = await controller.getPriceByTimestamp('AAPL', 'EUR', timestamp1)
 
-    expect(result1?.data.token).toStrictEqual('APPL')
+    expect(result1?.data.token).toStrictEqual('AAPL')
     expect(result1?.data.currency).toStrictEqual('EUR')
     expect(result1?.data.amount).toStrictEqual(0.5)
 
-    const result2 = await controller.getPriceByTimestamp('APPL', 'EUR', timestamp2)
+    const result2 = await controller.getPriceByTimestamp('AAPL', 'EUR', timestamp2)
 
-    expect(result2?.data.token).toStrictEqual('APPL')
+    expect(result2?.data.token).toStrictEqual('AAPL')
     expect(result2?.data.currency).toStrictEqual('EUR')
     expect(result2?.data.amount).toStrictEqual(0.8333333333333334)
   })
@@ -319,5 +320,21 @@ describe('4 - Oracle Price', () => {
     const result = await controller.getPriceByTimestamp('invalid', 'invalid', -1)
 
     expect(result).toStrictEqual(undefined)
+  })
+
+  it('should get price percentage changed of two timestamps for token and currency', async () => {
+    await waitForIndexedHeight(app, height + 5)
+
+    const result = await controller.getPricePercentageChange('AAPL', 'EUR', timestamp1, timestamp2)
+
+    expect(result).toStrictEqual(new BigNumber('0.003333333333333334'))
+  })
+
+  it('should return 0 if get latest price with invalid token, currency, timestamp1 and timestamp2', async () => {
+    await waitForIndexedHeight(app, height + 5)
+
+    const result = await controller.getPricePercentageChange('invalid', 'invalid', -1, -1)
+
+    expect(result).toStrictEqual(new BigNumber('0'))
   })
 })
