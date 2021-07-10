@@ -134,6 +134,7 @@ export interface OraclePriceAggregration {
     token: string
     currency: string
     amount: number
+    lastUpdatedTimestamp: number
   }
 }
 
