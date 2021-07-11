@@ -4,10 +4,10 @@ import { Database, SortOrder } from '@src/module.database/database'
 import { OracleAppointed } from '@whale-api-client/api/oracle'
 
 const OracleAppointedMapping: ModelMapping<OracleAppointed> = {
-  type: 'oracle_status',
+  type: 'oracle_appointed',
   index: {
     oracleId_height: {
-      name: 'oracle_status_oracleId_height',
+      name: 'oracle_appointed_oracleId_height',
       partition: {
         type: 'string',
         key: (d: OracleAppointed) => d.data.oracleId

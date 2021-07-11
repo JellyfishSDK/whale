@@ -7,7 +7,7 @@ import { OracleState, OracleAppointed, OraclePriceFeed } from '@whale-api-client
 import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 
 @Injectable()
-export class OracleStatusIndexer extends Indexer {
+export class OracleAppointedPriceFeedIndexer extends Indexer {
   constructor (
     private readonly oracleAppointedMapper: OracleAppointedMapper,
     private readonly oraclePriceFeedMapper: OraclePriceFeedMapper
@@ -36,7 +36,7 @@ export class OracleStatusIndexer extends Indexer {
             // Add weightage
             const weightage: number = stack[1].tx.data.weightage
 
-            oracleAppointedRecord[`${oracleId}-${block.height}`] = OracleStatusIndexer.newOracleAppointed(block.height, oracleId, weightage, OracleState.LIVE)
+            oracleAppointedRecord[`${oracleId}-${block.height}`] = OracleAppointedPriceFeedIndexer.newOracleAppointed(block.height, oracleId, weightage, OracleState.LIVE)
 
             // Add priceFeeds
             const priceFeeds = stack[1].tx.data.priceFeeds
@@ -47,7 +47,7 @@ export class OracleStatusIndexer extends Indexer {
               const token: string = priceFeed.token
               const currency: string = priceFeed.currency
 
-              oraclePriceFeedRecord[`${oracleId}-${token}-${currency}-${block.height}`] = OracleStatusIndexer.newOraclePriceFeed(block.height, oracleId, token, currency, OracleState.LIVE)
+              oraclePriceFeedRecord[`${oracleId}-${token}-${currency}-${block.height}`] = OracleAppointedPriceFeedIndexer.newOraclePriceFeed(block.height, oracleId, token, currency, OracleState.LIVE)
             }
           } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
             const oracleId: string = stack[1].tx.data.oracleId
@@ -56,10 +56,10 @@ export class OracleStatusIndexer extends Indexer {
             const oldStatus = await this.oracleAppointedMapper.getLatest(oracleId)
             const oldHeight: number = oldStatus?.block.height ?? 0
             const oldWeightage: number = oldStatus?.data.weightage ?? 0
-            oracleAppointedRecord[`${oracleId}-${oldHeight}`] = OracleStatusIndexer.newOracleAppointed(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
+            oracleAppointedRecord[`${oracleId}-${oldHeight}`] = OracleAppointedPriceFeedIndexer.newOracleAppointed(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
 
             const weightage: number = stack[1].tx.data.weightage
-            oracleAppointedRecord[`${oracleId}-${block.height}`] = OracleStatusIndexer.newOracleAppointed(block.height, oracleId, weightage, OracleState.LIVE)
+            oracleAppointedRecord[`${oracleId}-${block.height}`] = OracleAppointedPriceFeedIndexer.newOracleAppointed(block.height, oracleId, weightage, OracleState.LIVE)
 
             // Update priceFeeds
             const oldPriceFeeds = await this.oraclePriceFeedMapper.getByOracleId(oracleId) ?? []
@@ -71,7 +71,7 @@ export class OracleStatusIndexer extends Indexer {
               const currency: string = priceFeed.data.currency
               const height: number = priceFeed.block.height
 
-              oraclePriceFeedRecord[`${oracleId}-${token}-${currency}-${height}`] = OracleStatusIndexer.newOraclePriceFeed(height, oracleId, token, currency, OracleState.REMOVED)
+              oraclePriceFeedRecord[`${oracleId}-${token}-${currency}-${height}`] = OracleAppointedPriceFeedIndexer.newOraclePriceFeed(height, oracleId, token, currency, OracleState.REMOVED)
             }
 
             const newPriceFeeds = stack[1].tx.data.priceFeeds
@@ -81,7 +81,7 @@ export class OracleStatusIndexer extends Indexer {
 
               const token: string = priceFeed.token
               const currency: string = priceFeed.currency
-              oraclePriceFeedRecord[`${oracleId}-${token}-${currency}-${block.height}`] = OracleStatusIndexer.newOraclePriceFeed(block.height, oracleId, token, currency, OracleState.LIVE)
+              oraclePriceFeedRecord[`${oracleId}-${token}-${currency}-${block.height}`] = OracleAppointedPriceFeedIndexer.newOraclePriceFeed(block.height, oracleId, token, currency, OracleState.LIVE)
             }
           } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
             const oracleId: string = stack[1].tx.data.oracleId
@@ -91,7 +91,7 @@ export class OracleStatusIndexer extends Indexer {
             const oldHeight: number = oldStatus?.block.height ?? 0
             const oldWeightage: number = oldStatus?.data.weightage ?? 0
 
-            oracleAppointedRecord[`${oracleId}-${oldHeight}`] = OracleStatusIndexer.newOracleAppointed(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
+            oracleAppointedRecord[`${oracleId}-${oldHeight}`] = OracleAppointedPriceFeedIndexer.newOracleAppointed(oldHeight, oracleId, oldWeightage, OracleState.REMOVED)
 
             // Remove priceFeeds
             const priceFeeds = await this.oraclePriceFeedMapper.getByOracleId(oracleId) ?? []
@@ -103,7 +103,7 @@ export class OracleStatusIndexer extends Indexer {
               const currency: string = priceFeed.data.currency
               const height: number = priceFeed.block.height
 
-              oraclePriceFeedRecord[`${oracleId}-${token}-${currency}-${height}`] = OracleStatusIndexer.newOraclePriceFeed(height, oracleId, token, currency, OracleState.REMOVED)
+              oraclePriceFeedRecord[`${oracleId}-${token}-${currency}-${height}`] = OracleAppointedPriceFeedIndexer.newOraclePriceFeed(height, oracleId, token, currency, OracleState.REMOVED)
             }
           }
         }

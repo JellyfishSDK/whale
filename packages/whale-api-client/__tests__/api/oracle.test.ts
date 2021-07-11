@@ -9,55 +9,6 @@ let container: MasterNodeRegTestContainer
 let service: StubService
 let client: WhaleApiClient
 
-describe('1 - Oracle Weightage', () => {
-  let oracleId: string
-  let height: number
-
-  beforeAll(async () => {
-    container = new MasterNodeRegTestContainer()
-    service = new StubService(container)
-    client = new StubWhaleApiClient(service)
-
-    await container.start()
-    await container.waitForReady()
-    await container.waitForWalletCoinbaseMaturity()
-    await service.start()
-
-    const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
-    oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
-
-    await container.generate(1)
-
-    await container.call('updateoracle', [oracleId, await container.getNewAddress(), priceFeeds, 2])
-
-    await container.generate(1)
-
-    height = await container.call('getblockcount')
-  })
-
-  afterAll(async () => {
-    try {
-      await service.stop()
-    } finally {
-      await container.stop()
-    }
-  })
-
-  it('should get status 5 blocks after the oracle was updated', async () => {
-    await service.waitForIndexedHeight(height + 5)
-
-    const result = await client.oracle.getStatus(oracleId)
-    expect(result?.data.weightage).toStrictEqual(2)
-  })
-
-  it('should return undefined if get status with invalid oracle id', async () => {
-    await service.waitForIndexedHeight(height + 5)
-
-    const result = await client.oracle.getStatus('invalid')
-    expect(result).toStrictEqual(undefined)
-  })
-})
-
 describe('2 - Oracle Price Feed', () => {
   let oracleId1: string
   let oracleId2: string

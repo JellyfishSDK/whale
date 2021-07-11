@@ -10,49 +10,6 @@ const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
 let controller: OracleController
 
-describe('1 - Oracle Weightage', () => {
-  let oracleId: string
-  let height: number
-
-  beforeAll(async () => {
-    await container.start()
-    await container.waitForReady()
-    await container.waitForWalletCoinbaseMaturity()
-
-    app = await createTestingApp(container)
-    controller = app.get(OracleController)
-
-    const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
-    oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
-
-    await container.generate(1)
-
-    await container.call('updateoracle', [oracleId, await container.getNewAddress(), priceFeeds, 2])
-
-    await container.generate(1)
-
-    height = await container.call('getblockcount')
-  })
-
-  afterAll(async () => {
-    await stopTestingApp(container, app)
-  })
-
-  it('should get status 5 blocks after the oracle was updated', async () => {
-    await waitForIndexedHeight(app, height + 5)
-
-    const result = await controller.getStatus(oracleId)
-    expect(result?.data.weightage).toStrictEqual(2)
-  })
-
-  it('should return undefined if get status with invalid oracle id', async () => {
-    await waitForIndexedHeight(app, height + 5)
-
-    const result = await controller.getStatus('invalid')
-    expect(result).toStrictEqual(undefined)
-  })
-})
-
 describe('2 - Oracle Price Feed', () => {
   let oracleId1: string
   let oracleId2: string

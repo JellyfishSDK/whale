@@ -1,7 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common'
-import { OracleAppointedMapper } from '@src/module.model/oracle.appointed'
 import {
-  OracleAppointed,
   OraclePriceAggregration,
   OraclePriceData,
   OraclePriceFeed
@@ -14,18 +12,10 @@ import BigNumber from 'bignumber.js'
 @Controller('/v0/:network/oracle')
 export class OracleController {
   constructor (
-    protected readonly appointedMapper: OracleAppointedMapper,
     protected readonly priceFeedMapper: OraclePriceFeedMapper,
     protected readonly priceDataMapper: OraclePriceDataMapper,
     protected readonly priceAggregrationMapper: OraclePriceAggregrationMapper
   ) {
-  }
-
-  @Get('/:id/status')
-  async getStatus (
-    @Param('id') id: string
-  ): Promise<OracleAppointed | undefined> {
-    return await this.appointedMapper.getLatest(id)
   }
 
   @Get('/priceFeeds')

@@ -10,7 +10,7 @@ import { TransactionVinIndexer } from '@src/module.indexer/model/transaction.vin
 import { TransactionVoutIndexer } from '@src/module.indexer/model/transaction.vout'
 import { VoutFinder } from '@src/module.indexer/model/_vout_finder'
 import { IndexStatusMapper } from '@src/module.indexer/status'
-import { OracleStatusIndexer } from '@src/module.indexer/model/oracle.status'
+import { OracleAppointedPriceFeedIndexer } from '@src/module.indexer/model/oracle.status'
 import { OraclePriceDataIndexer } from '@src/module.indexer/model/oracle.price.data'
 import { OraclePriceAggregationIndexer } from '@src/module.indexer/model/oracle.price.aggregration'
 
@@ -27,7 +27,7 @@ import { OraclePriceAggregationIndexer } from '@src/module.indexer/model/oracle.
     TransactionIndexer,
     TransactionVinIndexer,
     TransactionVoutIndexer,
-    OracleStatusIndexer,
+    OracleAppointedPriceFeedIndexer,
     OraclePriceDataIndexer,
     OraclePriceAggregationIndexer
   ]
