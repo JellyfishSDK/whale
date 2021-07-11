@@ -33,7 +33,6 @@ export class PoolPairService {
 
   async get (id: string): Promise<PoolPairInfoPlus> {
     const info = await this.deFiDCache.getPoolPairInfo(id)
-    console.log('info: ', info)
     if (info === undefined) {
       throw new NotFoundException('Unable to find poolpair')
     }
@@ -48,9 +47,7 @@ export class PoolPairService {
 
   private async getUsdtDfiConversion (): Promise<Record<string, BigNumber>> {
     const usdtToDfi = await this.dexUsdtDfi()
-    console.log('usdtToDfi: ', usdtToDfi.toString())
     const dfiToUsdt = new BigNumber('1').div(usdtToDfi)
-    console.log('dfiToUsdt: ', dfiToUsdt.toString())
 
     return {
       usdtToDfi,
@@ -73,15 +70,11 @@ export class PoolPairService {
 
     // to find 1token = ?DFI -> reserveB(DFI)/reserveA(token)
     const tokenToDfi = new BigNumber(poolPairInfo['reserveB/reserveA'])
-    console.log('tokenToDfi: ', tokenToDfi.toString())
     const tokenToUsdt = usdtToDfi.div(tokenToDfi)
-    console.log('tokenToUsdt: ', tokenToUsdt.toString())
 
     // logic's assuming poolpair tokenB is always DFI
     const reserveAUsd = poolPairInfo.reserveA.times(tokenToUsdt)
-    console.log('reserveAUsd: ', reserveAUsd.toString())
     const reserveBUsd = poolPairInfo.reserveB.times(dfiToUsdt)
-    console.log('reserveBUsd: ', reserveBUsd.toString())
 
     // Note(canonbrother): totalLiquidity in USD calculation
     // reserveA_USD (eg: BTC) = reserveA * tokenToUsdt
