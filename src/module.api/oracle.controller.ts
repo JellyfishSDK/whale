@@ -2,9 +2,9 @@ import { Controller, Get, Param } from '@nestjs/common'
 import {
   OraclePriceAggregration,
   OraclePriceData,
-  OraclePriceFeed
+  OracleAppointedTokenCurrency
 } from '@whale-api-client/api/oracle'
-import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
+import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
 import BigNumber from 'bignumber.js'
@@ -12,22 +12,22 @@ import BigNumber from 'bignumber.js'
 @Controller('/v0/:network/oracle')
 export class OracleController {
   constructor (
-    protected readonly priceFeedMapper: OraclePriceFeedMapper,
+    protected readonly priceFeedMapper: OracleAppointedTokenCurrencyMapper,
     protected readonly priceDataMapper: OraclePriceDataMapper,
     protected readonly priceAggregrationMapper: OraclePriceAggregrationMapper
   ) {
   }
 
   @Get('/priceFeeds')
-  async getPriceFeeds (): Promise<OraclePriceFeed[] | undefined> {
-    return await this.priceFeedMapper.getPriceFeeds()
+  async getPriceFeeds (): Promise<OracleAppointedTokenCurrency[] | undefined> {
+    return await this.priceFeedMapper.list()
   }
 
   @Get('/:id/priceFeed')
   async getPriceFeed (
     @Param('id') id: string
-  ): Promise<OraclePriceFeed[] | undefined> {
-    return await this.priceFeedMapper.getByOracleId(id)
+  ): Promise<OracleAppointedTokenCurrency[] | undefined> {
+    return await this.priceFeedMapper.listByOracleId(id)
   }
 
   @Get('/:id/priceData')

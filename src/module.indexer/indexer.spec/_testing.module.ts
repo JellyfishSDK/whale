@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { RegTestContainer } from '@defichain/testcontainers'
+import { MasterNodeRegTestContainer, RegTestContainer } from '@defichain/testcontainers'
 import { ConfigModule } from '@nestjs/config'
 import { ScheduleModule } from '@nestjs/schedule'
 import { DatabaseModule } from '@src/module.database/_module'
@@ -51,4 +51,13 @@ export async function waitForHeight (app: TestingModule, height: number): Promis
     const block = await blockMapper.getHighest()
     await expect(block?.height).toBeGreaterThan(height)
   })
+}
+
+export async function waitForTime (container: MasterNodeRegTestContainer, timestamp: number, timeout: number = 30000): Promise<void> {
+  await waitForExpect(async () => {
+    await container.generate(1)
+    const height = await container.call('getblockcount')
+    const stats = await container.call('getblockstats', [height])
+    await expect(Number(stats.time)).toStrictEqual(timestamp)
+  }, timeout)
 }

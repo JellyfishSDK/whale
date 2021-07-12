@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
-import { OracleAppointedMapper } from '@src/module.model/oracle.appointed'
-import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
+import { OracleAppointedWeightageMapper } from '@src/module.model/oracle.appointed.weightage'
+import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 import { OraclePriceAggregration } from '@whale-api-client/api/oracle'
 
 @Injectable()
 export class OraclePriceAggregationIndexer extends Indexer {
   constructor (
-    private readonly appointedMapper: OracleAppointedMapper,
-    private readonly priceFeedMapper: OraclePriceFeedMapper,
+    private readonly appointedMapper: OracleAppointedWeightageMapper,
+    private readonly priceFeedMapper: OracleAppointedTokenCurrencyMapper,
     private readonly priceDataMapper: OraclePriceDataMapper,
     private readonly priceAggregrationMapper: OraclePriceAggregrationMapper
   ) {
@@ -25,7 +25,7 @@ export class OraclePriceAggregationIndexer extends Indexer {
           continue
         }
 
-        const data = await this.priceFeedMapper.getPriceFeeds() ?? []
+        const data = await this.priceFeedMapper.list() ?? []
 
         if (data.length > 0) {
           const priceFeedSet: Set<string> = new Set()

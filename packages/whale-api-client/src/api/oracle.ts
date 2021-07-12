@@ -12,9 +12,9 @@ export class Oracle {
    * Get current status of an oracle
    *
    * @param {string} id oracleId
-   * @return {Promise<OracleAppointed>}
+   * @return {Promise<OracleAppointedWeightage>}
    */
-  async getStatus (id: string): Promise<OracleAppointed> {
+  async getStatus (id: string): Promise<OracleAppointedWeightage> {
     return await this.client.requestData('GET', `oracle/${id}/status`)
   }
 
@@ -22,18 +22,18 @@ export class Oracle {
    * Get price Feed for an oracleId
    *
    * @param {string} id oracleId
-   * @return {Promise<OraclePriceFeed>}
+   * @return {Promise<OracleAppointedTokenCurrency>}
    */
-  async getPriceFeed (id: string): Promise<OraclePriceFeed[]> {
+  async getPriceFeed (id: string): Promise<OracleAppointedTokenCurrency[]> {
     return await this.client.requestData('GET', `oracle/${id}/priceFeed`)
   }
 
   /**
    * Get all price feeds
    *
-   * @return {Promise<OraclePriceFeed>}
+   * @return {Promise<OracleAppointedTokenCurrency>}
    */
-  async getPriceFeeds (): Promise<OraclePriceFeed[]> {
+  async getPriceFeeds (): Promise<OracleAppointedTokenCurrency[]> {
     return await this.client.requestData('GET', 'oracle/priceFeeds')
   }
 
@@ -98,7 +98,7 @@ export class Oracle {
   }
 }
 
-export interface OracleAppointed {
+export interface OracleAppointedWeightage {
   id: string
   block: {
     height: number
@@ -110,7 +110,7 @@ export interface OracleAppointed {
   state: OracleState
 }
 
-export interface OraclePriceFeed {
+export interface OracleAppointedTokenCurrency {
   id: string
   block: {
     height: number
@@ -129,11 +129,11 @@ export interface OraclePriceData {
     height: number
   }
   data: {
-    timestamp: number
+    oracleId: string
     token: string
     currency: string
-    oracleId: string
     amount: number
+    timestamp: number
   }
   state: OracleState
 }
@@ -144,10 +144,10 @@ export interface OraclePriceAggregration {
     height: number
   }
   data: {
-    timestamp: number
     token: string
     currency: string
     amount: number
+    timestamp: number
     lastUpdatedTimestamp: number
   }
 }

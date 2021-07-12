@@ -167,11 +167,11 @@ export class OraclePriceDataIndexer extends Indexer {
         height
       },
       data: {
-        timestamp,
+        oracleId,
         token,
         currency,
-        oracleId,
-        amount
+        amount,
+        timestamp
       },
       state
     }
