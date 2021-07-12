@@ -33,7 +33,7 @@
     "@defichain/jellyfish-network": ">=0.24.0",
     "@defichain/jellyfish-transaction": ">=0.24.0",
     "@nestjs/common": "^7.6.15",
-    "@nestjs/config": "^0.6.3",
+    "@nestjs/config": "^1.0.0",
     "@nestjs/core": "^7.6.15",
     "@nestjs/platform-fastify": "^7.6.15",
     "@nestjs/schedule": "^1.0.0",
