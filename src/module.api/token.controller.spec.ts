@@ -55,7 +55,8 @@ describe('list', () => {
       destruction: {
         tx: '0000000000000000000000000000000000000000000000000000000000000000',
         height: -1
-      }
+      },
+      collateralAddress: undefined
     })
     expect(result.data[1].collateralAddress).toBeDefined()
     expect(result.data[1]).toStrictEqual({
@@ -194,7 +195,8 @@ describe('get', () => {
       destruction: {
         tx: '0000000000000000000000000000000000000000000000000000000000000000',
         height: -1
-      }
+      },
+      collateralAddress: undefined
     })
   })
 
