@@ -34,7 +34,6 @@ describe('list', () => {
     const result = await controller.list({ size: 100 })
     expect(result.data.length).toStrictEqual(4)
 
-    expect(result.data[0].collateralAddress).toBeUndefined()
     expect(result.data[0]).toStrictEqual({
       id: '0',
       symbol: 'DFI',
@@ -58,7 +57,6 @@ describe('list', () => {
       },
       collateralAddress: undefined
     })
-    expect(result.data[1].collateralAddress).toBeDefined()
     expect(result.data[1]).toStrictEqual({
       id: '1',
       symbol: 'DBTC',
@@ -83,7 +81,6 @@ describe('list', () => {
       collateralAddress: expect.any(String)
     })
 
-    expect(result.data[2].collateralAddress).toBeDefined()
     expect(result.data[2]).toStrictEqual({
       id: '2',
       symbol: 'DETH',
@@ -108,7 +105,6 @@ describe('list', () => {
       collateralAddress: expect.any(String)
     })
 
-    expect(result.data[3].collateralAddress).toBeDefined()
     expect(result.data[3]).toStrictEqual({
       id: '3',
       symbol: 'DBTC-DET',
@@ -174,7 +170,6 @@ describe('list', () => {
 describe('get', () => {
   it('should get DFI with by DFI numeric id', async () => {
     const data = await controller.get('0')
-    expect(data.collateralAddress).toBeUndefined()
     expect(data).toStrictEqual({
       id: '0',
       symbol: 'DFI',
@@ -202,7 +197,6 @@ describe('get', () => {
 
   it('should get DBTC by DBTC numeric id', async () => {
     const data = await controller.get('1')
-    expect(data.collateralAddress).toBeDefined()
     expect(data).toStrictEqual({
       id: '1',
       symbol: 'DBTC',
@@ -230,7 +224,6 @@ describe('get', () => {
 
   it('should get DETH by DETH numeric id', async () => {
     const data = await controller.get('2')
-    expect(data.collateralAddress).toBeDefined()
     expect(data).toStrictEqual({
       id: '2',
       symbol: 'DETH',
@@ -258,7 +251,6 @@ describe('get', () => {
 
   it('should get DBTC-DETH by DBTC-DETH numeric id', async () => {
     const data = await controller.get('3')
-    expect(data.collateralAddress).toBeDefined()
     expect(data).toStrictEqual({
       id: '3',
       symbol: 'DBTC-DET',
