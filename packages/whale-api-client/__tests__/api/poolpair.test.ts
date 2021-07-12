@@ -49,45 +49,43 @@ afterEach(() => {
 })
 
 async function setup (): Promise<void> {
-  const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
+  const tokens = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
   for (const token of tokens) {
     await container.waitForWalletBalanceGTE(110)
     await createToken(container, token)
     await mintTokens(container, token)
   }
-  await createPoolPair(container, 'A', 'B')
-  await createPoolPair(container, 'A', 'C')
-  await createPoolPair(container, 'A', 'D')
-  await createPoolPair(container, 'A', 'E')
-  await createPoolPair(container, 'A', 'F')
-  await createPoolPair(container, 'B', 'C')
-  await createPoolPair(container, 'B', 'D')
-  await createPoolPair(container, 'B', 'E')
-  await container.generate(1)
+  await createPoolPair(container, 'A', 'DFI')
+  await createPoolPair(container, 'B', 'DFI')
+  await createPoolPair(container, 'C', 'DFI')
+  await createPoolPair(container, 'D', 'DFI')
+  await createPoolPair(container, 'E', 'DFI')
+  await createPoolPair(container, 'F', 'DFI')
+  await createPoolPair(container, 'G', 'DFI')
+  await createPoolPair(container, 'H', 'DFI')
 
   await addPoolLiquidity(container, {
     tokenA: 'A',
     amountA: 100,
-    tokenB: 'B',
+    tokenB: 'DFI',
     amountB: 200,
     shareAddress: await getNewAddress(container)
   })
   await addPoolLiquidity(container, {
-    tokenA: 'A',
+    tokenA: 'B',
     amountA: 50,
-    tokenB: 'C',
+    tokenB: 'DFI',
     amountB: 300,
     shareAddress: await getNewAddress(container)
   })
   await addPoolLiquidity(container, {
-    tokenA: 'A',
+    tokenA: 'C',
     amountA: 90,
-    tokenB: 'D',
+    tokenB: 'DFI',
     amountB: 360,
     shareAddress: await getNewAddress(container)
   })
-  await container.generate(1)
 }
 
 describe('list', () => {
@@ -98,17 +96,17 @@ describe('list', () => {
     expect(response.hasNext).toStrictEqual(false)
 
     expect(response[1]).toStrictEqual({
-      id: '8',
-      symbol: 'A-C',
-      name: 'A-C',
+      id: '10',
+      symbol: 'B-DFI',
+      name: 'B-Default Defi token',
       status: true,
       tokenA: {
-        id: '1',
+        id: '2',
         reserve: '50',
         blockCommission: '0'
       },
       tokenB: {
-        id: '3',
+        id: '0',
         reserve: '300',
         blockCommission: '0'
       },
@@ -135,39 +133,39 @@ describe('list', () => {
     const first = await client.poolpair.list(3)
     expect(first.length).toStrictEqual(3)
     expect(first.hasNext).toStrictEqual(true)
-    expect(first.nextToken).toStrictEqual('9')
+    expect(first.nextToken).toStrictEqual('11')
 
-    expect(first[0].symbol).toStrictEqual('A-B')
-    expect(first[1].symbol).toStrictEqual('A-C')
-    expect(first[2].symbol).toStrictEqual('A-D')
+    expect(first[0].symbol).toStrictEqual('A-DFI')
+    expect(first[1].symbol).toStrictEqual('B-DFI')
+    expect(first[2].symbol).toStrictEqual('C-DFI')
 
     const next = await client.paginate(first)
     expect(next.length).toStrictEqual(3)
     expect(next.hasNext).toStrictEqual(true)
-    expect(next.nextToken).toStrictEqual('12')
+    expect(next.nextToken).toStrictEqual('14')
 
-    expect(next[0].symbol).toStrictEqual('A-E')
-    expect(next[1].symbol).toStrictEqual('A-F')
-    expect(next[2].symbol).toStrictEqual('B-C')
+    expect(next[0].symbol).toStrictEqual('D-DFI')
+    expect(next[1].symbol).toStrictEqual('E-DFI')
+    expect(next[2].symbol).toStrictEqual('F-DFI')
 
     const last = await client.paginate(next)
     expect(last.length).toStrictEqual(2)
     expect(last.hasNext).toStrictEqual(false)
     expect(last.nextToken).toBeUndefined()
 
-    expect(last[0].symbol).toStrictEqual('B-D')
-    expect(last[1].symbol).toStrictEqual('B-E')
+    expect(last[0].symbol).toStrictEqual('G-DFI')
+    expect(last[1].symbol).toStrictEqual('H-DFI')
   })
 })
 
 describe('get', () => {
   it('should get', async () => {
-    const response: PoolPairData = await client.poolpair.get('7')
+    const response: PoolPairData = await client.poolpair.get('9')
 
     expect(response).toStrictEqual({
-      id: '7',
-      symbol: 'A-B',
-      name: 'A-B',
+      id: '9',
+      symbol: 'A-DFI',
+      name: 'A-Default Defi token',
       status: true,
       tokenA: {
         id: expect.any(String),
@@ -201,7 +199,7 @@ describe('get', () => {
   it('should throw error as numeric string is expected', async () => {
     expect.assertions(2)
     try {
-      await client.poolpair.get('A-B')
+      await client.poolpair.get('A-DFI')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
@@ -209,7 +207,7 @@ describe('get', () => {
         type: 'BadRequest',
         at: expect.any(Number),
         message: 'Validation failed (numeric string is expected)',
-        url: '/v0/regtest/poolpairs/A-B'
+        url: '/v0/regtest/poolpairs/A-DFI'
       })
     }
   })

@@ -7,6 +7,8 @@ import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpa
 
 @Injectable()
 export class PoolPairService {
+  dfiTokenId: string = '0'
+
   constructor (
     protected readonly rpcClient: JsonRpcClient,
     protected readonly deFiDCache: DeFiDCache
@@ -68,13 +70,20 @@ export class PoolPairService {
   ): Promise<BigNumber> {
     const { usdtToDfi, dfiToUsdt } = dfiUsdtConversion
 
-    // to find 1token = ?DFI -> reserveB(DFI)/reserveA(token)
-    const tokenToDfi = new BigNumber(poolPairInfo['reserveB/reserveA'])
+    // check position of DFI token for safe, eg: BTC-DFI or DFI-BTC
+    const tokenToDfi = poolPairInfo.idTokenB === this.dfiTokenId
+      ? new BigNumber(poolPairInfo['reserveB/reserveA'])
+      : new BigNumber(poolPairInfo['reserveA/reserveB'])
+
     const tokenToUsdt = usdtToDfi.div(tokenToDfi)
 
-    // logic's assuming poolpair tokenB is always DFI
-    const reserveAUsd = poolPairInfo.reserveA.times(tokenToUsdt)
-    const reserveBUsd = poolPairInfo.reserveB.times(dfiToUsdt)
+    const reserveAUsd = poolPairInfo.idTokenB === this.dfiTokenId
+      ? poolPairInfo.reserveA.times(tokenToUsdt)
+      : poolPairInfo.reserveA.times(dfiToUsdt)
+
+    const reserveBUsd = poolPairInfo.idTokenB === this.dfiTokenId
+      ? poolPairInfo.reserveB.times(dfiToUsdt)
+      : poolPairInfo.reserveB.times(tokenToUsdt)
 
     // Note(canonbrother): totalLiquidity in USD calculation
     // reserveA_USD (eg: BTC) = reserveA * tokenToUsdt

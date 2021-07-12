@@ -6,7 +6,6 @@ import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintToken
 import { DeFiDCache } from './cache/defid.cache'
 import { CacheModule, NotFoundException } from '@nestjs/common'
 import BigNumber from 'bignumber.js'
-import { ConfigService } from '@nestjs/config'
 
 const container = new MasterNodeRegTestContainer()
 let service: PoolPairService
@@ -25,8 +24,7 @@ beforeAll(async () => {
     providers: [
       { provide: JsonRpcClient, useValue: client },
       DeFiDCache,
-      PoolPairService,
-      ConfigService
+      PoolPairService
     ]
   }).compile()
 
@@ -55,34 +53,31 @@ async function setup (): Promise<void> {
     await createToken(container, token)
     await mintTokens(container, token)
   }
-  await createPoolPair(container, 'A', 'B')
-  await createPoolPair(container, 'A', 'C')
-  await createPoolPair(container, 'A', 'D')
-  await createPoolPair(container, 'A', 'E')
-  await createPoolPair(container, 'A', 'F')
-  await createPoolPair(container, 'B', 'C')
-  await createPoolPair(container, 'B', 'D')
-  await createPoolPair(container, 'B', 'E')
-  await container.generate(1)
+  await createPoolPair(container, 'A', 'DFI')
+  await createPoolPair(container, 'B', 'DFI')
+  await createPoolPair(container, 'C', 'DFI')
+  await createPoolPair(container, 'D', 'DFI')
+  await createPoolPair(container, 'E', 'DFI')
+  await createPoolPair(container, 'F', 'DFI')
 
   await addPoolLiquidity(container, {
     tokenA: 'A',
     amountA: 100,
-    tokenB: 'B',
+    tokenB: 'DFI',
     amountB: 200,
     shareAddress: await getNewAddress(container)
   })
   await addPoolLiquidity(container, {
-    tokenA: 'A',
+    tokenA: 'B',
     amountA: 50,
-    tokenB: 'C',
+    tokenB: 'DFI',
     amountB: 300,
     shareAddress: await getNewAddress(container)
   })
   await addPoolLiquidity(container, {
-    tokenA: 'A',
+    tokenA: 'C',
     amountA: 90,
-    tokenB: 'D',
+    tokenB: 'DFI',
     amountB: 360,
     shareAddress: await getNewAddress(container)
   })
@@ -94,15 +89,15 @@ describe('list', () => {
       size: 30
     })
 
-    expect(pairPairsData.length).toStrictEqual(8)
+    expect(pairPairsData.length).toStrictEqual(6)
 
     expect(pairPairsData[1]).toStrictEqual({
       id: '8',
-      symbol: 'A-C',
-      name: 'A-C',
+      symbol: 'B-DFI',
+      name: 'B-Default Defi token',
       status: true,
-      idTokenA: '1',
-      idTokenB: '3',
+      idTokenA: '2',
+      idTokenB: '0',
       reserveA: new BigNumber('50'),
       reserveB: new BigNumber('300'),
       blockCommissionA: new BigNumber('0'),
@@ -125,8 +120,8 @@ describe('list', () => {
       size: 2
     })
     expect(pairPairsData.length).toStrictEqual(2)
-    expect(pairPairsData[0].symbol).toStrictEqual('A-B')
-    expect(pairPairsData[1].symbol).toStrictEqual('A-C')
+    expect(pairPairsData[0].symbol).toStrictEqual('A-DFI')
+    expect(pairPairsData[1].symbol).toStrictEqual('B-DFI')
   })
 })
 
@@ -136,8 +131,8 @@ describe('get', () => {
 
     expect(pairPairData).toStrictEqual({
       id: '7',
-      symbol: 'A-B',
-      name: 'A-B',
+      symbol: 'A-DFI',
+      name: 'A-Default Defi token',
       status: true,
       idTokenA: expect.any(String),
       idTokenB: expect.any(String),

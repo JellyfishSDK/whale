@@ -60,34 +60,31 @@ async function setup (): Promise<void> {
     await createToken(container, token)
     await mintTokens(container, token)
   }
-  await createPoolPair(container, 'A', 'B')
-  await createPoolPair(container, 'A', 'C')
-  await createPoolPair(container, 'A', 'D')
-  await createPoolPair(container, 'A', 'E')
-  await createPoolPair(container, 'A', 'F')
-  await createPoolPair(container, 'B', 'C')
-  await createPoolPair(container, 'B', 'D')
-  await createPoolPair(container, 'B', 'E')
-  await container.generate(1)
+  await createPoolPair(container, 'A', 'DFI')
+  await createPoolPair(container, 'B', 'DFI')
+  await createPoolPair(container, 'C', 'DFI')
+  await createPoolPair(container, 'D', 'DFI')
+  await createPoolPair(container, 'E', 'DFI')
+  await createPoolPair(container, 'F', 'DFI')
 
   await addPoolLiquidity(container, {
     tokenA: 'A',
     amountA: 100,
-    tokenB: 'B',
+    tokenB: 'DFI',
     amountB: 200,
     shareAddress: await getNewAddress(container)
   })
   await addPoolLiquidity(container, {
-    tokenA: 'A',
+    tokenA: 'B',
     amountA: 50,
-    tokenB: 'C',
+    tokenB: 'DFI',
     amountB: 300,
     shareAddress: await getNewAddress(container)
   })
   await addPoolLiquidity(container, {
-    tokenA: 'A',
+    tokenA: 'C',
     amountA: 90,
-    tokenB: 'D',
+    tokenB: 'DFI',
     amountB: 360,
     shareAddress: await getNewAddress(container)
   })
@@ -99,21 +96,21 @@ describe('list', () => {
       size: 30
     })
 
-    expect(response.data.length).toStrictEqual(8)
+    expect(response.data.length).toStrictEqual(6)
     expect(response.page).toBeUndefined()
 
     expect(response.data[1]).toStrictEqual({
       id: '8',
-      symbol: 'A-C',
-      name: 'A-C',
+      symbol: 'B-DFI',
+      name: 'B-Default Defi token',
       status: true,
       tokenA: {
-        id: '1',
+        id: '2',
         reserve: '50',
         blockCommission: '0'
       },
       tokenB: {
-        id: '3',
+        id: '0',
         reserve: '300',
         blockCommission: '0'
       },
@@ -143,22 +140,20 @@ describe('list', () => {
     })
     expect(first.data.length).toStrictEqual(2)
     expect(first.page?.next).toStrictEqual('8')
-    expect(first.data[0].symbol).toStrictEqual('A-B')
-    expect(first.data[1].symbol).toStrictEqual('A-C')
+    expect(first.data[0].symbol).toStrictEqual('A-DFI')
+    expect(first.data[1].symbol).toStrictEqual('B-DFI')
 
     const next = await controller.list({
       size: 10,
       next: first.page?.next
     })
 
-    expect(next.data.length).toStrictEqual(6)
+    expect(next.data.length).toStrictEqual(4)
     expect(next.page?.next).toBeUndefined()
-    expect(next.data[0].symbol).toStrictEqual('A-D')
-    expect(next.data[1].symbol).toStrictEqual('A-E')
-    expect(next.data[2].symbol).toStrictEqual('A-F')
-    expect(next.data[3].symbol).toStrictEqual('B-C')
-    expect(next.data[4].symbol).toStrictEqual('B-D')
-    expect(next.data[5].symbol).toStrictEqual('B-E')
+    expect(next.data[0].symbol).toStrictEqual('C-DFI')
+    expect(next.data[1].symbol).toStrictEqual('D-DFI')
+    expect(next.data[2].symbol).toStrictEqual('E-DFI')
+    expect(next.data[3].symbol).toStrictEqual('F-DFI')
   })
 
   it('should list with undefined next pagination', async () => {
@@ -178,8 +173,8 @@ describe('get', () => {
 
     expect(response).toStrictEqual({
       id: '7',
-      symbol: 'A-B',
-      name: 'A-B',
+      symbol: 'A-DFI',
+      name: 'A-Default Defi token',
       status: true,
       tokenA: {
         id: expect.any(String),
