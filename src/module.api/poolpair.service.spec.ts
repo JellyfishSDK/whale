@@ -58,7 +58,7 @@ async function setup (): Promise<void> {
   await createPoolPair(container, 'C', 'DFI')
   await createPoolPair(container, 'D', 'DFI')
   await createPoolPair(container, 'E', 'DFI')
-  await createPoolPair(container, 'F', 'DFI')
+  await createPoolPair(container, 'DFI', 'F')
 
   await addPoolLiquidity(container, {
     tokenA: 'A',
@@ -75,9 +75,9 @@ async function setup (): Promise<void> {
     shareAddress: await getNewAddress(container)
   })
   await addPoolLiquidity(container, {
-    tokenA: 'C',
+    tokenA: 'DFI',
     amountA: 90,
-    tokenB: 'DFI',
+    tokenB: 'F',
     amountB: 360,
     shareAddress: await getNewAddress(container)
   })
@@ -109,6 +109,29 @@ describe('list', () => {
       ownerAddress: expect.any(String),
       'reserveA/reserveB': new BigNumber('0.16666666'),
       'reserveB/reserveA': new BigNumber('6'),
+      rewardPct: new BigNumber('0'),
+      creationTx: expect.any(String),
+      creationHeight: expect.any(BigNumber)
+    })
+
+    expect(pairPairsData[5]).toStrictEqual({
+      id: '12',
+      symbol: 'DFI-F',
+      name: 'Default Defi token-F',
+      status: true,
+      idTokenA: '0',
+      idTokenB: '6',
+      reserveA: new BigNumber('90'),
+      reserveB: new BigNumber('360'),
+      blockCommissionA: new BigNumber('0'),
+      blockCommissionB: new BigNumber('0'),
+      commission: new BigNumber('0'),
+      totalLiquidity: new BigNumber('180'),
+      totalLiquidityUsd: new BigNumber('829.94706084436676838'),
+      tradeEnabled: true,
+      ownerAddress: expect.any(String),
+      'reserveA/reserveB': new BigNumber('0.25'),
+      'reserveB/reserveA': new BigNumber('4'),
       rewardPct: new BigNumber('0'),
       creationTx: expect.any(String),
       creationHeight: expect.any(BigNumber)
