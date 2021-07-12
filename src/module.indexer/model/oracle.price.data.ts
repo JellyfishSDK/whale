@@ -26,58 +26,8 @@ export class OraclePriceDataIndexer extends Indexer {
           SmartBuffer.fromBuffer(Buffer.from(vout.scriptPubKey.hex, 'hex'))
         )
 
-        if (stack[0]?.type === 'OP_RETURN' || stack[0]?.code === '106') {
-          if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
-            const oracleId: string = stack[1].tx.data.oracleId
-            const oracles = await this.mapper.getByOracleId(oracleId) ?? []
-
-            for (let i = 0; i < oracles.length; i += 1) {
-              const oracle = oracles[i]
-              const token = oracle.data.token
-              const currency = oracle.data.currency
-              const amount = oracle.data.amount
-              const height = oracle.block.height
-              const timestamp = oracle.data.timestamp
-
-              if (oracle.state === 'REMOVED') {
-                continue
-              }
-
-              records[`${oracleId}-${token}-${currency}-${height}-${timestamp}`] = OraclePriceDataIndexer.newOraclePriceData(height, oracleId, token, currency, amount, timestamp, OracleState.REMOVED)
-            }
-          } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
-            const priceSet = new Set()
-            const newPriceFeeds = stack[1].tx.data.priceFeeds ?? []
-
-            for (let i = 0; i < newPriceFeeds.length; i += 1) {
-              const priceFeed = newPriceFeeds[i]
-
-              const token: string = priceFeed.token
-              const currency: string = priceFeed.currency
-
-              priceSet.add(`${token}-${currency}`)
-            }
-
-            if (priceSet.size > 0) {
-              const oracleId: string = stack[1].tx.data.oracleId
-              const oracles = await this.mapper.getByOracleId(oracleId) ?? []
-
-              for (let i = 0; i < oracles.length; i += 1) {
-                const oracle = oracles[i]
-                const token = oracle.data.token
-                const currency = oracle.data.currency
-                const amount = oracle.data.amount
-                const height = oracle.block.height
-                const timestamp = oracle.data.timestamp
-
-                if (priceSet.has(`${token}-${currency}`) || oracle.state === 'REMOVED') {
-                  continue
-                }
-
-                records[`${oracleId}-${token}-${currency}-${height}-${timestamp}`] = OraclePriceDataIndexer.newOraclePriceData(height, oracleId, token, currency, amount, timestamp, OracleState.REMOVED)
-              }
-            }
-          } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
+        if (stack[0]?.type === 'OP_RETURN' && stack[0]?.code === 106) {
+          if (stack[1]?.tx?.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
             const timestamp: number = stack[1].tx.data.timestamp
             const oracleId: string = stack[1].tx.data.oracleId
             const data = stack[1].tx.data.tokens
@@ -112,6 +62,56 @@ export class OraclePriceDataIndexer extends Indexer {
                 }
               }
             }
+          } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
+            const priceSet = new Set()
+            const newPriceFeeds = stack[1].tx.data.priceFeeds ?? []
+
+            for (let i = 0; i < newPriceFeeds.length; i += 1) {
+              const priceFeed = newPriceFeeds[i]
+
+              const token: string = priceFeed.token
+              const currency: string = priceFeed.currency
+
+              priceSet.add(`${token}-${currency}`)
+            }
+
+            if (priceSet.size > 0) {
+              const oracleId: string = stack[1].tx.data.oracleId
+              const oracles = await this.mapper.getByOracleId(oracleId) ?? []
+
+              for (let i = 0; i < oracles.length; i += 1) {
+                const oracle = oracles[i]
+                const token = oracle.data.token
+                const currency = oracle.data.currency
+                const amount = oracle.data.amount
+                const height = oracle.block.height
+                const timestamp = oracle.data.timestamp
+
+                if (priceSet.has(`${token}-${currency}`) || oracle.state === 'REMOVED') {
+                  continue
+                }
+
+                records[`${oracleId}-${token}-${currency}-${height}-${timestamp}`] = OraclePriceDataIndexer.newOraclePriceData(height, oracleId, token, currency, amount, timestamp, OracleState.REMOVED)
+              }
+            }
+          } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
+            const oracleId: string = stack[1].tx.data.oracleId
+            const oracles = await this.mapper.getByOracleId(oracleId) ?? []
+
+            for (let i = 0; i < oracles.length; i += 1) {
+              const oracle = oracles[i]
+              const token = oracle.data.token
+              const currency = oracle.data.currency
+              const amount = oracle.data.amount
+              const height = oracle.block.height
+              const timestamp = oracle.data.timestamp
+
+              if (oracle.state === 'REMOVED') {
+                continue
+              }
+
+              records[`${oracleId}-${token}-${currency}-${height}-${timestamp}`] = OraclePriceDataIndexer.newOraclePriceData(height, oracleId, token, currency, amount, timestamp, OracleState.REMOVED)
+            }
           }
         }
       }
@@ -123,33 +123,44 @@ export class OraclePriceDataIndexer extends Indexer {
   }
 
   async invalidate (block: RawBlock): Promise<void> {
-    // for (const txn of block.tx) {
-    //   for (const vout of txn.vout) {
-    //     if (!vout.scriptPubKey.hex.startsWith('6a')) {
-    //       continue
-    //     }
-    //
-    //     const stack: any = toOPCodes(
-    //       SmartBuffer.fromBuffer(Buffer.from(vout.scriptPubKey.hex, 'hex'))
-    //     )
-    //
-    //     if (stack[1].tx.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
-    //       const oracleId: string = stack[1].tx.data.oracleId
-    //       const data = stack[1].tx.data.tokens
-    //
-    //       for (let i = 0; i < data.length; i += 1) {
-    //         const token: string = data[i].token
-    //         const prices = data[i].prices
-    //
-    //         for (let y = 0; y < prices.length; y += 1) {
-    //           const price = prices[y]
-    //           const currency: string = price.currency
-    //           await this.mapper.delete(`${oracleId}-${token}-${currency}-${block.height}`)
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
+    const oraclePriceDataIds: string[] = []
+
+    for (const txn of block.tx) {
+      for (const vout of txn.vout) {
+        if (!vout.scriptPubKey.hex.startsWith('6a')) {
+          continue
+        }
+
+        const stack: any = toOPCodes(
+          SmartBuffer.fromBuffer(Buffer.from(vout.scriptPubKey.hex, 'hex'))
+        )
+
+        if (stack[0]?.type === 'OP_RETURN' && stack[0]?.code === 106) {
+          if (stack[1]?.tx?.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
+            const timestamp: number = stack[1].tx.data.timestamp
+            const oracleId: string = stack[1].tx.data.oracleId
+            const data = stack[1].tx.data.tokens
+
+            for (let i = 0; i < data.length; i += 1) {
+              const token: string = data[i].token
+              const prices = data[i].prices
+
+              for (let y = 0; y < prices.length; y += 1) {
+                const price = prices[y]
+
+                const currency: string = price.currency
+
+                oraclePriceDataIds.push(`${oracleId}-${token}-${currency}-${block.height}-${timestamp.toString()}`)
+              }
+            }
+          }
+        }
+      }
+    }
+
+    for (const id of oraclePriceDataIds) {
+      await this.mapper.delete(id)
+    }
   }
 
   static newOraclePriceData (

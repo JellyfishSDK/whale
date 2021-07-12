@@ -25,6 +25,14 @@ export class OracleAppointedWeightageMapper {
   public constructor (protected readonly database: Database) {
   }
 
+  async list (oracleId: string): Promise<OracleAppointedWeightage[] | undefined> {
+    return await this.database.query(OracleAppointedWeightageMapping.index.oracleId_height, {
+      partitionKey: oracleId,
+      order: SortOrder.ASC,
+      limit: 1000000
+    })
+  }
+
   async getLatest (oracleId: string): Promise<OracleAppointedWeightage | undefined> {
     const data = await this.database.query(OracleAppointedWeightageMapping.index.oracleId_height, {
       partitionKey: oracleId,
