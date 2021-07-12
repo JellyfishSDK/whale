@@ -34,7 +34,6 @@ describe('list', () => {
   it('should listTokens', async () => {
     const result = await client.tokens.list()
     expect(result.length).toStrictEqual(4)
-    expect(result[0].collateralAddress).toBeUndefined()
     expect(result[0]).toStrictEqual({
       id: '0',
       symbol: 'DFI',
@@ -89,7 +88,6 @@ describe('list', () => {
 describe('get', () => {
   it('should get DFI by DFI numeric id', async () => {
     const data = await client.tokens.get('0')
-    expect(data.collateralAddress).toBeUndefined()
     expect(data).toStrictEqual({
       id: '0',
       symbol: 'DFI',
