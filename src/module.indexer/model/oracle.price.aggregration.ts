@@ -45,7 +45,6 @@ export class OraclePriceAggregationIndexer extends Indexer {
 
             let sum = 0
             let weightageSum = 0
-            let lastUpdatedTimestamp = 0
 
             for (let i = 0; i < prices.length; i += 1) {
               const price = prices[i]
@@ -56,11 +55,10 @@ export class OraclePriceAggregationIndexer extends Indexer {
               weightageSum += weightage
 
               hasFound = true
-              lastUpdatedTimestamp = price.data.timestamp ?? 0
             }
 
             if (hasFound) {
-              records[`${token}-${currency}-${block.height}-${block.time}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block.height, token, currency, sum / weightageSum, block.time, lastUpdatedTimestamp)
+              records[`${token}-${currency}-${block.height}-${block.time}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block.height, block.time, token, currency, sum / weightageSum)
             }
           }
         }
@@ -78,23 +76,21 @@ export class OraclePriceAggregationIndexer extends Indexer {
 
   static newOraclePriceAggregation (
     height: number,
+    blockTime: number,
     token: string,
     currency: string,
-    amount: number,
-    timestamp: number,
-    lastUpdatedTimestamp: number
+    amount: number
   ): OraclePriceAggregration {
     return {
-      id: `${token}-${currency}-${height}-${timestamp}`,
+      id: `${token}-${currency}-${height}-${blockTime}`,
       block: {
-        height
+        height,
+        time: blockTime
       },
       data: {
-        timestamp,
         token,
         currency,
-        amount,
-        lastUpdatedTimestamp
+        amount
       }
     }
   }

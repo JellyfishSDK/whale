@@ -11,7 +11,7 @@ import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.ag
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
 
-describe('PriceAggregration - 1', () => {
+describe('Price Aggregration - 1', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -58,44 +58,50 @@ describe('PriceAggregration - 1', () => {
       { tokenAmount: '0.5@AAPL', currency: 'EUR' }
     ]
 
-    const timestamp = Math.floor(new Date().getTime() / 1000)
-    await container.call('setoracledata', [oracleId1, timestamp, prices1])
+    const timestamp1 = Number.parseInt((await container.call('getblockstats', [await container.call('getblockcount')])).time)
+    await container.call('setoracledata', [oracleId1, timestamp1, prices1])
 
     await container.generate(1)
 
     height1 = await container.call('getblockcount')
-    blockTime1 = Number((await container.call('getblockstats', [height1])).time)
+    blockTime1 = Number.parseInt((await container.call('getblockstats', [height1])).time)
 
     await waitForTime(container, blockTime1 + 1)
+
+    const timestamp2 = Number.parseInt((await container.call('getblockstats', [await container.call('getblockcount')])).time)
 
     const prices2 = [
       { tokenAmount: '1.0@TSLA', currency: 'USD' }
     ]
 
-    await container.call('setoracledata', [oracleId2, timestamp, prices2])
+    await container.call('setoracledata', [oracleId2, timestamp2, prices2])
 
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
-    blockTime2 = Number((await container.call('getblockstats', [height2])).time)
+    blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
   }
 
-  it('Should get oracle aggregration price data for an oracle', async () => {
+  it('should get oracle price aggregration', async () => {
     await waitForHeight(app, height2)
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
-    const agg1 = await priceAggregrationMapper.get('AAPL', 'EUR', height1, blockTime1)
+    const result1 = await priceAggregrationMapper.get('AAPL', 'EUR', height1, blockTime1)
 
-    expect(agg1?.data.token).toStrictEqual('AAPL')
-    expect(agg1?.data.currency).toStrictEqual('EUR')
-    expect(agg1?.data.amount).toStrictEqual(0.5)
+    expect(result1?.block.height).toStrictEqual(height1)
+    expect(result1?.block.time).toStrictEqual(blockTime1)
+    expect(result1?.data.token).toStrictEqual('AAPL')
+    expect(result1?.data.currency).toStrictEqual('EUR')
+    expect(result1?.data.amount).toStrictEqual(0.5)
 
-    const agg2 = await priceAggregrationMapper.get('TSLA', 'USD', height2, blockTime2)
+    const result2 = await priceAggregrationMapper.get('TSLA', 'USD', height2, blockTime2)
 
-    expect(agg2?.data.token).toStrictEqual('TSLA')
-    expect(agg2?.data.currency).toStrictEqual('USD')
-    expect(agg2?.data.amount).toStrictEqual(1)
+    expect(result2?.block.height).toStrictEqual(height2)
+    expect(result2?.block.time).toStrictEqual(blockTime2)
+    expect(result2?.data.token).toStrictEqual('TSLA')
+    expect(result2?.data.currency).toStrictEqual('USD')
+    expect(result2?.data.amount).toStrictEqual(1)
 
     const data1 = await container.call('getprice', [{ token: 'AAPL', currency: 'EUR' }])
     expect(data1).toStrictEqual(0.5)
@@ -126,8 +132,8 @@ describe('PriceAggregration - 2', () => {
     }
   })
 
-  let timestamp1: number
-  let timestamp2: number
+  let blockTime1: number
+  let blockTime2: number
   let height1: number
   let height2: number
 
@@ -145,67 +151,73 @@ describe('PriceAggregration - 2', () => {
 
     await container.generate(1)
 
-    let stats = await container.call('getblockstats', [await container.call('getblockcount')])
-    let timestamp = Number(stats.time)
+    const timestamp1 = Number.parseInt((await container.call('getblockstats', [await container.call('getblockcount')])).time)
 
     const prices1 = [
       { tokenAmount: '0.5@AAPL', currency: 'EUR' },
       { tokenAmount: '1.0@TSLA', currency: 'USD' }
     ]
 
-    await container.call('setoracledata', [oracleId1, timestamp, prices1])
+    await container.call('setoracledata', [oracleId1, timestamp1, prices1])
 
     await container.generate(1)
 
     height1 = await container.call('getblockcount')
-    timestamp1 = Number((await container.call('getblockstats', [height1])).time)
+    blockTime1 = Number.parseInt((await container.call('getblockstats', [height1])).time)
 
-    await container.generate(30)
+    await waitForTime(container, blockTime1 + 1)
 
-    stats = await container.call('getblockstats', [await container.call('getblockcount')])
-    timestamp = Number(stats.time)
+    const timestamp2 = Number.parseInt((await container.call('getblockstats', [await container.call('getblockcount')])).time)
 
     const prices2 = [
       { tokenAmount: '1.5@AAPL', currency: 'EUR' },
       { tokenAmount: '2.0@TSLA', currency: 'USD' }
     ]
 
-    await container.call('setoracledata', [oracleId2, timestamp, prices2])
+    await container.call('setoracledata', [oracleId2, timestamp2, prices2])
 
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
-    timestamp2 = Number((await container.call('getblockstats', [height2])).time)
+    blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
   }
 
-  it('Should get oracle aggregration price data', async () => {
+  it('should get oracle price aggregration', async () => {
     await waitForHeight(app, height2)
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
-    const agg1 = await priceAggregrationMapper.get('AAPL', 'EUR', height1, timestamp1)
+    const result1 = await priceAggregrationMapper.get('AAPL', 'EUR', height1, blockTime1)
 
-    expect(agg1?.data.token).toStrictEqual('AAPL')
-    expect(agg1?.data.currency).toStrictEqual('EUR')
-    expect(agg1?.data.amount).toStrictEqual(0.5)
+    expect(result1?.block.height).toStrictEqual(height1)
+    expect(result1?.block.time).toStrictEqual(blockTime1)
+    expect(result1?.data.token).toStrictEqual('AAPL')
+    expect(result1?.data.currency).toStrictEqual('EUR')
+    expect(result1?.data.amount).toStrictEqual(0.5)
 
-    const agg2 = await priceAggregrationMapper.get('AAPL', 'EUR', height2, timestamp2)
+    const result2 = await priceAggregrationMapper.get('TSLA', 'USD', height1, blockTime1)
 
-    expect(agg2?.data.token).toStrictEqual('AAPL')
-    expect(agg2?.data.currency).toStrictEqual('EUR')
-    expect(agg2?.data.amount).toStrictEqual(1.1666666666666667)
+    expect(result2?.block.height).toStrictEqual(height1)
+    expect(result2?.block.time).toStrictEqual(blockTime1)
+    expect(result2?.data.token).toStrictEqual('TSLA')
+    expect(result2?.data.currency).toStrictEqual('USD')
+    expect(result2?.data.amount).toStrictEqual(1)
 
-    const agg3 = await priceAggregrationMapper.get('TSLA', 'USD', height1, timestamp1)
+    const result3 = await priceAggregrationMapper.get('AAPL', 'EUR', height2, blockTime2)
 
-    expect(agg3?.data.token).toStrictEqual('TSLA')
-    expect(agg3?.data.currency).toStrictEqual('USD')
-    expect(agg3?.data.amount).toStrictEqual(1)
+    expect(result3?.block.height).toStrictEqual(height2)
+    expect(result3?.block.time).toStrictEqual(blockTime2)
+    expect(result3?.data.token).toStrictEqual('AAPL')
+    expect(result3?.data.currency).toStrictEqual('EUR')
+    expect(result3?.data.amount).toStrictEqual(1.1666666666666667)
 
-    const agg4 = await priceAggregrationMapper.get('TSLA', 'USD', height2, timestamp2)
+    const result4 = await priceAggregrationMapper.get('TSLA', 'USD', height2, blockTime2)
 
-    expect(agg4?.data.token).toStrictEqual('TSLA')
-    expect(agg4?.data.currency).toStrictEqual('USD')
-    expect(agg4?.data.amount).toStrictEqual(1.6666666666666667)
+    expect(result4?.block.height).toStrictEqual(height2)
+    expect(result4?.block.time).toStrictEqual(blockTime2)
+    expect(result4?.data.token).toStrictEqual('TSLA')
+    expect(result4?.data.currency).toStrictEqual('USD')
+    expect(result4?.data.amount).toStrictEqual(1.6666666666666667)
 
     const data1 = await container.call('getprice', [{ token: 'AAPL', currency: 'EUR' }])
     expect(data1).toStrictEqual(1.16666666)
@@ -215,7 +227,7 @@ describe('PriceAggregration - 2', () => {
   })
 })
 
-describe('PriceAggregration - 3', () => {
+describe('Price Aggregration - 3', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -236,8 +248,8 @@ describe('PriceAggregration - 3', () => {
     }
   })
 
-  let timestamp1: number
-  let timestamp2: number
+  let blockTime1: number
+  let blockTime2: number
   let height1: number
   let height2: number
 
@@ -248,6 +260,8 @@ describe('PriceAggregration - 3', () => {
 
     const oracleId1 = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
 
+    await container.generate(1)
+
     const priceFeeds2 = [
       { token: 'TSLA', currency: 'USD' }
     ]
@@ -256,47 +270,45 @@ describe('PriceAggregration - 3', () => {
 
     await container.generate(1)
 
-    let stats = await container.call('getblockstats', [await container.call('getblockcount')])
-    let timestamp = Number(stats.time) - 5000
+    const timestamp1 = Number.parseInt((await container.call('getblockstats', [await container.call('getblockcount')])).time) - 5000
 
     const prices1 = [
       { tokenAmount: '0.5@AAPL', currency: 'EUR' }
     ]
 
-    await container.call('setoracledata', [oracleId1, timestamp, prices1])
+    await container.call('setoracledata', [oracleId1, timestamp1, prices1])
 
     await container.generate(1)
 
     height1 = await container.call('getblockcount')
-    timestamp1 = Number((await container.call('getblockstats', [height1])).time)
+    blockTime1 = Number((await container.call('getblockstats', [height1])).time)
 
-    await container.generate(30)
+    await waitForTime(container, blockTime1 + 1)
 
-    stats = await container.call('getblockstats', [await container.call('getblockcount')])
-    timestamp = Number(stats.time) + 5000
+    const timestamp2 = Number.parseInt((await container.call('getblockstats', [await container.call('getblockcount')])).time) + 5000
 
     const prices2 = [
       { tokenAmount: '1.0@TSLA', currency: 'USD' }
     ]
 
-    await container.call('setoracledata', [oracleId2, timestamp, prices2])
+    await container.call('setoracledata', [oracleId2, timestamp2, prices2])
 
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
-    timestamp2 = Number((await container.call('getblockstats', [height2])).time) + 5000
+    blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
   }
 
-  it('Should not get oracle aggregration price data if their timestamp is out of range', async () => {
+  it('Should not get oracle price aggregration if their timestamp is out of range', async () => {
     await waitForHeight(app, height2)
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
-    const agg1 = await priceAggregrationMapper.get('AAPL', 'EUR', height1, timestamp1)
-    const agg2 = await priceAggregrationMapper.get('TSLA', 'USD', height2, timestamp2)
+    const result1 = await priceAggregrationMapper.get('AAPL', 'EUR', height1, blockTime1)
+    const result2 = await priceAggregrationMapper.get('TSLA', 'USD', height2, blockTime2)
 
-    expect(agg1).toStrictEqual(undefined)
-    expect(agg2).toStrictEqual(undefined)
+    expect(result1).toStrictEqual(undefined)
+    expect(result2).toStrictEqual(undefined)
 
     const promise1 = container.call('getprice', [{ token: 'AAPL', currency: 'EUR' }])
     const promise2 = container.call('getprice', [{ token: 'TSLA', currency: 'USD' }])

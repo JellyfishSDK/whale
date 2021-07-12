@@ -51,7 +51,7 @@ export class OracleController {
       @Param('currency') currency: string,
       @Param('timestamp') timestamp: number
   ): Promise<OraclePriceAggregration | undefined> {
-    return await this.priceAggregrationMapper.getLatestByTimestamp(token, currency, timestamp)
+    return await this.priceAggregrationMapper.getLatestByBlockTime(token, currency, timestamp)
   }
 
   @Get('/:token/:currency/:timestamp1/:timestamp2/percentagePriceChange')
@@ -61,8 +61,8 @@ export class OracleController {
       @Param('timestamp1') timestamp1: number,
       @Param('timestamp2') timestamp2: number
   ): Promise<BigNumber> {
-    const result1 = await this.priceAggregrationMapper.getLatestByTimestamp(token, currency, timestamp1)
-    const result2 = await this.priceAggregrationMapper.getLatestByTimestamp(token, currency, timestamp2)
+    const result1 = await this.priceAggregrationMapper.getLatestByBlockTime(token, currency, timestamp1)
+    const result2 = await this.priceAggregrationMapper.getLatestByBlockTime(token, currency, timestamp2)
 
     const amountBN1 = new BigNumber(result1?.data.amount ?? 0)
     const amountBN2 = new BigNumber(result2?.data.amount ?? 0)
@@ -86,7 +86,7 @@ export class OracleController {
 
     for (let i = 0; i <= no; i += 1) {
       const timestamp = timestamp1 + interval * i
-      const result = await this.priceAggregrationMapper.getLatestByTimestamp(token, currency, timestamp)
+      const result = await this.priceAggregrationMapper.getLatestByBlockTime(token, currency, timestamp)
       const data = { timestamp, amount: result?.data?.amount }
       allPrices.push(data)
     }

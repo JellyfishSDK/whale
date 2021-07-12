@@ -142,13 +142,12 @@ export interface OraclePriceAggregration {
   id: string
   block: {
     height: number
+    time: number
   }
   data: {
     token: string
     currency: string
     amount: number
-    timestamp: number
-    lastUpdatedTimestamp: number
   }
 }
 
