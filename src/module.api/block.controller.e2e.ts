@@ -67,6 +67,18 @@ describe('BlockController', () => {
     expect(paginatedTransactions.data.length).toStrictEqual(1)
   })
 
+  it('getBlockTransactions should get empty array when hash is not valid', async () => {
+    const paginatedTransactions = await controller.getBlockTransactions('z1wadfsvq90qlkfalnklvm', { size: 30 })
+
+    expect(paginatedTransactions.data.length).toStrictEqual(0)
+  })
+
+  it('getBlockTransactions should get empty array when height is not valid', async () => {
+    const paginatedTransactions = await controller.getBlockTransactions('999999999999', { size: 30 })
+
+    expect(paginatedTransactions.data.length).toStrictEqual(0)
+  })
+
   it('listBlocks should be able to get a paginated response of blocks', async () => {
     const paginatedBlocks = await controller.listBlocks({ size: 30, next: '40' })
 
