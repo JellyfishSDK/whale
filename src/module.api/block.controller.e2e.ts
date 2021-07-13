@@ -46,8 +46,17 @@ describe('BlockController', () => {
     const paginatedTransactions = await controller.getBlockTransactions(blockHash, { size: 30, next: '10' })
 
     // there's only one transaction
-    //
     expect(paginatedTransactions.data.length).toStrictEqual(1)
+    expect(paginatedTransactions.data[0].block.height).toStrictEqual(100)
+  })
+
+  it('getBlockTransactions should get transactions from a block by height', async () => {
+    const paginatedTransactions = await controller.getBlockTransactions('100', { size: 30, next: '10' })
+
+    // there's only one transaction
+    expect(paginatedTransactions.data.length).toStrictEqual(1)
+
+    expect(paginatedTransactions.data[0].block.height).toStrictEqual(100)
   })
 
   it('getBlockTransactions should get first few transactions from a block by hash', async () => {
