@@ -1,8 +1,8 @@
 import { DeFiDRpcError, MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
-import { OracleState } from '@whale-api-client/api/oracle'
 import { OracleAppointedWeightageMapper } from '@src/module.model/oracle.appointed.weightage'
+import { OracleState } from '@whale-api-client/api/oracle'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule

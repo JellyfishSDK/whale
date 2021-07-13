@@ -30,87 +30,87 @@ export class OraclePriceDataIndexer extends Indexer {
           if (stack[1]?.tx?.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
             const timestamp: number = stack[1].tx.data.timestamp
             const oracleId: string = stack[1].tx.data.oracleId
-            const data = stack[1].tx.data.tokens
+            const tokens = stack[1].tx.data.tokens
 
-            for (let i = 0; i < data.length; i += 1) {
-              const token: string = data[i].token
-              const prices = data[i].prices
+            for (let i = 0; i < tokens.length; i += 1) {
+              const token: string = tokens[i].token
+              const prices = tokens[i].prices
 
-              for (let y = 0; y < prices.length; y += 1) {
-                const price = prices[y]
+              for (let j = 0; j < prices.length; j += 1) {
+                const price = prices[j]
 
                 const currency: string = price.currency
                 const amount: number = price.amount
 
                 records[`${oracleId}-${token}-${currency}-${block.height}-${timestamp.toString()}`] = OraclePriceDataIndexer.newOraclePriceData(block.height, oracleId, token, currency, amount, timestamp, OracleState.LIVE)
 
-                const oracles = await this.mapper.getByOracleIdTokenCurrency(oracleId, token, currency) ?? []
+                const priceDatas = await this.mapper.getByOracleIdTokenCurrency(oracleId, token, currency) ?? []
 
-                for (let i = 0; i < oracles.length; i += 1) {
-                  const oracle = oracles[i]
-                  const token = oracle.data.token
-                  const currency = oracle.data.currency
-                  const amount = oracle.data.amount
-                  const height = oracle.block.height
-                  const timestamp = oracle.data.timestamp
+                for (let k = 0; k < priceDatas.length; k += 1) {
+                  const priceData = priceDatas[k]
 
-                  if (oracle.state === 'REMOVED') {
-                    continue
+                  if (priceData.state === OracleState.LIVE) {
+                    const token = priceData.data.token
+                    const currency = priceData.data.currency
+                    const height = priceData.block.height
+                    const timestamp = priceData.data.timestamp
+
+                    priceData.state = OracleState.REMOVED
+
+                    records[`${oracleId}-${token}-${currency}-${height}-${timestamp.toString()}`] = priceData
                   }
-
-                  records[`${oracleId}-${token}-${currency}-${height}-${timestamp}`] = OraclePriceDataIndexer.newOraclePriceData(height, oracleId, token, currency, amount, timestamp, OracleState.REMOVED)
                 }
               }
             }
           } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
-            const priceSet = new Set()
-            const newPriceFeeds = stack[1].tx.data.priceFeeds ?? []
+            const tokenCurrencies: string[] = []
+            const newTokenCurrenciesObj = stack[1].tx.data.priceFeeds ?? []
 
-            for (let i = 0; i < newPriceFeeds.length; i += 1) {
-              const priceFeed = newPriceFeeds[i]
+            for (let i = 0; i < newTokenCurrenciesObj.length; i += 1) {
+              const tokenCurrencyObj = newTokenCurrenciesObj[i]
 
-              const token: string = priceFeed.token
-              const currency: string = priceFeed.currency
+              const token: string = tokenCurrencyObj.token
+              const currency: string = tokenCurrencyObj.currency
 
-              priceSet.add(`${token}-${currency}`)
+              tokenCurrencies.push(`${token}-${currency}`)
             }
 
-            if (priceSet.size > 0) {
+            if (tokenCurrencies.length > 0) {
               const oracleId: string = stack[1].tx.data.oracleId
-              const oracles = await this.mapper.getByOracleId(oracleId) ?? []
+              const priceDatas = await this.mapper.getByOracleId(oracleId) ?? []
 
-              for (let i = 0; i < oracles.length; i += 1) {
-                const oracle = oracles[i]
-                const token = oracle.data.token
-                const currency = oracle.data.currency
-                const amount = oracle.data.amount
-                const height = oracle.block.height
-                const timestamp = oracle.data.timestamp
+              for (let i = 0; i < priceDatas.length; i += 1) {
+                const priceData = priceDatas[i]
+                const token = priceData.data.token
+                const currency = priceData.data.currency
 
-                if (priceSet.has(`${token}-${currency}`) || oracle.state === 'REMOVED') {
-                  continue
+                if (priceData.state === OracleState.LIVE && !tokenCurrencies.includes(`${token}-${currency}`)) {
+                  const height = priceData.block.height
+                  const timestamp = priceData.data.timestamp
+
+                  priceData.state = OracleState.REMOVED
+
+                  records[`${oracleId}-${token}-${currency}-${height}-${timestamp.toString()}`] = priceData
                 }
-
-                records[`${oracleId}-${token}-${currency}-${height}-${timestamp}`] = OraclePriceDataIndexer.newOraclePriceData(height, oracleId, token, currency, amount, timestamp, OracleState.REMOVED)
               }
             }
           } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
             const oracleId: string = stack[1].tx.data.oracleId
-            const oracles = await this.mapper.getByOracleId(oracleId) ?? []
+            const priceDatas = await this.mapper.getByOracleId(oracleId) ?? []
 
-            for (let i = 0; i < oracles.length; i += 1) {
-              const oracle = oracles[i]
-              const token = oracle.data.token
-              const currency = oracle.data.currency
-              const amount = oracle.data.amount
-              const height = oracle.block.height
-              const timestamp = oracle.data.timestamp
+            for (let i = 0; i < priceDatas.length; i += 1) {
+              const priceData = priceDatas[i]
 
-              if (oracle.state === 'REMOVED') {
-                continue
+              if (priceData.state === OracleState.LIVE) {
+                const token = priceData.data.token
+                const currency = priceData.data.currency
+                const height = priceData.block.height
+                const timestamp = priceData.data.timestamp
+
+                priceData.state = OracleState.REMOVED
+
+                records[`${oracleId}-${token}-${currency}-${height}-${timestamp.toString()}`] = priceData
               }
-
-              records[`${oracleId}-${token}-${currency}-${height}-${timestamp}`] = OraclePriceDataIndexer.newOraclePriceData(height, oracleId, token, currency, amount, timestamp, OracleState.REMOVED)
             }
           }
         }
@@ -139,15 +139,14 @@ export class OraclePriceDataIndexer extends Indexer {
           if (stack[1]?.tx?.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
             const timestamp: number = stack[1].tx.data.timestamp
             const oracleId: string = stack[1].tx.data.oracleId
-            const data = stack[1].tx.data.tokens
+            const tokens = stack[1].tx.data.tokens
 
-            for (let i = 0; i < data.length; i += 1) {
-              const token: string = data[i].token
-              const prices = data[i].prices
+            for (let i = 0; i < tokens.length; i += 1) {
+              const token: string = tokens[i].token
+              const prices = tokens[i].prices
 
               for (let y = 0; y < prices.length; y += 1) {
                 const price = prices[y]
-
                 const currency: string = price.currency
 
                 oraclePriceDataIds.push(`${oracleId}-${token}-${currency}-${block.height}-${timestamp.toString()}`)
