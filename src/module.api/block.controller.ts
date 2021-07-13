@@ -42,8 +42,20 @@ export class BlockController {
   }
 
   @Get('/:id/transactions')
-  async getBlockTransactions (@Param('id') hash: string, @Query() query: PaginationQuery): Promise<ApiPagedResponse<Transaction>> {
-    const transactions = await this.transactionMapper.queryByBlockHash(hash, query.size, query.next)
+  async getBlockTransactions (@Param('id') id: string, @Query() query: PaginationQuery): Promise<ApiPagedResponse<Transaction>> {
+    const height = parseHeight(id)
+
+    if (height !== undefined) { // if id is height
+      const block = await this.blockMapper.getByHeight(height)
+
+      if (block != null) { // type guard
+        return ApiPagedResponse.of(await this.transactionMapper.queryByBlockHash(block.id, query.size, query.next), query.size, transaction => {
+          return transaction.id
+        })
+      }
+    }
+
+    const transactions = await this.transactionMapper.queryByBlockHash(id, query.size, query.next)
 
     return ApiPagedResponse.of(transactions, query.size, transaction => {
       return transaction.id
