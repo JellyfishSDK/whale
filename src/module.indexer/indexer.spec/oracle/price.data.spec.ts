@@ -78,7 +78,7 @@ describe('Price Data - setoracledata 1', () => {
     height2 = await container.call('getblockcount')
   }
 
-  it('should get all price data if 2 prices are set for 2 different oracle', async () => {
+  it('should get price data', async () => {
     await waitForHeight(app, height2)
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
@@ -267,7 +267,7 @@ describe('Price Data - setoracledata 3', () => {
     height2 = await container.call('getblockcount')
   }
 
-  it('should get latest price data only if 2 prices data are set for the same oracle', async () => {
+  it('should get price data if 2 prices data are set for the same oracle', async () => {
     await waitForHeight(app, height2)
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
@@ -337,20 +337,18 @@ describe('Price Data - updateoracle', () => {
 
     timestamp = Math.floor(new Date().getTime() / 1000)
 
-    const prices1 = [
+    const prices = [
       { tokenAmount: '0.5@AAPL', currency: 'EUR' },
       { tokenAmount: '1.0@TSLA', currency: 'USD' }
     ]
 
-    await container.call('setoracledata', [oracleId, timestamp, prices1])
+    await container.call('setoracledata', [oracleId, timestamp, prices])
 
     await container.generate(1)
 
     height1 = await container.call('getblockcount')
 
-    const priceFeeds2 = [
-      { token: 'AAPL', currency: 'EUR' }
-    ]
+    const priceFeeds2 = [{ token: 'AAPL', currency: 'EUR' }]
 
     await container.call('updateoracle', [oracleId, await container.getNewAddress(), priceFeeds2, 2])
 
@@ -359,7 +357,7 @@ describe('Price Data - updateoracle', () => {
     height2 = await container.call('getblockcount')
   }
 
-  it('should get price data if updateoracle removes 1 of the price feed', async () => {
+  it('should get price data if updateoracle removes 1 price feed', async () => {
     await waitForHeight(app, height2)
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
@@ -421,12 +419,12 @@ describe('Price Data - removeoracle', () => {
   let height2: number
 
   async function setup (): Promise<void> {
-    const priceFeeds1 = [
+    const priceFeeds = [
       { token: 'AAPL', currency: 'EUR' },
       { token: 'TSLA', currency: 'USD' }
     ]
 
-    oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
+    oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
 
     await container.generate(1)
 

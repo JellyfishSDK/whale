@@ -7,7 +7,7 @@ import { OracleState } from '@whale-api-client/api/oracle'
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
 
-describe('Weightage - approveOracle', () => {
+describe('Weightage - approveoracle', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -43,10 +43,9 @@ describe('Weightage - approveOracle', () => {
   it('should get weightage', async () => {
     await waitForHeight(app, height)
 
-    const oracleAppointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
+    const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
 
-    const result = await oracleAppointedWeightageMapper.get(oracleId, height)
-
+    const result = await appointedWeightageMapper.get(oracleId, height)
     expect(result?.id).toStrictEqual(`${oracleId}-${height}`)
     expect(result?.block.height).toStrictEqual(height)
     expect(result?.data.oracleId).toStrictEqual(oracleId)
@@ -59,7 +58,7 @@ describe('Weightage - approveOracle', () => {
   })
 })
 
-describe('Weightage - updateOracle', () => {
+describe('Weightage - updateoracle', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -102,18 +101,16 @@ describe('Weightage - updateOracle', () => {
   it('should get weightage', async () => {
     await waitForHeight(app, height2)
 
-    const oracleAppointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
+    const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
 
-    const result1 = await oracleAppointedWeightageMapper.get(oracleId, height1)
-
+    const result1 = await appointedWeightageMapper.get(oracleId, height1)
     expect(result1?.id).toStrictEqual(`${oracleId}-${height1}`)
     expect(result1?.block.height).toStrictEqual(height1)
     expect(result1?.data.oracleId).toStrictEqual(oracleId)
     expect(result1?.data.weightage).toStrictEqual(1)
     expect(result1?.state).toStrictEqual(OracleState.REMOVED)
 
-    const result2 = await oracleAppointedWeightageMapper.get(oracleId, height2)
-
+    const result2 = await appointedWeightageMapper.get(oracleId, height2)
     expect(result2?.id).toStrictEqual(`${oracleId}-${height2}`)
     expect(result2?.block.height).toStrictEqual(height2)
     expect(result2?.data.oracleId).toStrictEqual(oracleId)
@@ -121,12 +118,11 @@ describe('Weightage - updateOracle', () => {
     expect(result2?.state).toStrictEqual(OracleState.LIVE)
 
     const data = await container.call('getoracledata', [oracleId])
-
     expect(data?.weightage).toStrictEqual(2)
   })
 })
 
-describe('Weightage - removeOracle', () => {
+describe('Weightage - removeoracle', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -169,10 +165,9 @@ describe('Weightage - removeOracle', () => {
   it('should remove weightage', async () => {
     await waitForHeight(app, height2)
 
-    const oracleAppointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
+    const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
 
-    const result = await oracleAppointedWeightageMapper.get(oracleId, height1)
-
+    const result = await appointedWeightageMapper.get(oracleId, height1)
     expect(result?.id).toStrictEqual(`${oracleId}-${height1}`)
     expect(result?.block.height).toStrictEqual(height1)
     expect(result?.data.oracleId).toStrictEqual(oracleId)
@@ -180,7 +175,6 @@ describe('Weightage - removeOracle', () => {
     expect(result?.state).toStrictEqual(OracleState.REMOVED)
 
     const promise = container.call('getoracledata', [oracleId])
-
     await expect(promise).rejects.toThrow(DeFiDRpcError)
     await expect(promise).rejects.toThrow(`DeFiDRpcError: 'oracle <${oracleId}> not found', code: -20`)
   })
