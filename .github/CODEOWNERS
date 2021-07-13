@@ -6,8 +6,8 @@
 /.idea/                                         @fuxingloh
 
 /packages/                                      @fuxingloh
-/packages/whale-api-client/                     @fuxingloh @canonbrother @jingyi2811
-/packages/whale-api-wallet/                     @fuxingloh @ivan-zynesis
+/packages/whale-api-client/                     @fuxingloh @canonbrother @jingyi2811 @ivan-zynesis @thedoublejay @monstrobishi
+/packages/whale-api-wallet/                     @fuxingloh @ivan-zynesis @thedoublejay @monstrobishi
 
 /src/                                           @fuxingloh
 /src/module.api/                                @fuxingloh @canonbrother @jingyi2811

@@ -12,7 +12,7 @@ export class PoolPair {
    * List pool pairs
    *
    * @param {number} size of PoolPairData balance to query
-   * @param {number} next set of PoolPairData
+   * @param {string} next set of PoolPairData
    * @return {Promise<ApiPagedResponse<PoolPairData>>}
    */
   async list (size: number = 30, next?: string): Promise<ApiPagedResponse<PoolPairData>> {
@@ -50,7 +50,7 @@ export interface PoolPairData {
   tradeEnabled: boolean
   ownerAddress: string
   rewardPct: string // BigNumber
-  customRewards?: string // BigNumber
+  customRewards?: string[]
   creation: {
     tx: string
     height: number

@@ -9,7 +9,7 @@ export class Tokens {
    * Paginate query tokens.
    *
    * @param {number} size of tokens to query
-   * @param {number} next set of tokens
+   * @param {string} next set of tokens
    * @return {Promise<ApiPagedResponse<TokenData>>}
    */
   async list (size: number = 30, next?: string): Promise<ApiPagedResponse<TokenData>> {
@@ -45,5 +45,5 @@ export interface TokenData {
   minted: string // BigNumber
   creation: { tx: string, height: number }
   destruction: { tx: string, height: number }
-  collateralAddress: string
+  collateralAddress?: string
 }
