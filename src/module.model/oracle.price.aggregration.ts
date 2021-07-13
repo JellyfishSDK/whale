@@ -7,7 +7,7 @@ const OraclePriceAggregrationMapping: ModelMapping<OraclePriceAggregration> = {
   type: 'oracle_price_aggregration',
   index: {
     tokenCurrency_heightBlockTime: {
-      name: 'oracle_price_aggregration_tokenCurrency_heightBlockTime',
+      name: 'oracle_price_aggregration_tokenCurrency-heightBlockTime',
       partition: {
         type: 'string',
         key: (d: OraclePriceAggregration) => `${d.data.token}-${d.data.currency}`
@@ -18,7 +18,7 @@ const OraclePriceAggregrationMapping: ModelMapping<OraclePriceAggregration> = {
       }
     },
     tokenCurrency_blockTime: {
-      name: 'oracle_price_aggregration_tokenCurrency_blockTime',
+      name: 'oracle_price_aggregration_tokenCurrency-blockTime',
       partition: {
         type: 'string',
         key: (d: OraclePriceAggregration) => `${d.data.token}-${d.data.currency}`
@@ -36,7 +36,7 @@ export class OraclePriceAggregrationMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async getLatest (token: string, currency: string): Promise<OraclePriceAggregration | undefined> {
+  async getLatestByTokenCurrency (token: string, currency: string): Promise<OraclePriceAggregration | undefined> {
     const data = await this.database.query(OraclePriceAggregrationMapping.index.tokenCurrency_heightBlockTime, {
       partitionKey: `${token}-${currency}`,
       order: SortOrder.DESC,
@@ -46,13 +46,13 @@ export class OraclePriceAggregrationMapper {
     return data.length === 0 ? undefined : data[0]
   }
 
-  async getLatestByBlockTime (token: string, currency: string, timestamp: number): Promise<OraclePriceAggregration | undefined> {
+  async getLatestByTokenCurrencyBlockTime (token: string, currency: string, blockTime: number): Promise<OraclePriceAggregration | undefined> {
     const data = await this.database.query(OraclePriceAggregrationMapping.index.tokenCurrency_blockTime, {
       partitionKey: `${token}-${currency}`,
       order: SortOrder.DESC,
-      gte: timestamp,
-      lte: timestamp,
-      limit: 100
+      gte: blockTime,
+      lte: blockTime,
+      limit: 1
     })
 
     return data.length === 0 ? undefined : data[0]

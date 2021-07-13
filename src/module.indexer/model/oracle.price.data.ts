@@ -44,20 +44,20 @@ export class OraclePriceDataIndexer extends Indexer {
 
                 records[`${oracleId}-${token}-${currency}-${block.height}-${timestamp.toString()}`] = OraclePriceDataIndexer.newOraclePriceData(block.height, oracleId, token, currency, amount, timestamp, OracleState.LIVE)
 
-                const priceDatas = await this.mapper.getByOracleIdTokenCurrency(oracleId, token, currency) ?? []
+                const priceDataResult = await this.mapper.getByOracleIdTokenCurrency(oracleId, token, currency) ?? []
 
-                for (let k = 0; k < priceDatas.length; k += 1) {
-                  const priceData = priceDatas[k]
+                for (let k = 0; k < priceDataResult.length; k += 1) {
+                  const priceDataObj = priceDataResult[k]
 
-                  if (priceData.state === OracleState.LIVE) {
-                    const token = priceData.data.token
-                    const currency = priceData.data.currency
-                    const height = priceData.block.height
-                    const timestamp = priceData.data.timestamp
+                  if (priceDataObj.state === OracleState.LIVE) {
+                    const token = priceDataObj.data.token
+                    const currency = priceDataObj.data.currency
+                    const height = priceDataObj.block.height
+                    const timestamp = priceDataObj.data.timestamp
 
-                    priceData.state = OracleState.REMOVED
+                    priceDataObj.state = OracleState.REMOVED
 
-                    records[`${oracleId}-${token}-${currency}-${height}-${timestamp.toString()}`] = priceData
+                    records[`${oracleId}-${token}-${currency}-${height}-${timestamp.toString()}`] = priceDataObj
                   }
                 }
               }
@@ -77,10 +77,10 @@ export class OraclePriceDataIndexer extends Indexer {
 
             if (tokenCurrencies.length > 0) {
               const oracleId: string = stack[1].tx.data.oracleId
-              const priceDatas = await this.mapper.getByOracleId(oracleId) ?? []
+              const priceDataResult = await this.mapper.getByOracleId(oracleId) ?? []
 
-              for (let i = 0; i < priceDatas.length; i += 1) {
-                const priceData = priceDatas[i]
+              for (let i = 0; i < priceDataResult.length; i += 1) {
+                const priceData = priceDataResult[i]
                 const token = priceData.data.token
                 const currency = priceData.data.currency
 
@@ -96,20 +96,20 @@ export class OraclePriceDataIndexer extends Indexer {
             }
           } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
             const oracleId: string = stack[1].tx.data.oracleId
-            const priceDatas = await this.mapper.getByOracleId(oracleId) ?? []
+            const priceDataResult = await this.mapper.getByOracleId(oracleId) ?? []
 
-            for (let i = 0; i < priceDatas.length; i += 1) {
-              const priceData = priceDatas[i]
+            for (let i = 0; i < priceDataResult.length; i += 1) {
+              const priceDataObj = priceDataResult[i]
 
-              if (priceData.state === OracleState.LIVE) {
-                const token = priceData.data.token
-                const currency = priceData.data.currency
-                const height = priceData.block.height
-                const timestamp = priceData.data.timestamp
+              if (priceDataObj.state === OracleState.LIVE) {
+                const token = priceDataObj.data.token
+                const currency = priceDataObj.data.currency
+                const height = priceDataObj.block.height
+                const timestamp = priceDataObj.data.timestamp
 
-                priceData.state = OracleState.REMOVED
+                priceDataObj.state = OracleState.REMOVED
 
-                records[`${oracleId}-${token}-${currency}-${height}-${timestamp.toString()}`] = priceData
+                records[`${oracleId}-${token}-${currency}-${height}-${timestamp.toString()}`] = priceDataObj
               }
             }
           }

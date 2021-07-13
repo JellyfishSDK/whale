@@ -7,7 +7,7 @@ const OraclePriceDataMapping: ModelMapping<OraclePriceData> = {
   type: 'oracle_price_data',
   index: {
     oracleId_tokenCurrencyAmountHeight: {
-      name: 'oracle_price_data_oracleId_tokenCurrencyAmountHeight',
+      name: 'oracle_price_data_oracleId-tokenCurrencyAmountHeight',
       partition: {
         type: 'string',
         key: (d: OraclePriceData) => d.data.oracleId
@@ -18,7 +18,7 @@ const OraclePriceDataMapping: ModelMapping<OraclePriceData> = {
       }
     },
     oracleIdTokenCurrency_amountHeight: {
-      name: 'oracle_price_data_oracleIdTokenCurrency_amountHeight',
+      name: 'oracle_price_data_oracleIdTokenCurrency-amountHeight',
       partition: {
         type: 'string',
         key: (d: OraclePriceData) => `${d.data.oracleId}-${d.data.token}-${d.data.currency}`
@@ -29,7 +29,7 @@ const OraclePriceDataMapping: ModelMapping<OraclePriceData> = {
       }
     },
     tokenCurrency_timestamp: {
-      name: 'oracle_price_data_tokenCurrency_timestamp',
+      name: 'oracle_price_data_tokenCurrency-timestamp',
       partition: {
         type: 'string',
         key: (d: OraclePriceData) => `${d.data.token}-${d.data.currency}`

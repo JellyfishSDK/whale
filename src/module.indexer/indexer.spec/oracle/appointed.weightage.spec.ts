@@ -148,7 +148,8 @@ describe('Weightage - removeOracle', () => {
   })
 
   let oracleId: string
-  let height: number
+  let height1: number
+  let height2: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
@@ -156,22 +157,24 @@ describe('Weightage - removeOracle', () => {
 
     await container.generate(1)
 
-    height = await container.call('getblockcount')
+    height1 = await container.call('getblockcount')
 
     await container.call('removeoracle', [oracleId])
 
     await container.generate(1)
+
+    height2 = await container.call('getblockcount')
   }
 
   it('should remove weightage', async () => {
-    await waitForHeight(app, height)
+    await waitForHeight(app, height2)
 
     const oracleAppointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
 
-    const result = await oracleAppointedWeightageMapper.get(oracleId, height)
+    const result = await oracleAppointedWeightageMapper.get(oracleId, height1)
 
-    expect(result?.id).toStrictEqual(`${oracleId}-${height}`)
-    expect(result?.block.height).toStrictEqual(height)
+    expect(result?.id).toStrictEqual(`${oracleId}-${height1}`)
+    expect(result?.block.height).toStrictEqual(height1)
     expect(result?.data.oracleId).toStrictEqual(oracleId)
     expect(result?.data.weightage).toStrictEqual(1)
     expect(result?.state).toStrictEqual(OracleState.REMOVED)

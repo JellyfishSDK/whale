@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
-import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
 import { OracleAppointedWeightageMapper } from '@src/module.model/oracle.appointed.weightage'
 import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
-import { OraclePriceAggregration } from '@whale-api-client/api/oracle'
+import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
+import { OraclePriceAggregration, OracleState } from '@whale-api-client/api/oracle'
 
 @Injectable()
 export class OraclePriceAggregationIndexer extends Indexer {
   constructor (
-    private readonly appointedMapper: OracleAppointedWeightageMapper,
-    private readonly priceFeedMapper: OracleAppointedTokenCurrencyMapper,
+    private readonly appointedWeightageMapper: OracleAppointedWeightageMapper,
+    private readonly appointedTokenCurrencyMapper: OracleAppointedTokenCurrencyMapper,
     private readonly priceDataMapper: OraclePriceDataMapper,
     private readonly priceAggregrationMapper: OraclePriceAggregrationMapper
   ) {
@@ -25,41 +25,36 @@ export class OraclePriceAggregationIndexer extends Indexer {
           continue
         }
 
-        const data = await this.priceFeedMapper.list() ?? []
+        const tokenCurrenciesSet: Set<string> = new Set()
+        const tokenCurrencyResult = await this.appointedTokenCurrencyMapper.list() ?? []
 
-        if (data.length > 0) {
-          const priceFeedSet: Set<string> = new Set()
-
-          data.filter(p => p.state === 'LIVE').map(m => {
-            priceFeedSet.add(`${m.data.token}-${m.data.currency}`)
+        if (tokenCurrencyResult.length > 0) {
+          tokenCurrencyResult.filter(t => t.state === OracleState.LIVE).map(m => {
+            tokenCurrenciesSet.add(`${m.data.token}-${m.data.currency}`)
           })
+        }
 
-          for (const priceFeed of priceFeedSet) {
-            const data = priceFeed.split('-')
-            const token = data[0]
-            const currency = data[1]
+        for (const tokenCurrency of tokenCurrenciesSet) {
+          const data = tokenCurrency.split('-')
+          const token = data[0]
+          const currency = data[1]
 
-            const prices = await this.priceDataMapper.getActivePrices(token, currency, block.time) ?? []
+          const priceDataResult = await this.priceDataMapper.getActivePrices(token, currency, block.time) ?? []
 
-            let hasFound = false
+          let sum = 0
+          let weightageSum = 0
 
-            let sum = 0
-            let weightageSum = 0
+          for (let i = 0; i < priceDataResult.length; i += 1) {
+            const priceData = priceDataResult[i]
+            const weightageObj = await this.appointedWeightageMapper.getLatestByOracleIdHeight(priceData.data.oracleId, block.height)
+            const weightage = weightageObj?.data.weightage ?? 0
 
-            for (let i = 0; i < prices.length; i += 1) {
-              const price = prices[i]
-              const mapper = await this.appointedMapper.getLatest(price.data.oracleId)
-              const weightage = mapper?.data.weightage ?? 0
+            sum += priceData.data.amount * weightage
+            weightageSum += weightage
+          }
 
-              sum = sum + price.data.amount * weightage
-              weightageSum += weightage
-
-              hasFound = true
-            }
-
-            if (hasFound) {
-              records[`${token}-${currency}-${block.height}-${block.time}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block.height, block.time, token, currency, sum / weightageSum)
-            }
+          if (priceDataResult.length > 0) {
+            records[`${token}-${currency}-${block.height}-${block.time}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block.height, block.time, token, currency, sum / weightageSum)
           }
         }
       }
@@ -71,7 +66,40 @@ export class OraclePriceAggregationIndexer extends Indexer {
   }
 
   async invalidate (block: RawBlock): Promise<void> {
-    return await Promise.resolve(undefined)
+    const priceAggregrationIds: string[] = []
+
+    for (const txn of block.tx) {
+      for (const vout of txn.vout) {
+        if (!vout.scriptPubKey.hex.startsWith('6a')) {
+          continue
+        }
+
+        const tokenCurrenciesSet: Set<string> = new Set()
+        const tokenCurrencyResult = await this.appointedTokenCurrencyMapper.list() ?? []
+
+        if (tokenCurrencyResult.length > 0) {
+          tokenCurrencyResult.filter(t => t.state === 'LIVE').map(m => {
+            tokenCurrenciesSet.add(`${m.data.token}-${m.data.currency}`)
+          })
+        }
+
+        for (const tokenCurrency of tokenCurrenciesSet) {
+          const data = tokenCurrency.split('-')
+          const token = data[0]
+          const currency = data[1]
+
+          const priceDataResult = await this.priceDataMapper.getActivePrices(token, currency, block.time) ?? []
+
+          if (priceDataResult.length > 0) {
+            priceAggregrationIds.push(`${token}-${currency}-${block.height}-${block.time}`)
+          }
+        }
+      }
+    }
+
+    for (const id of priceAggregrationIds) {
+      await this.priceDataMapper.delete(id)
+    }
   }
 
   static newOraclePriceAggregation (

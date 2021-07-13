@@ -39,7 +39,7 @@ export class OracleAppointedTokenCurrencyMapper {
     })
   }
 
-  async listByOracleId (oracleId: string): Promise<OracleAppointedTokenCurrency[] | undefined> {
+  async getByOracleId (oracleId: string): Promise<OracleAppointedTokenCurrency[] | undefined> {
     return await this.database.query(OracleAppointedTokenCurrencyMapping.index.oracleId_tokenCurrencyHeight, {
       partitionKey: oracleId,
       order: SortOrder.ASC,

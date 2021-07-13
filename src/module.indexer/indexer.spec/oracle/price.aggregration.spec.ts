@@ -111,7 +111,7 @@ describe('Price Aggregration - 1', () => {
   })
 })
 
-describe('PriceAggregration - 2', () => {
+describe('Price Aggregration - 2', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
