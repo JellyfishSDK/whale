@@ -185,7 +185,8 @@ describe('Token Currency - removeoracle', () => {
   })
 
   let oracleId: string
-  let height: number
+  let height1: number
+  let height2: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [
@@ -197,29 +198,31 @@ describe('Token Currency - removeoracle', () => {
 
     await container.generate(1)
 
-    height = await container.call('getblockcount')
+    height1 = await container.call('getblockcount')
 
     await container.call('removeoracle', [oracleId])
 
     await container.generate(1)
+
+    height2 = await container.call('getblockcount')
   }
 
   it('should remove token currency', async () => {
-    await waitForHeight(app, height)
+    await waitForHeight(app, height2)
 
     const appointedTokenCurrencyMapper = app.get(OracleAppointedTokenCurrencyMapper)
 
-    const result1 = await appointedTokenCurrencyMapper.get(oracleId, 'AAPL', 'EUR', height)
-    expect(result1?.id).toStrictEqual(`${oracleId}-AAPL-EUR-${height}`)
-    expect(result1?.block.height).toStrictEqual(height)
+    const result1 = await appointedTokenCurrencyMapper.get(oracleId, 'AAPL', 'EUR', height1)
+    expect(result1?.id).toStrictEqual(`${oracleId}-AAPL-EUR-${height1}`)
+    expect(result1?.block.height).toStrictEqual(height1)
     expect(result1?.data.oracleId).toStrictEqual(oracleId)
     expect(result1?.data.token).toStrictEqual('AAPL')
     expect(result1?.data.currency).toStrictEqual('EUR')
     expect(result1?.state).toStrictEqual(OracleState.REMOVED)
 
-    const result2 = await appointedTokenCurrencyMapper.get(oracleId, 'TSLA', 'USD', height)
-    expect(result2?.id).toStrictEqual(`${oracleId}-TSLA-USD-${height}`)
-    expect(result2?.block.height).toStrictEqual(height)
+    const result2 = await appointedTokenCurrencyMapper.get(oracleId, 'TSLA', 'USD', height1)
+    expect(result2?.id).toStrictEqual(`${oracleId}-TSLA-USD-${height1}`)
+    expect(result2?.block.height).toStrictEqual(height1)
     expect(result2?.data.oracleId).toStrictEqual(oracleId)
     expect(result2?.data.token).toStrictEqual('TSLA')
     expect(result2?.data.currency).toStrictEqual('USD')
