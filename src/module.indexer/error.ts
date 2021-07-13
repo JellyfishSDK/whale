@@ -22,3 +22,21 @@ export class RpcNotFoundIndexerError extends IndexerError {
     super(`not found data from rpc ${action} ${item}`)
   }
 }
+
+/**
+ * Result items.length validation on rpc READ
+ */
+export class RpcItemLengthError extends IndexerError {
+  constructor (item: string) {
+    super(`the ${item} length is not valid`)
+  }
+}
+
+/**
+ * Expected snapshot is stored before overwrite data
+ */
+export class NotFoundSnapShotError extends IndexerError {
+  constructor (type: string) {
+    super(`attempting to reverse and overwrite data but ${type} snapshot cannot be found`)
+  }
+}
