@@ -48,7 +48,7 @@ export class BlockController {
     if (height !== undefined) { // if id is height
       const block = await this.blockMapper.getByHeight(height)
 
-      if (block != null) { // type guard
+      if (block !== undefined) { // type guard
         return ApiPagedResponse.of(await this.transactionMapper.queryByBlockHash(block.id, query.size, query.next), query.size, transaction => {
           return transaction.id
         })
