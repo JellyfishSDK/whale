@@ -1,9 +1,11 @@
 import BigNumber from 'bignumber.js'
-import { Body, Controller, Get, HttpCode, ParseIntPipe, Post, Query, ValidationPipe } from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, ParseIntPipe, Post, Query, ValidationPipe, Param } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { IsHexadecimal, IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator'
 import { BadRequestApiException } from '@src/module.api/_core/api.error'
 import { EstimateMode } from '@defichain/jellyfish-api-core/dist/category/mining'
+import { TransactionMapper } from '@src/module.model/transaction'
+import { Transaction } from '@whale-api-client/api/transactions'
 
 class RawTxDto {
   @IsNotEmpty()
@@ -27,7 +29,10 @@ export class TransactionsController {
    */
   private readonly defaultMaxFeeRate: BigNumber = new BigNumber('0.005')
 
-  constructor (private readonly client: JsonRpcClient) {
+  constructor (
+    private readonly client: JsonRpcClient,
+    private readonly transactionMapper: TransactionMapper
+  ) {
   }
 
   /**
@@ -45,6 +50,16 @@ export class TransactionsController {
     }
 
     return 0.00005000
+  }
+
+  /**
+   * Get a single transaction by id
+   *
+   * @return{Promise<Transaction | undefined>}
+   */
+  @Get('/:id')
+  async get (@Param('id') id: string): Promise<Transaction | undefined> {
+    return await this.transactionMapper.get(id)
   }
 
   /**

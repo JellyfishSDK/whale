@@ -172,4 +172,58 @@ describe('transactions', () => {
       expect(after).not.toStrictEqual(0.00005000)
     })
   })
+
+  describe('getTransaction', () => {
+    let txid: string
+    let height: number
+
+    async function setup (): Promise<void> {
+      const address = await container.getNewAddress()
+      const metadata = {
+        symbol: 'ETH',
+        name: 'ETH',
+        isDAT: true,
+        mintable: true,
+        tradeable: true,
+        collateralAddress: address
+      }
+      txid = await container.call('createtoken', [metadata])
+
+      await container.generate(1)
+
+      height = await container.call('getblockcount')
+    }
+
+    beforeAll(async () => {
+      await setup()
+    })
+
+    it('should get a single transaction', async () => {
+      await waitForIndexedHeight(app, height)
+
+      const transaction = await controller.get(txid)
+      expect(transaction).toStrictEqual({
+        id: txid,
+        block: {
+          hash: expect.any(String),
+          height
+        },
+        txid,
+        hash: txid,
+        version: expect.any(Number),
+        size: expect.any(Number),
+        vSize: expect.any(Number),
+        weight: expect.any(Number),
+        lockTime: expect.any(Number),
+        vinCount: expect.any(Number),
+        voutCount: expect.any(Number)
+      })
+    })
+
+    it('should return undefined for invalid transaction id ', async () => {
+      await waitForIndexedHeight(app, height)
+      const transaction = await controller.get('invalidtransactionId')
+      expect(transaction).toStrictEqual(undefined)
+    })
+  })
 })
