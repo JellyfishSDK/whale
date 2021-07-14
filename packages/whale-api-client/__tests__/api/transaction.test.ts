@@ -239,7 +239,6 @@ describe('transaction', () => {
 
   describe('get', () => {
     let txid: string
-    let height: number
 
     async function setup (): Promise<void> {
       const address = await container.getNewAddress()
@@ -256,7 +255,7 @@ describe('transaction', () => {
 
       await container.generate(1)
 
-      height = await container.call('getblockcount')
+      const height = await container.call('getblockcount')
 
       await service.waitForIndexedHeight(height)
     }
@@ -271,7 +270,7 @@ describe('transaction', () => {
         id: txid,
         block: {
           hash: expect.any(String),
-          height
+          height: expect.any(Number)
         },
         txid,
         hash: txid,
