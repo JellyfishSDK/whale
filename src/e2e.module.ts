@@ -32,18 +32,6 @@ export async function createTestingApp (container: MasterNodeRegTestContainer): 
   return app
 }
 
-export async function clear (container: MasterNodeRegTestContainer): Promise<NestFastifyApplication> {
-  const url = await container.getCachedRpcUrl()
-  const module = await createTestingModule(url)
-  const app = module.createNestApplication<NestFastifyApplication>(
-    newFastifyAdapter({
-      logger: false
-    })
-  )
-  await app.init()
-  return app
-}
-
 /**
  * @param {MasterNodeRegTestContainer} container to provide defid client
  * @param {NestFastifyApplication} app to close
@@ -88,8 +76,8 @@ export async function waitForIndexedHeight (app: NestFastifyApplication, height:
 
 /**
  * @param {MasterNodeRegTestContainer} container
- * @param {timestamp} number
- * @param {timeout} [timeout=30000]
+ * @param {number} timestamp
+ * @param {number} [timeout=30000]
  */
 export async function waitForIndexedTimestamp (container: MasterNodeRegTestContainer, timestamp: number, timeout: number = 30000): Promise<void> {
   await waitForExpect(async () => {

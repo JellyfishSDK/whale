@@ -296,7 +296,7 @@ describe('3 - Oracle Price', () => {
     })
   })
 
-  describe('getPricePercentageChange()', () => {
+  describe('getPriceChangePercentage()', () => {
     it('should get price change percentage of two timestamps for token and currency', async () => {
       const result = await client.oracle.getPriceChangePercentage('AAPL', 'EUR', blockTime1, blockTime2)
       expect(result).toStrictEqual(0.006666666666666667)

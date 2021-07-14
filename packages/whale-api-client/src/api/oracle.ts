@@ -81,7 +81,7 @@ export class Oracle {
    * @param {number} timestamp1
    * @param {number} timestamp2
    * @param {number} timeInterval
-   * @return {Promise<Array<PriceInterval>>}
+   * @return {Promise<PriceInterval[]>}
    */
   async getIntervalPrice (token: string, currency: string, timestamp1: number, timestamp2: number, timeInterval: number): Promise<PriceInterval[]> {
     return await this.client.requestData('GET', `oracle/${token}/${currency}/${timestamp1}/${timestamp2}/${timeInterval}/price/interval`)
