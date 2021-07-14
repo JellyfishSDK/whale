@@ -9,46 +9,36 @@ export class Oracle {
   }
 
   /**
-   * Get current status of an oracle
+   * list all token currencies.
    *
-   * @param {string} id oracleId
-   * @return {Promise<OracleAppointedWeightage>}
+   * @return {Promise<OracleAppointedTokenCurrency[]>}
    */
-  async getStatus (id: string): Promise<OracleAppointedWeightage> {
-    return await this.client.requestData('GET', `oracle/${id}/status`)
+  async listTokenCurrencies (): Promise<OracleAppointedTokenCurrency[]> {
+    return await this.client.requestData('GET', 'oracle/token/currency')
   }
 
   /**
-   * Get price Feed for an oracleId
+   * Get all token currencies of an oracle.
    *
    * @param {string} id oracleId
-   * @return {Promise<OracleAppointedTokenCurrency>}
+   * @return {Promise<OracleAppointedTokenCurrency[]>}
    */
-  async getPriceFeed (id: string): Promise<OracleAppointedTokenCurrency[]> {
-    return await this.client.requestData('GET', `oracle/${id}/priceFeed`)
+  async getTokenCurrencies (id: string): Promise<OracleAppointedTokenCurrency[]> {
+    return await this.client.requestData('GET', `oracle/${id}/token/currency`)
   }
 
   /**
-   * Get all price feeds
-   *
-   * @return {Promise<OracleAppointedTokenCurrency>}
-   */
-  async getPriceFeeds (): Promise<OracleAppointedTokenCurrency[]> {
-    return await this.client.requestData('GET', 'oracle/priceFeeds')
-  }
-
-  /**
-   * Get price data for an oracleId
+   * Get price data of an oracle.
    *
    * @param {string} id oracleId
-   * @return {Promise<OraclePriceData>}
+   * @return {Promise<OraclePriceData[]>}
    */
   async getPriceData (id: string): Promise<OraclePriceData[]> {
-    return await this.client.requestData('GET', `oracle/${id}/priceData`)
+    return await this.client.requestData('GET', `oracle/${id}/price/data`)
   }
 
   /**
-   * Get price for a token and currency
+   * Get current price of a token currency.
    *
    * @param {string} token
    * @param {string} currency
@@ -59,7 +49,7 @@ export class Oracle {
   }
 
   /**
-   * Get price for a token and currency at a specific timestamp
+   * Get price of a token currency at a specific timestamp.
    *
    * @param {string} token
    * @param {string} currency
@@ -71,7 +61,7 @@ export class Oracle {
   }
 
   /**
-   * Get percentage price change based on 2 timestamps
+   * Get price change percentage between 2 timestamps.
    *
    * @param {string} token
    * @param {string} currency
@@ -79,23 +69,28 @@ export class Oracle {
    * @param {number} timestamp2
    * @return {Promise<BigNumber>}
    */
-  async getPricePercentageChange (token: string, currency: string, timestamp1: number, timestamp2: number): Promise<BigNumber> {
-    return await this.client.requestData('GET', `oracle/${token}/${currency}/${timestamp1}/${timestamp2}/percentagePriceChange`)
+  async getPriceChangePercentage (token: string, currency: string, timestamp1: number, timestamp2: number): Promise<BigNumber> {
+    return await this.client.requestData('GET', `oracle/${token}/${currency}/${timestamp1}/${timestamp2}/price/change/percentage`)
   }
 
   /**
-   * Returns prices interval across a time range.
+   * Get prices of all time intervals between 2 timestamps.
    *
    * @param {string} token
    * @param {string} currency
    * @param {number} timestamp1
    * @param {number} timestamp2
-   * @param {number} interval
-   * @return {Promise<BigNumber>}
+   * @param {number} timeInterval
+   * @return {Promise<Array<PriceInterval>>}
    */
-  async getPricesInterval (token: string, currency: string, timestamp1: number, timestamp2: number, interval: number): Promise<BigNumber> {
-    return await this.client.requestData('GET', `oracle/${token}/${currency}/${timestamp1}/${timestamp2}/${interval}/pricesInterval`)
+  async getIntervalPrice (token: string, currency: string, timestamp1: number, timestamp2: number, timeInterval: number): Promise<PriceInterval[]> {
+    return await this.client.requestData('GET', `oracle/${token}/${currency}/${timestamp1}/${timestamp2}/${timeInterval}/price/interval`)
   }
+}
+
+export interface PriceInterval{
+  timestamp: number
+  amount: BigNumber
 }
 
 export interface OracleAppointedWeightage {

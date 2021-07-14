@@ -46,6 +46,7 @@ export class OraclePriceAggregationIndexer extends Indexer {
 
           for (let i = 0; i < priceDataResult.length; i += 1) {
             const priceData = priceDataResult[i]
+
             const weightageObj = await this.appointedWeightageMapper.getLatestByOracleIdHeight(priceData.data.oracleId, block.height)
             const weightage = weightageObj?.data.weightage ?? 0
 

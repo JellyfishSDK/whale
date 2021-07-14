@@ -1,36 +1,38 @@
 import { Controller, Get, Param } from '@nestjs/common'
 import {
-  OraclePriceAggregration,
+  OracleAppointedTokenCurrency,
   OraclePriceData,
-  OracleAppointedTokenCurrency
+  OraclePriceAggregration,
+  PriceInterval
 } from '@whale-api-client/api/oracle'
 import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
 import BigNumber from 'bignumber.js'
+import { BadRequestApiException } from '@src/module.api/_core/api.error'
 
 @Controller('/v0/:network/oracle')
 export class OracleController {
   constructor (
-    protected readonly priceFeedMapper: OracleAppointedTokenCurrencyMapper,
+    protected readonly appointedTokenCurrencyMapper: OracleAppointedTokenCurrencyMapper,
     protected readonly priceDataMapper: OraclePriceDataMapper,
     protected readonly priceAggregrationMapper: OraclePriceAggregrationMapper
   ) {
   }
 
-  @Get('/priceFeeds')
-  async getPriceFeeds (): Promise<OracleAppointedTokenCurrency[] | undefined> {
-    return await this.priceFeedMapper.list()
+  @Get('/token/currency')
+  async listTokenCurrencies (): Promise<OracleAppointedTokenCurrency[] | undefined> {
+    return await this.appointedTokenCurrencyMapper.list()
   }
 
-  @Get('/:id/priceFeed')
-  async getPriceFeed (
+  @Get('/:id/token/currency')
+  async getTokenCurrencies (
     @Param('id') id: string
   ): Promise<OracleAppointedTokenCurrency[] | undefined> {
-    return await this.priceFeedMapper.getByOracleId(id)
+    return await this.appointedTokenCurrencyMapper.getByOracleId(id)
   }
 
-  @Get('/:id/priceData')
+  @Get('/:id/price/data')
   async getPriceData (
     @Param('id') id: string
   ): Promise<OraclePriceData[] | undefined> {
@@ -54,13 +56,17 @@ export class OracleController {
     return await this.priceAggregrationMapper.getLatestByTokenCurrencyBlockTime(token, currency, timestamp)
   }
 
-  @Get('/:token/:currency/:timestamp1/:timestamp2/percentagePriceChange')
-  async getPricePercentageChange (
+  @Get('/:token/:currency/:timestamp1/:timestamp2/price/change/percentage')
+  async getPriceChangePercentage (
     @Param('token') token: string,
       @Param('currency') currency: string,
       @Param('timestamp1') timestamp1: number,
       @Param('timestamp2') timestamp2: number
   ): Promise<BigNumber> {
+    if ((timestamp1 < 0 && timestamp1 > 9999999999) || (timestamp2 < 0 && timestamp2 > 9999999999)) {
+      throw new BadRequestApiException('Timestamp is out of range')
+    }
+
     const result1 = await this.priceAggregrationMapper.getLatestByTokenCurrencyBlockTime(token, currency, timestamp1)
     const result2 = await this.priceAggregrationMapper.getLatestByTokenCurrencyBlockTime(token, currency, timestamp2)
 
@@ -70,24 +76,28 @@ export class OracleController {
     return (amountBN2.minus(amountBN1)).div(100)
   }
 
-  @Get('/:token/:currency/:timestamp1/:timestamp2/:interval/pricesInterval')
-  async getPriceInterval (
+  @Get('/:token/:currency/:timestamp1/:timestamp2/:timeInterval/price/interval')
+  async getIntervalPrice (
     @Param('token') token: string,
       @Param('currency') currency: string,
       @Param('timestamp1') timestamp1: number,
       @Param('timestamp2') timestamp2: number,
-      @Param('interval') interval: number
-  ): Promise<any> {
-    const timestampDifference = timestamp2 - timestamp1
+      @Param('timeInterval') timeInterval: number
+  ): Promise<PriceInterval[]> {
+    if ((timestamp1 < 0 && timestamp1 > 9999999999) || (timestamp2 < 0 && timestamp2 > 9999999999)) {
+      throw new BadRequestApiException('Timestamp is out of range')
+    }
+
+    const timestampDifference = Math.abs(timestamp2 - timestamp1)
 
     const allPrices = []
 
-    const no = timestampDifference / interval
+    const no = Math.abs(timestampDifference) / timeInterval
 
     for (let i = 0; i <= no; i += 1) {
-      const timestamp = timestamp1 + interval * i
+      const timestamp = timestamp1 + timeInterval * i
       const result = await this.priceAggregrationMapper.getLatestByTokenCurrencyBlockTime(token, currency, timestamp)
-      const data = { timestamp, amount: result?.data?.amount }
+      const data = { timestamp, amount: new BigNumber(result?.data?.amount ?? 0) }
       allPrices.push(data)
     }
 
