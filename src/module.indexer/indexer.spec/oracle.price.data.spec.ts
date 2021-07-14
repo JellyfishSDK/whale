@@ -79,7 +79,7 @@ describe('Price Data - setoracledata 1', () => {
   }
 
   it('should get price data', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height2 + 5)
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
@@ -187,7 +187,7 @@ describe('Price Data - setoracledata 2', () => {
   }
 
   it('should get price data if 1 price only set for 2 token currencies for an oracle', async () => {
-    await waitForHeight(app, height)
+    await waitForHeight(app, height + 5)
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
@@ -268,7 +268,7 @@ describe('Price Data - setoracledata 3', () => {
   }
 
   it('should get price data if 2 prices data are set for the same oracle', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height2 + 5)
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
@@ -358,7 +358,7 @@ describe('Price Data - updateoracle', () => {
   }
 
   it('should get price data if updateoracle removes 1 price feed', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height2 + 5)
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
@@ -449,7 +449,7 @@ describe('Price Data - removeoracle', () => {
   }
 
   it('should not get price data', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height2 + 5)
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
 

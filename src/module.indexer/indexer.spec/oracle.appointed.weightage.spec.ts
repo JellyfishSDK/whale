@@ -41,7 +41,7 @@ describe('Weightage - approveoracle', () => {
   }
 
   it('should get weightage', async () => {
-    await waitForHeight(app, height)
+    await waitForHeight(app, height + 5)
 
     const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
 
@@ -99,7 +99,7 @@ describe('Weightage - updateoracle', () => {
   }
 
   it('should get weightage', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height2 + 5)
 
     const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
 
@@ -163,7 +163,7 @@ describe('Weightage - removeoracle', () => {
   }
 
   it('should remove weightage', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height2 + 5)
 
     const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
 

@@ -77,7 +77,7 @@ describe('Price Aggregration - 1', () => {
   }
 
   it('should get oracle price aggregration', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height2 + 5)
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
@@ -175,7 +175,7 @@ describe('Price Aggregration - 2', () => {
   }
 
   it('should get oracle price aggregration with correct sum of 2 prices', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height2 + 5)
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
@@ -284,7 +284,7 @@ describe('Price Aggregration - 3', () => {
   }
 
   it('should not get oracle price aggregration if the timestamp is out of range', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height2 + 5)
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
