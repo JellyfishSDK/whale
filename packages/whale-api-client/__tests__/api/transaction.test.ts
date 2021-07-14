@@ -237,7 +237,7 @@ describe('transaction', () => {
     })
   })
 
-  describe('getTransaction', () => {
+  describe('get', () => {
     let txid: string
     let height: number
 
@@ -257,6 +257,8 @@ describe('transaction', () => {
       await container.generate(1)
 
       height = await container.call('getblockcount')
+
+      await service.waitForIndexedHeight(height)
     }
 
     beforeAll(async () => {
@@ -264,10 +266,7 @@ describe('transaction', () => {
     })
 
     it('should get a single transaction', async () => {
-      await service.waitForIndexedHeight(height)
-
-      const transaction = await client.transactions.getTransaction(txid)
-
+      const transaction = await client.transactions.get(txid)
       expect(transaction).toStrictEqual({
         id: txid,
         block: {
@@ -286,12 +285,20 @@ describe('transaction', () => {
       })
     })
 
-    it('should return undefined for invalid transaction id ', async () => {
-      await service.waitForIndexedHeight(height)
-
-      const transaction = await client.transactions.getTransaction('invalidtransactionId')
-
-      expect(transaction).toStrictEqual(undefined)
+    it('should fail due to non-existent transaction', async () => {
+      expect.assertions(2)
+      try {
+        await client.transactions.get('invalidtransactionid')
+      } catch (err) {
+        expect(err).toBeInstanceOf(WhaleApiException)
+        expect(err.error).toStrictEqual({
+          code: 404,
+          type: 'NotFound',
+          at: expect.any(Number),
+          message: 'Unable to find transaction by id: invalidtransactionid',
+          url: '/v0/regtest/transactions/invalidtransactionid'
+        })
+      }
     })
   })
 })

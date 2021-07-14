@@ -13,10 +13,10 @@ export class Transactions {
   }
 
   /**
-   * @param {string} id transaction id to query
-   * @return {Transaction}
+   * @param {string} id of transaction to query
+   * @return {Promise<Transaction>}
    */
-  async getTransaction (id: string): Promise<Transaction> {
+  async get (id: string): Promise<Transaction> {
     return await this.client.requestData('GET', `transactions/${id}`)
   }
 

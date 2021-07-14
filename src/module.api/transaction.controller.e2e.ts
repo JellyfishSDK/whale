@@ -7,6 +7,7 @@ import { RegTest } from '@defichain/jellyfish-network'
 import { BadRequestApiException } from '@src/module.api/_core/api.error'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
+import { NotFoundException } from '@nestjs/common'
 
 describe('transactions', () => {
   const container = new MasterNodeRegTestContainer()
@@ -173,7 +174,7 @@ describe('transactions', () => {
     })
   })
 
-  describe('getTransaction', () => {
+  describe('get', () => {
     let txid: string
     let height: number
 
@@ -187,11 +188,14 @@ describe('transactions', () => {
         tradeable: true,
         collateralAddress: address
       }
+
       txid = await container.call('createtoken', [metadata])
 
       await container.generate(1)
 
       height = await container.call('getblockcount')
+
+      await waitForIndexedHeight(app, height)
     }
 
     beforeAll(async () => {
@@ -199,8 +203,6 @@ describe('transactions', () => {
     })
 
     it('should get a single transaction', async () => {
-      await waitForIndexedHeight(app, height)
-
       const transaction = await controller.get(txid)
       expect(transaction).toStrictEqual({
         id: txid,
@@ -209,7 +211,7 @@ describe('transactions', () => {
           height
         },
         txid,
-        hash: txid,
+        hash: expect.any(String),
         version: expect.any(Number),
         size: expect.any(Number),
         vSize: expect.any(Number),
@@ -220,10 +222,18 @@ describe('transactions', () => {
       })
     })
 
-    it('should return undefined for invalid transaction id ', async () => {
-      await waitForIndexedHeight(app, height)
-      const transaction = await controller.get('invalidtransactionId')
-      expect(transaction).toStrictEqual(undefined)
+    it('should fail due to non-existent transaction', async () => {
+      expect.assertions(2)
+      try {
+        await controller.get('invalidtransactionid')
+      } catch (err) {
+        expect(err).toBeInstanceOf(NotFoundException)
+        expect(err.response).toStrictEqual({
+          statusCode: 404,
+          message: 'Unable to find transaction by id: invalidtransactionid',
+          error: 'Not Found'
+        })
+      }
     })
   })
 })
