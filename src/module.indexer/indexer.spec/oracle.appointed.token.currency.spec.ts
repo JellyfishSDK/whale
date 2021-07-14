@@ -45,7 +45,7 @@ describe('Token Currency - approveoracle', () => {
   }
 
   it('should get token currency', async () => {
-    await waitForHeight(app, height + 5)
+    await waitForHeight(app, height)
 
     const appointedTokenCurrencyMapper = app.get(OracleAppointedTokenCurrencyMapper)
 
@@ -117,7 +117,7 @@ describe('Token Currency - updateoracle', () => {
   }
 
   it('should get token currency', async () => {
-    await waitForHeight(app, height2 + 5)
+    await waitForHeight(app, height2)
 
     const appointedTokenCurrencyMapper = app.get(OracleAppointedTokenCurrencyMapper)
 
@@ -208,7 +208,7 @@ describe('Token Currency - removeoracle', () => {
   }
 
   it('should remove token currency', async () => {
-    await waitForHeight(app, height2 + 5)
+    await waitForHeight(app, height2)
 
     const appointedTokenCurrencyMapper = app.get(OracleAppointedTokenCurrencyMapper)
 
