@@ -24,20 +24,20 @@ afterAll(async () => {
 })
 
 describe('BlockController', () => {
-  it('getBlock should get block with hash of block', async () => {
+  it('get should get block with hash of block', async () => {
     const blockHash = await container.call('getblockhash', [100])
-    const block = await controller.getBlock(blockHash)
+    const block = await controller.get(blockHash)
     expect(block?.height).toStrictEqual(100)
     expect(block?.hash).toStrictEqual(blockHash)
   })
 
-  it('getBlock should get undefined with invalid hash ', async () => {
-    const block = await controller.getBlock('lajsdl;kfjljklj12lk34j')
+  it('get should get undefined with invalid hash ', async () => {
+    const block = await controller.get('lajsdl;kfjljklj12lk34j')
     expect(block).toStrictEqual(undefined)
   })
 
-  it('getBlock should get block with height', async () => {
-    const block = await controller.getBlock('100')
+  it('get should get block with height', async () => {
+    const block = await controller.get('100')
     expect(block?.height).toStrictEqual(100)
   })
 
@@ -79,42 +79,42 @@ describe('BlockController', () => {
     expect(paginatedTransactions.data.length).toStrictEqual(0)
   })
 
-  it('listBlocks should be able to get a paginated response of blocks', async () => {
-    const paginatedBlocks = await controller.listBlocks({ size: 30, next: '40' })
+  it('list should be able to get a paginated response of blocks', async () => {
+    const paginatedBlocks = await controller.list({ size: 30, next: '40' })
 
     expect(paginatedBlocks.data.length).toStrictEqual(30)
     expect(paginatedBlocks.data[0].height).toStrictEqual(39)
   })
 
-  it('listBlocks should be able top few transactions', async () => {
-    const paginatedBlocks = await controller.listBlocks({ size: 30, next: '40' })
+  it('list should be able top few transactions', async () => {
+    const paginatedBlocks = await controller.list({ size: 30, next: '40' })
 
     expect(paginatedBlocks.data.length).toStrictEqual(30)
     expect(paginatedBlocks.data[0].height).toStrictEqual(39)
   })
 
-  it('listBlocks should get empty array when next is 0', async () => {
-    const paginatedBlocks = await controller.listBlocks({ size: 30, next: '0' })
+  it('list should get empty array when next is 0', async () => {
+    const paginatedBlocks = await controller.list({ size: 30, next: '0' })
 
     expect(paginatedBlocks.data.length).toStrictEqual(0)
   })
 
-  it('listBlocks would return all the blocks if the size is out of range', async () => {
-    const paginatedBlocks = await controller.listBlocks({ size: 100000, next: '100' })
+  it('list would return all the blocks if the size is out of range', async () => {
+    const paginatedBlocks = await controller.list({ size: 100000, next: '100' })
 
     expect(paginatedBlocks.data.length).toStrictEqual(100)
     expect(paginatedBlocks.data[0].height).toBeGreaterThanOrEqual(99)
   })
 
-  it('listBlocks would return the latest set if next is outside of range', async () => {
-    const paginatedBlocks = await controller.listBlocks({ size: 30, next: '100000' })
+  it('list would return the latest set if next is outside of range', async () => {
+    const paginatedBlocks = await controller.list({ size: 30, next: '100000' })
 
     expect(paginatedBlocks.data.length).toStrictEqual(30)
     expect(paginatedBlocks.data[0].height).toBeGreaterThanOrEqual(100)
   })
 
-  it('listBlocks would return the latest set if next is undefined', async () => {
-    const paginatedBlocks = await controller.listBlocks({ size: 30 })
+  it('list would return the latest set if next is undefined', async () => {
+    const paginatedBlocks = await controller.list({ size: 30 })
 
     expect(paginatedBlocks.data.length).toStrictEqual(30)
     expect(paginatedBlocks.data[0].height).toBeGreaterThanOrEqual(100)
