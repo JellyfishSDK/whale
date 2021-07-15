@@ -61,7 +61,7 @@ describe('get', () => {
     expect(data).toStrictEqual(masternode)
   })
 
-  it('should fail and throw an error with wrong id', async () => {
+  it('should fail due to non-existent masternode', async () => {
     expect.assertions(2)
     const id = '8d4d987dee688e400a0cdc899386f243250d3656d802231755ab4d28178c9816'
     try {
