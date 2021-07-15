@@ -37,7 +37,6 @@ export class BlockController {
       return await this.blockMapper.getByHeight(height)
     }
 
-    // id is not a number
     return await this.blockMapper.getByHash(id)
   }
 
