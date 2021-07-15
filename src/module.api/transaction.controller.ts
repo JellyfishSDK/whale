@@ -67,10 +67,10 @@ export class TransactionsController {
    * Get a single transaction by id
    *
    * @param {string} id of transaction to query
-   * @return{Promise<Transaction | undefined>}
+   * @return{Promise<Transaction>}
    */
   @Get('/:id')
-  async get (@Param('id') id: string): Promise<Transaction | undefined> {
+  async get (@Param('id') id: string): Promise<Transaction> {
     const transaction = await this.transactionMapper.get(id)
 
     if (transaction === undefined) {
