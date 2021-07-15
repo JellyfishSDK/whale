@@ -19,7 +19,7 @@ export class BlockController {
   }
 
   @Get('')
-  async listBlocks (
+  async list (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<Block>> {
     const height = parseHeight(query.next)
@@ -30,7 +30,7 @@ export class BlockController {
   }
 
   @Get('/:id')
-  async getBlock (@Param('id') id: string): Promise<Block | undefined> {
+  async get (@Param('id') id: string): Promise<Block | undefined> {
     const height = parseHeight(id)
 
     if (height !== undefined) {
