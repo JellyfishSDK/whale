@@ -278,18 +278,6 @@ describe('3 - Oracle Price', () => {
       expect(result).toStrictEqual(undefined)
     })
   })
-
-  describe('getPriceChangePercentage()', () => {
-    it('should get price change percentage of two timestamps for token and currency', async () => {
-      const result = await controller.getPriceChangePercentage('AAPL', 'EUR', blockTime1, blockTime2)
-      expect(result).toStrictEqual(new BigNumber('0.006666666666666667'))
-    })
-
-    it('should return 0 if get price change percentage with invalid token, currency, blockTime1 and blockTime2', async () => {
-      const result = await controller.getPriceChangePercentage('invalid', 'invalid', -1, -1)
-      expect(result).toStrictEqual(new BigNumber('0'))
-    })
-  })
 })
 
 describe('4 - Oracle Price Interval', () => {

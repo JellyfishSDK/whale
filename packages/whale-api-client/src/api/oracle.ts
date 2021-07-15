@@ -61,19 +61,6 @@ export class Oracle {
   }
 
   /**
-   * Get price change percentage between 2 timestamps.
-   *
-   * @param {string} token
-   * @param {string} currency
-   * @param {number} timestamp1
-   * @param {number} timestamp2
-   * @return {Promise<BigNumber>}
-   */
-  async getPriceChangePercentage (token: string, currency: string, timestamp1: number, timestamp2: number): Promise<BigNumber> {
-    return await this.client.requestData('GET', `oracle/${token}/${currency}/${timestamp1}/${timestamp2}/price/change/percentage`)
-  }
-
-  /**
    * Get prices of all time intervals between 2 timestamps.
    *
    * @param {string} token

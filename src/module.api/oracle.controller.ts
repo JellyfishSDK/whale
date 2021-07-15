@@ -56,26 +56,6 @@ export class OracleController {
     return await this.priceAggregrationMapper.getLatestByTokenCurrencyBlockTime(token, currency, timestamp)
   }
 
-  @Get('/:token/:currency/:timestamp1/:timestamp2/price/change/percentage')
-  async getPriceChangePercentage (
-    @Param('token') token: string,
-      @Param('currency') currency: string,
-      @Param('timestamp1') timestamp1: number,
-      @Param('timestamp2') timestamp2: number
-  ): Promise<BigNumber> {
-    if ((timestamp1 < 0 && timestamp1 > 9999999999) || (timestamp2 < 0 && timestamp2 > 9999999999)) {
-      throw new BadRequestApiException('Timestamp is out of range')
-    }
-
-    const result1 = await this.priceAggregrationMapper.getLatestByTokenCurrencyBlockTime(token, currency, timestamp1)
-    const result2 = await this.priceAggregrationMapper.getLatestByTokenCurrencyBlockTime(token, currency, timestamp2)
-
-    const amountBN1 = new BigNumber(result1?.data.amount ?? 0)
-    const amountBN2 = new BigNumber(result2?.data.amount ?? 0)
-
-    return (amountBN2.minus(amountBN1)).div(100)
-  }
-
   @Get('/:token/:currency/:timestamp1/:timestamp2/:timeInterval/price/interval')
   async getIntervalPrice (
     @Param('token') token: string,
