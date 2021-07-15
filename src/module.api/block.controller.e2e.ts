@@ -138,8 +138,8 @@ describe('parseHeight', () => {
     expect(parseHeight('')).toStrictEqual(undefined)
   })
 
-  it('should return undefined for null', () => {
-    expect(parseHeight('')).toStrictEqual(undefined)
+  it('should return undefined for undefined', () => {
+    expect(parseHeight(undefined)).toStrictEqual(undefined)
   })
 
   it('should return undefined for strings with characters', () => {
