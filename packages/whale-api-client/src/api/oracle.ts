@@ -13,7 +13,7 @@ export class Oracle {
    *
    * @param {number} size
    * @param {string} next
-   * @return {Promise<OracleAppointedTokenCurrency[]>}
+   * @return {Promise<ApiPagedResponse<TokenCurrency>>}
    */
   async listTokenCurrencies (size: number = 50, next?: string): Promise<ApiPagedResponse<TokenCurrency>> {
     return await this.client.requestList('GET', 'oracle/token/currency', size, next)
@@ -23,9 +23,9 @@ export class Oracle {
    * Get all token currencies of an oracle.
    *
    * @param {string} id oracleId
-   * @return {Promise<OracleAppointedTokenCurrency[]>}
+   * @return {Promise<TokenCurrency[]>}
    */
-  async getTokenCurrencies (id: string): Promise<OracleAppointedTokenCurrency[]> {
+  async getTokenCurrencies (id: string): Promise<TokenCurrency[]> {
     return await this.client.requestData('GET', `oracle/${id}/token/currency`)
   }
 

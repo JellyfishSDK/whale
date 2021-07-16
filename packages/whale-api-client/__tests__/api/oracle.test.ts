@@ -106,23 +106,23 @@ describe('1 - Oracle Token Currency', () => {
       const result1 = await client.oracle.getTokenCurrencies(oracleId1) ?? []
       expect(result1.length).toStrictEqual(2)
 
-      expect(result1[0]?.data.token).toStrictEqual('AAPL')
-      expect(result1[0]?.data.currency).toStrictEqual('EUR')
+      expect(result1[0]?.token).toStrictEqual('AAPL')
+      expect(result1[0]?.currency).toStrictEqual('EUR')
       expect(result1[0]?.state).toStrictEqual(OracleState.REMOVED)
 
-      expect(result1[1]?.data.token).toStrictEqual('TSLA')
-      expect(result1[1]?.data.currency).toStrictEqual('USD')
+      expect(result1[1]?.token).toStrictEqual('TSLA')
+      expect(result1[1]?.currency).toStrictEqual('USD')
       expect(result1[1]?.state).toStrictEqual(OracleState.LIVE)
 
       const result2 = await client.oracle.getTokenCurrencies(oracleId2) ?? []
       expect(result2.length).toStrictEqual(2)
 
-      expect(result2[0]?.data.token).toStrictEqual('FB')
-      expect(result2[0]?.data.currency).toStrictEqual('CNY')
+      expect(result2[0]?.token).toStrictEqual('FB')
+      expect(result2[0]?.currency).toStrictEqual('CNY')
       expect(result2[0]?.state).toStrictEqual(OracleState.REMOVED)
 
-      expect(result2[1]?.data.token).toStrictEqual('MSFT')
-      expect(result2[1]?.data.currency).toStrictEqual('SGD')
+      expect(result2[1]?.token).toStrictEqual('MSFT')
+      expect(result2[1]?.currency).toStrictEqual('SGD')
       expect(result2[1]?.state).toStrictEqual(OracleState.LIVE)
     })
 

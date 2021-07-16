@@ -27,7 +27,7 @@ export class OracleController {
   async listTokenCurrencies (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<TokenCurrency>> {
-    const list: TokenCurrency[] = (await this.appointedTokenCurrencyMapper.list() ?? [])
+    const list = (await this.appointedTokenCurrencyMapper.list() ?? [])
       .map((obj: OracleAppointedTokenCurrency) => {
         return {
           token: obj.data.token,
@@ -57,8 +57,17 @@ export class OracleController {
   @Get('/:id/token/currency')
   async getTokenCurrencies (
     @Param('id') id: string
-  ): Promise<OracleAppointedTokenCurrency[] | undefined> {
-    return await this.appointedTokenCurrencyMapper.getByOracleId(id)
+  ): Promise<TokenCurrency[]> {
+    return (await this.appointedTokenCurrencyMapper.getByOracleId(id) ?? [])
+      .map((obj: OracleAppointedTokenCurrency) => {
+        return {
+          token: obj.data.token,
+          currency: obj.data.currency,
+          state: obj.state
+        }
+      })
+      .sort((a, b) =>
+        `${a.token}-${a.currency}`.localeCompare(`${b.token}-${b.currency}`))
   }
 
   @Get('/:id/price/data')
