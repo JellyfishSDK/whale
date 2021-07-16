@@ -66,8 +66,8 @@ export function mapPoolPair (poolPairInfoPlus: PoolPairInfoPlus): PoolPairData {
       blockCommission: poolPairInfoPlus.blockCommissionB.toFixed()
     },
     priceRatio: {
-      'tokenA/tokenB': poolPairInfoPlus['reserveA/reserveB'] instanceof BigNumber ? poolPairInfoPlus['reserveA/reserveB'].toFixed() : poolPairInfoPlus['reserveA/reserveB'],
-      'tokenB/tokenA': poolPairInfoPlus['reserveB/reserveA'] instanceof BigNumber ? poolPairInfoPlus['reserveB/reserveA'].toFixed() : poolPairInfoPlus['reserveB/reserveA']
+      ab: poolPairInfoPlus['reserveA/reserveB'] instanceof BigNumber ? poolPairInfoPlus['reserveA/reserveB'].toFixed() : poolPairInfoPlus['reserveA/reserveB'],
+      ba: poolPairInfoPlus['reserveB/reserveA'] instanceof BigNumber ? poolPairInfoPlus['reserveB/reserveA'].toFixed() : poolPairInfoPlus['reserveB/reserveA']
     },
     commission: poolPairInfoPlus.commission.toFixed(),
     totalLiquidity: {

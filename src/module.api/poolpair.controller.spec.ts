@@ -122,8 +122,8 @@ describe('list', () => {
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
-        'tokenA/tokenB': '0.16666666',
-        'tokenB/tokenA': '6'
+        ab: '0.16666666',
+        ba: '6'
       },
       rewardPct: '0',
       customRewards: undefined,
@@ -194,8 +194,8 @@ describe('get', () => {
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
-        'tokenA/tokenB': '0.5',
-        'tokenB/tokenA': '2'
+        ab: '0.5',
+        ba: '2'
       },
       rewardPct: '0',
       customRewards: undefined,
