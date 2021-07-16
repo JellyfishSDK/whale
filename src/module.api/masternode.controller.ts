@@ -41,7 +41,6 @@ export class MasternodesController {
    * @param {string} id
    * @return {Promise<MasternodeData>}
    */
-
   @Get('/:id')
   async get (@Param('id') id: string): Promise<MasternodeData> {
     try {

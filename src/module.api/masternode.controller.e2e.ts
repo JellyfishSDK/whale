@@ -58,9 +58,9 @@ describe('get', () => {
   })
 
   it('should fail due to non-existent masternode', async () => {
-    const id = '8d4d987dee688e400a0cdc899386f243250d3656d802231755ab4d28178c9816'
+    expect.assertions(2)
     try {
-      await controller.get(id)
+      await controller.get('8d4d987dee688e400a0cdc899386f243250d3656d802231755ab4d28178c9816')
     } catch (err) {
       expect(err).toBeInstanceOf(NotFoundException)
       expect(err.response).toStrictEqual({
