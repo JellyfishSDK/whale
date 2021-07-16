@@ -4,14 +4,10 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintTokens } from '@defichain/testing'
 import { NotFoundException } from '@nestjs/common'
-import { PoolPairService } from '@src/module.api/poolpair.service'
-import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
 let controller: PoolPairController
-let service: PoolPairService
-let spy: jest.SpyInstance
 
 beforeAll(async () => {
   await container.start()
@@ -21,7 +17,6 @@ beforeAll(async () => {
 
   app = await createTestingApp(container)
   controller = app.get(PoolPairController)
-  service = app.get(PoolPairService) // for stubbing testPoolSwap
 
   await waitForIndexedHeight(app, 100)
 
@@ -30,14 +25,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await stopTestingApp(container, app)
-})
-
-beforeEach(async () => {
-  spy = jest.spyOn(service, 'dexUsdtDfi').mockImplementation(async () => await Promise.resolve(new BigNumber('0.43151288')))
-})
-
-afterEach(() => {
-  spy.mockRestore()
 })
 
 async function setup (): Promise<void> {
@@ -76,6 +63,18 @@ async function setup (): Promise<void> {
     amountB: 360,
     shareAddress: await getNewAddress(container)
   })
+
+  // dexUsdtDfi setup
+  await createToken(container, 'USDT')
+  await createPoolPair(container, 'USDT', 'DFI')
+  await mintTokens(container, 'USDT')
+  await addPoolLiquidity(container, {
+    tokenA: 'USDT',
+    amountA: 1000,
+    tokenB: 'DFI',
+    amountB: 431.51288,
+    shareAddress: await getNewAddress(container)
+  })
 }
 
 describe('list', () => {
@@ -84,7 +83,7 @@ describe('list', () => {
       size: 30
     })
 
-    expect(response.data.length).toStrictEqual(6)
+    expect(response.data.length).toStrictEqual(7)
     expect(response.page).toBeUndefined()
 
     expect(response.data[1]).toStrictEqual({
@@ -136,7 +135,7 @@ describe('list', () => {
       next: first.page?.next
     })
 
-    expect(next.data.length).toStrictEqual(4)
+    expect(next.data.length).toStrictEqual(5)
     expect(next.page?.next).toBeUndefined()
     expect(next.data[0].symbol).toStrictEqual('C-DFI')
     expect(next.data[1].symbol).toStrictEqual('D-DFI')

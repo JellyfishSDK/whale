@@ -5,12 +5,10 @@ import { ApiPagedResponse, WhaleApiClient, WhaleApiException } from '../../src'
 import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintTokens } from '@defichain/testing'
 import { PoolPairService } from '@src/module.api/poolpair.service'
 import { PoolPairData } from '@whale-api-client/api/poolpair'
-import BigNumber from 'bignumber.js'
 
 let container: MasterNodeRegTestContainer
 let service: StubService
 let client: WhaleApiClient
-let spy: jest.SpyInstance
 let poolPairService: PoolPairService
 
 beforeAll(async () => {
@@ -38,14 +36,6 @@ afterAll(async () => {
   } finally {
     await container.stop()
   }
-})
-
-beforeEach(async () => {
-  spy = jest.spyOn(poolPairService, 'dexUsdtDfi').mockImplementation(async () => await Promise.resolve(new BigNumber('0.43151288')))
-})
-
-afterEach(() => {
-  spy.mockRestore()
 })
 
 async function setup (): Promise<void> {
@@ -86,13 +76,25 @@ async function setup (): Promise<void> {
     amountB: 360,
     shareAddress: await getNewAddress(container)
   })
+
+  // dexUsdtDfi setup
+  await createToken(container, 'USDT')
+  await createPoolPair(container, 'USDT', 'DFI')
+  await mintTokens(container, 'USDT')
+  await addPoolLiquidity(container, {
+    tokenA: 'USDT',
+    amountA: 1000,
+    tokenB: 'DFI',
+    amountB: 431.51288,
+    shareAddress: await getNewAddress(container)
+  })
 }
 
 describe('list', () => {
   it('should list', async () => {
     const response: ApiPagedResponse<PoolPairData> = await client.poolpair.list(30)
 
-    expect(response.length).toStrictEqual(8)
+    expect(response.length).toStrictEqual(9)
     expect(response.hasNext).toStrictEqual(false)
 
     expect(response[1]).toStrictEqual({
@@ -130,31 +132,32 @@ describe('list', () => {
   })
 
   it('should list with pagination', async () => {
-    const first = await client.poolpair.list(3)
-    expect(first.length).toStrictEqual(3)
+    const first = await client.poolpair.list(4)
+    expect(first.length).toStrictEqual(4)
     expect(first.hasNext).toStrictEqual(true)
-    expect(first.nextToken).toStrictEqual('11')
+    expect(first.nextToken).toStrictEqual('12')
 
     expect(first[0].symbol).toStrictEqual('A-DFI')
     expect(first[1].symbol).toStrictEqual('B-DFI')
     expect(first[2].symbol).toStrictEqual('C-DFI')
+    expect(first[3].symbol).toStrictEqual('D-DFI')
 
     const next = await client.paginate(first)
-    expect(next.length).toStrictEqual(3)
+    expect(next.length).toStrictEqual(4)
     expect(next.hasNext).toStrictEqual(true)
-    expect(next.nextToken).toStrictEqual('14')
+    expect(next.nextToken).toStrictEqual('16')
 
-    expect(next[0].symbol).toStrictEqual('D-DFI')
-    expect(next[1].symbol).toStrictEqual('E-DFI')
-    expect(next[2].symbol).toStrictEqual('F-DFI')
+    expect(next[0].symbol).toStrictEqual('E-DFI')
+    expect(next[1].symbol).toStrictEqual('F-DFI')
+    expect(next[2].symbol).toStrictEqual('G-DFI')
+    expect(next[3].symbol).toStrictEqual('H-DFI')
 
     const last = await client.paginate(next)
-    expect(last.length).toStrictEqual(2)
+    expect(last.length).toStrictEqual(1)
     expect(last.hasNext).toStrictEqual(false)
     expect(last.nextToken).toBeUndefined()
 
-    expect(last[0].symbol).toStrictEqual('G-DFI')
-    expect(last[1].symbol).toStrictEqual('H-DFI')
+    expect(last[0].symbol).toStrictEqual('USDT-DFI')
   })
 })
 
