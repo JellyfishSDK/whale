@@ -27,7 +27,7 @@ export class OracleController {
   async listTokenCurrencies (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<TokenCurrency>> {
-    const list = (await this.appointedTokenCurrencyMapper.list() ?? [])
+    const list: TokenCurrency[] = (await this.appointedTokenCurrencyMapper.list() ?? [])
       .map((obj: OracleAppointedTokenCurrency) => {
         return {
           token: obj.data.token,
@@ -38,16 +38,7 @@ export class OracleController {
       .sort((a, b) =>
         `${a.token}-${a.currency}`.localeCompare(`${b.token}-${b.currency}`))
 
-    let sliceList: TokenCurrency[] = []
-
-    if (query.next !== undefined) {
-      const index = list.findIndex(l => `${l.token}-${l.currency}` === query.next)
-      if (index >= 0) {
-        sliceList = list.slice(index + 1, index + 1 + query.size)
-      }
-    } else {
-      sliceList = list.slice(0, query.size)
-    }
+    const sliceList = await this.getSliceList(list, query, list.findIndex(l => `${l.token}-${l.currency}` === query.next))
 
     return ApiPagedResponse.of(sliceList, query.size, item => {
       return `${item.token}-${item.currency}`
@@ -56,9 +47,10 @@ export class OracleController {
 
   @Get('/:id/token/currency')
   async getTokenCurrencies (
-    @Param('id') id: string
-  ): Promise<TokenCurrency[]> {
-    return (await this.appointedTokenCurrencyMapper.getByOracleId(id) ?? [])
+    @Param('id') id: string,
+      @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<TokenCurrency>> {
+    const list: TokenCurrency[] = (await this.appointedTokenCurrencyMapper.getByOracleId(id) ?? [])
       .map((obj: OracleAppointedTokenCurrency) => {
         return {
           token: obj.data.token,
@@ -68,6 +60,12 @@ export class OracleController {
       })
       .sort((a, b) =>
         `${a.token}-${a.currency}`.localeCompare(`${b.token}-${b.currency}`))
+
+    const sliceList = await this.getSliceList(list, query, list.findIndex(l => `${l.token}-${l.currency}` === query.next))
+
+    return ApiPagedResponse.of(sliceList, query.size, item => {
+      return `${item.token}-${item.currency}`
+    })
   }
 
   @Get('/:id/price/data')
@@ -120,5 +118,19 @@ export class OracleController {
     }
 
     return allPrices
+  }
+
+  getSliceList<T> (list: T[], query: PaginationQuery, index: number): T[] {
+    let sliceList: T[] = []
+
+    if (query.next !== undefined) {
+      if (index >= 0) {
+        sliceList = list.slice(index + 1, index + 1 + query.size)
+      }
+    } else {
+      sliceList = list.slice(0, query.size)
+    }
+
+    return sliceList
   }
 }

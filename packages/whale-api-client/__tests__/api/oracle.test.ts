@@ -103,32 +103,64 @@ describe('1 - Oracle Token Currency', () => {
 
   describe('getTokenCurrencies()', () => {
     it('should get all token currencies with oracle id', async () => {
-      const result1 = await client.oracle.getTokenCurrencies(oracleId1) ?? []
-      expect(result1.length).toStrictEqual(2)
+      let first = await client.oracle.getTokenCurrencies(oracleId1, 1)
 
-      expect(result1[0]?.token).toStrictEqual('AAPL')
-      expect(result1[0]?.currency).toStrictEqual('EUR')
-      expect(result1[0]?.state).toStrictEqual(OracleState.REMOVED)
+      expect(first.length).toStrictEqual(1)
+      expect(first.hasNext).toStrictEqual(true)
+      expect(first.nextToken).toStrictEqual('AAPL-EUR')
 
-      expect(result1[1]?.token).toStrictEqual('TSLA')
-      expect(result1[1]?.currency).toStrictEqual('USD')
-      expect(result1[1]?.state).toStrictEqual(OracleState.LIVE)
+      expect(first[0]?.token).toStrictEqual('AAPL')
+      expect(first[0]?.currency).toStrictEqual('EUR')
+      expect(first[0]?.state).toStrictEqual(OracleState.REMOVED)
 
-      const result2 = await client.oracle.getTokenCurrencies(oracleId2) ?? []
-      expect(result2.length).toStrictEqual(2)
+      let next = await client.paginate(first)
 
-      expect(result2[0]?.token).toStrictEqual('FB')
-      expect(result2[0]?.currency).toStrictEqual('CNY')
-      expect(result2[0]?.state).toStrictEqual(OracleState.REMOVED)
+      expect(next.length).toStrictEqual(1)
+      expect(next.hasNext).toStrictEqual(true)
+      expect(next.nextToken).toStrictEqual('TSLA-USD')
 
-      expect(result2[1]?.token).toStrictEqual('MSFT')
-      expect(result2[1]?.currency).toStrictEqual('SGD')
-      expect(result2[1]?.state).toStrictEqual(OracleState.LIVE)
+      expect(next[0]?.token).toStrictEqual('TSLA')
+      expect(next[0]?.currency).toStrictEqual('USD')
+      expect(next[0]?.state).toStrictEqual(OracleState.LIVE)
+
+      let last = await client.paginate(next)
+
+      expect(last.length).toStrictEqual(0)
+      expect(last.hasNext).toStrictEqual(false)
+      expect(last.nextToken).toBeUndefined()
+
+      first = await client.oracle.getTokenCurrencies(oracleId2, 1)
+
+      expect(first.length).toStrictEqual(1)
+      expect(first.hasNext).toStrictEqual(true)
+      expect(first.nextToken).toStrictEqual('FB-CNY')
+
+      expect(first[0]?.token).toStrictEqual('FB')
+      expect(first[0]?.currency).toStrictEqual('CNY')
+      expect(first[0]?.state).toStrictEqual(OracleState.REMOVED)
+
+      next = await client.paginate(first)
+
+      expect(next.length).toStrictEqual(1)
+      expect(next.hasNext).toStrictEqual(true)
+      expect(next.nextToken).toStrictEqual('MSFT-SGD')
+
+      expect(next[0]?.token).toStrictEqual('MSFT')
+      expect(next[0]?.currency).toStrictEqual('SGD')
+      expect(next[0]?.state).toStrictEqual(OracleState.LIVE)
+
+      last = await client.paginate(next)
+
+      expect(last.length).toStrictEqual(0)
+      expect(last.hasNext).toStrictEqual(false)
+      expect(last.nextToken).toBeUndefined()
     })
 
-    it('should return empty array if get token currencies with invalid oracle id', async () => {
+    it('should return undefined if get token currencies with invalid oracle id', async () => {
       const result = await client.oracle.getTokenCurrencies('invalid')
-      expect(result).toStrictEqual([])
+      expect(result.length).toStrictEqual(0)
+      expect(result.hasNext).toStrictEqual(false)
+      expect(result.nextToken).toBeUndefined()
     })
   })
 })
