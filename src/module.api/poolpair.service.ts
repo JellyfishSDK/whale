@@ -112,7 +112,7 @@ export interface PoolPairInfoPlus {
   blockCommissionA: BigNumber
   blockCommissionB: BigNumber
   rewardPct: BigNumber
-  customRewards?: BigNumber
+  customRewards?: string[]
   creationTx: string
   creationHeight: BigNumber
 }

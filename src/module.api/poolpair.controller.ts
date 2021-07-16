@@ -77,7 +77,7 @@ export function mapPoolPair (poolPairInfoPlus: PoolPairInfoPlus): PoolPairData {
     tradeEnabled: poolPairInfoPlus.tradeEnabled,
     ownerAddress: poolPairInfoPlus.ownerAddress,
     rewardPct: poolPairInfoPlus.rewardPct.toFixed(),
-    customRewards: poolPairInfoPlus.customRewards?.toFixed(),
+    customRewards: poolPairInfoPlus.customRewards,
     creation: {
       tx: poolPairInfoPlus.creationTx,
       height: poolPairInfoPlus.creationHeight.toNumber()
