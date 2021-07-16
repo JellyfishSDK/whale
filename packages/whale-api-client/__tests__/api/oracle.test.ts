@@ -63,26 +63,41 @@ describe('1 - Oracle Token Currency', () => {
   }
 
   describe('listTokenCurrencies()', () => {
-    it('should get all token currencies', async () => {
-      const result = await client.oracle.listTokenCurrencies() ?? []
-      expect(result.length).toStrictEqual(4)
+    it('should list token currencies with pagination', async () => {
+      // Result sorted by token currency
+      const first = await client.oracle.listTokenCurrencies(2)
 
-      // Result sorted by token, currency and block height
-      expect(result[0]?.data.token).toStrictEqual('AAPL')
-      expect(result[0]?.data.currency).toStrictEqual('EUR')
-      expect(result[0]?.state).toStrictEqual(OracleState.REMOVED)
+      expect(first.length).toStrictEqual(2)
+      expect(first.hasNext).toStrictEqual(true)
+      expect(first.nextToken).toStrictEqual('FB-CNY')
 
-      expect(result[1]?.data.token).toStrictEqual('FB')
-      expect(result[1]?.data.currency).toStrictEqual('CNY')
-      expect(result[1]?.state).toStrictEqual(OracleState.REMOVED)
+      expect(first[0].token).toStrictEqual('AAPL')
+      expect(first[0].currency).toStrictEqual('EUR')
+      expect(first[0].state).toStrictEqual(OracleState.REMOVED)
 
-      expect(result[2]?.data.token).toStrictEqual('MSFT')
-      expect(result[2]?.data.currency).toStrictEqual('SGD')
-      expect(result[2]?.state).toStrictEqual(OracleState.LIVE)
+      expect(first[1].token).toStrictEqual('FB')
+      expect(first[1].currency).toStrictEqual('CNY')
+      expect(first[1].state).toStrictEqual(OracleState.REMOVED)
 
-      expect(result[3]?.data.token).toStrictEqual('TSLA')
-      expect(result[3]?.data.currency).toStrictEqual('USD')
-      expect(result[3]?.state).toStrictEqual(OracleState.LIVE)
+      const next = await client.paginate(first)
+
+      expect(next.length).toStrictEqual(2)
+      expect(next.hasNext).toStrictEqual(true)
+      expect(next.nextToken).toStrictEqual('TSLA-USD')
+
+      expect(next[0].token).toStrictEqual('MSFT')
+      expect(next[0].currency).toStrictEqual('SGD')
+      expect(next[0].state).toStrictEqual(OracleState.LIVE)
+
+      expect(next[1].token).toStrictEqual('TSLA')
+      expect(next[1].currency).toStrictEqual('USD')
+      expect(next[1].state).toStrictEqual(OracleState.LIVE)
+
+      const last = await client.paginate(next)
+
+      expect(last.length).toStrictEqual(0)
+      expect(last.hasNext).toStrictEqual(false)
+      expect(last.nextToken).toBeUndefined()
     })
   })
 

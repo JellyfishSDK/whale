@@ -1,8 +1,9 @@
-import { Controller, Get, Param } from '@nestjs/common'
+import { Controller, Get, Param, Query } from '@nestjs/common'
 import {
   OracleAppointedTokenCurrency,
   OraclePriceData,
   OraclePriceAggregration,
+  TokenCurrency,
   PriceInterval
 } from '@whale-api-client/api/oracle'
 import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
@@ -10,6 +11,8 @@ import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
 import BigNumber from 'bignumber.js'
 import { BadRequestApiException } from '@src/module.api/_core/api.error'
+import { PaginationQuery } from '@src/module.api/_core/api.query'
+import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 
 @Controller('/v0/:network/oracle')
 export class OracleController {
@@ -21,8 +24,34 @@ export class OracleController {
   }
 
   @Get('/token/currency')
-  async listTokenCurrencies (): Promise<OracleAppointedTokenCurrency[] | undefined> {
-    return await this.appointedTokenCurrencyMapper.list()
+  async listTokenCurrencies (
+    @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<TokenCurrency>> {
+    const list: TokenCurrency[] = (await this.appointedTokenCurrencyMapper.list() ?? [])
+      .map((obj: OracleAppointedTokenCurrency) => {
+        return {
+          token: obj.data.token,
+          currency: obj.data.currency,
+          state: obj.state
+        }
+      })
+      .sort((a, b) =>
+        `${a.token}-${a.currency}`.localeCompare(`${b.token}-${b.currency}`))
+
+    let sliceList: TokenCurrency[] = []
+
+    if (query.next !== undefined) {
+      const index = list.findIndex(l => `${l.token}-${l.currency}` === query.next)
+      if (index >= 0) {
+        sliceList = list.slice(index + 1, index + 1 + query.size)
+      }
+    } else {
+      sliceList = list.slice(0, query.size)
+    }
+
+    return ApiPagedResponse.of(sliceList, query.size, item => {
+      return `${item.token}-${item.currency}`
+    })
   }
 
   @Get('/:id/token/currency')

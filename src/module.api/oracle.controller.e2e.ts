@@ -58,26 +58,51 @@ describe('1 - Oracle Token Currency', () => {
   }
 
   describe('listTokenCurrencies()', () => {
-    it('should get all token currencies', async () => {
-      const result = await controller.listTokenCurrencies() ?? []
-      expect(result.length).toStrictEqual(4)
+    it('should list token currencies with pagination', async () => {
+      // Result sorted by token currency
+      const first = await controller.listTokenCurrencies({ size: 2 }) ?? []
 
-      // Result sorted by token, currency and block height
-      expect(result[0]?.data.token).toStrictEqual('AAPL')
-      expect(result[0]?.data.currency).toStrictEqual('EUR')
-      expect(result[0]?.state).toStrictEqual(OracleState.REMOVED)
+      expect(first.data.length).toStrictEqual(2)
+      expect(first.page?.next).toStrictEqual('FB-CNY')
 
-      expect(result[1]?.data.token).toStrictEqual('FB')
-      expect(result[1]?.data.currency).toStrictEqual('CNY')
-      expect(result[1]?.state).toStrictEqual(OracleState.REMOVED)
+      expect(first.data[0].token).toStrictEqual('AAPL')
+      expect(first.data[0].currency).toStrictEqual('EUR')
+      expect(first.data[0].state).toStrictEqual(OracleState.REMOVED)
 
-      expect(result[2]?.data.token).toStrictEqual('MSFT')
-      expect(result[2]?.data.currency).toStrictEqual('SGD')
-      expect(result[2]?.state).toStrictEqual(OracleState.LIVE)
+      expect(first.data[1].token).toStrictEqual('FB')
+      expect(first.data[1].currency).toStrictEqual('CNY')
+      expect(first.data[1].state).toStrictEqual(OracleState.REMOVED)
 
-      expect(result[3]?.data.token).toStrictEqual('TSLA')
-      expect(result[3]?.data.currency).toStrictEqual('USD')
-      expect(result[3]?.state).toStrictEqual(OracleState.LIVE)
+      const next = await controller.listTokenCurrencies({
+        size: 2,
+        next: first.page?.next
+      })
+
+      expect(next.data.length).toStrictEqual(2)
+      expect(next.page?.next).toStrictEqual('TSLA-USD')
+
+      expect(next.data[0].token).toStrictEqual('MSFT')
+      expect(next.data[0].currency).toStrictEqual('SGD')
+      expect(next.data[0].state).toStrictEqual(OracleState.LIVE)
+
+      expect(next.data[1].token).toStrictEqual('TSLA')
+      expect(next.data[1].currency).toStrictEqual('USD')
+      expect(next.data[1].state).toStrictEqual(OracleState.LIVE)
+
+      const last = await controller.listTokenCurrencies({
+        size: 2,
+        next: next.page?.next
+      })
+
+      expect(last.data.length).toStrictEqual(0)
+      expect(last.page).toBeUndefined()
+    })
+
+    it('should list token currencies with an empty object if size 100 next BAIDU-MYR which is out of range', async () => {
+      const result = await controller.listTokenCurrencies({ size: 100, next: 'BAIDU-MYR' })
+
+      expect(result.data.length).toStrictEqual(0)
+      expect(result.page).toBeUndefined()
     })
   })
 

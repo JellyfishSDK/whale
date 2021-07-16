@@ -1,6 +1,6 @@
 import { WhaleApiClient } from '../whale.api.client'
 import BigNumber from 'bignumber.js'
-
+import { ApiPagedResponse } from '../whale.api.response'
 /**
  * DeFi whale endpoint for oracle related services.
  */
@@ -11,10 +11,12 @@ export class Oracle {
   /**
    * list all token currencies.
    *
+   * @param {number} size
+   * @param {string} next
    * @return {Promise<OracleAppointedTokenCurrency[]>}
    */
-  async listTokenCurrencies (): Promise<OracleAppointedTokenCurrency[]> {
-    return await this.client.requestData('GET', 'oracle/token/currency')
+  async listTokenCurrencies (size: number = 50, next?: string): Promise<ApiPagedResponse<TokenCurrency>> {
+    return await this.client.requestList('GET', 'oracle/token/currency', size, next)
   }
 
   /**
@@ -131,6 +133,12 @@ export interface OraclePriceAggregration {
     currency: string
     amount: number
   }
+}
+
+export interface TokenCurrency {
+  token: string
+  currency: string
+  state: OracleState
 }
 
 export enum OracleState {
