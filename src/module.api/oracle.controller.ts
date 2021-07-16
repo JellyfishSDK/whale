@@ -27,7 +27,7 @@ export class OracleController {
   async listTokenCurrencies (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<TokenCurrency>> {
-    const list: TokenCurrency[] = (await this.appointedTokenCurrencyMapper.list() ?? [])
+    const list = (await this.appointedTokenCurrencyMapper.list() ?? [])
       .map((obj: OracleAppointedTokenCurrency) => {
         return {
           token: obj.data.token,
@@ -50,7 +50,7 @@ export class OracleController {
     @Param('id') id: string,
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<TokenCurrency>> {
-    const list: TokenCurrency[] = (await this.appointedTokenCurrencyMapper.getByOracleId(id) ?? [])
+    const list = (await this.appointedTokenCurrencyMapper.getByOracleId(id) ?? [])
       .map((obj: OracleAppointedTokenCurrency) => {
         return {
           token: obj.data.token,
