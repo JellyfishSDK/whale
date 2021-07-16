@@ -9,10 +9,10 @@ export class Masternodes {
   }
 
   /**
-   * Query list of masternodes.
+   * Get list of masternodes.
    *
    * @param {number} size masternodes size to query
-   * @param {string} next  set of masternodes to query
+   * @param {string} next  set of masternodes to get
    * @return {Promise<ApiPagedResponse<MasternodeData>>}
    */
   async list (size: number = 30, next?: string): Promise<ApiPagedResponse<MasternodeData>> {
@@ -20,9 +20,9 @@ export class Masternodes {
   }
 
   /**
-   * Query information about a masternode with given id.
+   * Get information about a masternode with given id.
    *
-   * @param {string} id masternode id to query
+   * @param {string} id masternode id to get
    * @return {Promise<MasternodeData>}
    */
   async get (id: string): Promise<MasternodeData> {

@@ -31,6 +31,19 @@ describe('list', () => {
     expect(Object.keys(data[0]).length).toStrictEqual(7)
     expect(data.hasNext).toStrictEqual(false)
     expect(data.nextToken).toStrictEqual(undefined)
+
+    expect(data[0]).toStrictEqual({
+      id: '03280abd3d3ae8dc294c1a572cd7912c3c3e53044943eac62c2f6c4687c87f10',
+      state: 'ENABLED',
+      mintedBlocks: 0,
+      owner: { address: 'bcrt1qyeuu9rvq8a67j86pzvh5897afdmdjpyankp4mu' },
+      operator: { address: 'bcrt1qurwyhta75n2g75u2u5nds9p6w9v62y8wr40d2r' },
+      creation: { height: 0 },
+      resign: {
+        tx: '0000000000000000000000000000000000000000000000000000000000000000',
+        height: -1
+      }
+    })
   })
 
   it('should list masternodes with pagination', async () => {
@@ -58,7 +71,18 @@ describe('get', () => {
 
     const data = await client.masternodes.get(masternode.id)
     expect(Object.keys(data).length).toStrictEqual(7)
-    expect(data).toStrictEqual(masternode)
+    expect(data).toStrictEqual({
+      id: masternode.id,
+      state: masternode.state,
+      mintedBlocks: masternode.mintedBlocks,
+      owner: { address: masternode.owner.address },
+      operator: { address: masternode.operator.address },
+      creation: { height: masternode.creation.height },
+      resign: {
+        tx: masternode.resign.tx,
+        height: masternode.resign.height
+      }
+    })
   })
 
   it('should fail due to non-existent masternode', async () => {
