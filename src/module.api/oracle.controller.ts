@@ -38,7 +38,7 @@ export class OracleController {
       .sort((a, b) =>
         `${a.token}-${a.currency}`.localeCompare(`${b.token}-${b.currency}`))
 
-    const sliceList = await this.getSliceList(list, query, list.findIndex(l => `${l.token}-${l.currency}` === query.next))
+    const sliceList = this.getSliceList(list, query, list.findIndex(l => `${l.token}-${l.currency}` === query.next))
 
     return ApiPagedResponse.of(sliceList, query.size, item => {
       return `${item.token}-${item.currency}`
@@ -61,7 +61,7 @@ export class OracleController {
       .sort((a, b) =>
         `${a.token}-${a.currency}`.localeCompare(`${b.token}-${b.currency}`))
 
-    const sliceList = await this.getSliceList(list, query, list.findIndex(l => `${l.token}-${l.currency}` === query.next))
+    const sliceList = this.getSliceList(list, query, list.findIndex(l => `${l.token}-${l.currency}` === query.next))
 
     return ApiPagedResponse.of(sliceList, query.size, item => {
       return `${item.token}-${item.currency}`
@@ -70,9 +70,18 @@ export class OracleController {
 
   @Get('/:id/price/data')
   async getPriceData (
-    @Param('id') id: string
-  ): Promise<OraclePriceData[] | undefined> {
-    return await this.priceDataMapper.getByOracleId(id)
+    @Param('id') id: string,
+      @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<OraclePriceData>> {
+    const list = (await this.priceDataMapper.getByOracleId(id) ?? [])
+      .sort((a, b) =>
+        `${a.data.token}-${a.data.currency}`.localeCompare(`${b.data.token}-${b.data.currency}`))
+
+    const sliceList = this.getSliceList(list, query, list.findIndex(l => `${l.data.token}-${l.data.currency}` === query.next))
+
+    return ApiPagedResponse.of(sliceList, query.size, item => {
+      return `${item.data.token}-${item.data.currency}`
+    })
   }
 
   @Get('/:token/:currency/price')

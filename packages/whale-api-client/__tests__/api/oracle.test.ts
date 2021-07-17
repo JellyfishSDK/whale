@@ -102,7 +102,7 @@ describe('1 - Oracle Token Currency', () => {
   })
 
   describe('getTokenCurrencies()', () => {
-    it('should get all token currencies with oracle id', async () => {
+    it('should get all token currencies with oracle id with pagination', async () => {
       let first = await client.oracle.getTokenCurrencies(oracleId1, 1)
 
       expect(first.length).toStrictEqual(1)
@@ -215,24 +215,41 @@ describe('2 - Oracle Price Data', () => {
   }
 
   describe('getPriceData()', () => {
-    it('should get all price data with oracle id', async () => {
-      const result = await client.oracle.getPriceData(oracleId) ?? []
-      expect(result.length).toStrictEqual(2)
+    it('should get all price data with oracle id with pagination', async () => {
+      const first = await client.oracle.getPriceData(oracleId, 1)
 
-      expect(result[0]?.data.token).toStrictEqual('AAPL')
-      expect(result[0]?.data.currency).toStrictEqual('EUR')
-      expect(result[0]?.data.amount).toStrictEqual('0.5')
-      expect(result[0]?.state).toStrictEqual(OracleState.LIVE)
+      expect(first.length).toStrictEqual(1)
+      expect(first.hasNext).toStrictEqual(true)
+      expect(first.nextToken).toStrictEqual('AAPL-EUR')
 
-      expect(result[1]?.data.token).toStrictEqual('TSLA')
-      expect(result[1]?.data.currency).toStrictEqual('USD')
-      expect(result[1]?.data.amount).toStrictEqual('1')
-      expect(result[1]?.state).toStrictEqual(OracleState.LIVE)
+      expect(first[0]?.data.token).toStrictEqual('AAPL')
+      expect(first[0]?.data.currency).toStrictEqual('EUR')
+      expect(first[0]?.state).toStrictEqual(OracleState.LIVE)
+      expect(first[0]?.data.amount).toStrictEqual('0.5')
+
+      const next = await client.paginate(first)
+
+      expect(next.length).toStrictEqual(1)
+      expect(next.hasNext).toStrictEqual(true)
+      expect(next.nextToken).toStrictEqual('TSLA-USD')
+
+      expect(next[0]?.data.token).toStrictEqual('TSLA')
+      expect(next[0]?.data.currency).toStrictEqual('USD')
+      expect(next[0]?.state).toStrictEqual(OracleState.LIVE)
+      expect(next[0]?.data.amount).toStrictEqual('1')
+
+      const last = await client.paginate(next)
+
+      expect(last.length).toStrictEqual(0)
+      expect(last.hasNext).toStrictEqual(false)
+      expect(last.nextToken).toBeUndefined()
     })
 
     it('should return empty array if get price data with invalid oracle id', async () => {
       const result = await client.oracle.getPriceData('invalid')
-      expect(result).toStrictEqual([])
+      expect(result.length).toStrictEqual(0)
+      expect(result.hasNext).toStrictEqual(false)
+      expect(result.nextToken).toBeUndefined()
     })
   })
 })

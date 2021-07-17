@@ -107,9 +107,9 @@ describe('1 - Oracle Token Currency', () => {
   })
 
   describe('getTokenCurrencies()', () => {
-    it('should get all token currencies with oracle id', async () => {
+    it('should get all token currencies with oracle id with pagination', async () => {
       // oracleId1
-      let first = await controller.getTokenCurrencies(oracleId1, { size: 1 }) ?? []
+      let first = await controller.getTokenCurrencies(oracleId1, { size: 1 })
 
       expect(first.data.length).toStrictEqual(1)
       expect(first.page?.next).toStrictEqual('AAPL-EUR')
@@ -139,7 +139,7 @@ describe('1 - Oracle Token Currency', () => {
       expect(last.page).toBeUndefined()
 
       // oracleId2
-      first = await controller.getTokenCurrencies(oracleId2, { size: 1 }) ?? []
+      first = await controller.getTokenCurrencies(oracleId2, { size: 1 })
 
       expect(first.data.length).toStrictEqual(1)
       expect(first.page?.next).toStrictEqual('FB-CNY')
@@ -221,24 +221,43 @@ describe('2 - Oracle Price Data', () => {
   }
 
   describe('getPriceData()', () => {
-    it('should get all price data with oracle id', async () => {
-      const result = await controller.getPriceData(oracleId) ?? []
-      expect(result.length).toStrictEqual(2)
+    it('should get all price data with oracle id with pagination', async () => {
+      const first = await controller.getPriceData(oracleId, { size: 1 })
 
-      expect(result[0]?.data.token).toStrictEqual('AAPL')
-      expect(result[0]?.data.currency).toStrictEqual('EUR')
-      expect(result[0]?.data.amount).toStrictEqual('0.5')
-      expect(result[0]?.state).toStrictEqual(OracleState.LIVE)
+      expect(first.data.length).toStrictEqual(1)
+      expect(first.page?.next).toStrictEqual('AAPL-EUR')
 
-      expect(result[1]?.data.token).toStrictEqual('TSLA')
-      expect(result[1]?.data.currency).toStrictEqual('USD')
-      expect(result[1]?.data.amount).toStrictEqual('1')
-      expect(result[1]?.state).toStrictEqual(OracleState.LIVE)
+      expect(first.data[0].data.token).toStrictEqual('AAPL')
+      expect(first.data[0].data.currency).toStrictEqual('EUR')
+      expect(first.data[0].state).toStrictEqual(OracleState.LIVE)
+      expect(first.data[0].data.amount).toStrictEqual('0.5')
+
+      const next = await controller.getPriceData(oracleId, {
+        size: 1,
+        next: first.page?.next
+      })
+
+      expect(next.data.length).toStrictEqual(1)
+      expect(next.page?.next).toStrictEqual('TSLA-USD')
+
+      expect(next.data[0].data.token).toStrictEqual('TSLA')
+      expect(next.data[0].data.currency).toStrictEqual('USD')
+      expect(next.data[0].state).toStrictEqual(OracleState.LIVE)
+      expect(next.data[0].data.amount).toStrictEqual('1')
+
+      const last = await controller.getPriceData(oracleId, {
+        size: 2,
+        next: next.page?.next
+      })
+
+      expect(last.data.length).toStrictEqual(0)
+      expect(last.page).toBeUndefined()
     })
 
-    it('should return empty array if get price data with invalid oracle id', async () => {
-      const result = await controller.getPriceData('invalid')
-      expect(result).toStrictEqual([])
+    it('should return empty array if get price data with invalid oracle id and size 100 next BAIDU-MYR which is out of range', async () => {
+      const result = await controller.getPriceData('invalid', { size: 100, next: 'BAIDU-MYR' })
+      expect(result.data.length).toStrictEqual(0)
+      expect(result.page).toBeUndefined()
     })
   })
 })

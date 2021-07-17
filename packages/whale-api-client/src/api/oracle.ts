@@ -1,6 +1,7 @@
 import { WhaleApiClient } from '../whale.api.client'
 import BigNumber from 'bignumber.js'
 import { ApiPagedResponse } from '../whale.api.response'
+
 /**
  * DeFi whale endpoint for oracle related services.
  */
@@ -35,10 +36,12 @@ export class Oracle {
    * Get price data of an oracle.
    *
    * @param {string} id oracleId
-   * @return {Promise<OraclePriceData[]>}
+   * @param {number} size
+   * @param {string} next
+   * @return {Promise<ApiPagedResponse<OraclePriceData>>}
    */
-  async getPriceData (id: string): Promise<OraclePriceData[]> {
-    return await this.client.requestData('GET', `oracle/${id}/price/data`)
+  async getPriceData (id: string, size: number = 50, next?: string): Promise<ApiPagedResponse<OraclePriceData>> {
+    return await this.client.requestList('GET', `oracle/${id}/price/data`, size, next)
   }
 
   /**
@@ -79,7 +82,7 @@ export class Oracle {
   }
 }
 
-export interface PriceInterval{
+export interface PriceInterval {
   timestamp: number
   amount: BigNumber
 }
