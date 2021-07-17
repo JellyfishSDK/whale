@@ -437,14 +437,34 @@ describe('4 - Oracle Price Interval', () => {
   }
 
   describe('getPriceInterval()', () => {
-    it('should get price of all time intervals between 2 timestamps', async () => {
-      const result = await client.oracle.getIntervalPrice('AAPL', 'EUR', timestamp + 2, timestamp + 8, 2)
-      expect(result).toStrictEqual([
-        { timestamp: timestamp + 2, amount: 0.5 },
-        { timestamp: timestamp + 4, amount: 0.8333333333333334 },
-        { timestamp: timestamp + 6, amount: 1.1666666666666667 },
-        { timestamp: timestamp + 8, amount: 1.5 }
-      ])
+    it('should get price of all time intervals between 2 timestamps with pagination', async () => {
+      const first = await client.oracle.getIntervalPrice('AAPL', 'EUR', timestamp + 2, timestamp + 8, 2, 2)
+
+      expect(first.length).toStrictEqual(2)
+      expect(first.hasNext).toStrictEqual(true)
+      expect(first.nextToken).toStrictEqual((timestamp + 4).toString())
+
+      expect(first[0].timestamp).toStrictEqual(timestamp + 2)
+      expect(first[0].amount).toStrictEqual(0.5)
+      expect(first[1].timestamp).toStrictEqual(timestamp + 4)
+      expect(first[1].amount).toStrictEqual(0.8333333333333334)
+
+      const next = await client.paginate(first)
+
+      expect(next.length).toStrictEqual(2)
+      expect(next.hasNext).toStrictEqual(true)
+      expect(next.nextToken).toStrictEqual((timestamp + 8).toString())
+
+      expect(next[0]?.timestamp).toStrictEqual(timestamp + 6)
+      expect(next[0]?.amount).toStrictEqual(1.1666666666666667)
+      expect(next[1]?.timestamp).toStrictEqual(timestamp + 8)
+      expect(next[1]?.amount).toStrictEqual(1.5)
+
+      const last = await client.paginate(next)
+
+      expect(last.length).toStrictEqual(0)
+      expect(last.hasNext).toStrictEqual(false)
+      expect(last.nextToken).toBeUndefined()
     })
   })
 })

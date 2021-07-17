@@ -433,14 +433,35 @@ describe('4 - Oracle Price Interval', () => {
   }
 
   describe('getPriceInterval()', () => {
-    it('should get price of all time intervals between 2 timestamps', async () => {
-      const result = await controller.getIntervalPrice('AAPL', 'EUR', timestamp + 2, timestamp + 8, 2)
-      expect(result).toStrictEqual([
-        { timestamp: timestamp + 2, amount: new BigNumber(0.5) },
-        { timestamp: timestamp + 4, amount: new BigNumber(0.8333333333333334) },
-        { timestamp: timestamp + 6, amount: new BigNumber(1.1666666666666667) },
-        { timestamp: timestamp + 8, amount: new BigNumber(1.5) }
-      ])
+    it('should get price of all time intervals between 2 timestamps with pagination', async () => {
+      const first = await controller.getIntervalPrice('AAPL', 'EUR', timestamp + 2, timestamp + 8, 2, { size: 2 })
+
+      expect(first.data.length).toStrictEqual(2)
+      expect(first.page?.next).toStrictEqual((timestamp + 4).toString())
+
+      expect(first.data[0].timestamp).toStrictEqual(timestamp + 2)
+      expect(first.data[0].amount).toStrictEqual(new BigNumber(0.5))
+      expect(first.data[1].timestamp).toStrictEqual(timestamp + 4)
+      expect(first.data[1].amount).toStrictEqual(new BigNumber(0.8333333333333334))
+
+      const next = await controller.getIntervalPrice('AAPL', 'EUR', timestamp + 2, timestamp + 8, 2, {
+        size: 2, next: first.page?.next
+      })
+
+      expect(next.data.length).toStrictEqual(2)
+      expect(next.page?.next).toStrictEqual((timestamp + 8).toString())
+
+      expect(next.data[0].timestamp).toStrictEqual(timestamp + 6)
+      expect(next.data[0].amount).toStrictEqual(new BigNumber(1.1666666666666667))
+      expect(next.data[1].timestamp).toStrictEqual(timestamp + 8)
+      expect(next.data[1].amount).toStrictEqual(new BigNumber(1.5))
+
+      const last = await controller.getIntervalPrice('AAPL', 'EUR', timestamp + 2, timestamp + 8, 2, {
+        size: 2, next: next.page?.next
+      })
+
+      expect(last.data.length).toStrictEqual(0)
+      expect(last.page).toBeUndefined()
     })
   })
 })

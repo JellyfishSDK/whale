@@ -4,7 +4,7 @@ import {
   OraclePriceData,
   OraclePriceAggregration,
   TokenCurrency,
-  PriceInterval
+  OraclePriceInterval
 } from '@whale-api-client/api/oracle'
 import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
@@ -107,8 +107,9 @@ export class OracleController {
       @Param('currency') currency: string,
       @Param('timestamp1') timestamp1: number,
       @Param('timestamp2') timestamp2: number,
-      @Param('timeInterval') timeInterval: number
-  ): Promise<PriceInterval[]> {
+      @Param('timeInterval') timeInterval: number,
+      @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<OraclePriceInterval>> {
     if ((timestamp1 < 0 && timestamp1 > 9999999999) || (timestamp2 < 0 && timestamp2 > 9999999999)) {
       throw new BadRequestApiException('Timestamp is out of range')
     }
@@ -126,7 +127,12 @@ export class OracleController {
       allPrices.push(data)
     }
 
-    return allPrices
+    const list = allPrices.sort(a => a.timestamp)
+    const sliceList = this.getSliceList(list, query, list.findIndex(l => l.timestamp === Number.parseInt(query.next ?? '0')))
+
+    return ApiPagedResponse.of(sliceList, query.size, item => {
+      return item.timestamp.toString()
+    })
   }
 
   getSliceList<T> (list: T[], query: PaginationQuery, index: number): T[] {

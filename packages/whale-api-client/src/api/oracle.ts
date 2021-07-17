@@ -75,14 +75,16 @@ export class Oracle {
    * @param {number} timestamp1
    * @param {number} timestamp2
    * @param {number} timeInterval
-   * @return {Promise<PriceInterval[]>}
+   * @param {number} size
+   * @param {string} next
+   * @return {Promise<ApiPagedResponse<OraclePriceInterval>>}
    */
-  async getIntervalPrice (token: string, currency: string, timestamp1: number, timestamp2: number, timeInterval: number): Promise<PriceInterval[]> {
-    return await this.client.requestData('GET', `oracle/${token}/${currency}/${timestamp1}/${timestamp2}/${timeInterval}/price/interval`)
+  async getIntervalPrice (token: string, currency: string, timestamp1: number, timestamp2: number, timeInterval: number, size: number = 50, next?: string): Promise<ApiPagedResponse<OraclePriceInterval>> {
+    return await this.client.requestList('GET', `oracle/${token}/${currency}/${timestamp1}/${timestamp2}/${timeInterval}/price/interval`, size, next)
   }
 }
 
-export interface PriceInterval {
+export interface OraclePriceInterval {
   timestamp: number
   amount: BigNumber
 }
