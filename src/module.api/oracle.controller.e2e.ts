@@ -98,9 +98,8 @@ describe('1 - Oracle Token Currency', () => {
       expect(last.page).toBeUndefined()
     })
 
-    it('should list token currencies with an empty object if size 100 next BAIDU-MYR which is out of range', async () => {
+    it('should return an empty array if list token currencies with size 100 next BAIDU-MYR which is out of range', async () => {
       const result = await controller.listTokenCurrencies({ size: 100, next: 'BAIDU-MYR' })
-
       expect(result.data.length).toStrictEqual(0)
       expect(result.page).toBeUndefined()
     })
@@ -169,7 +168,7 @@ describe('1 - Oracle Token Currency', () => {
       expect(last.page).toBeUndefined()
     })
 
-    it('should return empty array if get token currencies with invalid oracle id and size 100 next BAIDU-MYR which is out of range', async () => {
+    it('should return an empty array if get token currencies with invalid oracle id and size 100 next BAIDU-MYR which is out of range', async () => {
       const result = await controller.getTokenCurrencies('invalid', { size: 100, next: 'BAIDU-MYR' })
       expect(result.data.length).toStrictEqual(0)
       expect(result.page).toBeUndefined()
@@ -254,7 +253,7 @@ describe('2 - Oracle Price Data', () => {
       expect(last.page).toBeUndefined()
     })
 
-    it('should return empty array if get price data with invalid oracle id and size 100 next BAIDU-MYR which is out of range', async () => {
+    it('should return an empty array if get price data with invalid oracle id and size 100 next BAIDU-MYR which is out of range', async () => {
       const result = await controller.getPriceData('invalid', { size: 100, next: 'BAIDU-MYR' })
       expect(result.data.length).toStrictEqual(0)
       expect(result.page).toBeUndefined()

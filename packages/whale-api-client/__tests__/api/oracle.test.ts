@@ -103,6 +103,7 @@ describe('1 - Oracle Token Currency', () => {
 
   describe('getTokenCurrencies()', () => {
     it('should get all token currencies with oracle id with pagination', async () => {
+      // oracleId1
       let first = await client.oracle.getTokenCurrencies(oracleId1, 1)
 
       expect(first.length).toStrictEqual(1)
@@ -129,6 +130,7 @@ describe('1 - Oracle Token Currency', () => {
       expect(last.hasNext).toStrictEqual(false)
       expect(last.nextToken).toBeUndefined()
 
+      // oracleId2
       first = await client.oracle.getTokenCurrencies(oracleId2, 1)
 
       expect(first.length).toStrictEqual(1)
@@ -156,7 +158,7 @@ describe('1 - Oracle Token Currency', () => {
       expect(last.nextToken).toBeUndefined()
     })
 
-    it('should return undefined if get token currencies with invalid oracle id', async () => {
+    it('should return an empty array if get token currencies with invalid oracle id', async () => {
       const result = await client.oracle.getTokenCurrencies('invalid')
       expect(result.length).toStrictEqual(0)
       expect(result.hasNext).toStrictEqual(false)
@@ -245,7 +247,7 @@ describe('2 - Oracle Price Data', () => {
       expect(last.nextToken).toBeUndefined()
     })
 
-    it('should return empty array if get price data with invalid oracle id', async () => {
+    it('should return an empty array if get price data with invalid oracle id', async () => {
       const result = await client.oracle.getPriceData('invalid')
       expect(result.length).toStrictEqual(0)
       expect(result.hasNext).toStrictEqual(false)

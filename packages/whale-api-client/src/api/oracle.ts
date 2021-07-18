@@ -14,9 +14,9 @@ export class Oracle {
    *
    * @param {number} size
    * @param {string} next
-   * @return {Promise<ApiPagedResponse<TokenCurrency>>}
+   * @return {Promise<ApiPagedResponse<OracleTokenCurrency>>}
    */
-  async listTokenCurrencies (size: number = 50, next?: string): Promise<ApiPagedResponse<TokenCurrency>> {
+  async listTokenCurrencies (size: number = 50, next?: string): Promise<ApiPagedResponse<OracleTokenCurrency>> {
     return await this.client.requestList('GET', 'oracle/token/currency', size, next)
   }
 
@@ -26,9 +26,9 @@ export class Oracle {
    * @param {string} id oracleId
    * @param {number} size
    * @param {string} next
-   * @return {Promise<ApiPagedResponse<TokenCurrency>>}
+   * @return {Promise<ApiPagedResponse<OracleTokenCurrency>>}
    */
-  async getTokenCurrencies (id: string, size: number = 50, next?: string): Promise<ApiPagedResponse<TokenCurrency>> {
+  async getTokenCurrencies (id: string, size: number = 50, next?: string): Promise<ApiPagedResponse<OracleTokenCurrency>> {
     return await this.client.requestList('GET', `oracle/${id}/token/currency`, size, next)
   }
 
@@ -84,11 +84,6 @@ export class Oracle {
   }
 }
 
-export interface OraclePriceInterval {
-  timestamp: number
-  amount: BigNumber
-}
-
 export interface OracleAppointedWeightage {
   id: string
   block: {
@@ -142,10 +137,15 @@ export interface OraclePriceAggregration {
   }
 }
 
-export interface TokenCurrency {
+export interface OracleTokenCurrency {
   token: string
   currency: string
   state: OracleState
+}
+
+export interface OraclePriceInterval {
+  timestamp: number
+  amount: BigNumber
 }
 
 export enum OracleState {

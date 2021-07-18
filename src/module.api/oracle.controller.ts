@@ -3,16 +3,16 @@ import {
   OracleAppointedTokenCurrency,
   OraclePriceData,
   OraclePriceAggregration,
-  TokenCurrency,
+  OracleTokenCurrency,
   OraclePriceInterval
 } from '@whale-api-client/api/oracle'
 import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
 import BigNumber from 'bignumber.js'
-import { BadRequestApiException } from '@src/module.api/_core/api.error'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
+import { BadRequestApiException } from '@src/module.api/_core/api.error'
 
 @Controller('/v0/:network/oracle')
 export class OracleController {
@@ -26,7 +26,7 @@ export class OracleController {
   @Get('/token/currency')
   async listTokenCurrencies (
     @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<TokenCurrency>> {
+  ): Promise<ApiPagedResponse<OracleTokenCurrency>> {
     const list = (await this.appointedTokenCurrencyMapper.list() ?? [])
       .map((obj: OracleAppointedTokenCurrency) => {
         return {
@@ -49,7 +49,7 @@ export class OracleController {
   async getTokenCurrencies (
     @Param('id') id: string,
       @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<TokenCurrency>> {
+  ): Promise<ApiPagedResponse<OracleTokenCurrency>> {
     const list = (await this.appointedTokenCurrencyMapper.getByOracleId(id) ?? [])
       .map((obj: OracleAppointedTokenCurrency) => {
         return {
@@ -110,7 +110,7 @@ export class OracleController {
       @Param('timeInterval') timeInterval: number,
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<OraclePriceInterval>> {
-    if ((timestamp1 < 0 && timestamp1 > 9999999999) || (timestamp2 < 0 && timestamp2 > 9999999999)) {
+    if (timestamp1 < 0 || timestamp1 > 9999999999 || timestamp2 < 0 || timestamp2 > 9999999999) {
       throw new BadRequestApiException('Timestamp is out of range')
     }
 
