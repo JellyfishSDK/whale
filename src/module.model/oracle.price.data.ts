@@ -14,7 +14,7 @@ const OraclePriceDataMapping: ModelMapping<OraclePriceData> = {
       },
       sort: {
         type: 'string',
-        key: (d: OraclePriceData) => `${d.data.token}-${d.data.currency}-${d.data.amount}-${d.block.height}`
+        key: (d: OraclePriceData) => `${d.data.token}-${d.data.currency}-${d.data.amount.toString()}-${d.block.height}`
       }
     },
     oracleIdTokenCurrency_amountHeight: {
@@ -25,7 +25,7 @@ const OraclePriceDataMapping: ModelMapping<OraclePriceData> = {
       },
       sort: {
         type: 'string',
-        key: (d: OraclePriceData) => `${d.data.amount}-${d.block.height}`
+        key: (d: OraclePriceData) => `${d.data.amount.toString()}-${d.block.height}`
       }
     },
     tokenCurrency_timestamp: {
