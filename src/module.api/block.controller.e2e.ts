@@ -103,9 +103,9 @@ describe('BlockController', () => {
     expect(paginatedBlocks.data.length).toStrictEqual(30)
     expect(paginatedBlocks.data[0].height).toStrictEqual(39)
 
-    const secondPaginatedBlocks = await controller.list({ size: 30, next: '30' })
+    const secondPaginatedBlocks = await controller.list({ size: 20, next: '30' })
 
-    expect(secondPaginatedBlocks.data.length).toStrictEqual(30)
+    expect(secondPaginatedBlocks.data.length).toStrictEqual(20)
     expect(secondPaginatedBlocks.data[0].height).toStrictEqual(29)
   })
 
