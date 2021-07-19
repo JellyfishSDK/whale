@@ -118,7 +118,7 @@ export interface OraclePriceData {
     oracleId: string
     token: string
     currency: string
-    amount: number
+    amount: BigNumber
     timestamp: number
   }
   state: OracleState
@@ -133,7 +133,7 @@ export interface OraclePriceAggregration {
   data: {
     token: string
     currency: string
-    amount: number
+    amount: BigNumber
   }
 }
 

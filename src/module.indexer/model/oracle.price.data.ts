@@ -4,6 +4,7 @@ import { SmartBuffer } from 'smart-buffer'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 import { OraclePriceData, OracleState } from '@whale-api-client/api/oracle'
+import BigNumber from 'bignumber.js'
 
 @Injectable()
 export class OraclePriceDataIndexer extends Indexer {
@@ -42,7 +43,7 @@ export class OraclePriceDataIndexer extends Indexer {
                 const currency: string = price.currency
                 const amount: number = price.amount
 
-                records[`${oracleId}-${token}-${currency}-${block.height}-${timestamp.toString()}`] = OraclePriceDataIndexer.newOraclePriceData(block.height, oracleId, token, currency, amount, timestamp, OracleState.LIVE)
+                records[`${oracleId}-${token}-${currency}-${block.height}-${timestamp.toString()}`] = OraclePriceDataIndexer.newOraclePriceData(block.height, oracleId, token, currency, new BigNumber(amount), timestamp, OracleState.LIVE)
 
                 const priceDataResult = await this.mapper.getByOracleIdTokenCurrency(oracleId, token, currency) ?? []
 
@@ -167,7 +168,7 @@ export class OraclePriceDataIndexer extends Indexer {
     oracleId: string,
     token: string,
     currency: string,
-    amount: number,
+    amount: BigNumber,
     timestamp: number,
     state: OracleState
   ): OraclePriceData {
