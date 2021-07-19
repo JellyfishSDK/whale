@@ -1,4 +1,4 @@
-name: @defichain Dependencies
+name: DeFiChain Dependencies
 
 on:
   workflow_dispatch:
