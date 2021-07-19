@@ -59,6 +59,24 @@ describe('BlockController', () => {
     expect(paginatedTransactions.data[0].block.height).toStrictEqual(100)
   })
 
+  it('getBlockTransactions should get transactions from a block at height 10', async () => {
+    const paginatedTransactions = await controller.getBlockTransactions('49', { size: 30, next: '10' })
+
+    console.log('paginatedTransactions', paginatedTransactions)
+
+    // there's only one transaction
+    expect(paginatedTransactions.data.length).toStrictEqual(1)
+
+    expect(paginatedTransactions.data[0].block.height).toStrictEqual(49)
+  })
+
+  it('getBlockTransactions should get transactions from a block at height 21 will always have 0 transactions', async () => {
+    const paginatedTransactions = await controller.getBlockTransactions('21', { size: 30, next: '10' })
+
+    // there's only one transaction
+    expect(paginatedTransactions.data.length).toStrictEqual(0)
+  })
+
   it('getBlockTransactions should get first few transactions from a block by hash', async () => {
     const blockHash = await container.call('getblockhash', [3])
     const paginatedTransactions = await controller.getBlockTransactions(blockHash, { size: 30 })
@@ -84,6 +102,11 @@ describe('BlockController', () => {
 
     expect(paginatedBlocks.data.length).toStrictEqual(30)
     expect(paginatedBlocks.data[0].height).toStrictEqual(39)
+
+    const secondPaginatedBlocks = await controller.list({ size: 30, next: '30' })
+
+    expect(secondPaginatedBlocks.data.length).toStrictEqual(30)
+    expect(secondPaginatedBlocks.data[0].height).toStrictEqual(29)
   })
 
   it('list should be able top few transactions', async () => {
