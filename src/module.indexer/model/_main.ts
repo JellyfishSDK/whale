@@ -12,7 +12,6 @@ import { RawBlockMapper } from '@src/module.model/raw.block'
 import { NotFoundIndexerError } from '@src/module.indexer/error'
 import { blockchain as defid } from '@defichain/jellyfish-api-core'
 import { OracleAppointedIndexer } from '@src/module.indexer/model/oracle.appointed'
-import { OraclePriceDataIndexer } from '@src/module.indexer/model/oracle.price.data'
 import { OraclePriceAggregationIndexer } from '@src/module.indexer/model/oracle.price.aggregration'
 
 /**
@@ -33,7 +32,6 @@ export class MainIndexer {
     private readonly transactionVin: TransactionVinIndexer,
     private readonly transactionVout: TransactionVoutIndexer,
     private readonly oracleAppointed: OracleAppointedIndexer,
-    private readonly oraclePriceData: OraclePriceDataIndexer,
     private readonly oraclePriceAggregration: OraclePriceAggregationIndexer
   ) {
     this.indexers = [
@@ -45,7 +43,6 @@ export class MainIndexer {
       transactionVin,
       transactionVout,
       oracleAppointed,
-      oraclePriceData,
       oraclePriceAggregration
     ]
   }

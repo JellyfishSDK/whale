@@ -11,7 +11,6 @@ import { TransactionVoutIndexer } from '@src/module.indexer/model/transaction.vo
 import { VoutFinder } from '@src/module.indexer/model/_vout_finder'
 import { IndexStatusMapper } from '@src/module.indexer/status'
 import { OracleAppointedIndexer } from '@src/module.indexer/model/oracle.appointed'
-import { OraclePriceDataIndexer } from '@src/module.indexer/model/oracle.price.data'
 import { OraclePriceAggregationIndexer } from '@src/module.indexer/model/oracle.price.aggregration'
 
 @Module({
@@ -28,7 +27,6 @@ import { OraclePriceAggregationIndexer } from '@src/module.indexer/model/oracle.
     TransactionVinIndexer,
     TransactionVoutIndexer,
     OracleAppointedIndexer,
-    OraclePriceDataIndexer,
     OraclePriceAggregationIndexer
   ]
 })

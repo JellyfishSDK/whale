@@ -4,20 +4,29 @@ import { SmartBuffer } from 'smart-buffer'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
 import { OracleAppointedWeightageMapper } from '@src/module.model/oracle.appointed.weightage'
 import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
-import { OracleAppointedWeightage, OracleAppointedTokenCurrency, OracleState } from '@whale-api-client/api/oracle'
+import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
+import {
+  OracleAppointedWeightage,
+  OracleAppointedTokenCurrency,
+  OracleState,
+  OraclePriceData
+} from '@whale-api-client/api/oracle'
+import BigNumber from 'bignumber.js'
 
 @Injectable()
 export class OracleAppointedIndexer extends Indexer {
   constructor (
     private readonly appointedWeightageMapper: OracleAppointedWeightageMapper,
-    private readonly appointedTokenCurrencyMapper: OracleAppointedTokenCurrencyMapper
+    private readonly appointedTokenCurrencyMapper: OracleAppointedTokenCurrencyMapper,
+    private readonly priceDataMapper: OraclePriceDataMapper
   ) {
     super()
   }
 
   async index (block: RawBlock): Promise<void> {
-    const weightageRecord: Record<string, OracleAppointedWeightage> = {}
-    const tokenCurrencyRecord: Record<string, OracleAppointedTokenCurrency> = {}
+    const weightageRecords: Record<string, OracleAppointedWeightage> = {}
+    const tokenCurrencyRecords: Record<string, OracleAppointedTokenCurrency> = {}
+    const priceDataRecords: Record<string, OraclePriceData> = {}
 
     for (const txn of block.tx) {
       for (const vout of txn.vout) {
@@ -35,7 +44,7 @@ export class OracleAppointedIndexer extends Indexer {
 
             // Add weightage
             const weightage: number = stack[1].tx.data.weightage
-            weightageRecord[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleAppointedWeightage(block.height, oracleId, weightage, OracleState.LIVE)
+            weightageRecords[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleAppointedWeightage(block.height, oracleId, weightage, OracleState.LIVE)
 
             // Add token and currency
             const priceFeeds = stack[1].tx.data.priceFeeds
@@ -46,7 +55,7 @@ export class OracleAppointedIndexer extends Indexer {
               const token: string = priceFeed.token
               const currency: string = priceFeed.currency
 
-              tokenCurrencyRecord[`${oracleId}-${token}-${currency}-${block.height}`] = OracleAppointedIndexer.newOracleAppointedTokenCurrency(block.height, oracleId, token, currency, OracleState.LIVE)
+              tokenCurrencyRecords[`${oracleId}-${token}-${currency}-${block.height}`] = OracleAppointedIndexer.newOracleAppointedTokenCurrency(block.height, oracleId, token, currency, OracleState.LIVE)
             }
           } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
             const oracleId: string = stack[1].tx.data.oracleId
@@ -57,11 +66,11 @@ export class OracleAppointedIndexer extends Indexer {
 
             if (oldWeightageObj != null) {
               oldWeightageObj.state = OracleState.REMOVED
-              weightageRecord[`${oracleId}-${oldHeight}`] = oldWeightageObj
+              weightageRecords[`${oracleId}-${oldHeight}`] = oldWeightageObj
             }
 
             const weightage: number = stack[1].tx.data.weightage
-            weightageRecord[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleAppointedWeightage(block.height, oracleId, weightage, OracleState.LIVE)
+            weightageRecords[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleAppointedWeightage(block.height, oracleId, weightage, OracleState.LIVE)
 
             // Update token and currency
             const oldTokenCurrencyResult = await this.appointedTokenCurrencyMapper.getByOracleId(oracleId) ?? []
@@ -74,7 +83,7 @@ export class OracleAppointedIndexer extends Indexer {
               const oldHeight: number = oldTokenCurrencyObj.block.height
 
               oldTokenCurrencyObj.state = OracleState.REMOVED
-              tokenCurrencyRecord[`${oracleId}-${oldToken}-${oldCurrency}-${oldHeight}`] = oldTokenCurrencyObj
+              tokenCurrencyRecords[`${oracleId}-${oldToken}-${oldCurrency}-${oldHeight}`] = oldTokenCurrencyObj
             }
 
             const priceFeeds = stack[1].tx.data.priceFeeds
@@ -84,7 +93,41 @@ export class OracleAppointedIndexer extends Indexer {
 
               const token: string = priceFeed.token
               const currency: string = priceFeed.currency
-              tokenCurrencyRecord[`${oracleId}-${token}-${currency}-${block.height}`] = OracleAppointedIndexer.newOracleAppointedTokenCurrency(block.height, oracleId, token, currency, OracleState.LIVE)
+              tokenCurrencyRecords[`${oracleId}-${token}-${currency}-${block.height}`] = OracleAppointedIndexer.newOracleAppointedTokenCurrency(block.height, oracleId, token, currency, OracleState.LIVE)
+            }
+
+            const tokenCurrencies: string[] = []
+            const newTokenCurrenciesObj = stack[1].tx.data.priceFeeds ?? []
+
+            for (let i = 0; i < newTokenCurrenciesObj.length; i += 1) {
+              const tokenCurrencyObj = newTokenCurrenciesObj[i]
+
+              const token: string = tokenCurrencyObj.token
+              const currency: string = tokenCurrencyObj.currency
+
+              tokenCurrencies.push(`${token}-${currency}`)
+            }
+
+            // Update price data
+
+            if (tokenCurrencies.length > 0) {
+              const oracleId: string = stack[1].tx.data.oracleId
+              const priceDataResult = await this.priceDataMapper.getByOracleId(oracleId) ?? []
+
+              for (let i = 0; i < priceDataResult.length; i += 1) {
+                const priceData = priceDataResult[i]
+                const token = priceData.data.token
+                const currency = priceData.data.currency
+
+                if (priceData.state === OracleState.LIVE && !tokenCurrencies.includes(`${token}-${currency}`)) {
+                  const height = priceData.block.height
+                  const timestamp = priceData.data.timestamp
+
+                  priceData.state = OracleState.REMOVED
+
+                  priceDataRecords[`${oracleId}-${token}-${currency}-${height}-${timestamp.toString()}`] = priceData
+                }
+              }
             }
           } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
             const oracleId: string = stack[1].tx.data.oracleId
@@ -95,7 +138,7 @@ export class OracleAppointedIndexer extends Indexer {
 
             if (weightageObj != null) {
               weightageObj.state = OracleState.REMOVED
-              weightageRecord[`${oracleId}-${height}`] = weightageObj
+              weightageRecords[`${oracleId}-${height}`] = weightageObj
             }
 
             // Remove token and currency
@@ -109,25 +152,83 @@ export class OracleAppointedIndexer extends Indexer {
               const height: number = tokenCurrencyObj.block.height
 
               tokenCurrencyObj.state = OracleState.REMOVED
-              tokenCurrencyRecord[`${oracleId}-${token}-${currency}-${height}`] = tokenCurrencyObj
+              tokenCurrencyRecords[`${oracleId}-${token}-${currency}-${height}`] = tokenCurrencyObj
+            }
+
+            // Remove price data
+            const priceDataResult = await this.priceDataMapper.getByOracleId(oracleId) ?? []
+
+            for (let i = 0; i < priceDataResult.length; i += 1) {
+              const priceDataObj = priceDataResult[i]
+
+              if (priceDataObj.state === OracleState.LIVE) {
+                const token = priceDataObj.data.token
+                const currency = priceDataObj.data.currency
+                const height = priceDataObj.block.height
+                const timestamp = priceDataObj.data.timestamp
+
+                priceDataObj.state = OracleState.REMOVED
+
+                priceDataRecords[`${oracleId}-${token}-${currency}-${height}-${timestamp.toString()}`] = priceDataObj
+              }
+            }
+          } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
+            const timestamp: number = stack[1].tx.data.timestamp
+            const oracleId: string = stack[1].tx.data.oracleId
+            const tokens = stack[1].tx.data.tokens
+
+            for (let i = 0; i < tokens.length; i += 1) {
+              const token: string = tokens[i].token
+              const prices = tokens[i].prices
+
+              for (let j = 0; j < prices.length; j += 1) {
+                const price = prices[j]
+
+                const currency: string = price.currency
+                const amount: number = price.amount
+
+                priceDataRecords[`${oracleId}-${token}-${currency}-${block.height}-${timestamp.toString()}`] = OracleAppointedIndexer.newOraclePriceData(block.height, oracleId, token, currency, new BigNumber(amount), timestamp, OracleState.LIVE)
+
+                const priceDataResult = await this.priceDataMapper.getByOracleIdTokenCurrency(oracleId, token, currency) ?? []
+
+                for (let k = 0; k < priceDataResult.length; k += 1) {
+                  const priceDataObj = priceDataResult[k]
+
+                  if (priceDataObj.state === OracleState.LIVE) {
+                    const token = priceDataObj.data.token
+                    const currency = priceDataObj.data.currency
+                    const height = priceDataObj.block.height
+                    const timestamp = priceDataObj.data.timestamp
+
+                    priceDataObj.state = OracleState.REMOVED
+
+                    priceDataRecords[`${oracleId}-${token}-${currency}-${height}-${timestamp.toString()}`] = priceDataObj
+                  }
+                }
+              }
             }
           }
         }
       }
     }
 
-    for (const record of Object.values(weightageRecord)) {
+    for (const record of Object.values(weightageRecords)) {
       await this.appointedWeightageMapper.put(record)
     }
 
-    for (const record of Object.values(tokenCurrencyRecord)) {
+    for (const record of Object.values(tokenCurrencyRecords)) {
       await this.appointedTokenCurrencyMapper.put(record)
+    }
+
+    for (const record of Object.values(priceDataRecords)) {
+      await this.priceDataMapper.put(record)
     }
   }
 
   async invalidate (block: RawBlock): Promise<void> {
     const appointedWeightageIds: string[] = []
     const appointedTokenCurrencyIds: string[] = []
+    const priceDataIds: string[] = []
 
     for (const txn of block.tx) {
       for (const vout of txn.vout) {
@@ -169,17 +270,39 @@ export class OracleAppointedIndexer extends Indexer {
 
               appointedTokenCurrencyIds.push(`${oracleId}-${token}-${currency}-${block.height}`)
             }
+          } else if (stack[0]?.type === 'OP_RETURN' && stack[0]?.code === 106) {
+            if (stack[1]?.tx?.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
+              const timestamp: number = stack[1].tx.data.timestamp
+              const oracleId: string = stack[1].tx.data.oracleId
+              const tokens = stack[1].tx.data.tokens
+
+              for (let i = 0; i < tokens.length; i += 1) {
+                const token: string = tokens[i].token
+                const prices = tokens[i].prices
+
+                for (let y = 0; y < prices.length; y += 1) {
+                  const price = prices[y]
+                  const currency: string = price.currency
+
+                  priceDataIds.push(`${oracleId}-${token}-${currency}-${block.height}-${timestamp.toString()}`)
+                }
+              }
+            }
           }
         }
       }
-    }
 
-    for (const id of appointedWeightageIds) {
-      await this.appointedWeightageMapper.delete(id)
-    }
+      for (const id of appointedWeightageIds) {
+        await this.appointedWeightageMapper.delete(id)
+      }
 
-    for (const id of appointedTokenCurrencyIds) {
-      await this.appointedTokenCurrencyMapper.delete(id)
+      for (const id of appointedTokenCurrencyIds) {
+        await this.appointedTokenCurrencyMapper.delete(id)
+      }
+
+      for (const id of priceDataIds) {
+        await this.priceDataMapper.delete(id)
+      }
     }
   }
 
@@ -218,6 +341,31 @@ export class OracleAppointedIndexer extends Indexer {
         oracleId,
         token,
         currency
+      },
+      state
+    }
+  }
+
+  static newOraclePriceData (
+    height: number,
+    oracleId: string,
+    token: string,
+    currency: string,
+    amount: BigNumber,
+    timestamp: number,
+    state: OracleState
+  ): OraclePriceData {
+    return {
+      id: `${oracleId}-${token}-${currency}-${height}-${timestamp}`,
+      block: {
+        height
+      },
+      data: {
+        oracleId,
+        token,
+        currency,
+        amount,
+        timestamp
       },
       state
     }
