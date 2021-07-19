@@ -17,7 +17,7 @@ jobs:
 
       - name: Upgrade dependencies
         run: |
-          npx npm-check-updates -l m -u --deep --target newest --pre -f "/^@defichain\/.+/" \
+          npx npm-check-updates -l m -u --deep --target newest --pre -f "/^@defichain\/.+/" -x "/^@defichain\/whale-.+/" \
           | grep -q 'Run npm install to install new versions' && \
           npm i
 
