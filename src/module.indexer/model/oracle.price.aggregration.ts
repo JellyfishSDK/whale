@@ -76,7 +76,8 @@ export class OraclePriceAggregationIndexer extends Indexer {
       const token = data[0]
       const currency = data[1]
 
-      const priceDataResult = await this.priceDataMapper.getActivePrices(token, currency, block.time) ?? []
+      const priceDataResult = (await this.priceDataMapper.getActivePrices(token, currency, block.time) ?? [])
+        .filter(p => p.state === OracleState.LIVE)
 
       if (priceDataResult.length > 0) {
         priceAggregrationIds.push(`${token}-${currency}-${block.height}-${block.time}`)

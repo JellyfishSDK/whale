@@ -229,7 +229,7 @@ describe('2 - Oracle Price Data', () => {
       expect(first.data[0].data.token).toStrictEqual('AAPL')
       expect(first.data[0].data.currency).toStrictEqual('EUR')
       expect(first.data[0].state).toStrictEqual(OracleState.LIVE)
-      expect(first.data[0].data.amount).toStrictEqual('0.5')
+      expect(first.data[0].data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
 
       const next = await controller.getPriceData(oracleId, {
         size: 1,
@@ -242,7 +242,7 @@ describe('2 - Oracle Price Data', () => {
       expect(next.data[0].data.token).toStrictEqual('TSLA')
       expect(next.data[0].data.currency).toStrictEqual('USD')
       expect(next.data[0].state).toStrictEqual(OracleState.LIVE)
-      expect(next.data[0].data.amount).toStrictEqual('1')
+      expect(next.data[0].data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
 
       const last = await controller.getPriceData(oracleId, {
         size: 2,
@@ -333,7 +333,7 @@ describe('3 - Oracle Price', () => {
       const result = await controller.getPrice('AAPL', 'EUR')
       expect(result?.data.token).toStrictEqual('AAPL')
       expect(result?.data.currency).toStrictEqual('EUR')
-      expect(result?.data.amount).toStrictEqual(1.1666666666666667)
+      expect(result?.data.amount.toString()).toStrictEqual(new BigNumber('1.16666666666666666667').toString())
     })
 
     it('should return undefined if get latest price with invalid token and currency', async () => {
@@ -347,12 +347,12 @@ describe('3 - Oracle Price', () => {
       const result1 = await controller.getPriceByTimestamp('AAPL', 'EUR', blockTime1)
       expect(result1?.data.token).toStrictEqual('AAPL')
       expect(result1?.data.currency).toStrictEqual('EUR')
-      expect(result1?.data.amount).toStrictEqual(0.5)
+      expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
 
       const result2 = await controller.getPriceByTimestamp('AAPL', 'EUR', blockTime2)
       expect(result2?.data.token).toStrictEqual('AAPL')
       expect(result2?.data.currency).toStrictEqual('EUR')
-      expect(result2?.data.amount).toStrictEqual(1.1666666666666667)
+      expect(result2?.data.amount.toString()).toStrictEqual(new BigNumber('1.16666666666666666667').toString())
     })
 
     it('should return undefined if get latest price with invalid token, currency and timestamp', async () => {
@@ -439,9 +439,9 @@ describe('4 - Oracle Price Interval', () => {
       expect(first.page?.next).toStrictEqual((timestamp + 4).toString())
 
       expect(first.data[0].timestamp).toStrictEqual(timestamp + 2)
-      expect(first.data[0].amount).toStrictEqual(new BigNumber(0.5))
+      expect(first.data[0].amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
       expect(first.data[1].timestamp).toStrictEqual(timestamp + 4)
-      expect(first.data[1].amount).toStrictEqual(new BigNumber(0.8333333333333334))
+      expect(first.data[1].amount.toString()).toStrictEqual(new BigNumber('0.83333333333333333333').toString())
 
       const next = await controller.getIntervalPrice('AAPL', 'EUR', timestamp + 2, timestamp + 8, 2, {
         size: 2, next: first.page?.next
@@ -451,9 +451,9 @@ describe('4 - Oracle Price Interval', () => {
       expect(next.page?.next).toStrictEqual((timestamp + 8).toString())
 
       expect(next.data[0].timestamp).toStrictEqual(timestamp + 6)
-      expect(next.data[0].amount).toStrictEqual(new BigNumber(1.1666666666666667))
+      expect(next.data[0].amount.toString()).toStrictEqual(new BigNumber('1.16666666666666666667').toString())
       expect(next.data[1].timestamp).toStrictEqual(timestamp + 8)
-      expect(next.data[1].amount).toStrictEqual(new BigNumber(1.5))
+      expect(next.data[1].amount.toString()).toStrictEqual(new BigNumber('1.5').toString())
 
       const last = await controller.getIntervalPrice('AAPL', 'EUR', timestamp + 2, timestamp + 8, 2, {
         size: 2, next: next.page?.next

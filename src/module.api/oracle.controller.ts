@@ -123,7 +123,7 @@ export class OracleController {
     for (let i = 0; i <= no; i += 1) {
       const timestamp = timestamp1 + timeInterval * i
       const result = await this.priceAggregrationMapper.getLatestByTokenCurrencyBlockTime(token, currency, timestamp)
-      const data = { timestamp, amount: new BigNumber(result?.data?.amount ?? 0) }
+      const data = { timestamp, amount: new BigNumber(result?.data?.amount.toString() ?? '0') }
       allPrices.push(data)
     }
 

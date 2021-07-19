@@ -3,6 +3,7 @@ import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 import { OracleState } from '@whale-api-client/api/oracle'
+import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
@@ -90,7 +91,7 @@ describe('Price Data - setoracledata 1', () => {
     expect(result1?.data.oracleId).toStrictEqual(oracleId1)
     expect(result1?.data.token).toStrictEqual('AAPL')
     expect(result1?.data.currency).toStrictEqual('EUR')
-    expect(result1?.data.amount).toStrictEqual('0.5')
+    expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
     expect(result1?.data.timestamp).toStrictEqual(timestamp.toString())
     expect(result1?.state).toStrictEqual(OracleState.LIVE)
 
@@ -101,7 +102,7 @@ describe('Price Data - setoracledata 1', () => {
     expect(result2?.data.oracleId).toStrictEqual(oracleId1)
     expect(result2?.data.token).toStrictEqual('TSLA')
     expect(result2?.data.currency).toStrictEqual('USD')
-    expect(result2?.data.amount).toStrictEqual('1')
+    expect(result2?.data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
     expect(result2?.data.timestamp).toStrictEqual(timestamp.toString())
     expect(result2?.state).toStrictEqual(OracleState.LIVE)
 
@@ -112,7 +113,7 @@ describe('Price Data - setoracledata 1', () => {
     expect(result3?.data.oracleId).toStrictEqual(oracleId2)
     expect(result3?.data.token).toStrictEqual('FB')
     expect(result3?.data.currency).toStrictEqual('CNY')
-    expect(result3?.data.amount).toStrictEqual('1.5')
+    expect(result3?.data.amount.toString()).toStrictEqual(new BigNumber('1.5').toString())
     expect(result3?.data.timestamp).toStrictEqual(timestamp.toString())
     expect(result3?.state).toStrictEqual(OracleState.LIVE)
 
@@ -123,7 +124,7 @@ describe('Price Data - setoracledata 1', () => {
     expect(result4?.data.oracleId).toStrictEqual(oracleId2)
     expect(result4?.data.token).toStrictEqual('MSFT')
     expect(result4?.data.currency).toStrictEqual('SGD')
-    expect(result4?.data.amount).toStrictEqual('2')
+    expect(result4?.data.amount.toString()).toStrictEqual(new BigNumber('2').toString())
     expect(result4?.data.timestamp).toStrictEqual(timestamp.toString())
     expect(result4?.state).toStrictEqual(OracleState.LIVE)
 
@@ -198,7 +199,7 @@ describe('Price Data - setoracledata 2', () => {
     expect(result1?.data.oracleId).toStrictEqual(oracleId)
     expect(result1?.data.token).toStrictEqual('AAPL')
     expect(result1?.data.currency).toStrictEqual('EUR')
-    expect(result1?.data.amount).toStrictEqual('0.5')
+    expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
     expect(result1?.data.timestamp).toStrictEqual(timestamp.toString())
     expect(result1?.state).toStrictEqual(OracleState.LIVE)
 
@@ -279,7 +280,7 @@ describe('Price Data - setoracledata 3', () => {
     expect(result1?.data.oracleId).toStrictEqual(oracleId)
     expect(result1?.data.token).toStrictEqual('AAPL')
     expect(result1?.data.currency).toStrictEqual('EUR')
-    expect(result1?.data.amount).toStrictEqual('0.5')
+    expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
     expect(result1?.data.timestamp).toStrictEqual(timestamp.toString())
     expect(result1?.state).toStrictEqual(OracleState.REMOVED)
 
@@ -290,7 +291,7 @@ describe('Price Data - setoracledata 3', () => {
     expect(result2?.data.oracleId).toStrictEqual(oracleId)
     expect(result2?.data.token).toStrictEqual('AAPL')
     expect(result2?.data.currency).toStrictEqual('EUR')
-    expect(result2?.data.amount).toStrictEqual('1')
+    expect(result2?.data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
     expect(result2?.data.timestamp).toStrictEqual(timestamp.toString())
     expect(result2?.state).toStrictEqual(OracleState.LIVE)
 
@@ -369,7 +370,7 @@ describe('Price Data - updateoracle', () => {
     expect(result1?.data.oracleId).toStrictEqual(oracleId)
     expect(result1?.data.token).toStrictEqual('AAPL')
     expect(result1?.data.currency).toStrictEqual('EUR')
-    expect(result1?.data.amount).toStrictEqual('0.5')
+    expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
     expect(result1?.data.timestamp).toStrictEqual(timestamp.toString())
     expect(result1?.state).toStrictEqual(OracleState.LIVE)
 
@@ -380,7 +381,7 @@ describe('Price Data - updateoracle', () => {
     expect(result2?.data.oracleId).toStrictEqual(oracleId)
     expect(result2?.data.token).toStrictEqual('TSLA')
     expect(result2?.data.currency).toStrictEqual('USD')
-    expect(result2?.data.amount).toStrictEqual('1')
+    expect(result2?.data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
     expect(result2?.data.timestamp).toStrictEqual(timestamp.toString())
     expect(result2?.state).toStrictEqual(OracleState.REMOVED)
 
@@ -460,7 +461,7 @@ describe('Price Data - removeoracle', () => {
     expect(result1?.data.oracleId).toStrictEqual(oracleId)
     expect(result1?.data.token).toStrictEqual('AAPL')
     expect(result1?.data.currency).toStrictEqual('EUR')
-    expect(result1?.data.amount).toStrictEqual('0.5')
+    expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
     expect(result1?.data.timestamp).toStrictEqual(timestamp.toString())
     expect(result1?.state).toStrictEqual(OracleState.REMOVED)
 
@@ -471,7 +472,7 @@ describe('Price Data - removeoracle', () => {
     expect(result2?.data.oracleId).toStrictEqual(oracleId)
     expect(result2?.data.token).toStrictEqual('TSLA')
     expect(result2?.data.currency).toStrictEqual('USD')
-    expect(result2?.data.amount).toStrictEqual('1')
+    expect(result2?.data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
     expect(result2?.data.timestamp).toStrictEqual(timestamp.toString())
     expect(result2?.state).toStrictEqual(OracleState.REMOVED)
 

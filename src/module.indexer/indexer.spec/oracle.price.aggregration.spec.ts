@@ -7,6 +7,7 @@ import {
   waitForTime
 } from '@src/module.indexer/indexer.spec/_testing.module'
 import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
+import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
@@ -86,14 +87,14 @@ describe('Price Aggregration - 1', () => {
     expect(result1?.block.time).toStrictEqual(blockTime1)
     expect(result1?.data.token).toStrictEqual('AAPL')
     expect(result1?.data.currency).toStrictEqual('EUR')
-    expect(result1?.data.amount).toStrictEqual(0.5)
+    expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
 
     const result2 = await priceAggregrationMapper.get('TSLA', 'USD', height2, blockTime2)
     expect(result2?.block.height).toStrictEqual(height2)
     expect(result2?.block.time).toStrictEqual(blockTime2)
     expect(result2?.data.token).toStrictEqual('TSLA')
     expect(result2?.data.currency).toStrictEqual('USD')
-    expect(result2?.data.amount).toStrictEqual(1)
+    expect(result2?.data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
 
     const data1 = await container.call('getprice', [{ token: 'AAPL', currency: 'EUR' }])
     expect(data1).toStrictEqual(0.5)
@@ -184,28 +185,28 @@ describe('Price Aggregration - 2', () => {
     expect(result1?.block.time).toStrictEqual(blockTime1)
     expect(result1?.data.token).toStrictEqual('AAPL')
     expect(result1?.data.currency).toStrictEqual('EUR')
-    expect(result1?.data.amount).toStrictEqual(0.5)
+    expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
 
     const result2 = await priceAggregrationMapper.get('TSLA', 'USD', height1, blockTime1)
     expect(result2?.block.height).toStrictEqual(height1)
     expect(result2?.block.time).toStrictEqual(blockTime1)
     expect(result2?.data.token).toStrictEqual('TSLA')
     expect(result2?.data.currency).toStrictEqual('USD')
-    expect(result2?.data.amount).toStrictEqual(1)
+    expect(result2?.data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
 
     const result3 = await priceAggregrationMapper.get('AAPL', 'EUR', height2, blockTime2)
     expect(result3?.block.height).toStrictEqual(height2)
     expect(result3?.block.time).toStrictEqual(blockTime2)
     expect(result3?.data.token).toStrictEqual('AAPL')
     expect(result3?.data.currency).toStrictEqual('EUR')
-    expect(result3?.data.amount).toStrictEqual(1.1666666666666667)
+    expect(result3?.data.amount.toString()).toStrictEqual(new BigNumber('1.16666666666666666667').toString())
 
     const result4 = await priceAggregrationMapper.get('TSLA', 'USD', height2, blockTime2)
     expect(result4?.block.height).toStrictEqual(height2)
     expect(result4?.block.time).toStrictEqual(blockTime2)
     expect(result4?.data.token).toStrictEqual('TSLA')
     expect(result4?.data.currency).toStrictEqual('USD')
-    expect(result4?.data.amount).toStrictEqual(1.6666666666666667)
+    expect(result4?.data.amount.toString()).toStrictEqual(new BigNumber('1.66666666666666666667').toString())
 
     const data1 = await container.call('getprice', [{ token: 'AAPL', currency: 'EUR' }])
     expect(data1).toStrictEqual(1.16666666)

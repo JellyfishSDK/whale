@@ -3,6 +3,7 @@ import { StubService } from '../stub.service'
 import { WhaleApiClient } from '../../src'
 import { OracleState } from '../../src/api/oracle'
 import { StubWhaleApiClient } from '../stub.client'
+import BigNumber from 'bignumber.js'
 
 let container: MasterNodeRegTestContainer
 let service: StubService
@@ -227,7 +228,7 @@ describe('2 - Oracle Price Data', () => {
       expect(first[0]?.data.token).toStrictEqual('AAPL')
       expect(first[0]?.data.currency).toStrictEqual('EUR')
       expect(first[0]?.state).toStrictEqual(OracleState.LIVE)
-      expect(first[0]?.data.amount).toStrictEqual('0.5')
+      expect(first[0]?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
 
       const next = await client.paginate(first)
 
@@ -238,7 +239,7 @@ describe('2 - Oracle Price Data', () => {
       expect(next[0]?.data.token).toStrictEqual('TSLA')
       expect(next[0]?.data.currency).toStrictEqual('USD')
       expect(next[0]?.state).toStrictEqual(OracleState.LIVE)
-      expect(next[0]?.data.amount).toStrictEqual('1')
+      expect(next[0]?.data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
 
       const last = await client.paginate(next)
 
@@ -334,7 +335,7 @@ describe('3 - Oracle Price', () => {
       const result = await client.oracle.getPrice('AAPL', 'EUR')
       expect(result?.data.token).toStrictEqual('AAPL')
       expect(result?.data.currency).toStrictEqual('EUR')
-      expect(result?.data.amount).toStrictEqual(1.1666666666666667)
+      expect(result?.data.amount.toString()).toStrictEqual(new BigNumber('1.16666666666666666667').toString())
     })
 
     it('should return undefined if get latest price with invalid token and currency', async () => {
@@ -348,12 +349,12 @@ describe('3 - Oracle Price', () => {
       const result1 = await client.oracle.getPriceByTimestamp('AAPL', 'EUR', blockTime1)
       expect(result1?.data.token).toStrictEqual('AAPL')
       expect(result1?.data.currency).toStrictEqual('EUR')
-      expect(result1?.data.amount).toStrictEqual(0.5)
+      expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
 
       const result2 = await client.oracle.getPriceByTimestamp('AAPL', 'EUR', blockTime2)
       expect(result2?.data.token).toStrictEqual('AAPL')
       expect(result2?.data.currency).toStrictEqual('EUR')
-      expect(result2?.data.amount).toStrictEqual(1.1666666666666667)
+      expect(result2?.data.amount.toString()).toStrictEqual(new BigNumber('1.16666666666666666667').toString())
     })
 
     it('should return undefined if get latest price with invalid token, currency and timestamp', async () => {
@@ -447,9 +448,9 @@ describe('4 - Oracle Price Interval', () => {
       expect(first.nextToken).toStrictEqual((timestamp + 4).toString())
 
       expect(first[0].timestamp).toStrictEqual(timestamp + 2)
-      expect(first[0].amount).toStrictEqual(0.5)
+      expect(first[0].amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
       expect(first[1].timestamp).toStrictEqual(timestamp + 4)
-      expect(first[1].amount).toStrictEqual(0.8333333333333334)
+      expect(first[1].amount.toString()).toStrictEqual(new BigNumber('0.8333333333333334').toString())
 
       const next = await client.paginate(first)
 
@@ -458,9 +459,9 @@ describe('4 - Oracle Price Interval', () => {
       expect(next.nextToken).toStrictEqual((timestamp + 8).toString())
 
       expect(next[0]?.timestamp).toStrictEqual(timestamp + 6)
-      expect(next[0]?.amount).toStrictEqual(1.1666666666666667)
+      expect(next[0]?.amount.toString()).toStrictEqual(new BigNumber(1.1666666666666667).toString())
       expect(next[1]?.timestamp).toStrictEqual(timestamp + 8)
-      expect(next[1]?.amount).toStrictEqual(1.5)
+      expect(next[1]?.amount.toString()).toStrictEqual(new BigNumber(1.5).toString())
 
       const last = await client.paginate(next)
 
