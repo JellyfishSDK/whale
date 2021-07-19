@@ -42,6 +42,6 @@
   "dependencies": {
     "@defichain/jellyfish-wallet": ">=0.27.0",
     "@defichain/jellyfish-transaction-builder": ">=0.27.0",
-    "@defichain/whale-api-client": "0.0.0"
+    "@defichain/whale-api-client": "0.5.9"
   }
 }
