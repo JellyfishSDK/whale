@@ -12,6 +12,7 @@ import { NetworkGuard } from '@src/module.api/guards/network.guard'
 import { ExceptionInterceptor } from '@src/module.api/interceptors/exception.interceptor'
 import { ResponseInterceptor } from '@src/module.api/interceptors/response.interceptor'
 import { TokensController } from '@src/module.api/token.controller'
+import { BlockController } from '@src/module.api/block.controller'
 import { MasternodesController } from '@src/module.api/masternode.controller'
 
 /**
@@ -26,7 +27,8 @@ import { MasternodesController } from '@src/module.api/masternode.controller'
     TransactionsController,
     TokensController,
     PoolPairController,
-    MasternodesController
+    MasternodesController,
+    BlockController
   ],
   providers: [
     { provide: APP_PIPE, useClass: ApiValidationPipe },
