@@ -1,9 +1,9 @@
-name: @defichain Dependencies
+name: @nestjs Dependencies
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 1 * * *'
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
 
       - name: Upgrade dependencies
         run: |
-          npx npm-check-updates -l m -u --deep --target newest --pre -f "/^@defichain\/.+/" \
+          npx npm-check-updates -l m -u -f "/^@nestjs\/.+/" \
           | grep -q 'Run npm install to install new versions' && \
           npm i
 
@@ -26,13 +26,13 @@ jobs:
         with:
           token: ${{ secrets.DEFICHAIN_BOT_GITHUB_TOKEN }}
           labels: kind/dependencies
-          commit-message: Bump @defichain dependencies
+          commit-message: Bump @nestjs dependencies
           committer: DeFiChain Bot <github-bot@defichain.com>
           author: DeFiChain Bot <github-bot@defichain.com>
-          title: Bump @defichain dependencies
+          title: Bump @nestjs dependencies
           body: |
             #### What kind of PR is this?:
             /kind dependencies
             #### What this PR does / why we need it:
-            Bump `@defichain/*` dependencies to the newest release.
-          branch: defichain-bot/bump-defichain-deps
+            Bump `@nestjs/*` dependencies to the newest release.
+          branch: defichain-bot/bump-nestjs-deps
