@@ -11,7 +11,7 @@ describe('Weightage - approveoracle', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(20)
+    await container.generate(100)
 
     app = await createIndexerTestModule(container)
     await app.init()
@@ -70,7 +70,7 @@ describe('Weightage - updateoracle', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(20)
+    await container.generate(100)
 
     app = await createIndexerTestModule(container)
     await app.init()
@@ -142,7 +142,7 @@ describe('Weightage - removeoracle', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(20)
+    await container.generate(100)
 
     app = await createIndexerTestModule(container)
     await app.init()
