@@ -9,10 +9,10 @@ import {
 import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
 import BigNumber from 'bignumber.js'
 
-describe('Price Aggregration - 1', () => {
-  const container = new MasterNodeRegTestContainer()
-  let app: TestingModule
+const container = new MasterNodeRegTestContainer()
+let app: TestingModule
 
+describe('Price Aggregration - 1', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -110,9 +110,6 @@ describe('Price Aggregration - 1', () => {
 })
 
 describe('Price Aggregration - 2', () => {
-  const container = new MasterNodeRegTestContainer()
-  let app: TestingModule
-
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -230,9 +227,6 @@ describe('Price Aggregration - 2', () => {
 })
 
 describe('Price Aggregration - 3', () => {
-  const container = new MasterNodeRegTestContainer()
-  let app: TestingModule
-
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()

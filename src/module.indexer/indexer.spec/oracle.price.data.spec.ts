@@ -5,10 +5,10 @@ import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 import { OracleState } from '@whale-api-client/api/oracle'
 import BigNumber from 'bignumber.js'
 
-describe('Price Data - setoracledata 1', () => {
-  const container = new MasterNodeRegTestContainer()
-  let app: TestingModule
+const container = new MasterNodeRegTestContainer()
+let app: TestingModule
 
+describe('Price Data - setoracledata 1', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -148,9 +148,6 @@ describe('Price Data - setoracledata 1', () => {
 })
 
 describe('Price Data - setoracledata 2', () => {
-  const container = new MasterNodeRegTestContainer()
-  let app: TestingModule
-
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -228,9 +225,6 @@ describe('Price Data - setoracledata 2', () => {
 })
 
 describe('Price Data - setoracledata 3', () => {
-  const container = new MasterNodeRegTestContainer()
-  let app: TestingModule
-
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -322,9 +316,6 @@ describe('Price Data - setoracledata 3', () => {
 })
 
 describe('Price Data - updateoracle', () => {
-  const container = new MasterNodeRegTestContainer()
-  let app: TestingModule
-
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -418,9 +409,6 @@ describe('Price Data - updateoracle', () => {
 })
 
 describe('Price Data - removeoracle', () => {
-  const container = new MasterNodeRegTestContainer()
-  let app: TestingModule
-
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()

@@ -4,10 +4,10 @@ import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module
 import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
 import { OracleState } from '@whale-api-client/api/oracle'
 
-describe('Token Currency - approveoracle', () => {
-  const container = new MasterNodeRegTestContainer()
-  let app: TestingModule
+const container = new MasterNodeRegTestContainer()
+let app: TestingModule
 
+describe('Token Currency - approveoracle', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -73,9 +73,6 @@ describe('Token Currency - approveoracle', () => {
 })
 
 describe('Token Currency - updateoracle', () => {
-  const container = new MasterNodeRegTestContainer()
-  let app: TestingModule
-
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -177,9 +174,6 @@ describe('Token Currency - updateoracle', () => {
 })
 
 describe('Token Currency - removeoracle', () => {
-  const container = new MasterNodeRegTestContainer()
-  let app: TestingModule
-
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
