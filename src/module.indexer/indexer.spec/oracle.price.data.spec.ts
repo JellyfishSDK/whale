@@ -79,7 +79,7 @@ describe('Price Data - setoracledata 1', () => {
 
     height2 = await container.call('getblockcount')
 
-    await container.generate(1)
+    await container.generate(5)
 
     height3 = await container.call('getblockcount')
   }
@@ -192,7 +192,7 @@ describe('Price Data - setoracledata 2', () => {
 
     height1 = await container.call('getblockcount')
 
-    await container.generate(1)
+    await container.generate(5)
 
     height2 = await container.call('getblockcount')
   }
@@ -278,7 +278,7 @@ describe('Price Data - setoracledata 3', () => {
 
     height2 = await container.call('getblockcount')
 
-    await container.generate(1)
+    await container.generate(5)
 
     height3 = await container.call('getblockcount')
   }
@@ -368,7 +368,7 @@ describe('Price Data - updateoracle', () => {
 
     await container.call('updateoracle', [oracleId, await container.getNewAddress(), priceFeeds2, 2])
 
-    await container.generate(2)
+    await container.generate(5)
 
     height2 = await container.call('getblockcount')
   }
@@ -459,7 +459,7 @@ describe('Price Data - removeoracle', () => {
 
     await container.call('removeoracle', [oracleId])
 
-    await container.generate(2)
+    await container.generate(5)
 
     height2 = await container.call('getblockcount')
   }

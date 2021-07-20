@@ -77,7 +77,7 @@ describe('Price Aggregration - 1', () => {
     height2 = await container.call('getblockcount')
     blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
 
-    await container.generate(1)
+    await container.generate(5)
 
     height3 = await container.call('getblockcount')
   }
@@ -179,6 +179,8 @@ describe('Price Aggregration - 2', () => {
 
     height2 = await container.call('getblockcount')
     blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
+
+    await container.generate(5)
 
     height3 = await container.call('getblockcount')
   }
@@ -292,7 +294,7 @@ describe('Price Aggregration - 3', () => {
     height2 = await container.call('getblockcount')
     blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
 
-    await container.generate(1)
+    await container.generate(5)
 
     height3 = await container.call('getblockcount')
   }
