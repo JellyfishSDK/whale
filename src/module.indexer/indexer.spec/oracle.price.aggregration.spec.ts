@@ -35,6 +35,7 @@ describe('Price Aggregration - 1', () => {
 
   let height1: number
   let height2: number
+  let height3: number
   let blockTime1: number
   let blockTime2: number
 
@@ -75,10 +76,14 @@ describe('Price Aggregration - 1', () => {
 
     height2 = await container.call('getblockcount')
     blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
+
+    await container.generate(1)
+
+    height3 = await container.call('getblockcount')
   }
 
   it('should get oracle price aggregration', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height3)
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
@@ -127,6 +132,7 @@ describe('Price Aggregration - 2', () => {
 
   let height1: number
   let height2: number
+  let height3: number
   let blockTime1: number
   let blockTime2: number
 
@@ -173,10 +179,12 @@ describe('Price Aggregration - 2', () => {
 
     height2 = await container.call('getblockcount')
     blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
+
+    height3 = await container.call('getblockcount')
   }
 
   it('should get oracle price aggregration with correct sum of 2 prices', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height3)
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
@@ -239,6 +247,7 @@ describe('Price Aggregration - 3', () => {
 
   let height1: number
   let height2: number
+  let height3: number
   let blockTime1: number
   let blockTime2: number
 
@@ -282,10 +291,14 @@ describe('Price Aggregration - 3', () => {
 
     height2 = await container.call('getblockcount')
     blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
+
+    await container.generate(1)
+
+    height3 = await container.call('getblockcount')
   }
 
   it('should not get oracle price aggregration if the timestamp is out of range', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height3)
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
 
