@@ -29,8 +29,7 @@ describe('Weightage - approveoracle', () => {
   })
 
   let oracleId: string
-  let height1: number
-  let height2: number
+  let height: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
@@ -38,21 +37,17 @@ describe('Weightage - approveoracle', () => {
 
     await container.generate(1)
 
-    height1 = await container.call('getblockcount')
-
-    await container.generate(1)
-
-    height2 = await container.call('getblockcount')
+    height = await container.call('getblockcount')
   }
 
   it('should get weightage', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height)
 
     const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
 
-    const result = await appointedWeightageMapper.get(oracleId, height1)
-    expect(result?.id).toStrictEqual(`${oracleId}-${height1}`)
-    expect(result?.block.height).toStrictEqual(height1)
+    const result = await appointedWeightageMapper.get(oracleId, height)
+    expect(result?.id).toStrictEqual(`${oracleId}-${height}`)
+    expect(result?.block.height).toStrictEqual(height)
     expect(result?.data.oracleId).toStrictEqual(oracleId)
     expect(result?.data.weightage).toStrictEqual(1)
     expect(result?.state).toStrictEqual(OracleState.LIVE)
@@ -87,7 +82,6 @@ describe('Weightage - updateoracle', () => {
   let oracleId: string
   let height1: number
   let height2: number
-  let height3: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
@@ -102,14 +96,10 @@ describe('Weightage - updateoracle', () => {
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
-
-    await container.generate(1)
-
-    height3 = await container.call('getblockcount')
   }
 
   it('should get weightage', async () => {
-    await waitForHeight(app, height3)
+    await waitForHeight(app, height2)
 
     const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
 
@@ -167,7 +157,7 @@ describe('Weightage - removeoracle', () => {
 
     await container.call('removeoracle', [oracleId])
 
-    await container.generate(2)
+    await container.generate(1)
 
     height2 = await container.call('getblockcount')
   }

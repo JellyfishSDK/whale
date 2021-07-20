@@ -29,8 +29,7 @@ describe('Token Currency - approveoracle', () => {
   })
 
   let oracleId: string
-  let height1: number
-  let height2: number
+  let height: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [
@@ -42,21 +41,17 @@ describe('Token Currency - approveoracle', () => {
 
     await container.generate(1)
 
-    height1 = await container.call('getblockcount')
-
-    await container.generate(1)
-
-    height2 = await container.call('getblockcount')
+    height = await container.call('getblockcount')
   }
 
   it('should get token currency', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height)
 
     const appointedTokenCurrencyMapper = app.get(OracleAppointedTokenCurrencyMapper)
 
-    const result = await appointedTokenCurrencyMapper.get(oracleId, 'AAPL', 'EUR', height1)
-    expect(result?.id).toStrictEqual(`${oracleId}-AAPL-EUR-${height1}`)
-    expect(result?.block.height).toStrictEqual(height1)
+    const result = await appointedTokenCurrencyMapper.get(oracleId, 'AAPL', 'EUR', height)
+    expect(result?.id).toStrictEqual(`${oracleId}-AAPL-EUR-${height}`)
+    expect(result?.block.height).toStrictEqual(height)
     expect(result?.data.oracleId).toStrictEqual(oracleId)
     expect(result?.data.token).toStrictEqual('AAPL')
     expect(result?.data.currency).toStrictEqual('EUR')
@@ -96,7 +91,6 @@ describe('Token Currency - updateoracle', () => {
   let oracleId: string
   let height1: number
   let height2: number
-  let height3: number
 
   async function setup (): Promise<void> {
     const priceFeeds1 = [
@@ -120,14 +114,10 @@ describe('Token Currency - updateoracle', () => {
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
-
-    await container.generate(1)
-
-    height3 = await container.call('getblockcount')
   }
 
   it('should get token currency', async () => {
-    await waitForHeight(app, height3)
+    await waitForHeight(app, height2)
 
     const appointedTokenCurrencyMapper = app.get(OracleAppointedTokenCurrencyMapper)
 
@@ -212,7 +202,7 @@ describe('Token Currency - removeoracle', () => {
 
     await container.call('removeoracle', [oracleId])
 
-    await container.generate(2)
+    await container.generate(1)
 
     height2 = await container.call('getblockcount')
   }
