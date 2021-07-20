@@ -34,7 +34,6 @@ describe('Price Data - setoracledata 1', () => {
   let timestamp: number
   let height1: number
   let height2: number
-  let height3: number
 
   async function setup (): Promise<void> {
     const priceFeeds1 = [
@@ -78,14 +77,10 @@ describe('Price Data - setoracledata 1', () => {
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
-
-    await container.generate(1)
-
-    height3 = await container.call('getblockcount')
   }
 
   it('should get price data', async () => {
-    await waitForHeight(app, height3)
+    await waitForHeight(app, height2)
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
@@ -170,8 +165,7 @@ describe('Price Data - setoracledata 2', () => {
 
   let oracleId: string
   let timestamp: number
-  let height1: number
-  let height2: number
+  let height: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [
@@ -190,22 +184,18 @@ describe('Price Data - setoracledata 2', () => {
 
     await container.generate(1)
 
-    height1 = await container.call('getblockcount')
-
-    await container.generate(1)
-
-    height2 = await container.call('getblockcount')
+    height = await container.call('getblockcount')
   }
 
   it('should get price data if 1 price only set for 2 token currencies for an oracle', async () => {
-    await waitForHeight(app, height2)
+    await waitForHeight(app, height)
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
-    const result1 = await priceDataMapper.get(oracleId, 'AAPL', 'EUR', height1, timestamp)
+    const result1 = await priceDataMapper.get(oracleId, 'AAPL', 'EUR', height, timestamp)
 
-    expect(result1?.id).toStrictEqual(`${oracleId}-AAPL-EUR-${height1}-${timestamp}`)
-    expect(result1?.block.height).toStrictEqual(height1)
+    expect(result1?.id).toStrictEqual(`${oracleId}-AAPL-EUR-${height}-${timestamp}`)
+    expect(result1?.block.height).toStrictEqual(height)
     expect(result1?.data.oracleId).toStrictEqual(oracleId)
     expect(result1?.data.token).toStrictEqual('AAPL')
     expect(result1?.data.currency).toStrictEqual('EUR')
@@ -213,7 +203,7 @@ describe('Price Data - setoracledata 2', () => {
     expect(result1?.data.timestamp).toStrictEqual(timestamp.toString())
     expect(result1?.state).toStrictEqual(OracleState.LIVE)
 
-    const result2 = await priceDataMapper.get(oracleId, 'TSLA', 'USD', height1, timestamp)
+    const result2 = await priceDataMapper.get(oracleId, 'TSLA', 'USD', height, timestamp)
     expect(result2).toBeUndefined()
 
     const data1 = await container.call('listlatestrawprices', [{ token: 'AAPL', currency: 'EUR' }])
@@ -249,7 +239,6 @@ describe('Price Data - setoracledata 3', () => {
   let timestamp: number
   let height1: number
   let height2: number
-  let height3: number
 
   async function setup (): Promise<void> {
     const priceFeeds = [
@@ -277,14 +266,10 @@ describe('Price Data - setoracledata 3', () => {
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
-
-    await container.generate(1)
-
-    height3 = await container.call('getblockcount')
   }
 
   it('should get price data if 2 prices data are set for the same oracle', async () => {
-    await waitForHeight(app, height3)
+    await waitForHeight(app, height2)
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
@@ -368,7 +353,7 @@ describe('Price Data - updateoracle', () => {
 
     await container.call('updateoracle', [oracleId, await container.getNewAddress(), priceFeeds2, 2])
 
-    await container.generate(2)
+    await container.generate(1)
 
     height2 = await container.call('getblockcount')
   }
@@ -459,7 +444,7 @@ describe('Price Data - removeoracle', () => {
 
     await container.call('removeoracle', [oracleId])
 
-    await container.generate(2)
+    await container.generate(1)
 
     height2 = await container.call('getblockcount')
   }
