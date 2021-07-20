@@ -12,7 +12,7 @@ describe('Price Data - setoracledata 1', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(100)
+    await container.generate(20)
 
     app = await createIndexerTestModule(container)
     await app.init()
@@ -154,7 +154,7 @@ describe('Price Data - setoracledata 2', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(100)
+    await container.generate(20)
 
     app = await createIndexerTestModule(container)
     await app.init()
@@ -234,7 +234,7 @@ describe('Price Data - setoracledata 3', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(100)
+    await container.generate(20)
 
     app = await createIndexerTestModule(container)
     await app.init()
@@ -328,7 +328,7 @@ describe('Price Data - updateoracle', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(100)
+    await container.generate(20)
 
     app = await createIndexerTestModule(container)
     await app.init()
@@ -424,7 +424,7 @@ describe('Price Data - removeoracle', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(100)
+    await container.generate(20)
 
     app = await createIndexerTestModule(container)
     await app.init()

@@ -21,8 +21,6 @@ describe('1 - Oracle Token Currency', () => {
     app = await createTestingApp(container)
     controller = app.get(OracleController)
 
-    await waitForIndexedHeight(app, 100)
-
     await setup()
   })
 
@@ -189,8 +187,6 @@ describe('2 - Oracle Price Data', () => {
     app = await createTestingApp(container)
     controller = app.get(OracleController)
 
-    await waitForIndexedHeight(app, 100)
-
     await setup()
   })
 
@@ -277,8 +273,6 @@ describe('3 - Oracle Price', () => {
 
     app = await createTestingApp(container)
     controller = app.get(OracleController)
-
-    await waitForIndexedHeight(app, 100)
 
     await setup()
   })
@@ -378,8 +372,6 @@ describe('4 - Oracle Price Interval', () => {
 
     app = await createTestingApp(container)
     controller = app.get(OracleController)
-
-    await waitForIndexedHeight(app, 100)
 
     await setup()
   })

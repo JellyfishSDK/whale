@@ -16,7 +16,7 @@ describe('Price Aggregration - 1', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(100)
+    await container.generate(20)
 
     app = await createIndexerTestModule(container)
     await app.init()
@@ -116,7 +116,7 @@ describe('Price Aggregration - 2', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(100)
+    await container.generate(20)
 
     app = await createIndexerTestModule(container)
     await app.init()
@@ -236,7 +236,7 @@ describe('Price Aggregration - 3', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(100)
+    await container.generate(20)
 
     app = await createIndexerTestModule(container)
     await app.init()

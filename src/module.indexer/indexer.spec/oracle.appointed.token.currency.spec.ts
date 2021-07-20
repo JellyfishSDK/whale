@@ -11,7 +11,7 @@ describe('Token Currency - approveoracle', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(100)
+    await container.generate(20)
 
     app = await createIndexerTestModule(container)
     await app.init()
@@ -79,7 +79,7 @@ describe('Token Currency - updateoracle', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(100)
+    await container.generate(20)
 
     app = await createIndexerTestModule(container)
     await app.init()
@@ -183,7 +183,7 @@ describe('Token Currency - removeoracle', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(100)
+    await container.generate(20)
 
     app = await createIndexerTestModule(container)
     await app.init()
