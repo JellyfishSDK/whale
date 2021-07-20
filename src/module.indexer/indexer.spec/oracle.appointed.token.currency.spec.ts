@@ -44,7 +44,7 @@ describe('Token Currency - approveoracle', () => {
 
     height1 = await container.call('getblockcount')
 
-    await container.generate(5)
+    await container.generate(1)
 
     height2 = await container.call('getblockcount')
   }
@@ -121,7 +121,7 @@ describe('Token Currency - updateoracle', () => {
 
     height2 = await container.call('getblockcount')
 
-    await container.generate(5)
+    await container.generate(1)
 
     height3 = await container.call('getblockcount')
   }
@@ -212,7 +212,7 @@ describe('Token Currency - removeoracle', () => {
 
     await container.call('removeoracle', [oracleId])
 
-    await container.generate(5)
+    await container.generate(2)
 
     height2 = await container.call('getblockcount')
   }
