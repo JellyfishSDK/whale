@@ -79,8 +79,6 @@ describe('list', () => {
 
     expect(firstPage.data[0].height).toBeGreaterThanOrEqual(100)
 
-    console.log('firstPage.data[39].height', firstPage.data[39].height)
-
     const secondPage = await controller.list({ size: 40, next: firstPage.data[39].height.toString() })
 
     expect(secondPage.data.length).toStrictEqual(40)
