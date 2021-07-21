@@ -73,15 +73,23 @@ describe('getBlockTransactions', () => {
 
 describe('list', () => {
   it('should return paginated list of blocks', async () => {
-    const paginatedBlocks = await controller.list({ size: 30, next: '40' })
+    const firstPage = await controller.list({ size: 40 })
 
-    expect(paginatedBlocks.data.length).toStrictEqual(30)
-    expect(paginatedBlocks.data[0].height).toStrictEqual(39)
+    expect(firstPage.data.length).toStrictEqual(40)
 
-    const secondPaginatedBlocks = await controller.list({ size: 20, next: '30' })
+    expect(firstPage.data[0].height).toBeGreaterThanOrEqual(100)
 
-    expect(secondPaginatedBlocks.data.length).toStrictEqual(20)
-    expect(secondPaginatedBlocks.data[0].height).toStrictEqual(29)
+    console.log('firstPage.data[39].height', firstPage.data[39].height)
+
+    const secondPage = await controller.list({ size: 40, next: firstPage.data[39].height.toString() })
+
+    expect(secondPage.data.length).toStrictEqual(40)
+    expect(secondPage.data[0].height).toStrictEqual(firstPage.data[39].height - 1)
+
+    const lastPage = await controller.list({ size: 40, next: secondPage.data[39].height.toString() })
+
+    expect(lastPage.data[0].height).toStrictEqual(secondPage.data[39].height - 1)
+    expect(lastPage.page?.next).toBeUndefined()
   })
 
   it('should return all the blocks if the size is out of range', async () => {
@@ -99,10 +107,6 @@ describe('list', () => {
   })
 
   it('list would return the latest set if next is undefined', async () => {
-    const paginatedBlocks = await controller.list({ size: 30 })
-
-    expect(paginatedBlocks.data.length).toStrictEqual(30)
-    expect(paginatedBlocks.data[0].height).toBeGreaterThanOrEqual(100)
   })
 })
 
