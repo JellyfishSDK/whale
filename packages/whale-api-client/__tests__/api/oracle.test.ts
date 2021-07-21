@@ -74,11 +74,11 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(first[0].token).toStrictEqual('AAPL')
       expect(first[0].currency).toStrictEqual('EUR')
-      expect(first[0].state).toStrictEqual(OracleState.REMOVED)
+      expect(first[0].state).toStrictEqual(OracleState.LIVE)
 
       expect(first[1].token).toStrictEqual('FB')
       expect(first[1].currency).toStrictEqual('CNY')
-      expect(first[1].state).toStrictEqual(OracleState.REMOVED)
+      expect(first[1].state).toStrictEqual(OracleState.LIVE)
 
       const next = await client.paginate(first)
 
@@ -113,7 +113,7 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(first[0]?.token).toStrictEqual('AAPL')
       expect(first[0]?.currency).toStrictEqual('EUR')
-      expect(first[0]?.state).toStrictEqual(OracleState.REMOVED)
+      expect(first[0]?.state).toStrictEqual(OracleState.LIVE)
 
       let next = await client.paginate(first)
 
@@ -140,7 +140,7 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(first[0]?.token).toStrictEqual('FB')
       expect(first[0]?.currency).toStrictEqual('CNY')
-      expect(first[0]?.state).toStrictEqual(OracleState.REMOVED)
+      expect(first[0]?.state).toStrictEqual(OracleState.LIVE)
 
       next = await client.paginate(first)
 

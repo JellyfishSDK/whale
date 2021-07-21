@@ -67,11 +67,11 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(first.data[0].token).toStrictEqual('AAPL')
       expect(first.data[0].currency).toStrictEqual('EUR')
-      expect(first.data[0].state).toStrictEqual(OracleState.REMOVED)
+      expect(first.data[0].state).toStrictEqual(OracleState.LIVE)
 
       expect(first.data[1].token).toStrictEqual('FB')
       expect(first.data[1].currency).toStrictEqual('CNY')
-      expect(first.data[1].state).toStrictEqual(OracleState.REMOVED)
+      expect(first.data[1].state).toStrictEqual(OracleState.LIVE)
 
       const next = await controller.listTokenCurrencies({
         size: 2,
@@ -115,7 +115,7 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(first.data[0].token).toStrictEqual('AAPL')
       expect(first.data[0].currency).toStrictEqual('EUR')
-      expect(first.data[0].state).toStrictEqual(OracleState.REMOVED)
+      expect(first.data[0].state).toStrictEqual(OracleState.LIVE)
 
       let next = await controller.getTokenCurrencies(oracleId1, {
         size: 1,
@@ -145,7 +145,7 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(first.data[0].token).toStrictEqual('FB')
       expect(first.data[0].currency).toStrictEqual('CNY')
-      expect(first.data[0].state).toStrictEqual(OracleState.REMOVED)
+      expect(first.data[0].state).toStrictEqual(OracleState.LIVE)
 
       next = await controller.getTokenCurrencies(oracleId2, {
         size: 1,

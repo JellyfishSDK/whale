@@ -282,7 +282,7 @@ describe('Price Data - setoracledata 3', () => {
     expect(result1?.data.currency).toStrictEqual('EUR')
     expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
     expect(result1?.data.timestamp).toStrictEqual(timestamp.toString())
-    expect(result1?.state).toStrictEqual(OracleState.REMOVED)
+    expect(result1?.state).toStrictEqual(OracleState.LIVE)
 
     const result2 = await priceDataMapper.get(oracleId, 'AAPL', 'EUR', height2, timestamp)
 
@@ -383,7 +383,7 @@ describe('Price Data - updateoracle', () => {
     expect(result2?.data.currency).toStrictEqual('USD')
     expect(result2?.data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
     expect(result2?.data.timestamp).toStrictEqual(timestamp.toString())
-    expect(result2?.state).toStrictEqual(OracleState.REMOVED)
+    expect(result2?.state).toStrictEqual(OracleState.LIVE)
 
     const data1 = await container.call('listlatestrawprices', [{ token: 'AAPL', currency: 'EUR' }])
     expect(data1[0]?.rawprice).toStrictEqual(0.5)

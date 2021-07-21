@@ -20,22 +20,28 @@ export class OraclePriceAggregationIndexer extends Indexer {
 
   async index (block: RawBlock): Promise<void> {
     const records: Record<string, OraclePriceAggregration> = {}
+
     const tokenCurrenciesSet: Set<string> = new Set()
     const tokenCurrencyResult = await this.appointedTokenCurrencyMapper.list() ?? []
 
     if (tokenCurrencyResult.length > 0) {
+      // NOTE(jingyi2811): Should include LIVE token currencies only.
       tokenCurrencyResult.filter(t => t.state === OracleState.LIVE).map(m => {
         tokenCurrenciesSet.add(`${m.data.token}-${m.data.currency}`)
       })
     }
 
+    // NOTE(jingyi2811): Search for distinct token currencies only.
     for (const tokenCurrency of tokenCurrenciesSet) {
       const data = tokenCurrency.split('-')
       const token = data[0]
       const currency = data[1]
 
-      const priceDataResult = await this.priceDataMapper.getActivePrices(token, currency, block.time) ?? []
+      // NOTE(jingyi2811): Search for LIVE price for within 1 hour ago or 1 hour later.
+      const priceDataResult = (await this.priceDataMapper.getActivePrices(token, currency, block.time) ?? [])
+        .filter(p => p.state === OracleState.LIVE)
 
+      // NOTE(jingyi2811): Calculate average price.
       let sumBN = new BigNumber(0)
       let weightageSum = 0
 
@@ -61,12 +67,13 @@ export class OraclePriceAggregationIndexer extends Indexer {
 
   async invalidate (block: RawBlock): Promise<void> {
     const priceAggregrationIds: string[] = []
-
     const tokenCurrenciesSet: Set<string> = new Set()
+
+    // NOTE(jingyi2811): Should include LIVE and REMOVED token currencies.
     const tokenCurrencyResult = await this.appointedTokenCurrencyMapper.list() ?? []
 
     if (tokenCurrencyResult.length > 0) {
-      tokenCurrencyResult.filter(t => t.state === OracleState.LIVE).map(m => {
+      tokenCurrencyResult.map(m => {
         tokenCurrenciesSet.add(`${m.data.token}-${m.data.currency}`)
       })
     }
@@ -77,9 +84,9 @@ export class OraclePriceAggregationIndexer extends Indexer {
       const currency = data[1]
 
       const priceDataResult = (await this.priceDataMapper.getActivePrices(token, currency, block.time) ?? [])
-        .filter(p => p.state === OracleState.LIVE)
 
       if (priceDataResult.length > 0) {
+        // NOTE(jingyi2811): Should include LIVE and REMOVED price data.
         priceAggregrationIds.push(`${token}-${currency}-${block.height}-${block.time}`)
       }
     }

@@ -53,7 +53,6 @@ describe('Weightage - approveoracle', () => {
     expect(result?.state).toStrictEqual(OracleState.LIVE)
 
     const data = await container.call('getoracledata', [oracleId])
-
     expect(data?.weightage).toStrictEqual(1)
   })
 })
@@ -108,7 +107,7 @@ describe('Weightage - updateoracle', () => {
     expect(result1?.block.height).toStrictEqual(height1)
     expect(result1?.data.oracleId).toStrictEqual(oracleId)
     expect(result1?.data.weightage).toStrictEqual(1)
-    expect(result1?.state).toStrictEqual(OracleState.REMOVED)
+    expect(result1?.state).toStrictEqual(OracleState.LIVE)
 
     const result2 = await appointedWeightageMapper.get(oracleId, height2)
     expect(result2?.id).toStrictEqual(`${oracleId}-${height2}`)

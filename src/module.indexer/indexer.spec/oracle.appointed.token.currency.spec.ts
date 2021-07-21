@@ -127,7 +127,7 @@ describe('Token Currency - updateoracle', () => {
     expect(result1?.data.oracleId).toStrictEqual(oracleId)
     expect(result1?.data.token).toStrictEqual('AAPL')
     expect(result1?.data.currency).toStrictEqual('EUR')
-    expect(result1?.state).toStrictEqual(OracleState.REMOVED)
+    expect(result1?.state).toStrictEqual(OracleState.LIVE)
 
     const result2 = await appointedTokenCurrencyMapper.get(oracleId, 'TSLA', 'USD', height1)
     expect(result2?.id).toStrictEqual(`${oracleId}-TSLA-USD-${height1}`)
@@ -135,7 +135,7 @@ describe('Token Currency - updateoracle', () => {
     expect(result2?.data.oracleId).toStrictEqual(oracleId)
     expect(result2?.data.token).toStrictEqual('TSLA')
     expect(result2?.data.currency).toStrictEqual('USD')
-    expect(result2?.state).toStrictEqual(OracleState.REMOVED)
+    expect(result2?.state).toStrictEqual(OracleState.LIVE)
 
     const result3 = await appointedTokenCurrencyMapper.get(oracleId, 'FB', 'CNY', height2)
     expect(result3?.id).toStrictEqual(`${oracleId}-FB-CNY-${height2}`)
