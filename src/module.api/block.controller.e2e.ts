@@ -79,12 +79,12 @@ describe('list', () => {
 
     expect(firstPage.data[0].height).toBeGreaterThanOrEqual(100)
 
-    const secondPage = await controller.list({ size: 40, next: firstPage.data[39].height.toString() })
+    const secondPage = await controller.list({ size: 40, next: firstPage.page?.next })
 
     expect(secondPage.data.length).toStrictEqual(40)
     expect(secondPage.data[0].height).toStrictEqual(firstPage.data[39].height - 1)
 
-    const lastPage = await controller.list({ size: 40, next: secondPage.data[39].height.toString() })
+    const lastPage = await controller.list({ size: 40, next: secondPage.page?.next })
 
     expect(lastPage.data[0].height).toStrictEqual(secondPage.data[39].height - 1)
     expect(lastPage.page?.next).toBeUndefined()

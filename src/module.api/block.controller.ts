@@ -25,7 +25,7 @@ export class BlockController {
     const height = parseHeight(query.next)
     const blocks = await this.blockMapper.queryByHeight(query.size, height)
     return ApiPagedResponse.of(blocks, query.size, item => {
-      return item.id
+      return item.height.toString()
     })
   }
 
