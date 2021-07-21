@@ -23,17 +23,12 @@ afterAll(async () => {
   await stopTestingApp(container, app)
 })
 
-describe('BlockController', () => {
-  it('get should get block with hash of block', async () => {
+describe('get', () => {
+  it('should get block based on hash', async () => {
     const blockHash = await container.call('getblockhash', [100])
     const block = await controller.get(blockHash)
     expect(block?.height).toStrictEqual(100)
     expect(block?.hash).toStrictEqual(blockHash)
-  })
-
-  it('get should get undefined with invalid hash ', async () => {
-    const block = await controller.get('lajsdl;kfjljklj12lk34j')
-    expect(block).toStrictEqual(undefined)
   })
 
   it('get should get block with height', async () => {
@@ -41,6 +36,13 @@ describe('BlockController', () => {
     expect(block?.height).toStrictEqual(100)
   })
 
+  it('get should get undefined with invalid hash ', async () => {
+    const block = await controller.get('lajsdl;kfjljklj12lk34j')
+    expect(block).toStrictEqual(undefined)
+  })
+})
+
+describe('getBlockTransactions', () => {
   it('getBlockTransactions should get transactions from a block by hash', async () => {
     const blockHash = await container.call('getblockhash', [100])
     const paginatedTransactions = await controller.getBlockTransactions(blockHash, { size: 30, next: '10' })
@@ -96,7 +98,9 @@ describe('BlockController', () => {
 
     expect(paginatedTransactions.data.length).toStrictEqual(0)
   })
+})
 
+describe('list', () => {
   it('list should be able to get a paginated response of blocks', async () => {
     const paginatedBlocks = await controller.list({ size: 30, next: '40' })
 
