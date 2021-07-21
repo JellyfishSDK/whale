@@ -43,7 +43,7 @@ describe('Price Data - setoracledata 1', () => {
 
     oracleId1 = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
 
-    await waitForHeight(app, await container.call('getblockcount') as number + 1)
+    await container.generate(1)
 
     const priceFeeds2 = [
       { token: 'FB', currency: 'CNY' },
@@ -52,7 +52,7 @@ describe('Price Data - setoracledata 1', () => {
 
     oracleId2 = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds2, 1])
 
-    await waitForHeight(app, await container.call('getblockcount') as number + 1)
+    await container.generate(1)
 
     timestamp = Math.floor(new Date().getTime() / 1000)
 
@@ -63,8 +63,9 @@ describe('Price Data - setoracledata 1', () => {
 
     await container.call('setoracledata', [oracleId1, timestamp, prices1])
 
-    height1 = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height1)
+    await container.generate(1)
+
+    height1 = await container.call('getblockcount')
 
     const prices2 = [
       { tokenAmount: '1.5@FB', currency: 'CNY' },
@@ -73,11 +74,14 @@ describe('Price Data - setoracledata 1', () => {
 
     await container.call('setoracledata', [oracleId2, timestamp, prices2])
 
-    height2 = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height2)
+    await container.generate(1)
+
+    height2 = await container.call('getblockcount')
   }
 
   it('should get price data', async () => {
+    await waitForHeight(app, height2)
+
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
     const result1 = await priceDataMapper.get(oracleId1, 'AAPL', 'EUR', height1, timestamp)
@@ -171,18 +175,21 @@ describe('Price Data - setoracledata 2', () => {
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
 
-    await waitForHeight(app, await container.call('getblockcount') as number + 1)
+    await container.generate(1)
 
     timestamp = Math.floor(new Date().getTime() / 1000)
     const prices = [{ tokenAmount: '0.5@AAPL', currency: 'EUR' }]
 
     await container.call('setoracledata', [oracleId, timestamp, prices])
 
-    height = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height)
+    await container.generate(1)
+
+    height = await container.call('getblockcount')
   }
 
   it('should get price data if 1 price only set for 2 token currencies for an oracle', async () => {
+    await waitForHeight(app, height)
+
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
     const result1 = await priceDataMapper.get(oracleId, 'AAPL', 'EUR', height, timestamp)
@@ -241,25 +248,29 @@ describe('Price Data - setoracledata 3', () => {
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
 
-    await waitForHeight(app, await container.call('getblockcount') as number + 1)
+    await container.generate(1)
 
     timestamp = Math.floor(new Date().getTime() / 1000)
     const prices1 = [{ tokenAmount: '0.5@AAPL', currency: 'EUR' }]
 
     await container.call('setoracledata', [oracleId, timestamp, prices1])
 
-    height1 = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height1)
+    await container.generate(1)
+
+    height1 = await container.call('getblockcount')
 
     const prices2 = [{ tokenAmount: '1.0@AAPL', currency: 'EUR' }]
 
     await container.call('setoracledata', [oracleId, timestamp, prices2])
 
-    height2 = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height2)
+    await container.generate(1)
+
+    height2 = await container.call('getblockcount')
   }
 
   it('should get price data if 2 prices data are set for the same oracle', async () => {
+    await waitForHeight(app, height2)
+
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
     const result1 = await priceDataMapper.get(oracleId, 'AAPL', 'EUR', height1, timestamp)
@@ -323,7 +334,7 @@ describe('Price Data - updateoracle', () => {
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
 
-    await waitForHeight(app, await container.call('getblockcount') as number + 1)
+    await container.generate(1)
 
     timestamp = Math.floor(new Date().getTime() / 1000)
 
@@ -334,18 +345,22 @@ describe('Price Data - updateoracle', () => {
 
     await container.call('setoracledata', [oracleId, timestamp, prices])
 
-    height1 = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height1)
+    await container.generate(1)
+
+    height1 = await container.call('getblockcount')
 
     const priceFeeds2 = [{ token: 'AAPL', currency: 'EUR' }]
 
     await container.call('updateoracle', [oracleId, await container.getNewAddress(), priceFeeds2, 2])
 
-    height2 = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height2)
+    await container.generate(1)
+
+    height2 = await container.call('getblockcount')
   }
 
   it('should get price data if updateoracle removes 1 price feed', async () => {
+    await waitForHeight(app, height2)
+
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
     const result1 = await priceDataMapper.get(oracleId, 'AAPL', 'EUR', height1, timestamp)
@@ -412,7 +427,7 @@ describe('Price Data - removeoracle', () => {
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
 
-    await waitForHeight(app, await container.call('getblockcount') as number + 1)
+    await container.generate(1)
 
     timestamp = Math.floor(new Date().getTime() / 1000)
 
@@ -423,16 +438,20 @@ describe('Price Data - removeoracle', () => {
 
     await container.call('setoracledata', [oracleId, timestamp, prices])
 
-    height1 = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height1)
+    await container.generate(1)
+
+    height1 = await container.call('getblockcount')
 
     await container.call('removeoracle', [oracleId])
 
-    height2 = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height2)
+    await container.generate(1)
+
+    height2 = await container.call('getblockcount')
   }
 
   it('should not get price data', async () => {
+    await waitForHeight(app, height2)
+
     const priceDataMapper = app.get(OraclePriceDataMapper)
 
     const result1 = await priceDataMapper.get(oracleId, 'AAPL', 'EUR', height1, timestamp)

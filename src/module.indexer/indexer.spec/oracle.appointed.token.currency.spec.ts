@@ -39,11 +39,14 @@ describe('Token Currency - approveoracle', () => {
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
 
-    height = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height)
+    await container.generate(1)
+
+    height = await container.call('getblockcount')
   }
 
   it('should get token currency', async () => {
+    await waitForHeight(app, height)
+
     const appointedTokenCurrencyMapper = app.get(OracleAppointedTokenCurrencyMapper)
 
     const result = await appointedTokenCurrencyMapper.get(oracleId, 'AAPL', 'EUR', height)
@@ -97,8 +100,9 @@ describe('Token Currency - updateoracle', () => {
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
 
-    height1 = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height1)
+    await container.generate(1)
+
+    height1 = await container.call('getblockcount')
 
     const priceFeeds2 = [
       { token: 'FB', currency: 'CNY' },
@@ -107,8 +111,9 @@ describe('Token Currency - updateoracle', () => {
 
     await container.call('updateoracle', [oracleId, await container.getNewAddress(), priceFeeds2, 2])
 
-    height2 = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height2)
+    await container.generate(1)
+
+    height2 = await container.call('getblockcount')
   }
 
   it('should get token currency', async () => {
@@ -191,16 +196,20 @@ describe('Token Currency - removeoracle', () => {
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
 
-    height1 = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height1)
+    await container.generate(1)
+
+    height1 = await container.call('getblockcount')
 
     await container.call('removeoracle', [oracleId])
 
-    height2 = await container.call('getblockcount') as number + 1
-    await waitForHeight(app, height2)
+    await container.generate(1)
+
+    height2 = await container.call('getblockcount')
   }
 
   it('should remove token currency', async () => {
+    await waitForHeight(app, height2)
+
     const appointedTokenCurrencyMapper = app.get(OracleAppointedTokenCurrencyMapper)
 
     const result1 = await appointedTokenCurrencyMapper.get(oracleId, 'AAPL', 'EUR', height1)
