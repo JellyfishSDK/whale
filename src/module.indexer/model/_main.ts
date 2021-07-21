@@ -11,7 +11,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { RawBlockMapper } from '@src/module.model/raw.block'
 import { NotFoundIndexerError } from '@src/module.indexer/error'
 import { blockchain as defid } from '@defichain/jellyfish-api-core'
-import { OracleAppointedIndexer } from '@src/module.indexer/model/oracle.appointed'
+import { OracleAppointedIndexer } from '@src/module.indexer/model/oracle.price'
 import { OraclePriceAggregationIndexer } from '@src/module.indexer/model/oracle.price.aggregration'
 
 /**

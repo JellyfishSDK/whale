@@ -62,10 +62,11 @@ export class OracleAppointedIndexer extends Indexer {
 
             // Update weightage
             const oldWeightageObj = await this.appointedWeightageMapper.getLatestByOracleIdHeight(oracleId, block.height)
-            const oldHeight: number = oldWeightageObj?.block.height ?? 0
 
-            if (oldWeightageObj != null) {
+            if (oldWeightageObj !== undefined && oldWeightageObj !== null) {
               oldWeightageObj.state = OracleState.REMOVED
+
+              const oldHeight: number = oldWeightageObj?.block.height ?? 0
               weightageRecords[`${oracleId}-${oldHeight}`] = oldWeightageObj
             }
 
@@ -96,6 +97,7 @@ export class OracleAppointedIndexer extends Indexer {
               tokenCurrencyRecords[`${oracleId}-${token}-${currency}-${block.height}`] = OracleAppointedIndexer.newOracleAppointedTokenCurrency(block.height, oracleId, token, currency, OracleState.LIVE)
             }
 
+            // Update price data
             const tokenCurrencies: string[] = []
             const newTokenCurrenciesObj = stack[1].tx.data.priceFeeds ?? []
 
@@ -107,8 +109,6 @@ export class OracleAppointedIndexer extends Indexer {
 
               tokenCurrencies.push(`${token}-${currency}`)
             }
-
-            // Update price data
 
             if (tokenCurrencies.length > 0) {
               const oracleId: string = stack[1].tx.data.oracleId
