@@ -31,33 +31,24 @@ export class BlockController {
 
   @Get('/:id')
   async get (@Param('id') id: string): Promise<Block | undefined> {
-    const height = parseHeight(id)
-
-    if (height !== undefined) {
-      return await this.blockMapper.getByHeight(height)
-    }
-
-    return await this.blockMapper.getByHash(id)
+    return ((await this.parseHeightAndGetBlock(id)) != null) || await this.blockMapper.getByHash(id)
   }
 
   @Get('/:id/transactions')
   async getBlockTransactions (@Param('id') id: string, @Query() query: PaginationQuery): Promise<ApiPagedResponse<Transaction>> {
-    const height = parseHeight(id)
+    const block = await this.parseHeightAndGetBlock(id)
 
-    if (height !== undefined) { // if id is height
-      const block = await this.blockMapper.getByHeight(height)
-
-      if (block !== undefined) { // type guard
-        return ApiPagedResponse.of(await this.transactionMapper.queryByBlockHash(block.id, query.size, query.next), query.size, transaction => {
-          return transaction.id
-        })
-      }
-    }
-
-    const transactions = await this.transactionMapper.queryByBlockHash(id, query.size, query.next)
+    const transactions = await this.transactionMapper.queryByBlockHash((block != null) ? block.id : id, query.size, query.next)
 
     return ApiPagedResponse.of(transactions, query.size, transaction => {
       return transaction.id
     })
+  }
+
+  async parseHeightAndGetBlock (str?: string): Promise<Block | undefined> {
+    const height = parseHeight(str)
+    if (height !== undefined) {
+      return await this.blockMapper.getByHeight(height)
+    }
   }
 }
