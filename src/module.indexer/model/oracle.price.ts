@@ -8,8 +8,8 @@ import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 import {
   OracleAppointedWeightage,
   OracleAppointedTokenCurrency,
-  OracleState,
-  OraclePriceData
+  OraclePriceData,
+  OracleState
 } from '@whale-api-client/api/oracle'
 import BigNumber from 'bignumber.js'
 
@@ -280,8 +280,8 @@ export class OracleAppointedIndexer extends Indexer {
                 const token: string = tokens[i].token
                 const prices = tokens[i].prices
 
-                for (let y = 0; y < prices.length; y += 1) {
-                  const price = prices[y]
+                for (let j = 0; j < prices.length; j += 1) {
+                  const price = prices[j]
                   const currency: string = price.currency
 
                   priceDataIds.push(`${oracleId}-${token}-${currency}-${block.height}-${timestamp.toString()}`)
