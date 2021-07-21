@@ -36,18 +36,17 @@ describe('get', () => {
     expect(block?.height).toStrictEqual(100)
   })
 
-  it('get should get undefined with invalid hash ', async () => {
+  it('should get undefined with invalid hash ', async () => {
     const block = await controller.get('lajsdl;kfjljklj12lk34j')
     expect(block).toStrictEqual(undefined)
   })
 })
 
 describe('getBlockTransactions', () => {
-  it('getBlockTransactions should get transactions from a block by hash', async () => {
+  it('should get transactions from a block by hash', async () => {
     const blockHash = await container.call('getblockhash', [100])
     const paginatedTransactions = await controller.getBlockTransactions(blockHash, { size: 30, next: '10' })
 
-    // there's only one transaction
     expect(paginatedTransactions.data.length).toStrictEqual(1)
     expect(paginatedTransactions.data[0].block.height).toStrictEqual(100)
   })
@@ -55,36 +54,8 @@ describe('getBlockTransactions', () => {
   it('getBlockTransactions should get transactions from a block by height', async () => {
     const paginatedTransactions = await controller.getBlockTransactions('100', { size: 30, next: '10' })
 
-    // there's only one transaction
     expect(paginatedTransactions.data.length).toStrictEqual(1)
-
     expect(paginatedTransactions.data[0].block.height).toStrictEqual(100)
-  })
-
-  it('getBlockTransactions should get transactions from a block at height 10', async () => {
-    const paginatedTransactions = await controller.getBlockTransactions('49', { size: 30, next: '10' })
-
-    console.log('paginatedTransactions', paginatedTransactions)
-
-    // there's only one transaction
-    expect(paginatedTransactions.data.length).toStrictEqual(1)
-
-    expect(paginatedTransactions.data[0].block.height).toStrictEqual(49)
-  })
-
-  it('getBlockTransactions should get transactions from a block at height 21 will always have 0 transactions', async () => {
-    const paginatedTransactions = await controller.getBlockTransactions('21', { size: 30, next: '10' })
-
-    // there's only one transaction
-    expect(paginatedTransactions.data.length).toStrictEqual(0)
-  })
-
-  it('getBlockTransactions should get first few transactions from a block by hash', async () => {
-    const blockHash = await container.call('getblockhash', [3])
-    const paginatedTransactions = await controller.getBlockTransactions(blockHash, { size: 30 })
-
-    // there's only one transaction
-    expect(paginatedTransactions.data.length).toStrictEqual(1)
   })
 
   it('getBlockTransactions should get empty array when hash is not valid', async () => {
@@ -101,7 +72,7 @@ describe('getBlockTransactions', () => {
 })
 
 describe('list', () => {
-  it('list should be able to get a paginated response of blocks', async () => {
+  it('should return paginated list of blocks', async () => {
     const paginatedBlocks = await controller.list({ size: 30, next: '40' })
 
     expect(paginatedBlocks.data.length).toStrictEqual(30)
@@ -113,20 +84,7 @@ describe('list', () => {
     expect(secondPaginatedBlocks.data[0].height).toStrictEqual(29)
   })
 
-  it('list should be able top few transactions', async () => {
-    const paginatedBlocks = await controller.list({ size: 30, next: '40' })
-
-    expect(paginatedBlocks.data.length).toStrictEqual(30)
-    expect(paginatedBlocks.data[0].height).toStrictEqual(39)
-  })
-
-  it('list should get empty array when next is 0', async () => {
-    const paginatedBlocks = await controller.list({ size: 30, next: '0' })
-
-    expect(paginatedBlocks.data.length).toStrictEqual(0)
-  })
-
-  it('list would return all the blocks if the size is out of range', async () => {
+  it('should return all the blocks if the size is out of range', async () => {
     const paginatedBlocks = await controller.list({ size: 100000, next: '100' })
 
     expect(paginatedBlocks.data.length).toStrictEqual(100)
