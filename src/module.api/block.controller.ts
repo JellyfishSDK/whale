@@ -31,7 +31,9 @@ export class BlockController {
 
   @Get('/:id')
   async get (@Param('id') id: string): Promise<Block | undefined> {
-    return ((await this.parseHeightAndGetBlock(id)) != null) || await this.blockMapper.getByHash(id)
+    const block = await this.parseHeightAndGetBlock(id)
+
+    return block !== undefined ? block : await this.blockMapper.getByHash(id)
   }
 
   @Get('/:id/transactions')
