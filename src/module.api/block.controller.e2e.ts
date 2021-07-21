@@ -133,3 +133,35 @@ describe('parseHeight', () => {
     expect(parseHeight('123a')).toStrictEqual(undefined)
   })
 })
+
+describe('parseHeightAndGetBlock', () => {
+  it('should return undefined for negative integer', async () => {
+    const block = await controller.parseHeightAndGetBlock('-123')
+    expect(block).toStrictEqual(undefined)
+  })
+
+  it('should return undefined for float', async () => {
+    const block = await controller.parseHeightAndGetBlock('123.32')
+    expect(block).toStrictEqual(undefined)
+  })
+
+  it('should return block for positive integers', async () => {
+    const block = await controller.parseHeightAndGetBlock('100')
+    expect(block?.height).toStrictEqual(100)
+  })
+
+  it('should return undefined for empty string', async () => {
+    const block = await controller.parseHeightAndGetBlock('')
+    expect(block).toStrictEqual(undefined)
+  })
+
+  it('should return undefined for undefined', async () => {
+    const block = await controller.parseHeightAndGetBlock(undefined)
+    expect(block).toStrictEqual(undefined)
+  })
+
+  it('should return undefined for strings with characters', async () => {
+    const block = await controller.parseHeightAndGetBlock('123a')
+    expect(block).toStrictEqual(undefined)
+  })
+})
