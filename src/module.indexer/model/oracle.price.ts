@@ -42,11 +42,11 @@ export class OracleAppointedIndexer extends Indexer {
           if (stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE') {
             const oracleId: string = txn.txid
 
-            // Add weightage
+            // NOTE(jingyi2811): Add weightage
             const weightage: number = stack[1].tx.data.weightage
             weightageRecords[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleAppointedWeightage(block.height, oracleId, weightage, OracleState.LIVE)
 
-            // Add token and currency
+            // NOTE(jingyi2811): Add token and currency
             const priceFeeds = stack[1].tx.data.priceFeeds
 
             for (let i = 0; i < priceFeeds.length; i += 1) {
@@ -70,6 +70,7 @@ export class OracleAppointedIndexer extends Indexer {
             //   weightageRecords[`${oracleId}-${oldHeight}`] = oldWeightageObj
             // }
 
+            // NOTE(jingyi2811): Add weightage
             const weightage: number = stack[1].tx.data.weightage
             weightageRecords[`${oracleId}-${block.height}`] = OracleAppointedIndexer.newOracleAppointedWeightage(block.height, oracleId, weightage, OracleState.LIVE)
 
@@ -87,6 +88,7 @@ export class OracleAppointedIndexer extends Indexer {
             //   tokenCurrencyRecords[`${oracleId}-${oldToken}-${oldCurrency}-${oldHeight}`] = oldTokenCurrencyObj
             // }
 
+            // NOTE(jingyi2811): Add token and currency
             const priceFeeds = stack[1].tx.data.priceFeeds
 
             for (let i = 0; i < priceFeeds.length; i += 1) {
@@ -132,7 +134,7 @@ export class OracleAppointedIndexer extends Indexer {
           } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_REMOVE_ORACLE') {
             const oracleId: string = stack[1].tx.data.oracleId
 
-            // Remove weightage
+            // NOTE(jingyi2811): Remove weightage
             const weightageObj = await this.appointedWeightageMapper.getLatestByOracleIdHeight(oracleId, block.height)
             const height: number = weightageObj?.block.height ?? 0
 
@@ -141,7 +143,7 @@ export class OracleAppointedIndexer extends Indexer {
               weightageRecords[`${oracleId}-${height}`] = weightageObj
             }
 
-            // Remove token and currency
+            // NOTE(jingyi2811): Remove token and currency
             const tokenCurrencyResult = await this.appointedTokenCurrencyMapper.getByOracleId(oracleId) ?? []
 
             for (let i = 0; i < tokenCurrencyResult.length; i += 1) {
@@ -155,7 +157,7 @@ export class OracleAppointedIndexer extends Indexer {
               tokenCurrencyRecords[`${oracleId}-${token}-${currency}-${height}`] = tokenCurrencyObj
             }
 
-            // Remove price data
+            // NOTE(jingyi2811): Remove price data
             const priceDataResult = await this.priceDataMapper.getByOracleId(oracleId) ?? []
 
             for (let i = 0; i < priceDataResult.length; i += 1) {
@@ -173,6 +175,7 @@ export class OracleAppointedIndexer extends Indexer {
               }
             }
           } else if (stack[1]?.tx?.name === 'OP_DEFI_TX_SET_ORACLE_DATA') {
+            // NOTE(jingyi2811): Add price data
             const timestamp: number = stack[1].tx.data.timestamp
             const oracleId: string = stack[1].tx.data.oracleId
             const tokens = stack[1].tx.data.tokens
