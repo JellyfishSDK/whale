@@ -46,6 +46,14 @@ export class OraclePriceAggregrationMapper {
     return data.length === 0 ? undefined : data[0]
   }
 
+  async list (token: string, currency: string): Promise<OraclePriceAggregration[] | undefined> {
+    return await this.database.query(OraclePriceAggregrationMapping.index.tokenCurrency_heightBlockTime, {
+      partitionKey: `${token}-${currency}`,
+      order: SortOrder.ASC,
+      limit: 1000000
+    })
+  }
+
   async getLatestByTokenCurrencyBlockTime (token: string, currency: string, blockTime: number): Promise<OraclePriceAggregration | undefined> {
     const data = await this.database.query(OraclePriceAggregrationMapping.index.tokenCurrency_blockTime, {
       partitionKey: `${token}-${currency}`,

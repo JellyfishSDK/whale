@@ -59,7 +59,8 @@ describe('1 - Oracle Token Currency', () => {
     await container.generate(1)
 
     const height: number = await container.call('getblockcount')
-    await service.waitForIndexedHeight(height + 5)
+    await container.generate(1)
+    await service.waitForIndexedHeight(height)
   }
 
   describe('listTokenCurrencies()', () => {
@@ -205,7 +206,8 @@ describe('2 - Oracle Price Data', () => {
     await container.generate(1)
 
     const height: number = await container.call('getblockcount')
-    await service.waitForIndexedHeight(height + 5)
+    await container.generate(1)
+    await service.waitForIndexedHeight(height)
   }
 
   describe('getPriceData()', () => {
@@ -316,7 +318,8 @@ describe('3 - Oracle Price', () => {
     const height2: number = await container.call('getblockcount')
     blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
 
-    await service.waitForIndexedHeight(height2 + 5)
+    await container.generate(1)
+    await service.waitForIndexedHeight(height2)
   }
 
   describe('getPrice()', () => {
@@ -425,7 +428,8 @@ describe('4 - Oracle Price Interval', () => {
     await container.call('setoracledata', [oracleId4, timestamp + 8, price4])
 
     const height: number = await container.call('getblockcount')
-    await service.waitForIndexedHeight(height + 5)
+    await container.generate(1)
+    await service.waitForIndexedHeight(height)
   }
 
   describe('getPriceInterval()', () => {

@@ -281,6 +281,7 @@ describe('Price Aggregration - 3', () => {
 
     height2 = await container.call('getblockcount')
     blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
+    await container.generate(1)
   }
 
   it('should not get oracle price aggregration if the timestamp is out of range', async () => {

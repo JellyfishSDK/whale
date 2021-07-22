@@ -22,6 +22,12 @@ export class OraclePriceAggregationIndexer extends Indexer {
     const records: Record<string, OraclePriceAggregration> = {}
 
     const tokenCurrenciesSet: Set<string> = new Set()
+    const tokenCurrencyResult = await this.appointedTokenCurrencyMapper.list() ?? []
+    if (tokenCurrencyResult.length > 0) {
+      tokenCurrencyResult.forEach(m => {
+        tokenCurrenciesSet.add(`${m.data.token}-${m.data.currency}`)
+      })
+    }
 
     // NOTE(jingyi2811): Search for distinct token currencies only.
     for (const tokenCurrency of tokenCurrenciesSet) {

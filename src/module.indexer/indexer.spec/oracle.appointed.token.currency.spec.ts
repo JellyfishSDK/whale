@@ -123,8 +123,6 @@ describe('Token Currency - updateoracle', () => {
     expect(result2?.data.token).toStrictEqual('TSLA')
     expect(result2?.data.currency).toStrictEqual('USD')
 
-    console.log(JSON.stringify(await appointedTokenCurrencyMapper.list()))
-
     const result3 = await appointedTokenCurrencyMapper.get(oracleId, 'FB', 'CNY', height2)
     expect(result3?.id).toStrictEqual(`${oracleId}-FB-CNY-${height2}`)
     expect(result3?.block.height).toStrictEqual(height2)

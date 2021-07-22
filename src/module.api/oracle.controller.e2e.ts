@@ -2,7 +2,6 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight, waitForIndexedTimestamp } from '@src/e2e.module'
 import { OracleController } from '@src/module.api/oracle.controller'
-import { OracleState } from '@whale-api-client/api/oracle'
 import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
@@ -67,11 +66,9 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(first.data[0].token).toStrictEqual('AAPL')
       expect(first.data[0].currency).toStrictEqual('EUR')
-      expect(first.data[0].state).toStrictEqual(OracleState.LIVE)
 
       expect(first.data[1].token).toStrictEqual('FB')
       expect(first.data[1].currency).toStrictEqual('CNY')
-      expect(first.data[1].state).toStrictEqual(OracleState.LIVE)
 
       const next = await controller.listTokenCurrencies({
         size: 2,
@@ -83,11 +80,9 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(next.data[0].token).toStrictEqual('MSFT')
       expect(next.data[0].currency).toStrictEqual('SGD')
-      expect(next.data[0].state).toStrictEqual(OracleState.LIVE)
 
       expect(next.data[1].token).toStrictEqual('TSLA')
       expect(next.data[1].currency).toStrictEqual('USD')
-      expect(next.data[1].state).toStrictEqual(OracleState.LIVE)
 
       const last = await controller.listTokenCurrencies({
         size: 2,
@@ -115,7 +110,6 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(first.data[0].token).toStrictEqual('AAPL')
       expect(first.data[0].currency).toStrictEqual('EUR')
-      expect(first.data[0].state).toStrictEqual(OracleState.LIVE)
 
       let next = await controller.getTokenCurrencies(oracleId1, {
         size: 1,
@@ -127,7 +121,6 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(next.data[0].token).toStrictEqual('TSLA')
       expect(next.data[0].currency).toStrictEqual('USD')
-      expect(next.data[0].state).toStrictEqual(OracleState.LIVE)
 
       let last = await controller.getTokenCurrencies(oracleId1, {
         size: 2,
@@ -145,7 +138,6 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(first.data[0].token).toStrictEqual('FB')
       expect(first.data[0].currency).toStrictEqual('CNY')
-      expect(first.data[0].state).toStrictEqual(OracleState.LIVE)
 
       next = await controller.getTokenCurrencies(oracleId2, {
         size: 1,
@@ -157,7 +149,6 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(next.data[0].token).toStrictEqual('MSFT')
       expect(next.data[0].currency).toStrictEqual('SGD')
-      expect(next.data[0].state).toStrictEqual(OracleState.LIVE)
 
       last = await controller.getTokenCurrencies(oracleId2, {
         size: 2,
@@ -228,7 +219,6 @@ describe('2 - Oracle Price Data', () => {
 
       expect(first.data[0].data.token).toStrictEqual('AAPL')
       expect(first.data[0].data.currency).toStrictEqual('EUR')
-      expect(first.data[0].state).toStrictEqual(OracleState.LIVE)
       expect(first.data[0].data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
 
       const next = await controller.getPriceData(oracleId, {
@@ -241,7 +231,6 @@ describe('2 - Oracle Price Data', () => {
 
       expect(next.data[0].data.token).toStrictEqual('TSLA')
       expect(next.data[0].data.currency).toStrictEqual('USD')
-      expect(next.data[0].state).toStrictEqual(OracleState.LIVE)
       expect(next.data[0].data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
 
       const last = await controller.getPriceData(oracleId, {
