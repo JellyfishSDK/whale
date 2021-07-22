@@ -74,8 +74,8 @@ describe('Price Data - setoracledata 1', () => {
     await container.call('setoracledata', [oracleId2, timestamp, prices2])
 
     await container.generate(1)
-
     height2 = await container.call('getblockcount')
+    await container.generate(1)
   }
 
   it('should get price data', async () => {
@@ -178,8 +178,8 @@ describe('Price Data - setoracledata 2', () => {
     await container.call('setoracledata', [oracleId, timestamp, prices])
 
     await container.generate(1)
-
     height = await container.call('getblockcount')
+    await container.generate(1)
   }
 
   it('should get price data if 1 price only set for 2 token currencies for an oracle', async () => {
@@ -241,25 +241,17 @@ describe('Price Data - setoracledata 3', () => {
     ]
 
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
-
     await container.generate(1)
-
     timestamp = Math.floor(new Date().getTime() / 1000)
     const prices1 = [{ tokenAmount: '0.5@AAPL', currency: 'EUR' }]
-
     await container.call('setoracledata', [oracleId, timestamp, prices1])
-
     await container.generate(1)
-
     height1 = await container.call('getblockcount')
-
     const prices2 = [{ tokenAmount: '1.0@AAPL', currency: 'EUR' }]
-
     await container.call('setoracledata', [oracleId, timestamp, prices2])
-
     await container.generate(1)
-
     height2 = await container.call('getblockcount')
+    await container.generate(1)
   }
 
   it('should get price data if 2 prices data are set for the same oracle', async () => {
@@ -348,6 +340,7 @@ describe('Price Data - updateoracle', () => {
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
+    await container.generate(1)
   }
 
   it('should get price data if updateoracle removes 1 price feed', async () => {
@@ -436,6 +429,7 @@ describe('Price Data - removeoracle', () => {
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
+    await container.generate(1)
 
     await waitForHeight(app, height2)
 

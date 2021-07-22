@@ -1,7 +1,6 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { StubService } from '../stub.service'
 import { WhaleApiClient } from '../../src'
-import { OracleState } from '../../src/api/oracle'
 import { StubWhaleApiClient } from '../stub.client'
 import BigNumber from 'bignumber.js'
 
@@ -74,11 +73,9 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(first[0].token).toStrictEqual('AAPL')
       expect(first[0].currency).toStrictEqual('EUR')
-      expect(first[0].state).toStrictEqual(OracleState.LIVE)
 
       expect(first[1].token).toStrictEqual('FB')
       expect(first[1].currency).toStrictEqual('CNY')
-      expect(first[1].state).toStrictEqual(OracleState.LIVE)
 
       const next = await client.paginate(first)
 
@@ -88,11 +85,9 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(next[0].token).toStrictEqual('MSFT')
       expect(next[0].currency).toStrictEqual('SGD')
-      expect(next[0].state).toStrictEqual(OracleState.LIVE)
 
       expect(next[1].token).toStrictEqual('TSLA')
       expect(next[1].currency).toStrictEqual('USD')
-      expect(next[1].state).toStrictEqual(OracleState.LIVE)
 
       const last = await client.paginate(next)
 
@@ -113,7 +108,6 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(first[0]?.token).toStrictEqual('AAPL')
       expect(first[0]?.currency).toStrictEqual('EUR')
-      expect(first[0]?.state).toStrictEqual(OracleState.LIVE)
 
       let next = await client.paginate(first)
 
@@ -123,7 +117,6 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(next[0]?.token).toStrictEqual('TSLA')
       expect(next[0]?.currency).toStrictEqual('USD')
-      expect(next[0]?.state).toStrictEqual(OracleState.LIVE)
 
       let last = await client.paginate(next)
 
@@ -140,7 +133,6 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(first[0]?.token).toStrictEqual('FB')
       expect(first[0]?.currency).toStrictEqual('CNY')
-      expect(first[0]?.state).toStrictEqual(OracleState.LIVE)
 
       next = await client.paginate(first)
 
@@ -150,7 +142,6 @@ describe('1 - Oracle Token Currency', () => {
 
       expect(next[0]?.token).toStrictEqual('MSFT')
       expect(next[0]?.currency).toStrictEqual('SGD')
-      expect(next[0]?.state).toStrictEqual(OracleState.LIVE)
 
       last = await client.paginate(next)
 
@@ -227,7 +218,6 @@ describe('2 - Oracle Price Data', () => {
 
       expect(first[0]?.data.token).toStrictEqual('AAPL')
       expect(first[0]?.data.currency).toStrictEqual('EUR')
-      expect(first[0]?.state).toStrictEqual(OracleState.LIVE)
       expect(first[0]?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
 
       const next = await client.paginate(first)
@@ -238,7 +228,6 @@ describe('2 - Oracle Price Data', () => {
 
       expect(next[0]?.data.token).toStrictEqual('TSLA')
       expect(next[0]?.data.currency).toStrictEqual('USD')
-      expect(next[0]?.state).toStrictEqual(OracleState.LIVE)
       expect(next[0]?.data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
 
       const last = await client.paginate(next)

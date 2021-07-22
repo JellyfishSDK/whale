@@ -60,6 +60,7 @@ describe('Price Aggregration - 1', () => {
     height1 = await container.call('getblockcount')
     blockTime1 = Number.parseInt((await container.call('getblockstats', [height1])).time)
 
+    await container.generate(1)
     await waitForTime(container, blockTime1 + 1)
 
     const timestamp2 = Number.parseInt((await container.call('getblockstats', [await container.call('getblockcount')])).time)
@@ -75,6 +76,7 @@ describe('Price Aggregration - 1', () => {
     height2 = await container.call('getblockcount')
     blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
 
+    await container.generate(1)
     await waitForHeight(app, height2)
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
@@ -153,6 +155,7 @@ describe('Price Aggregration - 2', () => {
 
     height1 = await container.call('getblockcount')
     blockTime1 = Number.parseInt((await container.call('getblockstats', [height1])).time)
+    await container.generate(1)
 
     await waitForTime(container, blockTime1 + 1)
 
@@ -169,6 +172,7 @@ describe('Price Aggregration - 2', () => {
 
     height2 = await container.call('getblockcount')
     blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
+    await container.generate(1)
 
     await waitForHeight(app, height2)
 
@@ -263,6 +267,7 @@ describe('Price Aggregration - 3', () => {
 
     height1 = await container.call('getblockcount')
     blockTime1 = Number((await container.call('getblockstats', [height1])).time)
+    await container.generate(1)
 
     await waitForTime(container, blockTime1 + 1)
 

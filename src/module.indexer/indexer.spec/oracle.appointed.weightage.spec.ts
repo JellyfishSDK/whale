@@ -36,8 +36,8 @@ describe('Weightage - approveoracle', () => {
     oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
 
     await container.generate(1)
-
     height = await container.call('getblockcount')
+    await container.generate(1)
   }
 
   it('should get weightage', async () => {
@@ -85,6 +85,7 @@ describe('Weightage - updateoracle', () => {
     await container.call('updateoracle', [oracleId, await container.getNewAddress(), priceFeeds, 2])
     await container.generate(1)
     const height2: number = await container.call('getblockcount')
+    await container.generate(1)
     await waitForHeight(app, height2)
 
     const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
@@ -136,6 +137,7 @@ describe('Weightage - removeoracle', () => {
     await container.call('removeoracle', [oracleId])
     await container.generate(1)
     const height2: number = await container.call('getblockcount')
+    await container.generate(1)
     await waitForHeight(app, height2)
 
     const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)

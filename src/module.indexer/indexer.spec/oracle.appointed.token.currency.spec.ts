@@ -33,6 +33,7 @@ describe('Token Currency - approveoracle', () => {
     const oracleId: string = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
     await container.generate(1)
     const height: number = await container.call('getblockcount')
+    await container.generate(1)
 
     await waitForHeight(app, height)
 
@@ -102,6 +103,8 @@ describe('Token Currency - updateoracle', () => {
 
     height2 = await container.call('getblockcount')
 
+    await container.generate(1)
+
     await waitForHeight(app, height2)
 
     const appointedTokenCurrencyMapper = app.get(OracleAppointedTokenCurrencyMapper)
@@ -119,6 +122,8 @@ describe('Token Currency - updateoracle', () => {
     expect(result2?.data.oracleId).toStrictEqual(oracleId)
     expect(result2?.data.token).toStrictEqual('TSLA')
     expect(result2?.data.currency).toStrictEqual('USD')
+
+    console.log(JSON.stringify(await appointedTokenCurrencyMapper.list()))
 
     const result3 = await appointedTokenCurrencyMapper.get(oracleId, 'FB', 'CNY', height2)
     expect(result3?.id).toStrictEqual(`${oracleId}-FB-CNY-${height2}`)
@@ -185,6 +190,8 @@ describe('Token Currency - removeoracle', () => {
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
+
+    await container.generate(1)
 
     await waitForHeight(app, height2)
 

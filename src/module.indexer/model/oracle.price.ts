@@ -40,7 +40,8 @@ export class OracleAppointedIndexer extends Indexer {
 
         if (stack[0]?.type === 'OP_RETURN' && stack[0]?.code === 106) {
           if (stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE' || stack[1]?.tx?.name === 'OP_DEFI_TX_UPDATE_ORACLE') {
-            const oracleId: string = txn.txid
+            const oracleId: string = stack[1]?.tx?.name === 'OP_DEFI_TX_APPOINT_ORACLE'
+              ? txn.txid : stack[1].tx.data.oracleId
 
             // NOTE(jingyi2811): Add weightage
             const weightage: number = stack[1].tx.data.weightage
@@ -73,10 +74,10 @@ export class OracleAppointedIndexer extends Indexer {
                 const currency: string = price.currency
                 const amount: number = price.amount
 
-                priceDataRecords[`${oracleId}-${token as string}-${currency}-${timestamp.toString()}`] = OracleAppointedIndexer.newOraclePriceData(
+                priceDataRecords[`${oracleId}-${token.token as string}-${currency}-${timestamp.toString()}`] = OracleAppointedIndexer.newOraclePriceData(
                   block.height,
                   oracleId,
-                  token,
+                  token.token,
                   currency,
                   new BigNumber(amount),
                   timestamp)
