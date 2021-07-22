@@ -2,7 +2,6 @@ import { DeFiDRpcError, MasterNodeRegTestContainer } from '@defichain/testcontai
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
-import { OracleState } from '@whale-api-client/api/oracle'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
@@ -11,13 +10,10 @@ describe('Token Currency - approveoracle', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
-    await container.generate(20)
-
     app = await createIndexerTestModule(container)
     await app.init()
 
     await container.waitForWalletCoinbaseMaturity()
-    await setup()
   })
 
   afterAll(async () => {
@@ -28,23 +24,16 @@ describe('Token Currency - approveoracle', () => {
     }
   })
 
-  let oracleId: string
-  let height: number
-
-  async function setup (): Promise<void> {
+  it('should get token currency', async () => {
     const priceFeeds = [
       { token: 'AAPL', currency: 'EUR' },
       { token: 'TSLA', currency: 'USD' }
     ]
 
-    oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
-
+    const oracleId: string = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
     await container.generate(1)
+    const height: number = await container.call('getblockcount')
 
-    height = await container.call('getblockcount')
-  }
-
-  it('should get token currency', async () => {
     await waitForHeight(app, height)
 
     const appointedTokenCurrencyMapper = app.get(OracleAppointedTokenCurrencyMapper)
@@ -55,7 +44,6 @@ describe('Token Currency - approveoracle', () => {
     expect(result?.data.oracleId).toStrictEqual(oracleId)
     expect(result?.data.token).toStrictEqual('AAPL')
     expect(result?.data.currency).toStrictEqual('EUR')
-    expect(result?.state).toStrictEqual(OracleState.LIVE)
 
     const data = await container.call('getoracledata', [oracleId])
     expect(data.priceFeeds).toStrictEqual(
@@ -77,7 +65,6 @@ describe('Token Currency - updateoracle', () => {
     await app.init()
 
     await container.waitForWalletCoinbaseMaturity()
-    await setup()
   })
 
   afterAll(async () => {
@@ -92,7 +79,7 @@ describe('Token Currency - updateoracle', () => {
   let height1: number
   let height2: number
 
-  async function setup (): Promise<void> {
+  it('should get token currency', async () => {
     const priceFeeds1 = [
       { token: 'AAPL', currency: 'EUR' },
       { token: 'TSLA', currency: 'USD' }
@@ -114,9 +101,7 @@ describe('Token Currency - updateoracle', () => {
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
-  }
 
-  it('should get token currency', async () => {
     await waitForHeight(app, height2)
 
     const appointedTokenCurrencyMapper = app.get(OracleAppointedTokenCurrencyMapper)
@@ -127,7 +112,6 @@ describe('Token Currency - updateoracle', () => {
     expect(result1?.data.oracleId).toStrictEqual(oracleId)
     expect(result1?.data.token).toStrictEqual('AAPL')
     expect(result1?.data.currency).toStrictEqual('EUR')
-    expect(result1?.state).toStrictEqual(OracleState.LIVE)
 
     const result2 = await appointedTokenCurrencyMapper.get(oracleId, 'TSLA', 'USD', height1)
     expect(result2?.id).toStrictEqual(`${oracleId}-TSLA-USD-${height1}`)
@@ -135,7 +119,6 @@ describe('Token Currency - updateoracle', () => {
     expect(result2?.data.oracleId).toStrictEqual(oracleId)
     expect(result2?.data.token).toStrictEqual('TSLA')
     expect(result2?.data.currency).toStrictEqual('USD')
-    expect(result2?.state).toStrictEqual(OracleState.LIVE)
 
     const result3 = await appointedTokenCurrencyMapper.get(oracleId, 'FB', 'CNY', height2)
     expect(result3?.id).toStrictEqual(`${oracleId}-FB-CNY-${height2}`)
@@ -143,7 +126,6 @@ describe('Token Currency - updateoracle', () => {
     expect(result3?.data.oracleId).toStrictEqual(oracleId)
     expect(result3?.data.token).toStrictEqual('FB')
     expect(result3?.data.currency).toStrictEqual('CNY')
-    expect(result3?.state).toStrictEqual(OracleState.LIVE)
 
     const result4 = await appointedTokenCurrencyMapper.get(oracleId, 'MSFT', 'SGD', height2)
     expect(result4?.id).toStrictEqual(`${oracleId}-MSFT-SGD-${height2}`)
@@ -151,7 +133,6 @@ describe('Token Currency - updateoracle', () => {
     expect(result4?.data.oracleId).toStrictEqual(oracleId)
     expect(result4?.data.token).toStrictEqual('MSFT')
     expect(result4?.data.currency).toStrictEqual('SGD')
-    expect(result4?.state).toStrictEqual(OracleState.LIVE)
 
     const data = await container.call('getoracledata', [oracleId])
     expect(data.priceFeeds).toStrictEqual(
@@ -173,7 +154,6 @@ describe('Token Currency - removeoracle', () => {
     await app.init()
 
     await container.waitForWalletCoinbaseMaturity()
-    await setup()
   })
 
   afterAll(async () => {
@@ -188,7 +168,7 @@ describe('Token Currency - removeoracle', () => {
   let height1: number
   let height2: number
 
-  async function setup (): Promise<void> {
+  it('should remove token currency', async () => {
     const priceFeeds = [
       { token: 'AAPL', currency: 'EUR' },
       { token: 'TSLA', currency: 'USD' }
@@ -205,9 +185,7 @@ describe('Token Currency - removeoracle', () => {
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
-  }
 
-  it('should remove token currency', async () => {
     await waitForHeight(app, height2)
 
     const appointedTokenCurrencyMapper = app.get(OracleAppointedTokenCurrencyMapper)
@@ -218,7 +196,6 @@ describe('Token Currency - removeoracle', () => {
     expect(result1?.data.oracleId).toStrictEqual(oracleId)
     expect(result1?.data.token).toStrictEqual('AAPL')
     expect(result1?.data.currency).toStrictEqual('EUR')
-    expect(result1?.state).toStrictEqual(OracleState.REMOVED)
 
     const result2 = await appointedTokenCurrencyMapper.get(oracleId, 'TSLA', 'USD', height1)
     expect(result2?.id).toStrictEqual(`${oracleId}-TSLA-USD-${height1}`)
@@ -226,7 +203,6 @@ describe('Token Currency - removeoracle', () => {
     expect(result2?.data.oracleId).toStrictEqual(oracleId)
     expect(result2?.data.token).toStrictEqual('TSLA')
     expect(result2?.data.currency).toStrictEqual('USD')
-    expect(result2?.state).toStrictEqual(OracleState.REMOVED)
 
     const promise = container.call('getoracledata', [oracleId])
     await expect(promise).rejects.toThrow(DeFiDRpcError)

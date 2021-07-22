@@ -31,8 +31,7 @@ export class OracleController {
       .map((obj: OracleAppointedTokenCurrency) => {
         return {
           token: obj.data.token,
-          currency: obj.data.currency,
-          state: obj.state
+          currency: obj.data.currency
         }
       })
       .sort((a, b) =>
@@ -54,8 +53,7 @@ export class OracleController {
       .map((obj: OracleAppointedTokenCurrency) => {
         return {
           token: obj.data.token,
-          currency: obj.data.currency,
-          state: obj.state
+          currency: obj.data.currency
         }
       })
       .sort((a, b) =>

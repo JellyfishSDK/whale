@@ -67,7 +67,6 @@ describe('Weightage - updateoracle', () => {
     await app.init()
 
     await container.waitForWalletCoinbaseMaturity()
-    await setup()
   })
 
   afterAll(async () => {
@@ -78,26 +77,14 @@ describe('Weightage - updateoracle', () => {
     }
   })
 
-  let oracleId: string
-  let height1: number
-  let height2: number
-
-  async function setup (): Promise<void> {
-    const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
-    oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
-
-    await container.generate(1)
-
-    height1 = await container.call('getblockcount')
-
-    await container.call('updateoracle', [oracleId, await container.getNewAddress(), priceFeeds, 2])
-
-    await container.generate(1)
-
-    height2 = await container.call('getblockcount')
-  }
-
   it('should get weightage', async () => {
+    const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
+    const oracleId: string = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
+    await container.generate(1)
+    const height1: number = await container.call('getblockcount')
+    await container.call('updateoracle', [oracleId, await container.getNewAddress(), priceFeeds, 2])
+    await container.generate(1)
+    const height2: number = await container.call('getblockcount')
     await waitForHeight(app, height2)
 
     const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
@@ -131,7 +118,6 @@ describe('Weightage - removeoracle', () => {
     await app.init()
 
     await container.waitForWalletCoinbaseMaturity()
-    await setup()
   })
 
   afterAll(async () => {
@@ -142,35 +128,23 @@ describe('Weightage - removeoracle', () => {
     }
   })
 
-  let oracleId: string
-  let height1: number
-  let height2: number
-
-  async function setup (): Promise<void> {
-    const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
-    oracleId = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
-
-    await container.generate(1)
-
-    height1 = await container.call('getblockcount')
-
-    await container.call('removeoracle', [oracleId])
-
-    await container.generate(1)
-
-    height2 = await container.call('getblockcount')
-  }
-
   it('should remove weightage', async () => {
+    const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
+    const oracleId: string = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
+
+    await container.generate(1)
+    await container.call('removeoracle', [oracleId])
+    await container.generate(1)
+    const height2: number = await container.call('getblockcount')
     await waitForHeight(app, height2)
 
     const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
 
-    const result = await appointedWeightageMapper.get(oracleId, height1)
-    expect(result?.id).toStrictEqual(`${oracleId}-${height1}`)
-    expect(result?.block.height).toStrictEqual(height1)
+    const result = await appointedWeightageMapper.get(oracleId, height2)
+    expect(result?.id).toStrictEqual(`${oracleId}-${height2}`)
+    expect(result?.block.height).toStrictEqual(height2)
     expect(result?.data.oracleId).toStrictEqual(oracleId)
-    expect(result?.data.weightage).toStrictEqual(1)
+    expect(result?.data.weightage).toStrictEqual(0)
     expect(result?.state).toStrictEqual(OracleState.REMOVED)
 
     const promise = container.call('getoracledata', [oracleId])

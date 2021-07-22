@@ -22,14 +22,6 @@ export class OraclePriceAggregationIndexer extends Indexer {
     const records: Record<string, OraclePriceAggregration> = {}
 
     const tokenCurrenciesSet: Set<string> = new Set()
-    const tokenCurrencyResult = await this.appointedTokenCurrencyMapper.list() ?? []
-
-    if (tokenCurrencyResult.length > 0) {
-      // NOTE(jingyi2811): Should include LIVE token currencies only.
-      tokenCurrencyResult.filter(t => t.state === OracleState.LIVE).map(m => {
-        tokenCurrenciesSet.add(`${m.data.token}-${m.data.currency}`)
-      })
-    }
 
     // NOTE(jingyi2811): Search for distinct token currencies only.
     for (const tokenCurrency of tokenCurrenciesSet) {
@@ -38,19 +30,19 @@ export class OraclePriceAggregationIndexer extends Indexer {
       const currency = data[1]
 
       // NOTE(jingyi2811): Search for LIVE price for within 1 hour ago or 1 hour later.
-      const priceDataResult = (await this.priceDataMapper.getActivePrices(token, currency, block.time) ?? [])
-        .filter(p => p.state === OracleState.LIVE)
+      const priceDataResult = await this.priceDataMapper.getActivePrices(token, currency, block.time) ?? []
 
       // NOTE(jingyi2811): Calculate average price.
       let sumBN = new BigNumber(0)
       let weightageSum = 0
 
-      for (let i = 0; i < priceDataResult.length; i += 1) {
-        const priceData = priceDataResult[i]
-
+      for (const priceData of priceDataResult) {
         const weightageObj = await this.appointedWeightageMapper.getLatestByOracleIdHeight(priceData.data.oracleId, block.height)
-        const weightage = weightageObj?.data.weightage ?? 0
+        if (weightageObj?.state !== OracleState.LIVE) {
+          continue
+        }
 
+        const weightage = weightageObj?.data.weightage ?? 0
         sumBN = sumBN.plus(new BigNumber(priceData.data.amount).multipliedBy(weightage))
         weightageSum += weightage
       }

@@ -106,7 +106,6 @@ export interface OracleAppointedTokenCurrency {
     token: string
     currency: string
   }
-  state: OracleState
 }
 
 export interface OraclePriceData {
@@ -121,7 +120,6 @@ export interface OraclePriceData {
     amount: BigNumber
     timestamp: number
   }
-  state: OracleState
 }
 
 export interface OraclePriceAggregration {
@@ -140,7 +138,6 @@ export interface OraclePriceAggregration {
 export interface OracleTokenCurrency {
   token: string
   currency: string
-  state: OracleState
 }
 
 export interface OraclePriceInterval {

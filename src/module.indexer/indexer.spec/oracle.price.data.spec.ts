@@ -2,7 +2,6 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
-import { OracleState } from '@whale-api-client/api/oracle'
 import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
@@ -93,7 +92,6 @@ describe('Price Data - setoracledata 1', () => {
     expect(result1?.data.currency).toStrictEqual('EUR')
     expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
     expect(result1?.data.timestamp).toStrictEqual(timestamp.toString())
-    expect(result1?.state).toStrictEqual(OracleState.LIVE)
 
     const result2 = await priceDataMapper.get(oracleId1, 'TSLA', 'USD', height1, timestamp)
 
@@ -104,7 +102,6 @@ describe('Price Data - setoracledata 1', () => {
     expect(result2?.data.currency).toStrictEqual('USD')
     expect(result2?.data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
     expect(result2?.data.timestamp).toStrictEqual(timestamp.toString())
-    expect(result2?.state).toStrictEqual(OracleState.LIVE)
 
     const result3 = await priceDataMapper.get(oracleId2, 'FB', 'CNY', height2, timestamp)
 
@@ -115,7 +112,6 @@ describe('Price Data - setoracledata 1', () => {
     expect(result3?.data.currency).toStrictEqual('CNY')
     expect(result3?.data.amount.toString()).toStrictEqual(new BigNumber('1.5').toString())
     expect(result3?.data.timestamp).toStrictEqual(timestamp.toString())
-    expect(result3?.state).toStrictEqual(OracleState.LIVE)
 
     const result4 = await priceDataMapper.get(oracleId2, 'MSFT', 'SGD', height2, timestamp)
 
@@ -126,7 +122,6 @@ describe('Price Data - setoracledata 1', () => {
     expect(result4?.data.currency).toStrictEqual('SGD')
     expect(result4?.data.amount.toString()).toStrictEqual(new BigNumber('2').toString())
     expect(result4?.data.timestamp).toStrictEqual(timestamp.toString())
-    expect(result4?.state).toStrictEqual(OracleState.LIVE)
 
     const data1 = await container.call('listlatestrawprices', [{ token: 'AAPL', currency: 'EUR' }])
     expect(data1[0]?.rawprice).toStrictEqual(0.5)
@@ -201,7 +196,6 @@ describe('Price Data - setoracledata 2', () => {
     expect(result1?.data.currency).toStrictEqual('EUR')
     expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
     expect(result1?.data.timestamp).toStrictEqual(timestamp.toString())
-    expect(result1?.state).toStrictEqual(OracleState.LIVE)
 
     const result2 = await priceDataMapper.get(oracleId, 'TSLA', 'USD', height, timestamp)
     expect(result2).toBeUndefined()
@@ -282,7 +276,6 @@ describe('Price Data - setoracledata 3', () => {
     expect(result1?.data.currency).toStrictEqual('EUR')
     expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
     expect(result1?.data.timestamp).toStrictEqual(timestamp.toString())
-    expect(result1?.state).toStrictEqual(OracleState.LIVE)
 
     const result2 = await priceDataMapper.get(oracleId, 'AAPL', 'EUR', height2, timestamp)
 
@@ -293,7 +286,6 @@ describe('Price Data - setoracledata 3', () => {
     expect(result2?.data.currency).toStrictEqual('EUR')
     expect(result2?.data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
     expect(result2?.data.timestamp).toStrictEqual(timestamp.toString())
-    expect(result2?.state).toStrictEqual(OracleState.LIVE)
 
     const data = await container.call('listlatestrawprices', [{ token: 'AAPL', currency: 'EUR' }])
     expect(data[0]?.rawprice).toStrictEqual(1)
@@ -372,7 +364,6 @@ describe('Price Data - updateoracle', () => {
     expect(result1?.data.currency).toStrictEqual('EUR')
     expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
     expect(result1?.data.timestamp).toStrictEqual(timestamp.toString())
-    expect(result1?.state).toStrictEqual(OracleState.LIVE)
 
     const result2 = await priceDataMapper.get(oracleId, 'TSLA', 'USD', height1, timestamp)
 
@@ -383,7 +374,6 @@ describe('Price Data - updateoracle', () => {
     expect(result2?.data.currency).toStrictEqual('USD')
     expect(result2?.data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
     expect(result2?.data.timestamp).toStrictEqual(timestamp.toString())
-    expect(result2?.state).toStrictEqual(OracleState.LIVE)
 
     const data1 = await container.call('listlatestrawprices', [{ token: 'AAPL', currency: 'EUR' }])
     expect(data1[0]?.rawprice).toStrictEqual(0.5)
@@ -403,7 +393,6 @@ describe('Price Data - removeoracle', () => {
     await app.init()
 
     await container.waitForWalletCoinbaseMaturity()
-    await setup()
   })
 
   afterAll(async () => {
@@ -419,7 +408,7 @@ describe('Price Data - removeoracle', () => {
   let height1: number
   let height2: number
 
-  async function setup (): Promise<void> {
+  it('should not get price data', async () => {
     const priceFeeds = [
       { token: 'AAPL', currency: 'EUR' },
       { token: 'TSLA', currency: 'USD' }
@@ -447,9 +436,7 @@ describe('Price Data - removeoracle', () => {
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
-  }
 
-  it('should not get price data', async () => {
     await waitForHeight(app, height2)
 
     const priceDataMapper = app.get(OraclePriceDataMapper)
@@ -463,7 +450,6 @@ describe('Price Data - removeoracle', () => {
     expect(result1?.data.currency).toStrictEqual('EUR')
     expect(result1?.data.amount.toString()).toStrictEqual(new BigNumber('0.5').toString())
     expect(result1?.data.timestamp).toStrictEqual(timestamp.toString())
-    expect(result1?.state).toStrictEqual(OracleState.REMOVED)
 
     const result2 = await priceDataMapper.get(oracleId, 'TSLA', 'USD', height1, timestamp)
 
@@ -474,7 +460,6 @@ describe('Price Data - removeoracle', () => {
     expect(result2?.data.currency).toStrictEqual('USD')
     expect(result2?.data.amount.toString()).toStrictEqual(new BigNumber('1').toString())
     expect(result2?.data.timestamp).toStrictEqual(timestamp.toString())
-    expect(result2?.state).toStrictEqual(OracleState.REMOVED)
 
     const data1 = await container.call('listlatestrawprices', [{ token: 'AAPL', currency: 'EUR' }])
     expect(data1.length).toStrictEqual(0)

@@ -22,7 +22,6 @@ describe('Price Aggregration - 1', () => {
     await app.init()
 
     await container.waitForWalletCoinbaseMaturity()
-    await setup()
   })
 
   afterAll(async () => {
@@ -38,7 +37,7 @@ describe('Price Aggregration - 1', () => {
   let blockTime1: number
   let blockTime2: number
 
-  async function setup (): Promise<void> {
+  it('should get oracle price aggregration', async () => {
     const priceFeeds1 = [{ token: 'AAPL', currency: 'EUR' }]
 
     const oracleId1 = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
@@ -75,9 +74,7 @@ describe('Price Aggregration - 1', () => {
 
     height2 = await container.call('getblockcount')
     blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
-  }
 
-  it('should get oracle price aggregration', async () => {
     await waitForHeight(app, height2)
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)
@@ -114,7 +111,6 @@ describe('Price Aggregration - 2', () => {
     await app.init()
 
     await container.waitForWalletCoinbaseMaturity()
-    await setup()
   })
 
   afterAll(async () => {
@@ -130,7 +126,7 @@ describe('Price Aggregration - 2', () => {
   let blockTime1: number
   let blockTime2: number
 
-  async function setup (): Promise<void> {
+  it('should get oracle price aggregration with correct sum of 2 prices', async () => {
     const priceFeeds = [
       { token: 'AAPL', currency: 'EUR' },
       { token: 'TSLA', currency: 'USD' }
@@ -173,9 +169,7 @@ describe('Price Aggregration - 2', () => {
 
     height2 = await container.call('getblockcount')
     blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
-  }
 
-  it('should get oracle price aggregration with correct sum of 2 prices', async () => {
     await waitForHeight(app, height2)
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)

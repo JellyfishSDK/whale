@@ -50,7 +50,7 @@ export async function waitForHeight (app: TestingModule, height: number): Promis
   await waitForExpect(async () => {
     const block = await blockMapper.getHighest()
     await expect(block?.height).toBeGreaterThan(height)
-  })
+  }, 30000)
 }
 
 export async function waitForTime (container: MasterNodeRegTestContainer, timestamp: number, timeout: number = 30000): Promise<void> {
