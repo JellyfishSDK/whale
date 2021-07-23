@@ -12,6 +12,7 @@ import { NetworkGuard } from '@src/module.api/guards/network.guard'
 import { ExceptionInterceptor } from '@src/module.api/interceptors/exception.interceptor'
 import { ResponseInterceptor } from '@src/module.api/interceptors/response.interceptor'
 import { TokensController } from '@src/module.api/token.controller'
+import { MasternodesController } from '@src/module.api/masternode.controller'
 
 /**
  * Exposed ApiModule for public interfacing
@@ -24,7 +25,8 @@ import { TokensController } from '@src/module.api/token.controller'
     ActuatorController,
     TransactionsController,
     TokensController,
-    PoolPairController
+    PoolPairController,
+    MasternodesController
   ],
   providers: [
     { provide: APP_PIPE, useClass: ApiValidationPipe },
