@@ -65,8 +65,8 @@ async function updatePoolPair (container: MasterNodeRegTestContainer, metadata: 
   await container.generate(1)
 }
 
-it('should query at block 112', async () => {
-  await waitForHeight(app, 112)
+it('should query at block 110', async () => {
+  await waitForHeight(app, 110)
 
   const poolpairs = await mapper.query('1-0', 100)
   expect(poolpairs.length).toStrictEqual(4)
@@ -85,15 +85,15 @@ it('should query at block 112', async () => {
   expect(poolpairs[1].commission).toStrictEqual('0.015')
   expect(poolpairs[1].block.height).toStrictEqual(110)
 
-  expect(poolpairs[1].id).toStrictEqual('1-0-109')
-  expect(poolpairs[1].status).toStrictEqual(false)
-  expect(poolpairs[1].commission).toStrictEqual('0.02')
-  expect(poolpairs[1].block.height).toStrictEqual(109)
+  expect(poolpairs[2].id).toStrictEqual('1-0-109')
+  expect(poolpairs[2].status).toStrictEqual(false)
+  expect(poolpairs[2].commission).toStrictEqual('0.02')
+  expect(poolpairs[2].block.height).toStrictEqual(109)
 
-  expect(poolpairs[1].id).toStrictEqual('1-0-104')
-  expect(poolpairs[1].status).toStrictEqual(true)
-  expect(poolpairs[1].commission).toStrictEqual('0')
-  expect(poolpairs[1].block.height).toStrictEqual(104)
+  expect(poolpairs[3].id).toStrictEqual('1-0-104')
+  expect(poolpairs[3].status).toStrictEqual(true)
+  expect(poolpairs[3].commission).toStrictEqual('0')
+  expect(poolpairs[3].block.height).toStrictEqual(104)
 
   const latest = await mapper.getLatest('1-0')
   expect(latest?.id).toStrictEqual('1-0-111')
