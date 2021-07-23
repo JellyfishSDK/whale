@@ -31,12 +31,3 @@ export class RpcItemLengthError extends IndexerError {
     super(`the ${item} length is not valid`)
   }
 }
-
-/**
- * Expected snapshot is stored before overwrite data
- */
-export class NotFoundSnapShotError extends IndexerError {
-  constructor (type: string) {
-    super(`attempting to reverse and overwrite data but ${type} snapshot cannot be found`)
-  }
-}

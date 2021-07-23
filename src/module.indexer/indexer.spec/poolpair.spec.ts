@@ -2,32 +2,29 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { PoolPairMapper } from '@src/module.model/poolpair'
-import { TokenMapper } from '@src/module.model/token'
-import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import BigNumber from 'bignumber.js'
-import crypto from 'crypto'
+import { createPoolPair, createToken } from '@defichain/testing'
 
 const container = new MasterNodeRegTestContainer()
 let app: TestingModule
-let client: JsonRpcClient
 let mapper: PoolPairMapper
-let tokenMapper: TokenMapper
 let spy: jest.SpyInstance
 
 beforeAll(async () => {
   await container.start()
   await container.waitForReady()
-  await container.generate(20)
+  await container.generate(10)
 
   app = await createIndexerTestModule(container)
   await app.init()
 
-  client = app.get<JsonRpcClient>(JsonRpcClient)
-
   mapper = app.get<PoolPairMapper>(PoolPairMapper)
-  tokenMapper = app.get<TokenMapper>(TokenMapper)
 
   await setup()
+})
+
+beforeEach(async () => {
+  // Note(canonbrother): to prevent index got invalidated as mocking 'client.blockchain.getBlock' will never get the best chain
+  spy = jest.spyOn(mapper, 'delete').mockImplementation()
 })
 
 afterAll(async () => {
@@ -38,125 +35,66 @@ afterAll(async () => {
   }
 })
 
-beforeEach(async () => {
-  // Note(canonbrother): to prevent index got invalidated as mocking 'client.blockchain.getBlock' will never get the best chain
-  spy = jest.spyOn(mapper, 'delete').mockImplementation()
-  spy = jest.spyOn(tokenMapper, 'delete').mockImplementation()
-
-  spy = jest.spyOn(client.blockchain, 'getBlock')
-    .mockImplementationOnce(() => generateBlock(dummyScripts[0], 16))
-    .mockImplementationOnce(() => generateBlock(dummyScripts[1], 17))
-    .mockImplementationOnce(() => generateBlock(dummyScripts[2], 18))
-    .mockImplementationOnce(() => generateBlock(dummyScripts[3], 19))
-
-  spy = jest.spyOn(client.poolpair, 'getPoolPair')
-    .mockImplementationOnce(() => generatePoolPair('16'))
-    .mockImplementationOnce(() => generatePoolPair('17'))
-    .mockImplementationOnce(() => generatePoolPair('18'))
-})
-
 afterEach(async () => {
   spy.mockRestore()
 })
 
-async function putToken (id: string, symbol: string): Promise<void> {
-  await tokenMapper.put({
-    id: id,
-    block: {
-      hash: crypto.randomBytes(32).toString('hex'),
-      height: Number(id)
-    },
-    symbol: symbol,
-    name: symbol,
-    decimal: 8,
-    limit: '0',
-    mintable: true,
-    tradeable: true,
-    isDAT: true
-  })
-}
-
 async function setup (): Promise<void> {
-  await putToken('0', 'DFI')
-  await putToken('1', 'ETH')
-  await putToken('2', 'BTC')
-  await putToken('3', 'USDT')
-  await putToken('4', 'BNB')
-  await putToken('5', 'ADA')
-  await putToken('6', 'DOGE')
-  await putToken('7', 'XRP')
-  await putToken('8', 'USDC')
-  await putToken('9', 'DOT')
-  await putToken('10', 'UNI')
-  await putToken('11', 'BUSD')
-  await putToken('12', 'BCH')
-  await putToken('13', 'LTC')
-  await putToken('14', 'SOL')
-  await putToken('15', 'LINK')
+  await createToken(container, 'ETH')
+  await createToken(container, 'BTC')
+  await createToken(container, 'USDT')
+  await createPoolPair(container, 'ETH', 'DFI') // height 104
+  await createPoolPair(container, 'BTC', 'DFI')
+  await createPoolPair(container, 'USDT', 'DFI')
+  await createToken(container, 'DOGE')
+  await createPoolPair(container, 'DOGE', 'DFI')
+
+  await updatePoolPair(container, { pool: 'ETH-DFI', status: false, commission: 0.02 }) // height 109
+  await updatePoolPair(container, { pool: 'ETH-DFI', status: true, commission: 0.015 }) // height 110
+  await updatePoolPair(container, { pool: 'ETH-DFI', status: true, commission: 0.03 }) // height 111
 }
 
-const dummyScripts = [
-  {
-    // regtest - createPoolPair
-    asm: 'OP_RETURN 4466547870010080841e000000000017a914cadb8f9af3e68326c1ab41fb3761d455178c6d2b87010000',
-    hex: '6a2a4466547870010080841e000000000017a914cadb8f9af3e68326c1ab41fb3761d455178c6d2b87010000'
-  },
-  {
-    // https://mainnet.defichain.io/#/DFI/mainnet/tx/9e0c956f9c626c07ba3dd742748ff9872b5688a976d66d35aa09418f18620b64
-    asm: 'OP_RETURN 44665478700700400d03000000000017a914f78ca7530bd35fff6af98a49522a34f7508ab64e87010000',
-    hex: '6a2a44665478700700400d03000000000017a914f78ca7530bd35fff6af98a49522a34f7508ab64e87010000'
-  },
-  {
-    // https://mainnet.defichain.io/#/DFI/mainnet/tx/75a25a52c54d12f84d4a553be354fa2c5651689d8f9f4860aad8b68c804af3f1
-    asm: 'OP_RETURN 44665478700900400d0300000000001976a9148f83f4f005ba70f0c5d7a59d4696daee13a6e43b88ac010000',
-    hex: '6a2c44665478700900400d0300000000001976a9148f83f4f005ba70f0c5d7a59d4696daee13a6e43b88ac010000'
-  },
-  {
-    // regtest - updatePoolPair
-    asm: 'OP_RETURN 44665478751000000000c0e1e400000000000000',
-    hex: '6a1444665478751000000000c0e1e400000000000000'
-  }
-]
+// TODO(canonbrother): add updatePoolPair rpc jellyfish core and testing
+async function updatePoolPair (container: MasterNodeRegTestContainer, metadata: any): Promise<void> {
+  await container.call('updatepoolpair', [{
+    pool: metadata.pool,
+    status: metadata.status,
+    commission: metadata.commission
+  }])
 
-function generateBlock (dummyScript: any, height: number): any {
-  return {
-    hash: crypto.randomBytes(32).toString('hex'),
-    height: height,
-    tx: [{
-      txid: crypto.randomBytes(32).toString('hex'),
-      vin: [],
-      vout: [{
-        scriptPubKey: dummyScript,
-        n: 0,
-        value: new BigNumber('26.78348323')
-      }]
-    }],
-    time: 1625547853
-  }
+  await container.generate(1)
 }
 
-function generatePoolPair (id: string): any {
-  return {
-    [id]: {
-    }
-  }
-}
+it('should query at block 112', async () => {
+  await waitForHeight(app, 112)
 
-it('should query at block 20', async () => {
-  await waitForHeight(app, 20)
+  const poolpairs = await mapper.query('1-0', 100)
+  expect(poolpairs.length).toStrictEqual(4)
 
-  const poolpairs = await mapper.query(100)
-  expect(poolpairs.length).toStrictEqual(3)
+  expect(poolpairs[0].id).toStrictEqual('1-0-111')
+  expect(poolpairs[0].poolId).toStrictEqual('4')
+  expect(poolpairs[0].symbol).toStrictEqual('ETH-DFI')
+  expect(poolpairs[0].symbolId).toStrictEqual('1-0')
+  expect(poolpairs[0].status).toStrictEqual(true)
+  expect(poolpairs[0].commission).toStrictEqual('0.03')
+  expect(poolpairs[0].block.hash).toStrictEqual(expect.any(String))
+  expect(poolpairs[0].block.height).toStrictEqual(111)
 
-  expect(poolpairs[2].id).toStrictEqual('1-0')
-  expect(poolpairs[2].poolId).toStrictEqual('16')
-  expect(poolpairs[2].symbol).toStrictEqual('ETH-DFI')
-  expect(poolpairs[2].status).toStrictEqual(false)// updated from true
-  expect(poolpairs[2].commission).toStrictEqual('0.15') // updated from 0.2
-  expect(poolpairs[2].block.hash).toStrictEqual(expect.any(String))
-  expect(poolpairs[2].block.height).toStrictEqual(16)
+  expect(poolpairs[1].id).toStrictEqual('1-0-110')
+  expect(poolpairs[1].status).toStrictEqual(true)
+  expect(poolpairs[1].commission).toStrictEqual('0.015')
+  expect(poolpairs[1].block.height).toStrictEqual(110)
 
-  // ensure the poolId is incremented
-  expect(poolpairs[1].poolId).toStrictEqual('17')
-  expect(poolpairs[0].poolId).toStrictEqual('18')
+  expect(poolpairs[1].id).toStrictEqual('1-0-109')
+  expect(poolpairs[1].status).toStrictEqual(false)
+  expect(poolpairs[1].commission).toStrictEqual('0.02')
+  expect(poolpairs[1].block.height).toStrictEqual(109)
+
+  expect(poolpairs[1].id).toStrictEqual('1-0-104')
+  expect(poolpairs[1].status).toStrictEqual(true)
+  expect(poolpairs[1].commission).toStrictEqual('0')
+  expect(poolpairs[1].block.height).toStrictEqual(104)
+
+  const latest = await mapper.getLatest('1-0')
+  expect(latest?.id).toStrictEqual('1-0-111')
 })

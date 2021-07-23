@@ -1,22 +1,17 @@
 import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import BigNumber from 'bignumber.js'
-import { NotFoundIndexerError, RpcItemLengthError, NotFoundSnapShotError } from '@src/module.indexer/error'
+import { NotFoundIndexerError, RpcItemLengthError, RpcNotFoundIndexerError } from '@src/module.indexer/error'
 import { PoolPair, PoolPairMapper } from '@src/module.model/poolpair'
 import { SmartBuffer } from 'smart-buffer'
 import { OP_DEFI_TX, PoolCreatePair, PoolUpdatePair } from '@defichain/jellyfish-transaction'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
-import { TokenMapper } from '@src/module.model/token'
-import { TokenIndexer } from './token'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 
 @Injectable()
 export class PoolPairIndexer extends Indexer {
-  poolPairSnap: PoolPair | undefined
-
   constructor (
     private readonly mapper: PoolPairMapper,
-    private readonly tokenMapper: TokenMapper,
     private readonly client: JsonRpcClient
   ) {
     super()
@@ -32,35 +27,25 @@ export class PoolPairIndexer extends Indexer {
 
           const data: PoolCreatePair = (stack[1] as OP_DEFI_TX).tx.data
 
-          const pairSymbol = data.pairSymbol !== ''
+          const symbol = data.pairSymbol !== ''
             ? data.pairSymbol
             : await this.constructPairSymbol(data.tokenA.toString(), data.tokenB.toString())
 
-          const rpcPoolPair = await this.client.poolpair.getPoolPair(pairSymbol)
+          const rpcPoolPair = await this.client.poolpair.getPoolPair(symbol)
 
-          // extra guard
           if (Object.keys(rpcPoolPair).length !== 1) throw new RpcItemLengthError('poolpair')
 
           const poolId = Object.keys(rpcPoolPair)[0]
 
-          const poolpair = await PoolPairIndexer.newPoolPair(block, data, poolId, pairSymbol)
-
-          const newToken = TokenIndexer.newToken(block, {
-            symbol: pairSymbol,
-            name: pairSymbol,
-            decimal: 8,
-            limit: new BigNumber('0'),
-            mintable: false,
-            tradeable: true,
-            isDAT: true
-          }, poolId, `${data.tokenA}-${data.tokenB}`)
-          await this.tokenMapper.put(newToken)
+          const poolpair = PoolPairIndexer.newPoolPair(block, {
+            ...data,
+            tokenA: data.tokenA.toString(),
+            tokenB: data.tokenB.toString(),
+            poolId,
+            symbol
+          })
 
           await this.mapper.put(poolpair)
-
-          // snapshot the poolpair after create
-          // just in case for invalidating updatePoolPair, it should reverse
-          this.poolPairSnap = poolpair
         }
 
         if (vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547875')) { // 44665478 -> DFTX, 75 -> u -> update poolpair
@@ -70,23 +55,20 @@ export class PoolPairIndexer extends Indexer {
 
           const data: PoolUpdatePair = (stack[1] as OP_DEFI_TX).tx.data
 
-          // find poolpair by token with data.poolId
-          const token = await this.tokenMapper.get(data.poolId.toString())
-          if (token === undefined || token.symbolId === undefined) {
-            throw new NotFoundIndexerError('index', 'UpdatePoolPair->Token', `${data.poolId}`)
-          }
+          const rpcPoolPair = await this.client.poolpair.getPoolPair(data.poolId.toString())
 
-          const poolpair = await this.mapper.get(token.symbolId)
-          if (poolpair === undefined) {
-            throw new NotFoundIndexerError('index', 'UpdatePoolPair', `${data.poolId}`)
-          }
+          if (Object.keys(rpcPoolPair).length !== 1) throw new RpcItemLengthError('poolpair')
 
-          // snapshot the token before update, just in case if any 'invalidate'
-          this.poolPairSnap = poolpair
+          const poolId = Object.keys(rpcPoolPair)[0]
+          const symbol = rpcPoolPair[poolId].symbol
 
-          // TODO(canonbrother): update ownerAddress, customRewards
-          poolpair.status = data.status
-          poolpair.commission = data.commission.toFixed()
+          const poolpair = PoolPairIndexer.newPoolPair(block, {
+            ...data,
+            tokenA: rpcPoolPair[poolId].idTokenA,
+            tokenB: rpcPoolPair[poolId].idTokenB,
+            poolId,
+            symbol
+          })
 
           await this.mapper.put(poolpair)
         }
@@ -104,7 +86,12 @@ export class PoolPairIndexer extends Indexer {
 
           const data: PoolCreatePair = (stack[1] as OP_DEFI_TX).tx.data
 
-          await this.mapper.delete(`${data.tokenA}-${data.tokenB}`)
+          const poolpair = await this.mapper.getLatest(`${data.tokenA}-${data.tokenB}`)
+          if (poolpair === undefined) {
+            throw new NotFoundIndexerError('invalidate', 'CreatePoolPair', `${data.tokenA}-${data.tokenB}`)
+          }
+
+          await this.mapper.delete(poolpair.id)
         }
 
         if (vout.scriptPubKey.asm.startsWith('OP_RETURN 4466547875')) { // 44665478 -> DFTX, 75 -> u -> update poolpair
@@ -114,55 +101,62 @@ export class PoolPairIndexer extends Indexer {
 
           const data: PoolUpdatePair = (stack[1] as OP_DEFI_TX).tx.data
 
-          // find poolpair by token with data.poolId
-          const token = await this.tokenMapper.get(data.poolId.toString())
-          if (token === undefined || token.symbolId === undefined) {
-            throw new NotFoundIndexerError('invalidate', 'UpdatePoolPair->Token', `${data.poolId}`)
-          }
+          const rpcPoolPair = await this.client.poolpair.getPoolPair(data.poolId.toString())
 
-          const poolpair = await this.mapper.get(token.symbolId)
+          // extra guard
+          if (Object.keys(rpcPoolPair).length !== 1) throw new RpcItemLengthError('poolpair')
+
+          const poolId = Object.keys(rpcPoolPair)[0]
+          const tokenA = rpcPoolPair[poolId].idTokenA
+          const tokenB = rpcPoolPair[poolId].idTokenB
+
+          const poolpair = await this.mapper.getLatest(`${tokenA}-${tokenB}`)
+
           if (poolpair === undefined) {
-            throw new NotFoundIndexerError('invalidate', 'UpdatePoolPair', `${data.poolId}`)
+            throw new NotFoundIndexerError('invalidate', 'UpdatePoolPair', `${tokenA}-${tokenB}`)
           }
 
-          if (this.poolPairSnap === undefined) {
-            throw new NotFoundSnapShotError('UpdatePoolPair')
-          }
-          // should not delete but reverse
-          await this.mapper.put(this.poolPairSnap)
+          await this.mapper.delete(poolpair.id)
         }
       }
     }
   }
 
   private async constructPairSymbol (tokenAId: string, tokenBId: string): Promise<string> {
-    const tokenA = await this.tokenMapper.get(tokenAId)
+    const tokenA = await this.client.token.getToken(tokenAId)
     if (tokenA === undefined) {
-      throw new NotFoundIndexerError('index', 'CreatePoolPair-Token', tokenAId)
+      throw new RpcNotFoundIndexerError('getToken', tokenAId)
     }
 
-    const tokenB = await this.tokenMapper.get(tokenBId)
+    const tokenB = await this.client.token.getToken(tokenBId)
     if (tokenB === undefined) {
-      throw new NotFoundIndexerError('index', 'CreatePoolPair-Token', tokenBId)
+      throw new RpcNotFoundIndexerError('getToken', tokenBId)
     }
 
-    return `${tokenA.symbol}-${tokenB.symbol}`
+    return `${tokenA[tokenAId].symbol}-${tokenB[tokenBId].symbol}`
   }
 
-  static newPoolPair (
-    block: RawBlock, data: PoolCreatePair, id: string, pairSymbol: string
-  ): PoolPair {
+  static newPoolPair (block: RawBlock, data: NewPoolPairPayload): PoolPair {
     return {
-      // Note(canonbrother): the id design intentionally made, easier for poolswap block get poolpair
-      id: `${data.tokenA}-${data.tokenB}`,
-      poolId: id,
+      id: `${data.tokenA}-${data.tokenB}-${block.height}`,
+      symbolId: `${data.tokenA}-${data.tokenB}`,
+      poolId: data.poolId,
       block: {
         hash: block.hash,
         height: block.height
       },
-      symbol: pairSymbol,
+      symbol: data.symbol,
       status: data.status,
       commission: data.commission.toFixed()
     }
   }
+}
+
+interface NewPoolPairPayload {
+  tokenA: string
+  tokenB: string
+  poolId: string
+  symbol: string
+  status: boolean
+  commission: BigNumber
 }
