@@ -1,6 +1,6 @@
 import { DeFiDRpcError, MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
-import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
+import { createIndexerTestModule, invalidateFromHeight, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
 
 const container = new MasterNodeRegTestContainer()
@@ -212,5 +212,62 @@ describe('Token Currency - removeoracle', () => {
     const promise = container.call('getoracledata', [oracleId])
     await expect(promise).rejects.toThrow(DeFiDRpcError)
     await expect(promise).rejects.toThrow(`DeFiDRpcError: 'oracle <${oracleId}> not found', code: -20`)
+  })
+})
+
+describe('Token Currency - invalidate', () => {
+  beforeAll(async () => {
+    await container.start()
+    await container.waitForReady()
+    await container.generate(20)
+
+    app = await createIndexerTestModule(container)
+    await app.init()
+
+    await container.waitForWalletCoinbaseMaturity()
+  })
+
+  afterAll(async () => {
+    try {
+      await stopIndexer(app)
+    } finally {
+      await container.stop()
+    }
+  })
+
+  it('handle invalidation', async () => {
+    const priceFeeds = [
+      { token: 'AAPL', currency: 'EUR' },
+      { token: 'TSLA', currency: 'USD' }
+    ]
+
+    const oracleId: string = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
+    await container.generate(1)
+    const height: number = await container.call('getblockcount')
+    await container.generate(1)
+
+    await waitForHeight(app, height)
+
+    const appointedTokenCurrencyMapper = app.get(OracleAppointedTokenCurrencyMapper)
+
+    const result = await appointedTokenCurrencyMapper.get(oracleId, 'AAPL', 'EUR', height)
+    expect(result?.id).toStrictEqual(`${oracleId}-AAPL-EUR-${height}`)
+    expect(result?.block.height).toStrictEqual(height)
+    expect(result?.data.oracleId).toStrictEqual(oracleId)
+    expect(result?.data.token).toStrictEqual('AAPL')
+    expect(result?.data.currency).toStrictEqual('EUR')
+
+    const data = await container.call('getoracledata', [oracleId])
+    expect(data.priceFeeds).toStrictEqual(
+      [
+        { token: 'AAPL', currency: 'EUR' },
+        { token: 'TSLA', currency: 'USD' }
+      ]
+    )
+
+    await invalidateFromHeight(app, container, height)
+
+    const result2 = await appointedTokenCurrencyMapper.get(oracleId, 'AAPL', 'EUR', height)
+    expect(result2).toStrictEqual(undefined)
   })
 })
