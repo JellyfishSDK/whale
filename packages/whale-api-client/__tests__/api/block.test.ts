@@ -59,4 +59,10 @@ describe('get blocks', () => {
     const block = await client.block.get(blockHash)
     expect(block?.height).toStrictEqual(37)
   })
+
+  it('should getBlockTransactions through hash', async () => {
+    const blockHash = await container.call('getblockhash', [37])
+    const transactions = await client.block.getBlockTransactions(blockHash)
+    expect(transactions[0].block.height).toStrictEqual(37)
+  })
 })

@@ -1,5 +1,6 @@
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
+import { Transaction } from './transactions'
 
 export class Blocks {
   constructor (private readonly client: WhaleApiClient) {
@@ -20,6 +21,16 @@ export class Blocks {
    */
   async get (id: string): Promise<Block> {
     return await this.client.requestData('GET', `blocks/${id}`)
+  }
+
+  /**
+   * @param {string} id - hash or height of the block
+   * @param {number} [size=30] - size to query
+   * @param {string} [next] - next token for next slice of blocks
+   * @return {Promise<ApiPagedResponse<Transaction>>}
+   */
+  async getBlockTransactions (id: string, size = 30, next?: string): Promise<ApiPagedResponse<Transaction>> {
+    return await this.client.requestList('GET', `blocks/${id}/transactions`, size, next)
   }
 }
 
