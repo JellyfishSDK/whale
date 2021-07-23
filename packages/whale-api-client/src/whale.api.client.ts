@@ -10,6 +10,7 @@ import { Transactions } from './api/transactions'
 import { Tokens } from './api/tokens'
 import { Masternodes } from './api/masternode'
 import version from './version'
+import { Blocks } from './api/block'
 
 /**
  * WhaleApiClient Options
