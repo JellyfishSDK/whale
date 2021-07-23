@@ -2,14 +2,14 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
 import { ApiPagedResponse, WhaleApiClient, WhaleApiException } from '../../src'
-import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintTokens } from '@defichain/testing'
+import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens } from '@defichain/testing'
 import { PoolPairService } from '@src/module.api/poolpair.service'
 import { PoolPairData } from '@whale-api-client/api/poolpair'
+import waitForExpect from 'wait-for-expect'
 
 let container: MasterNodeRegTestContainer
 let service: StubService
 let client: WhaleApiClient
-let poolPairService: PoolPairService
 
 beforeAll(async () => {
   container = new MasterNodeRegTestContainer()
@@ -21,13 +21,12 @@ beforeAll(async () => {
   await container.waitForWalletCoinbaseMaturity()
   await service.start()
 
-  const app = service.app
-  if (app !== undefined) {
-    poolPairService = app.get(PoolPairService)
-  }
-  expect(poolPairService).not.toBeUndefined()
-
   await setup()
+
+  await waitForExpect(() => {
+    // @ts-expect-error
+    expect(service.app?.get(PoolPairService).USDT_PER_DFI).toBeDefined()
+  }, 61000) // 60 seconds interval
 })
 
 afterAll(async () => {
@@ -115,7 +114,7 @@ describe('list', () => {
       commission: '0',
       totalLiquidity: {
         token: '122.47448713',
-        usd: '698.8243194812225612665'
+        usd: '1390.456752'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
@@ -183,7 +182,7 @@ describe('get', () => {
       commission: '0',
       totalLiquidity: {
         token: '141.42135623',
-        usd: '485.0612298763705964'
+        usd: '926.971168'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),

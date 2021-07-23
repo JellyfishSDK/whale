@@ -2,8 +2,9 @@ import { PoolPairController } from '@src/module.api/poolpair.controller'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
-import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintTokens } from '@defichain/testing'
+import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens } from '@defichain/testing'
 import { NotFoundException } from '@nestjs/common'
+import { PoolPairService } from '@src/module.api/poolpair.service'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -21,6 +22,7 @@ beforeAll(async () => {
   await waitForIndexedHeight(app, 100)
 
   await setup()
+  await app.get(PoolPairService).syncDfiUsdPair()
 })
 
 afterAll(async () => {
@@ -104,7 +106,7 @@ describe('list', () => {
       commission: '0',
       totalLiquidity: {
         token: '122.47448713',
-        usd: '698.8243194812225612665'
+        usd: '1390.456752'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
@@ -176,7 +178,7 @@ describe('get', () => {
       commission: '0',
       totalLiquidity: {
         token: '141.42135623',
-        usd: '485.0612298763705964'
+        usd: '926.971168'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),

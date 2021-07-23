@@ -3,16 +3,13 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { PoolPairController } from '@src/module.api/poolpair.controller'
 import { PoolPairService } from '@src/module.api/poolpair.service'
-import { createPoolPair, createToken, addPoolLiquidity, getNewAddress, mintTokens } from '@defichain/testing'
+import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens } from '@defichain/testing'
 import { CacheModule, NotFoundException } from '@nestjs/common'
 import { DeFiDCache } from './cache/defid.cache'
 import { ConfigService } from '@nestjs/config'
-import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
 let controller: PoolPairController
-let service: PoolPairService
-let spy: jest.SpyInstance
 
 beforeAll(async () => {
   await container.start()
@@ -35,40 +32,29 @@ beforeAll(async () => {
 
   controller = app.get(PoolPairController)
 
-  service = app.get(PoolPairService) // for stubbing testPoolSwap
-
   await setup()
+  await app.get(PoolPairService).syncDfiUsdPair()
 })
 
 afterAll(async () => {
   await container.stop()
 })
 
-beforeEach(async () => {
-  spy = jest.spyOn(service, 'dexUsdtDfi').mockImplementation(async () => await Promise.resolve(new BigNumber('0.43151288')))
-})
-
-afterEach(() => {
-  spy.mockRestore()
-})
-
 async function setup (): Promise<void> {
-  const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
+  const tokens = ['USDT', 'B', 'C', 'D', 'E', 'F']
 
   for (const token of tokens) {
     await container.waitForWalletBalanceGTE(110)
     await createToken(container, token)
     await mintTokens(container, token)
   }
-  await createPoolPair(container, 'A', 'DFI')
-  await createPoolPair(container, 'B', 'DFI')
-  await createPoolPair(container, 'C', 'DFI')
-  await createPoolPair(container, 'D', 'DFI')
-  await createPoolPair(container, 'E', 'DFI')
-  await createPoolPair(container, 'F', 'DFI')
+
+  for (const token of tokens) {
+    await createPoolPair(container, token, 'DFI')
+  }
 
   await addPoolLiquidity(container, {
-    tokenA: 'A',
+    tokenA: 'USDT',
     amountA: 100,
     tokenB: 'DFI',
     amountB: 200,
@@ -88,7 +74,43 @@ async function setup (): Promise<void> {
     amountB: 360,
     shareAddress: await getNewAddress(container)
   })
+  await addPoolLiquidity(container, {
+    tokenA: 'D',
+    amountA: 51.1,
+    tokenB: 'DFI',
+    amountB: 144.54134,
+    shareAddress: await getNewAddress(container)
+  })
 }
+
+it('should resolve tvl for all poolpair', async () => {
+  const response = await controller.list({ size: 5 })
+
+  expect(response.data[0].totalLiquidity).toStrictEqual({
+    token: '141.42135623',
+    usd: '200'
+  })
+
+  expect(response.data[1].totalLiquidity).toStrictEqual({
+    token: '122.47448713',
+    usd: '300'
+  })
+
+  expect(response.data[2].totalLiquidity).toStrictEqual({
+    token: '180',
+    usd: '360'
+  })
+
+  expect(response.data[3].totalLiquidity).toStrictEqual({
+    token: '85.94220426',
+    usd: '144.54134'
+  })
+
+  expect(response.data[4].totalLiquidity).toStrictEqual({
+    token: '0',
+    usd: '0'
+  })
+})
 
 describe('list', () => {
   it('should list', async () => {
@@ -117,7 +139,7 @@ describe('list', () => {
       commission: '0',
       totalLiquidity: {
         token: '122.47448713',
-        usd: '698.8243194812225612665'
+        usd: '300'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
@@ -140,7 +162,7 @@ describe('list', () => {
     })
     expect(first.data.length).toStrictEqual(2)
     expect(first.page?.next).toStrictEqual('8')
-    expect(first.data[0].symbol).toStrictEqual('A-DFI')
+    expect(first.data[0].symbol).toStrictEqual('USDT-DFI')
     expect(first.data[1].symbol).toStrictEqual('B-DFI')
 
     const next = await controller.list({
@@ -173,8 +195,8 @@ describe('get', () => {
 
     expect(response).toStrictEqual({
       id: '7',
-      symbol: 'A-DFI',
-      name: 'A-Default Defi token',
+      symbol: 'USDT-DFI',
+      name: 'USDT-Default Defi token',
       status: true,
       tokenA: {
         id: expect.any(String),
@@ -189,7 +211,7 @@ describe('get', () => {
       commission: '0',
       totalLiquidity: {
         token: '141.42135623',
-        usd: '485.0612298763705964'
+        usd: '200'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
