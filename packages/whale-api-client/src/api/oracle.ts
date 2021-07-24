@@ -84,7 +84,7 @@ export class Oracle {
   }
 }
 
-export interface OracleAppointed {
+export interface OracleAppointedWeightage {
   id: string
   block: {
     height: number
@@ -92,10 +92,20 @@ export interface OracleAppointed {
   data: {
     oracleId: string
     weightage: number
+  }
+  state: OracleState
+}
+
+export interface OracleAppointedTokenCurrency {
+  id: string
+  block: {
+    height: number
+  }
+  data: {
+    oracleId: string
     token: string
     currency: string
   }
-  state: OracleState
 }
 
 export interface OraclePriceData {

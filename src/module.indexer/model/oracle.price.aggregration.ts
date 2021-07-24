@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
-import { OracleAppointedMapper } from '@src/module.model/oracle.appointed'
+import { OracleAppointedWeightageMapper } from '@src/module.model/oracle.appointed.weightage'
+import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
-import { OraclePriceAggregration } from '@whale-api-client/api/oracle'
+import { OraclePriceAggregration, OracleState } from '@whale-api-client/api/oracle'
 import BigNumber from 'bignumber.js'
 
 @Injectable()
 export class OraclePriceAggregationIndexer extends Indexer {
   constructor (
-    private readonly appointedMapper: OracleAppointedMapper,
+    private readonly appointedWeightageMapper: OracleAppointedWeightageMapper,
+    private readonly appointedTokenCurrencyMapper: OracleAppointedTokenCurrencyMapper,
     private readonly priceDataMapper: OraclePriceDataMapper,
     private readonly priceAggregrationMapper: OraclePriceAggregrationMapper
   ) {
@@ -20,7 +22,7 @@ export class OraclePriceAggregationIndexer extends Indexer {
     const records: Record<string, OraclePriceAggregration> = {}
 
     const tokenCurrenciesSet: Set<string> = new Set()
-    const tokenCurrencyResult = await this.appointedMapper.list() ?? []
+    const tokenCurrencyResult = await this.appointedTokenCurrencyMapper.list() ?? []
     if (tokenCurrencyResult.length > 0) {
       tokenCurrencyResult.forEach(m => {
         tokenCurrenciesSet.add(`${m.data.token}-${m.data.currency}`)
@@ -41,18 +43,14 @@ export class OraclePriceAggregationIndexer extends Indexer {
       let weightageSum = 0
 
       for (const priceData of priceDataResult) {
-        const appointedObj = await this.appointedMapper.getLatestByOracleIdTokenCurrencyHeight(priceData.data.oracleId, token, currency, block.height)
-
-        // NOTE(jingyi2811): temporarily remove this
-        // if (appointedObj?.state === OracleState.REMOVED) {
-        //   continue
-        // }
-
-        if (appointedObj !== undefined) {
-          const weightage = appointedObj?.data.weightage ?? 0
-          sumBN = sumBN.plus(new BigNumber(priceData.data.amount).multipliedBy(weightage))
-          weightageSum += weightage
+        const weightageObj = await this.appointedWeightageMapper.getLatestByOracleIdHeight(priceData.data.oracleId, block.height)
+        if (weightageObj?.state !== OracleState.LIVE) {
+          continue
         }
+
+        const weightage = weightageObj?.data.weightage ?? 0
+        sumBN = sumBN.plus(new BigNumber(priceData.data.amount).multipliedBy(weightage))
+        weightageSum += weightage
       }
 
       if (priceDataResult.length > 0) {
@@ -69,10 +67,11 @@ export class OraclePriceAggregationIndexer extends Indexer {
     const priceAggregrationIds: string[] = []
     const tokenCurrenciesSet: Set<string> = new Set()
 
-    const result = await this.appointedMapper.list() ?? []
+    // NOTE(jingyi2811): Should include LIVE and REMOVED token currencies.
+    const tokenCurrencyResult = await this.appointedTokenCurrencyMapper.list() ?? []
 
-    if (result.length > 0) {
-      result.map(m => {
+    if (tokenCurrencyResult.length > 0) {
+      tokenCurrencyResult.map(m => {
         tokenCurrenciesSet.add(`${m.data.token}-${m.data.currency}`)
       })
     }
