@@ -39,22 +39,16 @@ describe('Price Aggregration - 1', () => {
 
   it('should get oracle price aggregration', async () => {
     const priceFeeds1 = [{ token: 'AAPL', currency: 'EUR' }]
-
     const oracleId1 = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
-
     await container.generate(1)
 
     const priceFeeds2 = [{ token: 'TSLA', currency: 'USD' }]
-
     const oracleId2 = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds2, 2])
-
     await container.generate(1)
 
     const prices1 = [{ tokenAmount: '0.5@AAPL', currency: 'EUR' }]
-
     const timestamp1 = Number.parseInt((await container.call('getblockstats', [await container.call('getblockcount')])).time)
     await container.call('setoracledata', [oracleId1, timestamp1, prices1])
-
     await container.generate(1)
 
     height1 = await container.call('getblockcount')
@@ -63,14 +57,9 @@ describe('Price Aggregration - 1', () => {
     await container.generate(1)
     await waitForTime(container, blockTime1 + 1)
 
+    const prices2 = [{ tokenAmount: '1.0@TSLA', currency: 'USD' }]
     const timestamp2 = Number.parseInt((await container.call('getblockstats', [await container.call('getblockcount')])).time)
-
-    const prices2 = [
-      { tokenAmount: '1.0@TSLA', currency: 'USD' }
-    ]
-
     await container.call('setoracledata', [oracleId2, timestamp2, prices2])
-
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
@@ -230,7 +219,6 @@ describe('Price Aggregration - 3', () => {
     await app.init()
 
     await container.waitForWalletCoinbaseMaturity()
-    await setup()
   })
 
   afterAll(async () => {
@@ -246,29 +234,25 @@ describe('Price Aggregration - 3', () => {
   let blockTime1: number
   let blockTime2: number
 
-  async function setup (): Promise<void> {
+  it('should not get oracle price aggregration if the timestamp is out of range', async () => {
     const priceFeeds1 = [
       { token: 'AAPL', currency: 'EUR' }
     ]
 
     const oracleId1 = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds1, 1])
-
     await container.generate(1)
-
     const priceFeeds2 = [
       { token: 'TSLA', currency: 'USD' }
     ]
 
     const oracleId2 = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds2, 2])
-
     await container.generate(1)
 
-    const timestamp1 = Number.parseInt((await container.call('getblockstats', [await container.call('getblockcount')])).time) - 5000
+    const baseTimestamp = Number.parseInt((await container.call('getblockstats', [await container.call('getblockcount')])).time)
+    const timestamp1 = baseTimestamp - 5000
 
     const prices1 = [{ tokenAmount: '0.5@AAPL', currency: 'EUR' }]
-
     await container.call('setoracledata', [oracleId1, timestamp1, prices1])
-
     await container.generate(1)
 
     height1 = await container.call('getblockcount')
@@ -277,20 +261,16 @@ describe('Price Aggregration - 3', () => {
 
     await waitForTime(container, blockTime1 + 1)
 
-    const timestamp2 = Number.parseInt((await container.call('getblockstats', [await container.call('getblockcount')])).time) + 5000
+    const timestamp2 = baseTimestamp + 5000
 
     const prices2 = [{ tokenAmount: '1.0@TSLA', currency: 'USD' }]
-
     await container.call('setoracledata', [oracleId2, timestamp2, prices2])
-
     await container.generate(1)
 
     height2 = await container.call('getblockcount')
     blockTime2 = Number.parseInt((await container.call('getblockstats', [height2])).time)
     await container.generate(1)
-  }
 
-  it('should not get oracle price aggregration if the timestamp is out of range', async () => {
     await waitForHeight(app, height2)
 
     const priceAggregrationMapper = app.get(OraclePriceAggregrationMapper)

@@ -19,15 +19,12 @@ export class OraclePriceAggregationIndexer extends Indexer {
   }
 
   async index (block: RawBlock): Promise<void> {
-    const records: Record<string, OraclePriceAggregration> = {}
-
-    const tokenCurrenciesSet: Set<string> = new Set()
+    const records: OraclePriceAggregration[] = []
     const tokenCurrencyResult = await this.appointedTokenCurrencyMapper.list() ?? []
-    if (tokenCurrencyResult.length > 0) {
-      tokenCurrencyResult.forEach(m => {
-        tokenCurrenciesSet.add(`${m.data.token}-${m.data.currency}`)
-      })
-    }
+    const tokenCurrenciesSet: Set<string> = new Set(
+      tokenCurrencyResult.map(m => `${m.data.token}-${m.data.currency}`)
+    )
+    const oracleIds: string[] = [...new Set(tokenCurrencyResult.map(m => m.data.oracleId))]
 
     // NOTE(jingyi2811): Search for distinct token currencies only.
     for (const tokenCurrency of tokenCurrenciesSet) {
@@ -35,30 +32,32 @@ export class OraclePriceAggregationIndexer extends Indexer {
       const token = data[0]
       const currency = data[1]
 
-      // NOTE(jingyi2811): Search for LIVE price for within 1 hour ago or 1 hour later.
-      const priceDataResult = await this.priceDataMapper.getActivePrices(token, currency, block.time) ?? []
-
       // NOTE(jingyi2811): Calculate average price.
       let sumBN = new BigNumber(0)
       let weightageSum = 0
 
-      for (const priceData of priceDataResult) {
-        const weightageObj = await this.appointedWeightageMapper.getLatestByOracleIdHeight(priceData.data.oracleId, block.height)
-        const weightage = weightageObj?.data.weightage ?? 0
+      for (const oracleId of oracleIds) {
+        const weightageObj = await this.appointedWeightageMapper.getLatestByOracleIdHeight(oracleId, block.height)
+        const priceDataObj = await this.priceDataMapper.getLatestByOracleIdTokenCurrency(oracleId, token, currency, block.height)
 
-        const priceDataObj = await this.priceDataMapper.getLatestByOracleIdTokenCurrency(priceData.data.oracleId, token, currency, block.height)
-        const amouunt = priceDataObj?.data.amount ?? 0
-
-        sumBN = sumBN.plus(new BigNumber(amouunt).multipliedBy(weightage))
-        weightageSum += weightage
+        const weightage = weightageObj?.data?.weightage ?? 0
+        if (priceDataObj !== undefined) {
+          const amount = new BigNumber(priceDataObj.data.amount)
+          const timestamp = priceDataObj.data.timestamp
+          if (timestamp >= (block.time - 3600) && timestamp <= (block.time + 3600)) {
+            sumBN = sumBN.plus(amount.multipliedBy(weightage))
+            weightageSum += weightage
+          }
+        }
       }
 
-      if (priceDataResult.length > 0) {
-        records[`${token}-${currency}-${block.height}-${block.time}`] = OraclePriceAggregationIndexer.newOraclePriceAggregation(block.height, block.time, token, currency, sumBN.dividedBy(weightageSum))
+      if (weightageSum > 0) {
+        const finalSum = sumBN.dividedBy(weightageSum)
+        records.push(OraclePriceAggregationIndexer.newOraclePriceAggregation(block.height, block.time, token, currency, finalSum))
       }
     }
 
-    for (const aggregation of Object.values(records)) {
+    for (const aggregation of records) {
       await this.priceAggregrationMapper.put(aggregation)
     }
   }
