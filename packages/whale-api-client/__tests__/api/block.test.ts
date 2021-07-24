@@ -25,6 +25,7 @@ beforeAll(async () => {
     expect(blocks.length).toBeGreaterThan(0)
     expect(blocks[0].height).toBeGreaterThanOrEqual(100)
   }, 30000)
+  await container.waitForWalletBalanceGTE(100)
 })
 
 afterAll(async () => {
@@ -35,14 +36,10 @@ afterAll(async () => {
   }
 })
 
-describe('get blocks', () => {
-  beforeAll(async () => {
-    await container.waitForWalletBalanceGTE(100)
-  })
-
+describe('list', () => {
   it('should get paginated list of blocks', async () => {
-    const first = await client.block.list(30)
-    expect(first.length).toStrictEqual(30)
+    const first = await client.block.list(40)
+    expect(first.length).toStrictEqual(40)
 
     expect(first[0]).toStrictEqual(
       expect.objectContaining({
@@ -68,10 +65,16 @@ describe('get blocks', () => {
     expect(first[0].height).toBeGreaterThanOrEqual(100)
 
     const second = await client.paginate(first)
-    expect(second[0].height).toStrictEqual(first[29].height - 1)
-    expect(second.length).toStrictEqual(30)
-  })
+    expect(second[0].height).toStrictEqual(first[39].height - 1)
+    expect(second.length).toStrictEqual(40)
 
+    const last = await client.paginate(second)
+    expect(last[0].height).toStrictEqual(second[39].height - 1)
+    expect(last.hasNext).toStrictEqual(false)
+  })
+})
+
+describe('get', () => {
   it('should get block through height', async () => {
     const block = await client.block.get('37')
 
@@ -125,7 +128,9 @@ describe('get blocks', () => {
     )
     expect(block?.height).toStrictEqual(37)
   })
+})
 
+describe('getBlockTransactions', () => {
   it('should getBlockTransactions through hash', async () => {
     const blockHash = await container.call('getblockhash', [37])
     const transactions = await client.block.getBlockTransactions(blockHash)
