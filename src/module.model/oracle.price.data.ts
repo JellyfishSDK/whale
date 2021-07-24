@@ -73,8 +73,8 @@ export class OraclePriceDataMapper {
     })
   }
 
-  async get (oracleId: string, token: string, currency: string, height: number, timestamp: number): Promise<OraclePriceData | undefined> {
-    return await this.database.get(OraclePriceDataMapping, `${oracleId}-${token}-${currency}-${height}-${timestamp}`)
+  async get (oracleId: string, token: string, currency: string, height: number): Promise<OraclePriceData | undefined> {
+    return await this.database.get(OraclePriceDataMapping, `${oracleId}-${token}-${currency}-${height}`)
   }
 
   async put (priceData: OraclePriceData): Promise<void> {

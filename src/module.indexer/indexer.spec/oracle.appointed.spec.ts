@@ -1,10 +1,10 @@
 import { DeFiDRpcError, MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
-import { OracleAppointedWeightageMapper } from '@src/module.model/oracle.appointed.weightage'
+import { OracleAppointedMapper } from '@src/module.model/oracle.appointed'
 import { OracleState } from '@whale-api-client/api/oracle'
 
-describe('Weightage - approveoracle', () => {
+describe('Appointed - approveoracle', () => {
   const container = new MasterNodeRegTestContainer()
   let app: TestingModule
 
@@ -40,24 +40,31 @@ describe('Weightage - approveoracle', () => {
     await container.generate(1)
   }
 
-  it('should get weightage', async () => {
+  it('should get appointed data', async () => {
     await waitForHeight(app, height)
 
-    const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
+    const appointedMapper = app.get(OracleAppointedMapper)
 
-    const result = await appointedWeightageMapper.get(oracleId, height)
-    expect(result?.id).toStrictEqual(`${oracleId}-${height}`)
+    const result = await appointedMapper.get(oracleId, 'AAPL', 'EUR', height)
+    expect(result?.id).toStrictEqual(`${oracleId}-AAPL-EUR-${height}`)
     expect(result?.block.height).toStrictEqual(height)
     expect(result?.data.oracleId).toStrictEqual(oracleId)
     expect(result?.data.weightage).toStrictEqual(1)
+    expect(result?.data.token).toStrictEqual('AAPL')
+    expect(result?.data.currency).toStrictEqual('EUR')
     expect(result?.state).toStrictEqual(OracleState.LIVE)
 
     const data = await container.call('getoracledata', [oracleId])
     expect(data?.weightage).toStrictEqual(1)
+    expect(data.priceFeeds).toStrictEqual(
+      [
+        { token: 'AAPL', currency: 'EUR' }
+      ]
+    )
   })
 })
 
-describe('Weightage - updateoracle', () => {
+describe('Appointed - updateoracle', () => {
   const container = new MasterNodeRegTestContainer()
   let app: TestingModule
 
@@ -80,7 +87,7 @@ describe('Weightage - updateoracle', () => {
     }
   })
 
-  it('should get weightage', async () => {
+  it('should get appointed data', async () => {
     const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
     const oracleId: string = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
     await container.generate(1)
@@ -91,28 +98,37 @@ describe('Weightage - updateoracle', () => {
     await container.generate(1)
     await waitForHeight(app, height2)
 
-    const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
+    const appointedMapper = app.get(OracleAppointedMapper)
 
-    const result1 = await appointedWeightageMapper.get(oracleId, height1)
-    expect(result1?.id).toStrictEqual(`${oracleId}-${height1}`)
+    const result1 = await appointedMapper.get(oracleId, 'AAPL', 'EUR', height1)
+    expect(result1?.id).toStrictEqual(`${oracleId}-AAPL-EUR-${height1}`)
     expect(result1?.block.height).toStrictEqual(height1)
     expect(result1?.data.oracleId).toStrictEqual(oracleId)
     expect(result1?.data.weightage).toStrictEqual(1)
+    expect(result1?.data.token).toStrictEqual('AAPL')
+    expect(result1?.data.currency).toStrictEqual('EUR')
     expect(result1?.state).toStrictEqual(OracleState.LIVE)
 
-    const result2 = await appointedWeightageMapper.get(oracleId, height2)
-    expect(result2?.id).toStrictEqual(`${oracleId}-${height2}`)
+    const result2 = await appointedMapper.get(oracleId, 'AAPL', 'EUR', height2)
+    expect(result2?.id).toStrictEqual(`${oracleId}-AAPL-EUR-${height2}`)
     expect(result2?.block.height).toStrictEqual(height2)
     expect(result2?.data.oracleId).toStrictEqual(oracleId)
     expect(result2?.data.weightage).toStrictEqual(2)
+    expect(result2?.data.token).toStrictEqual('AAPL')
+    expect(result2?.data.currency).toStrictEqual('EUR')
     expect(result2?.state).toStrictEqual(OracleState.LIVE)
 
     const data = await container.call('getoracledata', [oracleId])
     expect(data?.weightage).toStrictEqual(2)
+    expect(data.priceFeeds).toStrictEqual(
+      [
+        { token: 'AAPL', currency: 'EUR' }
+      ]
+    )
   })
 })
 
-describe('Weightage - removeoracle', () => {
+describe('Appointed - removeoracle', () => {
   const container = new MasterNodeRegTestContainer()
   let app: TestingModule
 
@@ -135,24 +151,25 @@ describe('Weightage - removeoracle', () => {
     }
   })
 
-  it('should remove weightage', async () => {
+  it('should remove appointed data', async () => {
     const priceFeeds = [{ token: 'AAPL', currency: 'EUR' }]
     const oracleId: string = await container.call('appointoracle', [await container.getNewAddress(), priceFeeds, 1])
-
     await container.generate(1)
+    const height1: number = await container.call('getblockcount')
     await container.call('removeoracle', [oracleId])
     await container.generate(1)
     const height2: number = await container.call('getblockcount')
-    await container.generate(1)
     await waitForHeight(app, height2)
 
-    const appointedWeightageMapper = app.get(OracleAppointedWeightageMapper)
+    const appointedMapper = app.get(OracleAppointedMapper)
 
-    const result = await appointedWeightageMapper.get(oracleId, height2)
-    expect(result?.id).toStrictEqual(`${oracleId}-${height2}`)
-    expect(result?.block.height).toStrictEqual(height2)
+    const result = await appointedMapper.get(oracleId, 'AAPL', 'EUR', height1)
+    expect(result?.id).toStrictEqual(`${oracleId}-AAPL-EUR-${height1}`)
+    expect(result?.block.height).toStrictEqual(height1)
     expect(result?.data.oracleId).toStrictEqual(oracleId)
-    expect(result?.data.weightage).toStrictEqual(0)
+    expect(result?.data.weightage).toStrictEqual(1)
+    expect(result?.data.token).toStrictEqual('AAPL')
+    expect(result?.data.currency).toStrictEqual('EUR')
     expect(result?.state).toStrictEqual(OracleState.REMOVED)
 
     const promise = container.call('getoracledata', [oracleId])

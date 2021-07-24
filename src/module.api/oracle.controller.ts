@@ -1,12 +1,12 @@
 import { Controller, Get, Param, Query } from '@nestjs/common'
 import {
-  OracleAppointedTokenCurrency,
+  OracleAppointed,
   OraclePriceData,
   OraclePriceAggregration,
   OracleTokenCurrency,
   OraclePriceInterval
 } from '@whale-api-client/api/oracle'
-import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
+import { OracleAppointedMapper } from '@src/module.model/oracle.appointed'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
 import BigNumber from 'bignumber.js'
@@ -17,7 +17,7 @@ import { BadRequestApiException } from '@src/module.api/_core/api.error'
 @Controller('/v0/:network/oracle')
 export class OracleController {
   constructor (
-    protected readonly appointedTokenCurrencyMapper: OracleAppointedTokenCurrencyMapper,
+    protected readonly appointedMapper: OracleAppointedMapper,
     protected readonly priceDataMapper: OraclePriceDataMapper,
     protected readonly priceAggregrationMapper: OraclePriceAggregrationMapper
   ) {
@@ -27,8 +27,8 @@ export class OracleController {
   async listTokenCurrencies (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<OracleTokenCurrency>> {
-    const list = (await this.appointedTokenCurrencyMapper.list() ?? [])
-      .map((obj: OracleAppointedTokenCurrency) => {
+    const list = (await this.appointedMapper.list() ?? [])
+      .map((obj: OracleAppointed) => {
         return {
           token: obj.data.token,
           currency: obj.data.currency
@@ -49,8 +49,8 @@ export class OracleController {
     @Param('id') id: string,
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<OracleTokenCurrency>> {
-    const list = (await this.appointedTokenCurrencyMapper.getByOracleId(id) ?? [])
-      .map((obj: OracleAppointedTokenCurrency) => {
+    const list = (await this.appointedMapper.getByOracleId(id) ?? [])
+      .map((obj: OracleAppointed) => {
         return {
           token: obj.data.token,
           currency: obj.data.currency

@@ -9,8 +9,7 @@ import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
 import { ModelProbeIndicator } from '@src/module.model/_model.probes'
-import { OracleAppointedWeightageMapper } from '@src/module.model/oracle.appointed.weightage'
-import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
+import { OracleAppointedMapper } from '@src/module.model/oracle.appointed'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 
 @Global()
@@ -25,8 +24,7 @@ import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
-    OracleAppointedWeightageMapper,
-    OracleAppointedTokenCurrencyMapper,
+    OracleAppointedMapper,
     OraclePriceDataMapper,
     OraclePriceAggregrationMapper
   ],
@@ -40,8 +38,7 @@ import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
     TransactionMapper,
     TransactionVinMapper,
     TransactionVoutMapper,
-    OracleAppointedWeightageMapper,
-    OracleAppointedTokenCurrencyMapper,
+    OracleAppointedMapper,
     OraclePriceDataMapper,
     OraclePriceAggregrationMapper
   ]
