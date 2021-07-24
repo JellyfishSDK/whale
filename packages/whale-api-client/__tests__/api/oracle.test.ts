@@ -4,11 +4,11 @@ import { WhaleApiClient } from '../../src'
 import { StubWhaleApiClient } from '../stub.client'
 import BigNumber from 'bignumber.js'
 
-let container: MasterNodeRegTestContainer
-let service: StubService
-let client: WhaleApiClient
-
 describe('1 - Oracle Token Currency', () => {
+  let container: MasterNodeRegTestContainer
+  let service: StubService
+  let client: WhaleApiClient
+
   let oracleId1: string
   let oracleId2: string
 
@@ -161,6 +161,10 @@ describe('1 - Oracle Token Currency', () => {
 })
 
 describe('2 - Oracle Price Data', () => {
+  let container: MasterNodeRegTestContainer
+  let service: StubService
+  let client: WhaleApiClient
+
   let oracleId: string
 
   beforeAll(async () => {
@@ -249,6 +253,10 @@ describe('2 - Oracle Price Data', () => {
 })
 
 describe('3 - Oracle Price', () => {
+  let container: MasterNodeRegTestContainer
+  let service: StubService
+  let client: WhaleApiClient
+
   let blockTime1: number
   let blockTime2: number
   let height1: number
@@ -357,6 +365,10 @@ describe('3 - Oracle Price', () => {
 })
 
 describe('4 - Oracle Price Interval', () => {
+  let container: MasterNodeRegTestContainer
+  let service: StubService
+  let client: WhaleApiClient
+
   let timestamp: number
 
   beforeAll(async () => {

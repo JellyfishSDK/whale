@@ -4,11 +4,11 @@ import { createTestingApp, stopTestingApp, waitForIndexedHeight, waitForIndexedT
 import { OracleController } from '@src/module.api/oracle.controller'
 import BigNumber from 'bignumber.js'
 
-const container = new MasterNodeRegTestContainer()
-let app: NestFastifyApplication
-let controller: OracleController
-
 describe('1 - Oracle Token Currency', () => {
+  const container = new MasterNodeRegTestContainer()
+  let app: NestFastifyApplication
+  let controller: OracleController
+
   let oracleId1: string
   let oracleId2: string
 
@@ -168,6 +168,10 @@ describe('1 - Oracle Token Currency', () => {
 })
 
 describe('2 - Oracle Price Data', () => {
+  const container = new MasterNodeRegTestContainer()
+  let app: NestFastifyApplication
+  let controller: OracleController
+
   let oracleId: string
 
   beforeAll(async () => {
@@ -251,6 +255,10 @@ describe('2 - Oracle Price Data', () => {
 })
 
 describe('3 - Oracle Price', () => {
+  const container = new MasterNodeRegTestContainer()
+  let app: NestFastifyApplication
+  let controller: OracleController
+
   let blockTime1: number
   let blockTime2: number
   let height1: number
@@ -352,6 +360,10 @@ describe('3 - Oracle Price', () => {
 })
 
 describe('4 - Oracle Price Interval', () => {
+  const container = new MasterNodeRegTestContainer()
+  let app: NestFastifyApplication
+  let controller: OracleController
+
   let timestamp: number
 
   beforeAll(async () => {

@@ -3,10 +3,10 @@ import { TestingModule } from '@nestjs/testing'
 import { createIndexerTestModule, invalidateFromHeight, stopIndexer, waitForHeight } from '@src/module.indexer/indexer.spec/_testing.module'
 import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
 
-const container = new MasterNodeRegTestContainer()
-let app: TestingModule
-
 describe('Token Currency - approveoracle', () => {
+  const container = new MasterNodeRegTestContainer()
+  let app: TestingModule
+
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -57,6 +57,9 @@ describe('Token Currency - approveoracle', () => {
 })
 
 describe('Token Currency - updateoracle', () => {
+  const container = new MasterNodeRegTestContainer()
+  let app: TestingModule
+
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -148,6 +151,9 @@ describe('Token Currency - updateoracle', () => {
 })
 
 describe('Token Currency - removeoracle', () => {
+  const container = new MasterNodeRegTestContainer()
+  let app: TestingModule
+
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -216,6 +222,9 @@ describe('Token Currency - removeoracle', () => {
 })
 
 describe('Token Currency - invalidate', () => {
+  const container = new MasterNodeRegTestContainer()
+  let app: TestingModule
+
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()

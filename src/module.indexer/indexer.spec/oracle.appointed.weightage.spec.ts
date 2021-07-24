@@ -4,10 +4,10 @@ import { createIndexerTestModule, stopIndexer, waitForHeight } from '@src/module
 import { OracleAppointedWeightageMapper } from '@src/module.model/oracle.appointed.weightage'
 import { OracleState } from '@whale-api-client/api/oracle'
 
-const container = new MasterNodeRegTestContainer()
-let app: TestingModule
-
 describe('Weightage - approveoracle', () => {
+  const container = new MasterNodeRegTestContainer()
+  let app: TestingModule
+
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -58,6 +58,9 @@ describe('Weightage - approveoracle', () => {
 })
 
 describe('Weightage - updateoracle', () => {
+  const container = new MasterNodeRegTestContainer()
+  let app: TestingModule
+
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
@@ -110,6 +113,9 @@ describe('Weightage - updateoracle', () => {
 })
 
 describe('Weightage - removeoracle', () => {
+  const container = new MasterNodeRegTestContainer()
+  let app: TestingModule
+
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
