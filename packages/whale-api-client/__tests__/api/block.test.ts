@@ -128,6 +128,16 @@ describe('get', () => {
     )
     expect(block?.height).toStrictEqual(37)
   })
+
+  it('should get undefined through invalid hash', async () => {
+    const block = await client.block.get('d78167c999ed24b999de6530d6b7d9d723096e49baf191bd2706ddb8eaf452ae')
+    expect(block).toBeUndefined()
+  })
+
+  it('should get undefined through invalid height', async () => {
+    const block = await client.block.get('1000000000')
+    expect(block).toBeUndefined()
+  })
 })
 
 describe('getBlockTransactions', () => {
@@ -172,5 +182,15 @@ describe('getBlockTransactions', () => {
       voutCount: expect.any(Number)
     })
     expect(transactions[0].block.height).toStrictEqual(37)
+  })
+
+  it('should getBlockTransactions through invalid hash', async () => {
+    const transactions = await client.block.getBlockTransactions('b33320d63574690eb549ee4867c0119efdb69b396d3452bf9a09132eaa76b4a5')
+    expect(transactions.length).toStrictEqual(0)
+  })
+
+  it('should getBlockTransactions through invalid height', async () => {
+    const transactions = await client.block.getBlockTransactions('1000000000')
+    expect(transactions.length).toStrictEqual(0)
   })
 })
