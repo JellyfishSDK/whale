@@ -99,27 +99,27 @@ export class OracleController {
     return await this.priceAggregrationMapper.getLatestByTokenCurrencyBlockTime(token, currency, timestamp)
   }
 
-  @Get('/:token/:currency/:timestamp1/:timestamp2/:timeInterval/price/interval')
+  @Get('/:token/:currency/:start/:end/:timeInterval/price/interval')
   async getIntervalPrice (
     @Param('token') token: string,
       @Param('currency') currency: string,
-      @Param('timestamp1') timestamp1: number,
-      @Param('timestamp2') timestamp2: number,
+      @Param('start') start: number,
+      @Param('end') end: number,
       @Param('timeInterval') timeInterval: number,
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<OraclePriceInterval>> {
-    if (timestamp1 < 0 || timestamp1 > 9999999999 || timestamp2 < 0 || timestamp2 > 9999999999) {
+    if (start < 0 || start > 9999999999 || end < 0 || end > 9999999999) {
       throw new BadRequestApiException('Timestamp is out of range')
     }
 
-    const timestampDifference = Math.abs(timestamp2 - timestamp1)
+    const timestampDifference = Math.abs(end - start)
 
     const allPrices = []
 
     const no = Math.abs(timestampDifference) / timeInterval
 
     for (let i = 0; i <= no; i += 1) {
-      const timestamp = timestamp1 + timeInterval * i
+      const timestamp = start + timeInterval * i
       const result = await this.priceAggregrationMapper.getLatestByTokenCurrencyBlockTime(token, currency, timestamp)
       const data = { timestamp, amount: new BigNumber(result?.data?.amount.toString() ?? '0') }
       allPrices.push(data)
