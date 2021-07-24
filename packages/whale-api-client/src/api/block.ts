@@ -29,7 +29,7 @@ export class Blocks {
    * @param {string} [next] - next token for next slice of blocks
    * @return {Promise<ApiPagedResponse<Transaction>>}
    */
-  async getBlockTransactions (id: string, size = 30, next?: string): Promise<ApiPagedResponse<Transaction>> {
+  async getBlockTransactions (id: string, size: number = 30, next?: string): Promise<ApiPagedResponse<Transaction>> {
     return await this.client.requestList('GET', `blocks/${id}/transactions`, size, next)
   }
 }
