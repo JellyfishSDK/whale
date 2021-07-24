@@ -4,7 +4,7 @@ import { OracleAppointedWeightageMapper } from '@src/module.model/oracle.appoint
 import { OracleAppointedTokenCurrencyMapper } from '@src/module.model/oracle.appointed.token.currency'
 import { OraclePriceDataMapper } from '@src/module.model/oracle.price.data'
 import { OraclePriceAggregrationMapper } from '@src/module.model/oracle.price.aggregration'
-import { OraclePriceAggregration, OracleState } from '@whale-api-client/api/oracle'
+import { OraclePriceAggregration } from '@whale-api-client/api/oracle'
 import BigNumber from 'bignumber.js'
 
 @Injectable()
@@ -44,12 +44,12 @@ export class OraclePriceAggregationIndexer extends Indexer {
 
       for (const priceData of priceDataResult) {
         const weightageObj = await this.appointedWeightageMapper.getLatestByOracleIdHeight(priceData.data.oracleId, block.height)
-        if (weightageObj?.state !== OracleState.LIVE) {
-          continue
-        }
-
         const weightage = weightageObj?.data.weightage ?? 0
-        sumBN = sumBN.plus(new BigNumber(priceData.data.amount).multipliedBy(weightage))
+
+        const priceDataObj = await this.priceDataMapper.getLatestByOracleIdTokenCurrency(priceData.data.oracleId, token, currency, block.height)
+        const amouunt = priceDataObj?.data.amount ?? 0
+
+        sumBN = sumBN.plus(new BigNumber(amouunt).multipliedBy(weightage))
         weightageSum += weightage
       }
 

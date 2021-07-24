@@ -17,15 +17,15 @@ const OraclePriceDataMapping: ModelMapping<OraclePriceData> = {
         key: (d: OraclePriceData) => `${d.data.token}-${d.data.currency}-${d.data.amount.toString()}-${d.block.height}`
       }
     },
-    oracleIdTokenCurrency_amountHeight: {
-      name: 'oracle_price_data_oracleIdTokenCurrency-amountHeight',
+    oracleIdTokenCurrency_height: {
+      name: 'oracle_price_data_oracleIdTokenCurrency-height',
       partition: {
         type: 'string',
         key: (d: OraclePriceData) => `${d.data.oracleId}-${d.data.token}-${d.data.currency}`
       },
       sort: {
-        type: 'string',
-        key: (d: OraclePriceData) => `${d.data.amount.toString()}-${d.block.height}`
+        type: 'number',
+        key: (d: OraclePriceData) => d.block.height
       }
     },
     tokenCurrency_timestamp: {
@@ -55,12 +55,15 @@ export class OraclePriceDataMapper {
     })
   }
 
-  async getByOracleIdTokenCurrency (oracleId: string, token: string, currency: string): Promise<OraclePriceData[] | undefined> {
-    return await this.database.query(OraclePriceDataMapping.index.oracleIdTokenCurrency_amountHeight, {
+  async getLatestByOracleIdTokenCurrency (oracleId: string, token: string, currency: string, height: number): Promise<OraclePriceData | undefined> {
+    const data = await this.database.query(OraclePriceDataMapping.index.oracleIdTokenCurrency_height, {
       partitionKey: `${oracleId}-${token}-${currency}`,
-      order: SortOrder.ASC,
-      limit: 1000000
+      order: SortOrder.DESC,
+      limit: 1,
+      lt: height + 1
     })
+
+    return data.length === 0 ? undefined : data[0]
   }
 
   async getActivePrices (token: string, currency: string, timestamp: number): Promise<OraclePriceData[] | undefined> {
