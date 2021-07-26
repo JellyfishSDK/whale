@@ -72,6 +72,62 @@ describe('list', () => {
     expect(last[0].height).toStrictEqual(second[39].height - 1)
     expect(last.hasNext).toStrictEqual(false)
   })
+
+  it('should get paginated list of blocks when next is out of range', async () => {
+    const blocks = await client.blocks.list(40, '1000000')
+    expect(blocks.length).toStrictEqual(40)
+
+    expect(blocks[0]).toStrictEqual(
+      expect.objectContaining({
+        id: expect.stringMatching(/[0-f]{64}/),
+        hash: expect.stringMatching(/[0-f]{64}/),
+        previousHash: expect.stringMatching(/[0-f]{64}/),
+        height: expect.any(Number),
+        version: expect.any(Number),
+        time: expect.any(Number),
+        medianTime: expect.any(Number),
+        transactionCount: expect.any(Number),
+        difficulty: expect.any(Number),
+        masternode: expect.stringMatching(/[0-f]{64}/),
+        minter: expect.stringMatching(/[a-zA-Z0-9]+/),
+        minterBlockCount: expect.any(Number),
+        stakeModifier: expect.stringMatching(/[0-f]{64}/),
+        merkleroot: expect.stringMatching(/[0-f]{64}/),
+        size: expect.any(Number),
+        sizeStripped: expect.any(Number),
+        weight: expect.any(Number)
+      })
+    )
+    expect(blocks[0].height).toBeGreaterThanOrEqual(100)
+  })
+
+  it('should get fetch the whole list of blocks when size is out of range', async () => {
+    const blocks = await client.blocks.list(1000)
+    expect(blocks.length).toBeGreaterThanOrEqual(100)
+
+    expect(blocks[0]).toStrictEqual(
+      expect.objectContaining({
+        id: expect.stringMatching(/[0-f]{64}/),
+        hash: expect.stringMatching(/[0-f]{64}/),
+        previousHash: expect.stringMatching(/[0-f]{64}/),
+        height: expect.any(Number),
+        version: expect.any(Number),
+        time: expect.any(Number),
+        medianTime: expect.any(Number),
+        transactionCount: expect.any(Number),
+        difficulty: expect.any(Number),
+        masternode: expect.stringMatching(/[0-f]{64}/),
+        minter: expect.stringMatching(/[a-zA-Z0-9]+/),
+        minterBlockCount: expect.any(Number),
+        stakeModifier: expect.stringMatching(/[0-f]{64}/),
+        merkleroot: expect.stringMatching(/[0-f]{64}/),
+        size: expect.any(Number),
+        sizeStripped: expect.any(Number),
+        weight: expect.any(Number)
+      })
+    )
+    expect(blocks[0].height).toBeGreaterThanOrEqual(100)
+  })
 })
 
 describe('get', () => {
