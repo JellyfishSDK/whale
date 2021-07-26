@@ -62,6 +62,7 @@ export class WhaleApiClient {
   public readonly transactions = new Transactions(this)
   public readonly tokens = new Tokens(this)
   public readonly masternodes = new Masternodes(this)
+  public readonly block = new Blocks(this)
 
   constructor (
     protected readonly options: WhaleApiClientOptions

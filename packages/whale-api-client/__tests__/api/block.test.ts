@@ -21,7 +21,7 @@ beforeAll(async () => {
 
   // ensure that there's at least 100 blocks
   await waitForExpect(async () => {
-    const blocks = await client.block.list()
+    const blocks = await client.blocks.list()
     expect(blocks.length).toBeGreaterThan(0)
     expect(blocks[0].height).toBeGreaterThanOrEqual(100)
   }, 30000)
@@ -38,7 +38,7 @@ afterAll(async () => {
 
 describe('list', () => {
   it('should get paginated list of blocks', async () => {
-    const first = await client.block.list(40)
+    const first = await client.blocks.list(40)
     expect(first.length).toStrictEqual(40)
 
     expect(first[0]).toStrictEqual(
@@ -76,7 +76,7 @@ describe('list', () => {
 
 describe('get', () => {
   it('should get block through height', async () => {
-    const block = await client.block.get('37')
+    const block = await client.blocks.get('37')
 
     expect(block).toStrictEqual(
       expect.objectContaining({
@@ -104,7 +104,7 @@ describe('get', () => {
 
   it('should get block through hash', async () => {
     const blockHash = await container.call('getblockhash', [37])
-    const block = await client.block.get(blockHash)
+    const block = await client.blocks.get(blockHash)
     expect(block).toStrictEqual(
       expect.objectContaining({
         id: expect.stringMatching(/[0-f]{64}/),
@@ -130,12 +130,12 @@ describe('get', () => {
   })
 
   it('should get undefined through invalid hash', async () => {
-    const block = await client.block.get('d78167c999ed24b999de6530d6b7d9d723096e49baf191bd2706ddb8eaf452ae')
+    const block = await client.blocks.get('d78167c999ed24b999de6530d6b7d9d723096e49baf191bd2706ddb8eaf452ae')
     expect(block).toBeUndefined()
   })
 
   it('should get undefined through invalid height', async () => {
-    const block = await client.block.get('1000000000')
+    const block = await client.blocks.get('1000000000')
     expect(block).toBeUndefined()
   })
 })
@@ -143,7 +143,7 @@ describe('get', () => {
 describe('getBlockTransactions', () => {
   it('should getBlockTransactions through hash', async () => {
     const blockHash = await container.call('getblockhash', [37])
-    const transactions = await client.block.getBlockTransactions(blockHash)
+    const transactions = await client.blocks.getBlockTransactions(blockHash)
     expect(transactions[0]).toStrictEqual({
       id: expect.stringMatching(/[0-f]{64}/),
       block: {
@@ -164,7 +164,7 @@ describe('getBlockTransactions', () => {
   })
 
   it('should getBlockTransactions through height', async () => {
-    const transactions = await client.block.getBlockTransactions('37')
+    const transactions = await client.blocks.getBlockTransactions('37')
     expect(transactions[0]).toStrictEqual({
       id: expect.stringMatching(/[0-f]{64}/),
       block: {
@@ -185,12 +185,12 @@ describe('getBlockTransactions', () => {
   })
 
   it('should getBlockTransactions through invalid hash', async () => {
-    const transactions = await client.block.getBlockTransactions('b33320d63574690eb549ee4867c0119efdb69b396d3452bf9a09132eaa76b4a5')
+    const transactions = await client.blocks.getBlockTransactions('b33320d63574690eb549ee4867c0119efdb69b396d3452bf9a09132eaa76b4a5')
     expect(transactions.length).toStrictEqual(0)
   })
 
   it('should getBlockTransactions through invalid height', async () => {
-    const transactions = await client.block.getBlockTransactions('1000000000')
+    const transactions = await client.blocks.getBlockTransactions('1000000000')
     expect(transactions.length).toStrictEqual(0)
   })
 })
