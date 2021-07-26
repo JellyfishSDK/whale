@@ -101,7 +101,7 @@ describe('list', () => {
     expect(blocks[0].height).toBeGreaterThanOrEqual(100)
   })
 
-  it('should get fetch the whole list of blocks when size is out of range', async () => {
+  it('should fetch the whole list of blocks when size is out of range', async () => {
     const blocks = await client.blocks.list(1000)
     expect(blocks.length).toBeGreaterThanOrEqual(100)
 
