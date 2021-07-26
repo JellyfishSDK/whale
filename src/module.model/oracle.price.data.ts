@@ -60,7 +60,7 @@ export class OraclePriceDataMapper {
       partitionKey: `${oracleId}-${token}-${currency}`,
       order: SortOrder.DESC,
       limit: 1,
-      lt: height + 1
+      lte: height
     })
 
     return data.length === 0 ? undefined : data[0]
