@@ -140,10 +140,10 @@ describe('get', () => {
   })
 })
 
-describe('getBlockTransactions', () => {
-  it('should getBlockTransactions through hash', async () => {
+describe('getTransactions', () => {
+  it('should getTransactions through hash', async () => {
     const blockHash = await container.call('getblockhash', [37])
-    const transactions = await client.blocks.getBlockTransactions(blockHash)
+    const transactions = await client.blocks.getTransactions(blockHash)
     expect(transactions[0]).toStrictEqual({
       id: expect.stringMatching(/[0-f]{64}/),
       block: {
@@ -163,8 +163,8 @@ describe('getBlockTransactions', () => {
     expect(transactions[0].block.height).toStrictEqual(37)
   })
 
-  it('should getBlockTransactions through height', async () => {
-    const transactions = await client.blocks.getBlockTransactions('37')
+  it('should getTransactions through height', async () => {
+    const transactions = await client.blocks.getTransactions('37')
     expect(transactions[0]).toStrictEqual({
       id: expect.stringMatching(/[0-f]{64}/),
       block: {
@@ -184,13 +184,13 @@ describe('getBlockTransactions', () => {
     expect(transactions[0].block.height).toStrictEqual(37)
   })
 
-  it('should getBlockTransactions through invalid hash', async () => {
-    const transactions = await client.blocks.getBlockTransactions('b33320d63574690eb549ee4867c0119efdb69b396d3452bf9a09132eaa76b4a5')
+  it('should getTransactions through invalid hash', async () => {
+    const transactions = await client.blocks.getTransactions('b33320d63574690eb549ee4867c0119efdb69b396d3452bf9a09132eaa76b4a5')
     expect(transactions.length).toStrictEqual(0)
   })
 
-  it('should getBlockTransactions through invalid height', async () => {
-    const transactions = await client.blocks.getBlockTransactions('1000000000')
+  it('should getTransactions through invalid height', async () => {
+    const transactions = await client.blocks.getTransactions('1000000000')
     expect(transactions.length).toStrictEqual(0)
   })
 })
