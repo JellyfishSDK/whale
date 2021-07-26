@@ -23,7 +23,7 @@ beforeAll(async () => {
   await waitForExpect(async () => {
     const blocks = await client.blocks.list()
     expect(blocks.length).toBeGreaterThan(0)
-    expect(blocks[0].height).toBeGreaterThanOrEqual(100)
+    expect(blocks[0].height).toBeGreaterThanOrEqual(40)
   }, 30000)
   await container.waitForWalletBalanceGTE(100)
 })
@@ -38,8 +38,8 @@ afterAll(async () => {
 
 describe('list', () => {
   it('should get paginated list of blocks', async () => {
-    const first = await client.blocks.list(40)
-    expect(first.length).toStrictEqual(40)
+    const first = await client.blocks.list(15)
+    expect(first.length).toStrictEqual(15)
 
     expect(first[0]).toStrictEqual(
       expect.objectContaining({
@@ -62,20 +62,20 @@ describe('list', () => {
         weight: expect.any(Number)
       })
     )
-    expect(first[0].height).toBeGreaterThanOrEqual(100)
+    expect(first[0].height).toBeGreaterThanOrEqual(40)
 
     const second = await client.paginate(first)
-    expect(second[0].height).toStrictEqual(first[39].height - 1)
-    expect(second.length).toStrictEqual(40)
+    expect(second[0].height).toStrictEqual(first[14].height - 1)
+    expect(second.length).toStrictEqual(15)
 
     const last = await client.paginate(second)
-    expect(last[0].height).toStrictEqual(second[39].height - 1)
+    expect(last[0].height).toStrictEqual(second[14].height - 1)
     expect(last.hasNext).toStrictEqual(false)
   })
 
   it('should get paginated list of blocks when next is out of range', async () => {
-    const blocks = await client.blocks.list(40, '1000000')
-    expect(blocks.length).toStrictEqual(40)
+    const blocks = await client.blocks.list(15, '1000000')
+    expect(blocks.length).toStrictEqual(15)
 
     expect(blocks[0]).toStrictEqual(
       expect.objectContaining({
@@ -98,12 +98,12 @@ describe('list', () => {
         weight: expect.any(Number)
       })
     )
-    expect(blocks[0].height).toBeGreaterThanOrEqual(100)
+    expect(blocks[0].height).toBeGreaterThanOrEqual(40)
   })
 
   it('should fetch the whole list of blocks when size is out of range', async () => {
-    const blocks = await client.blocks.list(1000)
-    expect(blocks.length).toBeGreaterThanOrEqual(100)
+    const blocks = await client.blocks.list(60)
+    expect(blocks.length).toBeGreaterThanOrEqual(40)
 
     expect(blocks[0]).toStrictEqual(
       expect.objectContaining({
@@ -126,7 +126,7 @@ describe('list', () => {
         weight: expect.any(Number)
       })
     )
-    expect(blocks[0].height).toBeGreaterThanOrEqual(100)
+    expect(blocks[0].height).toBeGreaterThanOrEqual(40)
   })
 })
 
