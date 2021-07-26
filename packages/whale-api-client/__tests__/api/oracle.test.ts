@@ -439,6 +439,8 @@ describe('4 - Oracle Price Interval', () => {
 
     await container.call('setoracledata', [oracleId4, timestamp + 8, price4])
 
+    await service.waitForIndexedTimestamp(container, timestamp + 10)
+
     const height: number = await container.call('getblockcount')
     await container.generate(1)
     await service.waitForIndexedHeight(height)

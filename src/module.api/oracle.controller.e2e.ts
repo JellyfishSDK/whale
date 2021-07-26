@@ -430,8 +430,9 @@ describe('4 - Oracle Price Interval', () => {
 
     await container.generate(1)
 
-    const height: number = await container.call('getblockcount')
+    await waitForIndexedTimestamp(container, timestamp + 10)
 
+    const height: number = await container.call('getblockcount')
     await container.generate(1)
     await waitForIndexedHeight(app, height)
   }
