@@ -11,7 +11,6 @@
   "scripts": {
     "prepare": "husky install",
     "standard": "ts-standard --fix",
-    "version": "lerna version $1 --yes --no-push --no-git-tag-version",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "start": "nest start",
@@ -21,8 +20,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci --coverage --maxWorkers=4",
+    "publish:version": "lerna version $1 --yes --no-push --no-git-tag-version",
     "packages:build": "lerna run build",
-    "packages:version": "lerna run version:update",
     "packages:publish:next": "lerna exec -- npm publish --tag next --access public",
     "packages:publish:latest": "lerna exec -- npm publish --tag latest --access public"
   },
