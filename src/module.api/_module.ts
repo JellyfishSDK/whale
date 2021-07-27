@@ -12,6 +12,8 @@ import { ExceptionInterceptor } from '@src/module.api/interceptors/exception.int
 import { ResponseInterceptor } from '@src/module.api/interceptors/response.interceptor'
 import { TokensController } from '@src/module.api/token.controller'
 import { MasternodesController } from '@src/module.api/masternode.controller'
+import { ConfigService } from '@nestjs/config'
+import { NetworkName } from '@defichain/jellyfish-network'
 
 /**
  * Exposed ApiModule for public interfacing
@@ -29,9 +31,16 @@ import { MasternodesController } from '@src/module.api/masternode.controller'
   ],
   providers: [
     { provide: APP_PIPE, useClass: ApiValidationPipe },
-    // APP_INTERCEPTOR are only activated for /v0/* paths
+    // APP_INTERCEPTOR are only activated for /v* paths
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
     { provide: APP_INTERCEPTOR, useClass: ExceptionInterceptor },
+    {
+      provide: 'NETWORK',
+      useFactory: (configService: ConfigService): NetworkName => {
+        return configService.get<string>('network') as NetworkName
+      },
+      inject: [ConfigService]
+    },
     DeFiDCache,
     PoolPairService
   ]

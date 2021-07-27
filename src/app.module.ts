@@ -64,7 +64,6 @@ export class AppModule {
       maxAge: 60 * 24 * 7
     })
 
-    // @ts-expect-error exclude not mapped
     app.setGlobalPrefix(`${version}/${network}`, {
       exclude: [
         '/_actuator/probes/liveness',
