@@ -59,19 +59,6 @@
 						"exec": [
 							"pm.test(\"Status code is 503\", function () {",
 							"    pm.response.to.have.status(503);",
-							"});",
-							"",
-							"pm.test(\"Status in JSON body is error\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.status).to.eql(\"error\");",
-							"",
-							"    pm.expect(jsonData.info.model.status).to.eql(\"up\");",
-							"",
-							"    pm.expect(jsonData.error.defid.status).to.eql(\"down\");",
-							"    pm.expect(jsonData.error.defid.initialBlockDownload).to.eql(true);",
-							"    pm.expect(jsonData.error.defid.blocks).to.eql(0);",
-							"    pm.expect(jsonData.error.defid.headers).to.eql(0);",
-							"    pm.expect(jsonData.error.defid.peers).to.eql(0);",
 							"});"
 						],
 						"type": "text/javascript"
