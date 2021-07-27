@@ -1,6 +1,7 @@
 import 'url-search-params-polyfill'
 import AbortController from 'abort-controller'
 import fetch from 'cross-fetch'
+import version from './version'
 import { raiseIfError, WhaleClientException, WhaleClientTimeoutException } from './errors'
 import { ApiPagedResponse, WhaleApiResponse } from './whale.api.response'
 import { Address } from './api/address'
@@ -9,8 +10,7 @@ import { Rpc } from './api/rpc'
 import { Transactions } from './api/transactions'
 import { Tokens } from './api/tokens'
 import { Masternodes } from './api/masternode'
-import { Blocks } from './api/block'
-import version from './version'
+import { Blocks } from './api/blocks'
 
 /**
  * WhaleApiClient Options
