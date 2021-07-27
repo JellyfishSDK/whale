@@ -2,7 +2,7 @@ import 'url-search-params-polyfill'
 import AbortController from 'abort-controller'
 import fetch from 'cross-fetch'
 import { raiseIfError, WhaleClientException, WhaleClientTimeoutException } from './errors'
-import { WhaleApiResponse, ApiPagedResponse } from './whale.api.response'
+import { ApiPagedResponse, WhaleApiResponse } from './whale.api.response'
 import { Address } from './api/address'
 import { PoolPair } from './api/poolpair'
 import { Rpc } from './api/rpc'
@@ -10,6 +10,7 @@ import { Transactions } from './api/transactions'
 import { Tokens } from './api/tokens'
 import { Masternodes } from './api/masternode'
 import { Blocks } from './api/block'
+import version from './version'
 
 /**
  * WhaleApiClient Options
@@ -26,7 +27,7 @@ export interface WhaleApiClientOptions {
   /**
    * Version of API
    */
-  version?: 'v0'
+  version?: `v${number}.${number}`
 
   /**
    * Network that whale client is configured to
@@ -40,7 +41,7 @@ export interface WhaleApiClientOptions {
 export const DefaultOptions: WhaleApiClientOptions = {
   url: 'https://ocean.defichain.com',
   timeout: 60000,
-  version: 'v0',
+  version: version,
   network: 'mainnet'
 }
 
@@ -64,7 +65,7 @@ export class WhaleApiClient {
   public readonly blocks = new Blocks(this)
 
   constructor (
-    private readonly options: WhaleApiClientOptions
+    protected readonly options: WhaleApiClientOptions
   ) {
     this.options = Object.assign(DefaultOptions, options ?? {})
     this.options.url = this.options.url.replace(/\/$/, '')

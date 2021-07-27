@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "22663b41-47c9-4bb2-ab9c-a32a8114402e",
+		"_postman_id": "5abeec8f-51bd-4585-8ce4-b1522241c795",
 		"name": "DeFi Whale",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -19,6 +19,12 @@
 							"pm.test(\"Status in JSON body is ok\", function () {",
 							"    var jsonData = pm.response.json();",
 							"    pm.expect(jsonData.status).to.eql(\"ok\");",
+							"",
+							"    pm.expect(jsonData.info.defid.status).to.eql(\"up\");",
+							"    pm.expect(jsonData.info.model.status).to.eql(\"up\");",
+							"",
+							"    pm.expect(jsonData.details.defid.status).to.eql(\"up\");",
+							"    pm.expect(jsonData.details.model.status).to.eql(\"up\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -45,7 +51,54 @@
 			"response": []
 		},
 		{
-			"name": "/v0/regtest/rpc/getblockchaininfo",
+			"name": "/_actuator/probes/readiness",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 503\", function () {",
+							"    pm.response.to.have.status(503);",
+							"});",
+							"",
+							"pm.test(\"Status in JSON body is error\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"error\");",
+							"",
+							"    pm.expect(jsonData.info.model.status).to.eql(\"up\");",
+							"",
+							"    pm.expect(jsonData.error.defid.status).to.eql(\"down\");",
+							"    pm.expect(jsonData.error.defid.initialBlockDownload).to.eql(true);",
+							"    pm.expect(jsonData.error.defid.blocks).to.eql(0);",
+							"    pm.expect(jsonData.error.defid.headers).to.eql(0);",
+							"    pm.expect(jsonData.error.defid.peers).to.eql(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/_actuator/probes/readiness",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"_actuator",
+						"probes",
+						"readiness"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/v0.0/regtest/rpc/getblockchaininfo",
 			"event": [
 				{
 					"listen": "test",
@@ -58,6 +111,8 @@
 							"pm.test(\"data.chain is regtest\", function () {",
 							"    var jsonData = pm.response.json();",
 							"    pm.expect(jsonData.data.chain).to.eql(\"regtest\");",
+							"    pm.expect(jsonData.data.blocks).to.eql(0);",
+							"    pm.expect(jsonData.data.headers).to.eql(0);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -68,14 +123,14 @@
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:3000/v0/regtest/rpc/getblockchaininfo",
+					"raw": "http://localhost:3000/v0.0/regtest/rpc/getblockchaininfo",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"v0",
+						"v0.0",
 						"regtest",
 						"rpc",
 						"getblockchaininfo"
@@ -85,7 +140,7 @@
 			"response": []
 		},
 		{
-			"name": "/v0/regtest/rpc/getblockhash",
+			"name": "/v0.0/regtest/rpc/getblockhash",
 			"event": [
 				{
 					"listen": "test",
@@ -98,6 +153,7 @@
 							"pm.test(\"data is a hash\", function () {",
 							"    var jsonData = pm.response.json();",
 							"    pm.expect(jsonData.data.length).to.eql(64);",
+							"    pm.expect(jsonData.data).to.eql(\"d744db74fb70ed42767ae028a129365fb4d7de54ba1b6575fb047490554f8a7b\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -117,17 +173,169 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/v0/regtest/rpc/getblockhash",
+					"raw": "http://localhost:3000/v0.0/regtest/rpc/getblockhash",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
-						"v0",
+						"v0.0",
 						"regtest",
 						"rpc",
 						"getblockhash"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/v0.0/regtest/rpc/getblock",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"params\": [\"d744db74fb70ed42767ae028a129365fb4d7de54ba1b6575fb047490554f8a7b\", 2]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/v0.0/regtest/rpc/getblock",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v0.0",
+						"regtest",
+						"rpc",
+						"getblock"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/v0.0/regtest/tokens",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"data is a hash\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.length).to.eql(1);",
+							"    pm.expect(jsonData.data[0].id).to.eql(\"0\");",
+							"    pm.expect(jsonData.data[0].symbol).to.eql(\"DFI\");",
+							"    pm.expect(jsonData.data[0].symbolKey).to.eql(\"DFI\");",
+							"    pm.expect(jsonData.data[0].tradeable).to.eql(true);",
+							"    pm.expect(jsonData.data[0].isDAT).to.eql(true);",
+							"    pm.expect(jsonData.data[0].isLPS).to.eql(false);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/v0.0/regtest/tokens",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v0.0",
+						"regtest",
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/v0.0/regtest/poolpairs",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"data is a hash\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.length).to.eql(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/v0.0/regtest/poolpairs",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"v0.0",
+						"regtest",
+						"poolpairs"
 					]
 				}
 			},
