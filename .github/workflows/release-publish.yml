@@ -10,17 +10,25 @@ jobs:
     runs-on: ubuntu-latest
     environment: Docker Release
     steps:
+      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+      - uses: actions/setup-node@aa759c6c94d3800c55b8601f21ba4b2371704cb7
+        with:
+          node-version: '15'
+
       - uses: actions/github-script@a3e7071a34d7e1f219a8a4de9a5e0a34d1ee1293
         id: version
         with:
           script: |
             const semver = context.ref.replace('refs/tags/v', '')
-            if (semver.match(/^[0-9]+\.[0-9]+\.[0-9]+$/)) {
+            if (semver.match(/[0-9]\.[0-9]\.[0-9]/)) {
               return semver
             }
 
             throw new Error('not semver')
           result-encoding: string
+
+      - run: npm ci
+      - run: npm run version ${{ steps.version.outputs.result }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@27d0a4f181a40b142cce983c5393082c365d1480
@@ -38,6 +46,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@1bc1040caef9e604eb543693ba89b5bf4fc80935
         with:
+          context: .
           push: true
           platforms: |
             linux/amd64
@@ -70,8 +79,8 @@ jobs:
           result-encoding: string
 
       - run: npm ci
+      - run: npm run version ${{ steps.version.outputs.result }}
       - run: npm run packages:build
-      - run: npm run packages:version ${{ steps.version.outputs.result }}
 
       - name: Publish Next
         if: github.event.release.prerelease
