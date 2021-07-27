@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   defi-blockchain:
-    image: defi/defichain:1.6.4
+    image: defi/defichain:1.7.11
     ports:
       - "19554:19554"
     command: >
@@ -12,8 +12,10 @@ services:
       -rpcbind=0.0.0.0
       -rpcuser=whale-rpcuser
       -rpcpassword=whale-rpcpassword
+      -masternode_operator=mswsMVsyGMj1FzDMbbxw2QW3KvQAv2FKiy
       -disablewallet=1
       -regtest=1
+      -jellyfish_regtest=1
       -txnotokens=0
       -logtimemicros
       -txindex=1
@@ -24,6 +26,7 @@ services:
       -clarkequayheight=3
       -dakotaheight=4
       -dakotacrescentheight=5
+      -eunosheight=6
 
   defi-whale:
     build: ../../..
