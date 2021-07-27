@@ -7,8 +7,8 @@ export class Blocks {
   }
 
   /**
-   * @param {number} [size=30] - size to query
-   * @param {string} [next] - next token for next slice of blocks
+   * @param {number} [size=30] size to query
+   * @param {string} [next] next token for next slice of blocks
    * @return {Promise<ApiPagedResponse<Block>>}
    */
   async list (size: number = 30, next?: string): Promise<ApiPagedResponse<Block>> {
@@ -16,7 +16,7 @@ export class Blocks {
   }
 
   /**
-   * @param {string} id - hash or height of the block
+   * @param {string} id as hash or height of the block
    * @return {Promise<<Block>}
    */
   async get (id: string): Promise<Block> {
@@ -24,13 +24,13 @@ export class Blocks {
   }
 
   /**
-   * @param {string} id - hash or height of the block
-   * @param {number} [size=30] - size to query
-   * @param {string} [next] - next token for next slice of blocks
+   * @param {string} hash of the block
+   * @param {number} [size=30] size to query
+   * @param {string} [next] next token for next slice of blocks
    * @return {Promise<ApiPagedResponse<Transaction>>}
    */
-  async getTransactions (id: string, size: number = 30, next?: string): Promise<ApiPagedResponse<Transaction>> {
-    return await this.client.requestList('GET', `blocks/${id}/transactions`, size, next)
+  async getTransactions (hash: string, size: number = 30, next?: string): Promise<ApiPagedResponse<Transaction>> {
+    return await this.client.requestList('GET', `blocks/${hash}/transactions`, size, next)
   }
 }
 

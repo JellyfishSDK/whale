@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common'
 import { Block, BlockMapper } from '@src/module.model/block'
-import { TransactionMapper, Transaction } from '@src/module.model/transaction'
+import { Transaction, TransactionMapper } from '@src/module.model/transaction'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 
@@ -10,7 +10,7 @@ export function parseHeight (str: string | undefined): number | undefined {
   }
 }
 
-@Controller('/v0/:network/blocks')
+@Controller('/blocks')
 export class BlockController {
   constructor (
     protected readonly blockMapper: BlockMapper,
@@ -30,27 +30,26 @@ export class BlockController {
   }
 
   @Get('/:id')
-  async get (@Param('id') id: string): Promise<Block | undefined> {
-    const block = await this.parseHeightAndGetBlock(id)
-
-    return block !== undefined ? block : await this.blockMapper.getByHash(id)
-  }
-
-  @Get('/:id/transactions')
-  async getBlockTransactions (@Param('id') id: string, @Query() query: PaginationQuery): Promise<ApiPagedResponse<Transaction>> {
-    const block = await this.parseHeightAndGetBlock(id)
-
-    const transactions = await this.transactionMapper.queryByBlockHash((block !== undefined) ? block.id : id, query.size, query.next)
-
-    return ApiPagedResponse.of(transactions, query.size, transaction => {
-      return transaction.id
-    })
-  }
-
-  async parseHeightAndGetBlock (str?: string): Promise<Block | undefined> {
-    const height = parseHeight(str)
+  async get (@Param('id') hashOrHeight: string): Promise<Block | undefined> {
+    const height = parseHeight(hashOrHeight)
     if (height !== undefined) {
       return await this.blockMapper.getByHeight(height)
     }
+
+    if (hashOrHeight.match(/^[0-f]{64}$/) != null) {
+      return await this.blockMapper.getByHash(hashOrHeight)
+    }
+  }
+
+  @Get('/:hash/transactions')
+  async getTransactions (@Param('hash') hash: string, @Query() query: PaginationQuery): Promise<ApiPagedResponse<Transaction>> {
+    if (hash.match(/^[0-f]{64}$/) == null) {
+      return ApiPagedResponse.empty()
+    }
+
+    const transactions = await this.transactionMapper.queryByBlockHash(hash, query.size, query.next)
+    return ApiPagedResponse.of(transactions, query.size, transaction => {
+      return transaction.id
+    })
   }
 }

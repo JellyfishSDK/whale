@@ -10,7 +10,7 @@ import { Transactions } from './api/transactions'
 import { Tokens } from './api/tokens'
 import { Masternodes } from './api/masternode'
 import version from './version'
-import { Blocks } from './api/block'
+import { Blocks } from './api/blocks'
 
 /**
  * WhaleApiClient Options
@@ -62,7 +62,7 @@ export class WhaleApiClient {
   public readonly transactions = new Transactions(this)
   public readonly tokens = new Tokens(this)
   public readonly masternodes = new Masternodes(this)
-  public readonly block = new Blocks(this)
+  public readonly blocks = new Blocks(this)
 
   constructor (
     protected readonly options: WhaleApiClientOptions

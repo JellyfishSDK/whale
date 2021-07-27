@@ -10,8 +10,7 @@ let controller: BlockController
 beforeAll(async () => {
   await container.start()
   await container.waitForReady()
-  await container.waitForWalletCoinbaseMaturity()
-  await container.waitForWalletBalanceGTE(100)
+  await container.waitForBlockHeight(101)
 
   app = await createTestingApp(container)
 
@@ -42,30 +41,29 @@ describe('get', () => {
   })
 })
 
-describe('getBlockTransactions', () => {
+describe('getTransactions', () => {
   it('should get transactions from a block by hash', async () => {
     const blockHash = await container.call('getblockhash', [100])
-    const paginatedTransactions = await controller.getBlockTransactions(blockHash, { size: 30, next: '10' })
+    const paginatedTransactions = await controller.getTransactions(blockHash, { size: 30, next: '10' })
 
     expect(paginatedTransactions.data.length).toStrictEqual(1)
     expect(paginatedTransactions.data[0].block.height).toStrictEqual(100)
   })
 
-  it('getBlockTransactions should get transactions from a block by height', async () => {
-    const paginatedTransactions = await controller.getBlockTransactions('100', { size: 30, next: '10' })
-
-    expect(paginatedTransactions.data.length).toStrictEqual(1)
-    expect(paginatedTransactions.data[0].block.height).toStrictEqual(100)
-  })
-
-  it('getBlockTransactions should get empty array when hash is not valid', async () => {
-    const paginatedTransactions = await controller.getBlockTransactions('z1wadfsvq90qlkfalnklvm', { size: 30 })
+  it('getTransactions should not get transactions by height', async () => {
+    const paginatedTransactions = await controller.getTransactions('0', { size: 30, next: '10' })
 
     expect(paginatedTransactions.data.length).toStrictEqual(0)
   })
 
-  it('getBlockTransactions should get empty array when height is not valid', async () => {
-    const paginatedTransactions = await controller.getBlockTransactions('999999999999', { size: 30 })
+  it('getTransactions should get empty array when hash is not valid', async () => {
+    const paginatedTransactions = await controller.getTransactions('z1wadfsvq90qlkfalnklvm', { size: 30 })
+
+    expect(paginatedTransactions.data.length).toStrictEqual(0)
+  })
+
+  it('getTransactions should get empty array when height is not valid', async () => {
+    const paginatedTransactions = await controller.getTransactions('999999999999', { size: 30 })
 
     expect(paginatedTransactions.data.length).toStrictEqual(0)
   })
@@ -135,37 +133,5 @@ describe('parseHeight', () => {
 
   it('should return undefined for strings with characters', () => {
     expect(parseHeight('123a')).toStrictEqual(undefined)
-  })
-})
-
-describe('parseHeightAndGetBlock', () => {
-  it('should return undefined for negative integer', async () => {
-    const block = await controller.parseHeightAndGetBlock('-123')
-    expect(block).toStrictEqual(undefined)
-  })
-
-  it('should return undefined for float', async () => {
-    const block = await controller.parseHeightAndGetBlock('123.32')
-    expect(block).toStrictEqual(undefined)
-  })
-
-  it('should return block for positive integers', async () => {
-    const block = await controller.parseHeightAndGetBlock('100')
-    expect(block?.height).toStrictEqual(100)
-  })
-
-  it('should return undefined for empty string', async () => {
-    const block = await controller.parseHeightAndGetBlock('')
-    expect(block).toStrictEqual(undefined)
-  })
-
-  it('should return undefined for undefined', async () => {
-    const block = await controller.parseHeightAndGetBlock(undefined)
-    expect(block).toStrictEqual(undefined)
-  })
-
-  it('should return undefined for strings with characters', async () => {
-    const block = await controller.parseHeightAndGetBlock('123a')
-    expect(block).toStrictEqual(undefined)
   })
 })
