@@ -9,6 +9,7 @@ import { Rpc } from './api/rpc'
 import { Transactions } from './api/transactions'
 import { Tokens } from './api/tokens'
 import { Masternodes } from './api/masternode'
+import version from './version'
 
 /**
  * WhaleApiClient Options
@@ -39,7 +40,7 @@ export interface WhaleApiClientOptions {
 export const DefaultOptions: WhaleApiClientOptions = {
   url: 'https://ocean.defichain.com',
   timeout: 60000,
-  version: 'v0.0',
+  version: version,
   network: 'mainnet'
 }
 

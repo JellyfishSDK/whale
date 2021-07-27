@@ -11,7 +11,7 @@
   "scripts": {
     "prepare": "husky install",
     "standard": "ts-standard --fix",
-    "version": "lerna version $1 --yes --no-push --no-git-tag-version",
+    "version": "lerna version $1 --yes --no-push --no-git-tag-version && lerna exec -- npm run version:set",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "start": "nest start",
