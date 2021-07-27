@@ -101,6 +101,12 @@ describe('list', () => {
     expect(blocks[0].height).toBeGreaterThanOrEqual(40)
   })
 
+  it('should get paginated list of blocks when next is 0', async () => {
+    const blocks = await client.blocks.list(15, '0')
+    expect(blocks.length).toStrictEqual(0)
+    expect(blocks.hasNext).toStrictEqual(false)
+  })
+
   it('should fetch the whole list of blocks when size is out of range', async () => {
     const blocks = await client.blocks.list(60)
     expect(blocks.length).toBeGreaterThanOrEqual(40)

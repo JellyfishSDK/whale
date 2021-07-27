@@ -104,7 +104,11 @@ describe('list', () => {
     expect(paginatedBlocks.data[0].height).toBeGreaterThanOrEqual(100)
   })
 
-  it('list would return the latest set if next is undefined', async () => {
+  it('list would return the latest set if next is 0', async () => {
+    const paginatedBlocks = await controller.list({ size: 30, next: '0' })
+
+    expect(paginatedBlocks.data.length).toStrictEqual(0)
+    expect(paginatedBlocks?.page).toBeUndefined()
   })
 })
 
