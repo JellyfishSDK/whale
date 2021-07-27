@@ -4,7 +4,7 @@ import { TransactionMapper, Transaction } from '@src/module.model/transaction'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 
-export function parseHeight (str?: string): number | undefined {
+export function parseHeight (str: string | undefined): number | undefined {
   if (str !== undefined && /^\d+$/.test(str)) {
     return parseInt(str)
   }
@@ -40,7 +40,7 @@ export class BlockController {
   async getBlockTransactions (@Param('id') id: string, @Query() query: PaginationQuery): Promise<ApiPagedResponse<Transaction>> {
     const block = await this.parseHeightAndGetBlock(id)
 
-    const transactions = await this.transactionMapper.queryByBlockHash((block != null) ? block.id : id, query.size, query.next)
+    const transactions = await this.transactionMapper.queryByBlockHash((block !== undefined) ? block.id : id, query.size, query.next)
 
     return ApiPagedResponse.of(transactions, query.size, transaction => {
       return transaction.id
