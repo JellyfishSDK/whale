@@ -50,7 +50,7 @@ export class AppModule {
   /**
    * Configure NestFastifyApplication with
    * - CORS
-   * - GlobalPrefix 'v{major}.{minor}/network' e.g. 'v0.0/regtest'
+   * - GlobalPrefix 'v{major}.{minor}/${network}' e.g. 'v0.0/regtest'
    */
   static configure (app: NestFastifyApplication): void {
     const [major, minor] = packageJson.version.split('.')
