@@ -13,10 +13,7 @@ export function parseHeight (str: string | undefined): number | undefined {
 }
 
 export function isSHA256Hash (str: string | undefined): boolean {
-  if (str === undefined) {
-    return false
-  }
-  return !(str.match(/^[0-f]{64}$/) == null)
+  return str !== undefined ? !(str.match(/^[0-f]{64}$/) == null) : false
 }
 
 @Controller('/blocks')
@@ -47,7 +44,7 @@ export class BlockController {
       return await this.blockMapper.getByHeight(height)
     }
 
-    if (hashOrHeight.match(/^[0-f]{64}$/) != null) {
+    if (isSHA256Hash(hashOrHeight)) {
       return await this.blockMapper.getByHash(hashOrHeight)
     }
   }
@@ -81,7 +78,7 @@ export class BlockController {
   async getVectors<T extends TransactionVin | TransactionVout> (mapper: TransactionVinMapper | TransactionVoutMapper, hash: string, txid: string, query: PaginationQuery): Promise<T[]> {
     const transaction = await this.transactionMapper.get(txid)
 
-    if (isSHA256Hash(hash) && transaction !== undefined && transaction.block.hash === hash) {
+    if (transaction !== undefined && transaction.block.hash === hash) {
       return await mapper.query(txid, query.size) as T[]
     }
 
