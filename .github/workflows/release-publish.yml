@@ -28,7 +28,7 @@ jobs:
           result-encoding: string
 
       - run: npm ci
-      - run: npm run publish:version ${{ steps.version.outputs.result }}
+      - run: npm run version:set ${{ steps.version.outputs.result }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@27d0a4f181a40b142cce983c5393082c365d1480
@@ -79,7 +79,7 @@ jobs:
           result-encoding: string
 
       - run: npm ci
-      - run: npm run publish:version ${{ steps.version.outputs.result }}
+      - run: npm run version:set ${{ steps.version.outputs.result }}
       - run: npm run packages:build
 
       - name: Publish Next
