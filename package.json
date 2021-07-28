@@ -21,9 +21,9 @@
     "test:watch": "jest --watch",
     "test:ci": "jest --ci --coverage --maxWorkers=4",
     "publish:version": "lerna version $1 --yes --no-push --no-git-tag-version",
-    "packages:build": "lerna run build",
-    "packages:publish:next": "lerna exec -- npm publish --tag next --access public",
-    "packages:publish:latest": "lerna exec -- npm publish --tag latest --access public"
+    "packages:build": "lerna run --no-private build",
+    "packages:publish:next": "lerna exec --no-private -- npm publish --tag next --access public",
+    "packages:publish:latest": "lerna exec --no-private -- npm publish --tag latest --access public"
   },
   "dependencies": {
     "@defichain/jellyfish-address": ">=0.30.0",
