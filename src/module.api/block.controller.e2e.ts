@@ -119,10 +119,10 @@ describe('getVins', () => {
 
     const vins = await controller.getVins(blockHash, transactions.data[0].id, { size: 30 })
 
-    expect(vins?.data.length).toBeGreaterThanOrEqual(1)
+    expect(vins.data.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('should return undefined if blockhash is not valid', async () => {
+  it('should return empty page if blockhash is not valid', async () => {
     const blockHash = await container.call('getblockhash', [100])
     const transactions = await controller.getTransactions(blockHash, { size: 1 })
 
@@ -130,18 +130,20 @@ describe('getVins', () => {
 
     const vins = await controller.getVins('0e8ffadf068a4dad100cc6d6c31cd6610a754b01d6e88361955d2070282354b1', transactions.data[0].id, { size: 30 })
 
-    expect(vins).toBeUndefined()
+    expect(vins.data.length).toStrictEqual(0)
+    expect(vins.page).toBeUndefined()
   })
 
-  it('should return undefined if txid is not valid', async () => {
+  it('should return empty page if txid is not valid', async () => {
     const blockHash = await container.call('getblockhash', [100])
 
     const vins = await controller.getVins(blockHash, '9d87a6b6b77323b6dab9d8971fff0bc7a6c341639ebae39891024f4800528532', { size: 30 })
 
-    expect(vins).toBeUndefined()
+    expect(vins.data.length).toStrictEqual(0)
+    expect(vins.page).toBeUndefined()
   })
 
-  it('should return undefined if transaction does not belong to the block', async () => {
+  it('should return empty page if transaction does not belong to the block', async () => {
     const blockHash = await container.call('getblockhash', [100])
     const transactions = await controller.getTransactions(blockHash, { size: 1 })
 
@@ -149,7 +151,8 @@ describe('getVins', () => {
 
     const vins = await controller.getVins(await container.call('getblockhash', [99]), transactions.data[0].id, { size: 30 })
 
-    expect(vins).toBeUndefined()
+    expect(vins.data.length).toStrictEqual(0)
+    expect(vins.page).toBeUndefined()
   })
 })
 
@@ -162,10 +165,10 @@ describe('getVouts', () => {
 
     const vouts = await controller.getVouts(blockHash, transactions.data[0].id, { size: 30 })
 
-    expect(vouts?.data.length).toBeGreaterThanOrEqual(1)
+    expect(vouts.data.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('should return undefined if blockhash is not valid', async () => {
+  it('should return empty page if blockhash is not valid', async () => {
     const blockHash = await container.call('getblockhash', [37])
     const transactions = await controller.getTransactions(blockHash, { size: 1 })
 
@@ -173,18 +176,20 @@ describe('getVouts', () => {
 
     const vouts = await controller.getVouts('0e8ffadf068a4dad100cc6d6c31cd6610a754b01d6e88361955d2070282354b1', transactions.data[0].id, { size: 30 })
 
-    expect(vouts).toBeUndefined()
+    expect(vouts.data.length).toStrictEqual(0)
+    expect(vouts.page).toBeUndefined()
   })
 
-  it('should return undefined if txid is not valid', async () => {
+  it('should return empty page if txid is not valid', async () => {
     const blockHash = await container.call('getblockhash', [37])
 
     const vouts = await controller.getVouts(blockHash, '9d87a6b6b77323b6dab9d8971fff0bc7a6c341639ebae39891024f4800528532', { size: 30 })
 
-    expect(vouts).toBeUndefined()
+    expect(vouts.data.length).toStrictEqual(0)
+    expect(vouts.page).toBeUndefined()
   })
 
-  it('should return undefined if transaction does not belong to the block', async () => {
+  it('should return empty page if transaction does not belong to the block', async () => {
     const blockHash = await container.call('getblockhash', [37])
     const transactions = await controller.getTransactions(blockHash, { size: 1 })
 
@@ -192,7 +197,8 @@ describe('getVouts', () => {
 
     const vouts = await controller.getVouts(await container.call('getblockhash', [99]), transactions.data[0].id, { size: 30 })
 
-    expect(vouts).toBeUndefined()
+    expect(vouts.data.length).toStrictEqual(0)
+    expect(vouts.page).toBeUndefined()
   })
 })
 

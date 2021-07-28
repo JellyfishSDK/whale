@@ -65,48 +65,26 @@ export class BlockController {
   }
 
   @Get('/:hash/transactions/:txid/vins')
-  async getVins (@Param('hash') hash: string, @Param('txid') txid: string, @Query() query: PaginationQuery): Promise<ApiPagedResponse<TransactionVin> | undefined> {
-    if (!isSHA256Hash(hash)) {
-      return
-    }
-
-    const transaction = await this.transactionMapper.get(txid)
-
-    if (transaction === undefined) {
-      return
-    }
-
-    if (transaction.block.hash !== hash) {
-      return
-    }
-
-    const vins = await this.transactionVinMapper.query(txid, query.size)
-
-    return ApiPagedResponse.of(vins, query.size, vin => {
-      return vin.id
+  async getVins (@Param('hash') hash: string, @Param('txid') txid: string, @Query() query: PaginationQuery): Promise<ApiPagedResponse<TransactionVin>> {
+    return ApiPagedResponse.of(await this.getVectors<TransactionVin>(this.transactionVinMapper, hash, txid, query), query.size, vout => {
+      return vout.id
     })
   }
 
   @Get('/:hash/transactions/:txid/vouts')
-  async getVouts (@Param('hash') hash: string, @Param('txid') txid: string, @Query() query: PaginationQuery): Promise<ApiPagedResponse<TransactionVout> | undefined> {
-    if (!isSHA256Hash(hash)) {
-      return
-    }
-
-    const transaction = await this.transactionMapper.get(txid)
-
-    if (transaction === undefined) {
-      return
-    }
-
-    if (transaction.block.hash !== hash) {
-      return
-    }
-
-    const vouts = await this.transactionVoutMapper.query(txid, query.size)
-
-    return ApiPagedResponse.of(vouts, query.size, vout => {
+  async getVouts (@Param('hash') hash: string, @Param('txid') txid: string, @Query() query: PaginationQuery): Promise<ApiPagedResponse<TransactionVout>> {
+    return ApiPagedResponse.of(await this.getVectors<TransactionVout>(this.transactionVoutMapper, hash, txid, query), query.size, vout => {
       return vout.n.toString()
     })
+  }
+
+  async getVectors<T extends TransactionVin | TransactionVout> (mapper: TransactionVinMapper | TransactionVoutMapper, hash: string, txid: string, query: PaginationQuery): Promise<T[]> {
+    const transaction = await this.transactionMapper.get(txid)
+
+    if (isSHA256Hash(hash) && transaction !== undefined && transaction.block.hash === hash) {
+      return await mapper.query(txid, query.size) as T[]
+    }
+
+    return []
   }
 }
