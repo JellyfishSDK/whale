@@ -4,7 +4,7 @@ import { StubService } from '../stub.service'
 import { ApiPagedResponse, WhaleApiClient, WhaleApiException } from '../../src'
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens } from '@defichain/testing'
 import { PoolPairService } from '@src/module.api/poolpair.service'
-import { PoolPairData } from '@whale-api-client/api/poolpair'
+import { PoolPairData } from '../../src/api/poolpairs'
 import waitForExpect from 'wait-for-expect'
 
 let container: MasterNodeRegTestContainer
