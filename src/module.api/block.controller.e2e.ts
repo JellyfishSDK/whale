@@ -122,6 +122,17 @@ describe('getVins', () => {
     expect(vins.data.length).toBeGreaterThanOrEqual(1)
   })
 
+  it('should return list of vins when next is out of range', async () => {
+    const blockHash = await container.call('getblockhash', [100])
+    const transactions = await controller.getTransactions(blockHash, { size: 1 })
+
+    expect(transactions.data.length).toStrictEqual(1)
+
+    const vins = await controller.getVins(blockHash, transactions.data[0].id, { size: 30, next: '100' })
+
+    expect(vins.data.length).toBeGreaterThanOrEqual(1)
+  })
+
   it('should return empty page if blockhash is not valid', async () => {
     const blockHash = await container.call('getblockhash', [100])
     const transactions = await controller.getTransactions(blockHash, { size: 1 })
@@ -164,6 +175,17 @@ describe('getVouts', () => {
     expect(transactions.data.length).toStrictEqual(1)
 
     const vouts = await controller.getVouts(blockHash, transactions.data[0].id, { size: 30 })
+
+    expect(vouts.data.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('should return list of vouts when next is out of range', async () => {
+    const blockHash = await container.call('getblockhash', [100])
+    const transactions = await controller.getTransactions(blockHash, { size: 1 })
+
+    expect(transactions.data.length).toStrictEqual(1)
+
+    const vouts = await controller.getVouts(blockHash, transactions.data[0].id, { size: 30, next: '100' })
 
     expect(vouts.data.length).toBeGreaterThanOrEqual(1)
   })
