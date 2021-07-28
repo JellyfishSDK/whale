@@ -11,6 +11,7 @@ import { Transactions } from './api/transactions'
 import { Tokens } from './api/tokens'
 import { Masternodes } from './api/masternodes'
 import { Blocks } from './api/blocks'
+import { Oracle } from './api/oracle'
 
 /**
  * WhaleApiClient Options
@@ -63,6 +64,7 @@ export class WhaleApiClient {
   public readonly tokens = new Tokens(this)
   public readonly masternodes = new Masternodes(this)
   public readonly blocks = new Blocks(this)
+  public readonly oracle = new Oracle(this)
 
   constructor (
     protected readonly options: WhaleApiClientOptions
