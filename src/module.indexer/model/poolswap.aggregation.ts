@@ -57,9 +57,9 @@ export class PoolSwapAggregationIndexer extends Indexer {
   }
 
   private async getPoolPair (fromTokenId: string, toTokenId: string): Promise<PoolPair | undefined> {
-    const poolpair = await this.poolPairMapper.get(constructPoolId(fromTokenId, toTokenId))
+    const poolpair = await this.poolPairMapper.getLatest(constructPoolId(fromTokenId, toTokenId))
     if (poolpair === undefined) {
-      return await this.poolPairMapper.get(constructPoolId(toTokenId, fromTokenId))
+      return await this.poolPairMapper.getLatest(constructPoolId(toTokenId, fromTokenId))
     }
     return poolpair
   }

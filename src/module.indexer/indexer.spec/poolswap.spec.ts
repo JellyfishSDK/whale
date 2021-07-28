@@ -81,17 +81,20 @@ const dummyScripts = [
 ]
 
 async function setup (): Promise<void> {
-  await put('3', 'BTC-DFI', '1', '0')
-  await put('4', 'BTC-DFI', '2', '0')
+  await put('1-0', 3, '3', 'BTC-DFI')
+  await put('2-0', 4, '4', 'ETH-DFI')
 }
 
-async function put (id: string, symbol: string, tokenA: string, tokenB: string): Promise<void> {
+async function put (
+  symbolId: string, height: number, poolId: string, symbol: string
+): Promise<void> {
   await poolPairMapper.put({
-    id: `${tokenA}-${tokenB}`,
-    poolId: id,
+    id: `${symbolId}-${height}`,
+    symbolId: symbolId,
+    poolId: poolId,
     block: {
       hash: '',
-      height: Number(id)
+      height: height
     },
     symbol: symbol,
     status: true,

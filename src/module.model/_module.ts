@@ -8,6 +8,7 @@ import { TransactionMapper } from '@src/module.model/transaction'
 import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { ModelProbeIndicator } from '@src/module.model/_model.probes'
+import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolSwapAggregationMapper } from '@src/module.model/poolswap.aggregation'
 
 @Global()

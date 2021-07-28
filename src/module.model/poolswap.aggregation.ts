@@ -8,7 +8,7 @@ const PoolSwapAggregationMapping: ModelMapping<PoolSwapAggregation> = {
   type: 'poolswap_aggregation',
   index: {
     poolId_bucketId: {
-      name: 'poolswap_aggregation_poolId_bucketId',
+      name: 'poolswap_aggregation_symbolId_bucketId',
       partition: {
         type: 'string',
         key: (p: PoolSwapAggregation) => p.poolId
