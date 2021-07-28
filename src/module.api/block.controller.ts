@@ -1,6 +1,8 @@
 import { Controller, Get, Param, Query } from '@nestjs/common'
 import { Block, BlockMapper } from '@src/module.model/block'
 import { Transaction, TransactionMapper } from '@src/module.model/transaction'
+import { TransactionVinMapper, TransactionVin } from '@src/module.model/transaction.vin'
+import { TransactionVoutMapper, TransactionVout } from '@src/module.model/transaction.vout'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 
@@ -10,11 +12,20 @@ export function parseHeight (str: string | undefined): number | undefined {
   }
 }
 
+export function isSHA256Hash (str: string | undefined): boolean {
+  if (str === undefined) {
+    return false
+  }
+  return !(str.match(/^[0-f]{64}$/) == null)
+}
+
 @Controller('/blocks')
 export class BlockController {
   constructor (
     protected readonly blockMapper: BlockMapper,
-    protected readonly transactionMapper: TransactionMapper
+    protected readonly transactionMapper: TransactionMapper,
+    protected readonly transactionVinMapper: TransactionVinMapper,
+    protected readonly transactionVoutMapper: TransactionVoutMapper
   ) {
   }
 
@@ -43,13 +54,59 @@ export class BlockController {
 
   @Get('/:hash/transactions')
   async getTransactions (@Param('hash') hash: string, @Query() query: PaginationQuery): Promise<ApiPagedResponse<Transaction>> {
-    if (hash.match(/^[0-f]{64}$/) == null) {
+    if (!isSHA256Hash(hash)) {
       return ApiPagedResponse.empty()
     }
 
     const transactions = await this.transactionMapper.queryByBlockHash(hash, query.size, query.next)
     return ApiPagedResponse.of(transactions, query.size, transaction => {
       return transaction.id
+    })
+  }
+
+  @Get('/:hash/transactions/:txid/vins')
+  async getVins (@Param('hash') hash: string, @Param('txid') txid: string, @Query() query: PaginationQuery): Promise<ApiPagedResponse<TransactionVin> | undefined> {
+    if (!isSHA256Hash(hash)) {
+      return
+    }
+
+    const transaction = await this.transactionMapper.get(txid)
+
+    if (transaction === undefined) {
+      return
+    }
+
+    if (transaction.block.hash !== hash) {
+      return
+    }
+
+    const vins = await this.transactionVinMapper.query(txid, query.size)
+
+    return ApiPagedResponse.of(vins, query.size, vin => {
+      return vin.id
+    })
+  }
+
+  @Get('/:hash/transactions/:txid/vouts')
+  async getVouts (@Param('hash') hash: string, @Param('txid') txid: string, @Query() query: PaginationQuery): Promise<ApiPagedResponse<TransactionVout> | undefined> {
+    if (!isSHA256Hash(hash)) {
+      return
+    }
+
+    const transaction = await this.transactionMapper.get(txid)
+
+    if (transaction === undefined) {
+      return
+    }
+
+    if (transaction.block.hash !== hash) {
+      return
+    }
+
+    const vouts = await this.transactionVoutMapper.query(txid, query.size)
+
+    return ApiPagedResponse.of(vouts, query.size, vout => {
+      return vout.n.toString()
     })
   }
 }
