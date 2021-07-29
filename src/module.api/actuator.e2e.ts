@@ -10,6 +10,7 @@ beforeAll(async () => {
   await container.waitForReady()
   app = await createTestingApp(container)
 
+  await container.generate(3)
   await waitForIndexedHeight(app, 2)
 })
 
@@ -72,6 +73,10 @@ describe('/_actuator/probes/readiness', () => {
           status: 'down'
         },
         model: {
+          count: {
+            defid: expect.any(Number),
+            index: expect.any(Number)
+          },
           status: 'up'
         }
       },
@@ -86,6 +91,10 @@ describe('/_actuator/probes/readiness', () => {
       },
       info: {
         model: {
+          count: {
+            defid: expect.any(Number),
+            index: expect.any(Number)
+          },
           status: 'up'
         }
       },

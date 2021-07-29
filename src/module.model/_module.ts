@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common'
+import { ModelProbeIndicator } from '@src/module.model/_model.probes'
 import { RawBlockMapper } from '@src/module.model/raw.block'
 import { BlockMapper } from '@src/module.model/block'
 import { ScriptActivityMapper } from '@src/module.model/script.activity'
@@ -8,7 +9,6 @@ import { TransactionMapper } from '@src/module.model/transaction'
 import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { PoolPairMapper } from '@src/module.model/poolpair'
-import { ModelProbeIndicator } from '@src/module.model/_model.probes'
 
 @Global()
 @Module({

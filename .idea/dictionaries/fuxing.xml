@@ -124,6 +124,7 @@
       <w>paytxfee</w>
       <w>pooledtx</w>
       <w>poolpair</w>
+      <w>poolpairs</w>
       <w>previousblockhash</w>
       <w>prevout</w>
       <w>prevouts</w>
@@ -167,6 +168,7 @@
       <w>txindex</w>
       <w>txinwitness</w>
       <w>txnotokens</w>
+      <w>txns</w>
       <w>uacomment</w>
       <w>unpkg</w>
       <w>utxo</w>

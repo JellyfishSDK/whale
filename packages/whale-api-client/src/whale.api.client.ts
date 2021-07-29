@@ -1,13 +1,17 @@
 import 'url-search-params-polyfill'
 import AbortController from 'abort-controller'
 import fetch from 'cross-fetch'
+import version from './version'
 import { raiseIfError, WhaleClientException, WhaleClientTimeoutException } from './errors'
-import { WhaleApiResponse, ApiPagedResponse } from './whale.api.response'
+import { ApiPagedResponse, WhaleApiResponse } from './whale.api.response'
 import { Address } from './api/address'
-import { PoolPair } from './api/poolpair'
+import { PoolPairs } from './api/poolpairs'
 import { Rpc } from './api/rpc'
 import { Transactions } from './api/transactions'
 import { Tokens } from './api/tokens'
+import { Masternodes } from './api/masternodes'
+import { Blocks } from './api/blocks'
+import { Oracles } from './api/oracles'
 
 /**
  * WhaleApiClient Options
@@ -24,7 +28,7 @@ export interface WhaleApiClientOptions {
   /**
    * Version of API
    */
-  version?: 'v0'
+  version?: `v${number}.${number}`
 
   /**
    * Network that whale client is configured to
@@ -38,7 +42,7 @@ export interface WhaleApiClientOptions {
 export const DefaultOptions: WhaleApiClientOptions = {
   url: 'https://ocean.defichain.com',
   timeout: 60000,
-  version: 'v0',
+  version: version,
   network: 'mainnet'
 }
 
@@ -53,14 +57,17 @@ export interface ResponseAsString {
 }
 
 export class WhaleApiClient {
-  public readonly address = new Address(this)
-  public readonly poolpair = new PoolPair(this)
   public readonly rpc = new Rpc(this)
+  public readonly address = new Address(this)
+  public readonly poolpairs = new PoolPairs(this)
   public readonly transactions = new Transactions(this)
   public readonly tokens = new Tokens(this)
+  public readonly masternodes = new Masternodes(this)
+  public readonly blocks = new Blocks(this)
+  public readonly oracles = new Oracles(this)
 
   constructor (
-    private readonly options: WhaleApiClientOptions
+    protected readonly options: WhaleApiClientOptions
   ) {
     this.options = Object.assign(DefaultOptions, options ?? {})
     this.options.url = this.options.url.replace(/\/$/, '')

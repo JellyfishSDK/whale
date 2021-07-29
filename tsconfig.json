@@ -8,11 +8,12 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2017",
+    "target": "es2019",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
+    "resolveJsonModule": true,
     "paths": {
       "@src/*": ["src/*"],
       "@whale-api-client/api/*": ["packages/whale-api-client/src/api/*"]

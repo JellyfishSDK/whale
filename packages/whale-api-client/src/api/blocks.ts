@@ -1,0 +1,86 @@
+import { WhaleApiClient } from '../whale.api.client'
+import { ApiPagedResponse } from '../whale.api.response'
+import { Transaction, TransactionVin, TransactionVout } from './transactions'
+
+export class Blocks {
+  constructor (private readonly client: WhaleApiClient) {
+  }
+
+  /**
+   * @param {number} [size=30] size to query
+   * @param {string} [next] next token for next slice of blocks
+   * @return {Promise<ApiPagedResponse<Block>>}
+   */
+  async list (size: number = 30, next?: string): Promise<ApiPagedResponse<Block>> {
+    return await this.client.requestList('GET', 'blocks', size, next)
+  }
+
+  /**
+   * @param {string} id as hash or height of the block
+   * @return {Promise<<Block>}
+   */
+  async get (id: string): Promise<Block> {
+    return await this.client.requestData('GET', `blocks/${id}`)
+  }
+
+  /**
+   * @param {string} hash of the block
+   * @param {number} [size=30] size to query
+   * @param {string} [next] next token for next slice of blocks
+   * @return {Promise<ApiPagedResponse<Transaction>>}
+   */
+  async getTransactions (hash: string, size: number = 30, next?: string): Promise<ApiPagedResponse<Transaction>> {
+    return await this.client.requestList('GET', `blocks/${hash}/transactions`, size, next)
+  }
+
+  /**
+   * @param {string} hash of the block
+   * @param {string} txid of the transaction
+   * @param {number} [size=30] size to query
+   * @param {string} [next] next token for next slice of vins
+   * @return {Promise<ApiPagedResponse<TransactionVin[]>>}
+   */
+  async getVins (hash: string, txid: string, size: number = 30, next?: string): Promise<ApiPagedResponse<TransactionVin>> {
+    return await this.client.requestList('GET', `blocks/${hash}/transactions/${txid}/vins`, size, next)
+  }
+
+  /**
+   * @param {string} hash of the block
+   * @param {string} txid of the transaction
+   * @param {number} [size=30] size to query
+   * @param {string} [next] next token for next slice of vouts
+   * @return {Promise<ApiPagedResponse<TransactionVin[]>>}
+   */
+  async getVouts (hash: string, txid: string, size: number = 30, next?: string): Promise<ApiPagedResponse<TransactionVout>> {
+    return await this.client.requestList('GET', `blocks/${hash}/transactions/${txid}/vouts`, size, next)
+  }
+}
+
+/**
+ * Information about a block in the best chain.
+ */
+export interface Block {
+  id: string // ----------------| unique id of the block, same as the hash
+  hash: string
+  previousHash: string
+
+  height: number
+  version: number
+  time: number // --------------| block time in seconds since epoch
+  medianTime: number // --------| median time of the past 11 block timestamps
+
+  transactionCount: number
+
+  difficulty: number // --------| difficulty of the block.
+
+  masternode: string
+  minter: string
+  minterBlockCount: number
+
+  stakeModifier: string
+  merkleroot: string
+
+  size: number // --------------| block size in bytes
+  sizeStripped: number // ------| block size in bytes, excluding witness data.
+  weight: number // ------------| block weight as defined in BIP 141
+}
