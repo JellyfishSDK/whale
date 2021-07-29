@@ -33,7 +33,9 @@ export class PoolPairIndexer extends Indexer {
 
           const rpcPoolPair = await this.client.poolpair.getPoolPair(symbol)
 
-          if (Object.keys(rpcPoolPair).length !== 1) throw new RpcItemLengthError('poolpair')
+          if (Object.keys(rpcPoolPair).length !== 1) {
+            throw new RpcItemLengthError('poolpair')
+          }
 
           const poolId = Object.keys(rpcPoolPair)[0]
 
@@ -57,7 +59,9 @@ export class PoolPairIndexer extends Indexer {
 
           const rpcPoolPair = await this.client.poolpair.getPoolPair(data.poolId.toString())
 
-          if (Object.keys(rpcPoolPair).length !== 1) throw new RpcItemLengthError('poolpair')
+          if (Object.keys(rpcPoolPair).length !== 1) {
+            throw new RpcItemLengthError('poolpair')
+          }
 
           const poolId = Object.keys(rpcPoolPair)[0]
           const symbol = rpcPoolPair[poolId].symbol
@@ -104,7 +108,9 @@ export class PoolPairIndexer extends Indexer {
           const rpcPoolPair = await this.client.poolpair.getPoolPair(data.poolId.toString())
 
           // extra guard
-          if (Object.keys(rpcPoolPair).length !== 1) throw new RpcItemLengthError('poolpair')
+          if (Object.keys(rpcPoolPair).length !== 1) {
+            throw new RpcItemLengthError('poolpair')
+          }
 
           const poolId = Object.keys(rpcPoolPair)[0]
           const tokenA = rpcPoolPair[poolId].idTokenA
