@@ -26,7 +26,7 @@ export class OracleController {
     })
   }
 
-  @Get('/oracles/:oracleId/:key')
+  @Get('/oracles/:oracleId/:key/prices')
   async listOraclePrices (
     @Param('oracleId') oracleId: string,
       @Param('key') key: string,
@@ -37,6 +37,8 @@ export class OracleController {
       return item.sort
     })
   }
+
+  // TODO(fuxingloh): more endpoint
 
   @Get('/prices/:key/aggregated')
   async listPriceAggregated (

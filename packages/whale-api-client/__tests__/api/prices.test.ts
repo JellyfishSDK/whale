@@ -30,8 +30,8 @@ afterAll(async () => {
   }
 })
 
-describe('oracles', () => {
+describe('prices', () => {
   beforeAll(() => {
-    // TODO(fuxingloh): test oracles
+    // TODO(fuxingloh): test prices
   })
 })
