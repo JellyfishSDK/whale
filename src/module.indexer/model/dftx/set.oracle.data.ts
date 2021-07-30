@@ -61,7 +61,7 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
   }
 
   private async mapPriceAggregated (block: RawBlock, token: string, currency: string): Promise<OraclePriceAggregated | undefined> {
-    const tokenCurrencies = await this.tokenCurrencyMapper.query(`${token}-${currency}`, Number.MAX_SAFE_INTEGER)
+    const oracles = await this.tokenCurrencyMapper.query(`${token}-${currency}`, Number.MAX_SAFE_INTEGER)
 
     const aggregated = {
       total: new BigNumber(0),
@@ -69,8 +69,11 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
       weightage: 0
     }
 
-    for (const tokenCurrency of tokenCurrencies) {
-      const key = `${token}-${currency}-${tokenCurrency.oracleId}`
+    for (const oracle of oracles) {
+      if (oracle.weightage === 0) {
+        continue
+      }
+      const key = `${token}-${currency}-${oracle.oracleId}`
       const feeds = await this.feedMapper.query(key, 1)
       if (feeds.length === 0) {
         continue
@@ -79,8 +82,8 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
       // one hour -/+ time frame
       if (Math.abs(feeds[0].time - block.time) < 3600) {
         aggregated.count += 1
-        aggregated.weightage = tokenCurrency.weightage
-        aggregated.total.plus(new BigNumber(feeds[0].amount))
+        aggregated.weightage += oracle.weightage
+        aggregated.total.plus(new BigNumber(feeds[0].amount).multipliedBy(oracle.weightage))
       }
     }
 
