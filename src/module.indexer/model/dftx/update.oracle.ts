@@ -29,9 +29,9 @@ export class UpdateOracleIndexer extends DfTxIndexer<UpdateOracle> {
         block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
       })
 
-      const previous = await this.getPrevious(block, data.oracleId)
+      const previous = await this.getPrevious(data.oracleId)
       for (const { token, currency } of previous.priceFeeds) {
-        await this.oracleTokenCurrencyMapper.delete(`${token}-${currency}-${previous.oracleId}`)
+        await this.oracleTokenCurrencyMapper.delete(`${token}-${currency}-${data.oracleId}`)
       }
 
       for (const { token, currency } of data.priceFeeds) {
@@ -65,7 +65,7 @@ export class UpdateOracleIndexer extends DfTxIndexer<UpdateOracle> {
         await this.oracleTokenCurrencyMapper.delete(`${token}-${currency}-${data.oracleId}`)
       }
 
-      const previous = await this.getPrevious(block, data.oracleId)
+      const previous = await this.getPrevious(data.oracleId)
 
       await this.oracleMapper.put({
         id: previous.oracleId,
@@ -91,9 +91,8 @@ export class UpdateOracleIndexer extends DfTxIndexer<UpdateOracle> {
   /**
    * Get previous oracle before current height
    */
-  private async getPrevious (block: RawBlock, oracleId: string): Promise<OracleHistory> {
-    const sort = HexEncoder.encodeHeight(block.height) + 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-    const histories = await this.oracleHistoryMapper.query(oracleId, 1, sort)
+  private async getPrevious (oracleId: string): Promise<OracleHistory> {
+    const histories = await this.oracleHistoryMapper.query(oracleId, 1)
     if (histories.length === 0) {
       throw new NotFoundIndexerError('index', 'OracleHistory', oracleId)
     }
