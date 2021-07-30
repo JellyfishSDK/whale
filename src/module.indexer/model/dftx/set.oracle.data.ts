@@ -90,7 +90,7 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
       if (Math.abs(feeds[0].time - block.time) < 3600) {
         aggregated.count += 1
         aggregated.weightage += oracle.weightage
-        aggregated.total.plus(new BigNumber(feeds[0].amount).multipliedBy(oracle.weightage))
+        aggregated.total = aggregated.total.plus(new BigNumber(feeds[0].amount).multipliedBy(oracle.weightage))
       }
     }
 

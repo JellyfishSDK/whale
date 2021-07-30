@@ -7,7 +7,7 @@ const PriceTickerMapping: ModelMapping<PriceTicker> = {
   type: 'price_ticker',
   index: {
     sort: {
-      name: 'price_ticker',
+      name: 'price_ticker_sort',
       partition: {
         type: 'string',
         key: (b: PriceTicker) => b.sort
@@ -33,8 +33,8 @@ export class PriceTickerMapper {
     return await this.database.get(PriceTickerMapping, id)
   }
 
-  async put (oracle: PriceTicker): Promise<void> {
-    return await this.database.put(PriceTickerMapping, oracle)
+  async put (price: PriceTicker): Promise<void> {
+    return await this.database.put(PriceTickerMapping, price)
   }
 
   async delete (id: string): Promise<void> {
