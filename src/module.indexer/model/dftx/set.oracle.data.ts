@@ -1,4 +1,4 @@
-import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx.indexer'
+import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
 import { CSetOracleData, SetOracleData } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable } from '@nestjs/common'

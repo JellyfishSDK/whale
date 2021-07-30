@@ -1,5 +1,4 @@
-import { blockchain } from '@defichain/jellyfish-api-core'
-import { DfTx, OP_DEFI_TX, OPCode } from '@defichain/jellyfish-transaction'
+import { OP_DEFI_TX, OPCode } from '@defichain/jellyfish-transaction'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
 import { SmartBuffer } from 'smart-buffer'
@@ -8,19 +7,7 @@ import { RemoveOracleIndexer } from '@src/module.indexer/model/dftx/remove.oracl
 import { UpdateOracleIndexer } from '@src/module.indexer/model/dftx/update.oracle'
 import { SetOracleDataIndexer } from '@src/module.indexer/model/dftx/set.oracle.data'
 import { Injectable } from '@nestjs/common'
-
-export abstract class DfTxIndexer<T> {
-  abstract OP_CODE: number
-
-  abstract index (block: RawBlock, txns: Array<DfTxTransaction<T>>): Promise<void>
-
-  abstract invalidate (block: RawBlock, txns: Array<DfTxTransaction<T>>): Promise<void>
-}
-
-export interface DfTxTransaction<T> {
-  txn: blockchain.Transaction
-  dftx: DfTx<T>
-}
+import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
@@ -35,8 +22,8 @@ export class MainDfTxIndexer extends Indexer {
     super()
     this.indexers = [
       appointOracle,
-      removeOracle,
       updateOracle,
+      removeOracle,
       setOracleData
     ]
   }
@@ -65,7 +52,7 @@ function getDfTxTransactions (block: RawBlock): Array<DfTxTransaction<any>> {
 
   for (const txn of block.tx) {
     for (const vout of txn.vout) {
-      if (!vout.scriptPubKey.hex.startsWith('OP_RETURN 44665478')) {
+      if (!vout.scriptPubKey.asm.startsWith('OP_RETURN 44665478')) {
         continue
       }
 

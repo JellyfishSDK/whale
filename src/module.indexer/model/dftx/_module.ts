@@ -4,13 +4,16 @@ import { RemoveOracleIndexer } from '@src/module.indexer/model/dftx/remove.oracl
 import { UpdateOracleIndexer } from '@src/module.indexer/model/dftx/update.oracle'
 import { SetOracleDataIndexer } from '@src/module.indexer/model/dftx/set.oracle.data'
 
+const indexers = [
+  AppointOracleIndexer,
+  RemoveOracleIndexer,
+  SetOracleDataIndexer,
+  UpdateOracleIndexer
+]
+
 @Module({
-  providers: [
-    AppointOracleIndexer,
-    RemoveOracleIndexer,
-    SetOracleDataIndexer,
-    UpdateOracleIndexer
-  ]
+  providers: indexers,
+  exports: indexers
 })
 export class DfTxIndexerModule {
 }
