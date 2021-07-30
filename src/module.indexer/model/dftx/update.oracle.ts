@@ -29,15 +29,6 @@ export class UpdateOracleIndexer extends DfTxIndexer<UpdateOracle> {
         block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
       })
 
-      await this.oracleHistoryMapper.put({
-        id: `${data.oracleId}-${block.height}-${txn.txid}`,
-        sort: HexEncoder.encodeHeight(block.height) + txn.txid,
-        oracleId: data.oracleId,
-        weightage: data.weightage,
-        priceFeeds: data.priceFeeds,
-        block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
-      })
-
       const previous = await this.getPrevious(block, data.oracleId)
       for (const { token, currency } of previous.priceFeeds) {
         await this.oracleTokenCurrencyMapper.delete(`${token}-${currency}-${previous.oracleId}`)
@@ -54,6 +45,15 @@ export class UpdateOracleIndexer extends DfTxIndexer<UpdateOracle> {
           block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
         })
       }
+
+      await this.oracleHistoryMapper.put({
+        id: `${data.oracleId}-${block.height}-${txn.txid}`,
+        sort: HexEncoder.encodeHeight(block.height) + txn.txid,
+        oracleId: data.oracleId,
+        weightage: data.weightage,
+        priceFeeds: data.priceFeeds,
+        block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
+      })
     }
   }
 
@@ -92,7 +92,7 @@ export class UpdateOracleIndexer extends DfTxIndexer<UpdateOracle> {
    * Get previous oracle before current height
    */
   private async getPrevious (block: RawBlock, oracleId: string): Promise<OracleHistory> {
-    const sort = HexEncoder.encodeHeight(block.height) + '0000000000000000000000000000000000000000000000000000000000000000'
+    const sort = HexEncoder.encodeHeight(block.height) + 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
     const histories = await this.oracleHistoryMapper.query(oracleId, 1, sort)
     if (histories.length === 0) {
       throw new NotFoundIndexerError('index', 'OracleHistory', oracleId)
