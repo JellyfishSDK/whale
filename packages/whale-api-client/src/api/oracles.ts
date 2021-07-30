@@ -14,7 +14,7 @@ export class Oracles {
 
   async getPriceFeed (oracleId: string, token: string, currency: string, size: number = 30, next?: string): Promise<ApiPagedResponse<OraclePriceFeed>> {
     const key = `${token}-${currency}`
-    return await this.client.requestList('GET', `oracles/${oracleId}/${key}/prices`, size, next)
+    return await this.client.requestList('GET', `oracles/${oracleId}/${key}/feed`, size, next)
   }
 }
 

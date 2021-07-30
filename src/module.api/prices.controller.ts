@@ -1,47 +1,38 @@
 import { Controller, Get, Param, Query } from '@nestjs/common'
-import { Oracle, OracleMapper } from '@src/module.model/oracle'
-import { OraclePriceFeed, OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 import { OraclePriceAggregated, OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
 import { OracleTokenCurrency, OracleTokenCurrencyMapper } from '@src/module.model/oracle.token.currency'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
+import { PriceTicker, PriceTickerMapper } from '@src/module.model/price.ticker'
 
-@Controller()
-export class OracleController {
+@Controller('/prices')
+export class PricesController {
   constructor (
-    protected readonly oracleMapper: OracleMapper,
     protected readonly oraclePriceAggregatedMapper: OraclePriceAggregatedMapper,
-    protected readonly oraclePriceFeedMapper: OraclePriceFeedMapper,
-    protected readonly oracleTokenCurrencyMapper: OracleTokenCurrencyMapper
+    protected readonly oracleTokenCurrencyMapper: OracleTokenCurrencyMapper,
+    protected readonly priceTickerMapper: PriceTickerMapper
   ) {
   }
 
-  @Get('/oracles')
-  async listOracle (
+  @Get()
+  async list (
     @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<Oracle>> {
-    const items = await this.oracleMapper.query(query.size, query.next)
-    return ApiPagedResponse.of(items, query.size, item => {
-      return item.id
-    })
-  }
-
-  @Get('/oracles/:oracleId/:key/prices')
-  async listOraclePrices (
-    @Param('oracleId') oracleId: string,
-      @Param('key') key: string,
-      @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<OraclePriceFeed>> {
-    const items = await this.oraclePriceFeedMapper.query(`${key}-${oracleId}`, query.size, query.next)
+  ): Promise<ApiPagedResponse<PriceTicker>> {
+    const items = await this.priceTickerMapper.query(query.size, query.next)
     return ApiPagedResponse.of(items, query.size, item => {
       return item.sort
     })
   }
 
-  // TODO(fuxingloh): more endpoint
+  @Get('/:key')
+  async get (
+    @Param('key') key: string
+  ): Promise<PriceTicker | undefined> {
+    return await this.priceTickerMapper.get(key)
+  }
 
-  @Get('/prices/:key/aggregated')
-  async listPriceAggregated (
+  @Get('/:key/feed')
+  async getFeed (
     @Param('key') key: string,
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<OraclePriceAggregated>> {
@@ -51,7 +42,7 @@ export class OracleController {
     })
   }
 
-  @Get('/prices/:key/oracles')
+  @Get('/:key/oracles')
   async listPriceOracles (
     @Param('key') key: string,
       @Query() query: PaginationQuery

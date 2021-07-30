@@ -7,6 +7,7 @@ import { OraclePriceFeed, OraclePriceFeedMapper } from '@src/module.model/oracle
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { OracleTokenCurrencyMapper } from '@src/module.model/oracle.token.currency'
 import BigNumber from 'bignumber.js'
+import { PriceTickerMapper } from '@src/module.model/price.ticker'
 
 @Injectable()
 export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
@@ -15,7 +16,8 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
   constructor (
     private readonly feedMapper: OraclePriceFeedMapper,
     private readonly aggregatedMapper: OraclePriceAggregatedMapper,
-    private readonly tokenCurrencyMapper: OracleTokenCurrencyMapper
+    private readonly tokenCurrencyMapper: OracleTokenCurrencyMapper,
+    private readonly priceTickerMapper: PriceTickerMapper
   ) {
     super()
   }
@@ -36,6 +38,11 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
       }
 
       await this.aggregatedMapper.put(aggregated)
+      await this.priceTickerMapper.put({
+        id: aggregated.key,
+        sort: HexEncoder.encodeHeight(aggregated.aggregated.oracles.total) + HexEncoder.encodeHeight(aggregated.block.height) + aggregated.key,
+        price: aggregated
+      })
     }
   }
 
@@ -95,8 +102,11 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
       block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
       aggregated: {
         amount: aggregated.total.dividedBy(aggregated.weightage).toFixed(8),
-        count: aggregated.count,
-        weightage: aggregated.weightage
+        weightage: aggregated.weightage,
+        oracles: {
+          active: aggregated.count,
+          total: oracles.length
+        }
       },
       currency: currency,
       token: token,
@@ -117,6 +127,7 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
 
     for (const [token, currency] of pairs) {
       await this.aggregatedMapper.delete(`${token}-${currency}-${block.height}`)
+      // price ticker won't be deleted
     }
   }
 }

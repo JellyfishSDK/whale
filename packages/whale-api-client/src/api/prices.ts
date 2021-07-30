@@ -8,7 +8,7 @@ export class Prices {
   constructor (private readonly client: WhaleApiClient) {
   }
 
-  async list (size: number = 30, next?: string): Promise<PriceTicker> {
+  async list (size: number = 30, next?: string): Promise<ApiPagedResponse<PriceTicker>> {
     return await this.client.requestList('GET', 'prices', size, next)
   }
 
@@ -29,7 +29,9 @@ export class Prices {
 }
 
 export interface PriceTicker {
-  // TODO(fuxingloh):
+  id: string
+  sort: string
+  price: PriceFeed
 }
 
 export interface PriceFeed {
@@ -42,8 +44,11 @@ export interface PriceFeed {
 
   aggregated: {
     amount: string
-    count: number
     weightage: number
+    oracles: {
+      active: number
+      total: number
+    }
   }
 
   block: {
