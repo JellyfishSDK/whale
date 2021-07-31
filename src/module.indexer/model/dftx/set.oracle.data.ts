@@ -3,6 +3,13 @@ import { CSetOracleData, SetOracleData } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable } from '@nestjs/common'
 import { OraclePriceAggregated, OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
+import {
+  OraclePriceAggregatedInterval10Mapper,
+  OraclePriceAggregatedInterval20Mapper,
+  OraclePriceAggregatedInterval120Mapper,
+  OraclePriceAggregatedInterval2880Mapper,
+  OraclePriceAggregatedIntervalMapper
+} from '@src/module.model/oracle.price.aggregated.interval'
 import { OraclePriceFeed, OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { OracleTokenCurrencyMapper } from '@src/module.model/oracle.token.currency'
@@ -12,14 +19,26 @@ import { PriceTickerMapper } from '@src/module.model/price.ticker'
 @Injectable()
 export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
   OP_CODE: number = CSetOracleData.OP_CODE
+  intervalMappers: OraclePriceAggregatedIntervalMapper[]
 
   constructor (
     private readonly feedMapper: OraclePriceFeedMapper,
     private readonly aggregatedMapper: OraclePriceAggregatedMapper,
+    private readonly aggregatedMapper10: OraclePriceAggregatedInterval10Mapper,
+    private readonly aggregatedMapper20: OraclePriceAggregatedInterval20Mapper,
+    private readonly aggregatedMapper120: OraclePriceAggregatedInterval120Mapper,
+    private readonly aggregatedMapper2880: OraclePriceAggregatedInterval2880Mapper,
     private readonly tokenCurrencyMapper: OracleTokenCurrencyMapper,
     private readonly priceTickerMapper: PriceTickerMapper
   ) {
     super()
+
+    this.intervalMappers = [
+      aggregatedMapper10,
+      aggregatedMapper20,
+      aggregatedMapper120,
+      aggregatedMapper2880
+    ]
   }
 
   async index (block: RawBlock, txns: Array<DfTxTransaction<SetOracleData>>): Promise<void> {
@@ -38,6 +57,12 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
       }
 
       await this.aggregatedMapper.put(aggregated)
+      for (const intervalMapper of this.intervalMappers) {
+        if (block.height % intervalMapper.interval === 0) {
+          await intervalMapper.put(aggregated)
+        }
+      }
+
       await this.priceTickerMapper.put({
         id: aggregated.key,
         sort: HexEncoder.encodeHeight(aggregated.aggregated.oracles.total) + HexEncoder.encodeHeight(aggregated.block.height) + aggregated.key,
@@ -127,6 +152,11 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
 
     for (const [token, currency] of pairs) {
       await this.aggregatedMapper.delete(`${token}-${currency}-${block.height}`)
+      for (const intervalMapper of this.intervalMappers) {
+        if (block.height % intervalMapper.interval === 0) {
+          await intervalMapper.delete(`${token}-${currency}-${block.height}`)
+        }
+      }
       // price ticker won't be deleted
     }
   }
