@@ -10,6 +10,12 @@ import { TransactionVinMapper } from '@src/module.model/transaction.vin'
 import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { OracleHistoryMapper } from '@src/module.model/oracle.history'
 import { OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
+import {
+  OraclePriceAggregatedInterval10Mapper,
+  OraclePriceAggregatedInterval20Mapper,
+  OraclePriceAggregatedInterval120Mapper,
+  OraclePriceAggregatedInterval2880Mapper
+} from '@src/module.model/oracle.price.aggregated.interval'
 import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 import { OracleTokenCurrencyMapper } from '@src/module.model/oracle.token.currency'
 import { OracleMapper } from '@src/module.model/oracle'
@@ -29,6 +35,10 @@ import { PriceTickerMapper } from '@src/module.model/price.ticker'
     TransactionVoutMapper,
     OracleHistoryMapper,
     OraclePriceAggregatedMapper,
+    OraclePriceAggregatedInterval10Mapper,
+    OraclePriceAggregatedInterval20Mapper,
+    OraclePriceAggregatedInterval120Mapper,
+    OraclePriceAggregatedInterval2880Mapper,
     OraclePriceFeedMapper,
     OracleTokenCurrencyMapper,
     OracleMapper,
@@ -46,6 +56,10 @@ import { PriceTickerMapper } from '@src/module.model/price.ticker'
     TransactionVoutMapper,
     OracleHistoryMapper,
     OraclePriceAggregatedMapper,
+    OraclePriceAggregatedInterval10Mapper,
+    OraclePriceAggregatedInterval20Mapper,
+    OraclePriceAggregatedInterval120Mapper,
+    OraclePriceAggregatedInterval2880Mapper,
     OraclePriceFeedMapper,
     OracleTokenCurrencyMapper,
     OracleMapper,

@@ -4,11 +4,11 @@ import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable } from '@nestjs/common'
 import { OraclePriceAggregated, OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
 import {
+  OraclePriceAggregatedIntervalMapper,
   OraclePriceAggregatedInterval10Mapper,
   OraclePriceAggregatedInterval20Mapper,
   OraclePriceAggregatedInterval120Mapper,
-  OraclePriceAggregatedInterval2880Mapper,
-  OraclePriceAggregatedIntervalMapper
+  OraclePriceAggregatedInterval2880Mapper
 } from '@src/module.model/oracle.price.aggregated.interval'
 import { OraclePriceFeed, OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 import { HexEncoder } from '@src/module.model/_hex.encoder'

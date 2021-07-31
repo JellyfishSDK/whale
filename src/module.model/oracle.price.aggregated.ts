@@ -2,7 +2,7 @@ import { Model, ModelMapping } from '@src/module.database/model'
 import { Injectable } from '@nestjs/common'
 import { Database, SortOrder } from '@src/module.database/database'
 
-export const OraclePriceAggregatedMapping: ModelMapping<OraclePriceAggregated> = {
+const OraclePriceAggregatedMapping: ModelMapping<OraclePriceAggregated> = {
   type: 'oracle_price_aggregated',
   index: {
     key_sort: {

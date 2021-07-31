@@ -7,6 +7,7 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, invalidateFromHeight, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 import { OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
+import { OraclePriceAggregatedInterval10Mapper, OraclePriceAggregatedInterval20Mapper } from '@src/module.model/oracle.price.aggregated.interval'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -347,5 +348,36 @@ describe('invalidate set oracle data', () => {
       const as2 = await app.get(OraclePriceAggregatedMapper).query('S2-USD2', Number.MAX_SAFE_INTEGER)
       expect(as2.length).toStrictEqual(1)
     }
+  })
+})
+
+describe('interval set oracle data', () => {
+  it('should get interval', async () => {
+    const address = await container.getNewAddress()
+    const oracleId = await client.oracle.appointOracle(address, [
+      { token: 'S1', currency: 'USD' }
+    ], {
+      weightage: 1
+    })
+    await container.generate(1)
+
+    for (let i = 0; i < 100; i++) {
+      await client.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
+        prices: [
+          { tokenAmount: '1.0@S1', currency: 'USD' }
+        ]
+      })
+      await container.generate(1)
+    }
+
+    const height = await container.getBlockCount()
+    await container.generate(1)
+    await waitForIndexedHeight(app, height)
+
+    const interval10 = await app.get(OraclePriceAggregatedInterval10Mapper).query('S1-USD', Number.MAX_SAFE_INTEGER)
+    expect(interval10.length).toStrictEqual(100 / 10)
+
+    const interval20 = await app.get(OraclePriceAggregatedInterval20Mapper).query('S1-USD', Number.MAX_SAFE_INTEGER)
+    expect(interval20.length).toStrictEqual(100 / 20)
   })
 })
