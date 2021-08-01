@@ -31,7 +31,7 @@ export interface OraclePriceAggregatedIntervalMapper {
 // 5-minutes
 export class OraclePriceAggregatedInterval5MinuteMapper extends OraclePriceAggregatedMapper
   implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = 5 * 60 * 1000
+  public readonly interval: number = 5 * 60
   public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
 
   async query (key: string, limit: number, lt?: string): Promise<OraclePriceAggregated[]> {
@@ -56,7 +56,7 @@ export class OraclePriceAggregatedInterval5MinuteMapper extends OraclePriceAggre
 @Injectable()
 export class OraclePriceAggregatedInterval10MinuteMapper extends OraclePriceAggregatedInterval5MinuteMapper
   implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = 10 * 60 * 1000
+  public readonly interval: number = 10 * 60
   public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
 }
 
@@ -64,7 +64,7 @@ export class OraclePriceAggregatedInterval10MinuteMapper extends OraclePriceAggr
 @Injectable()
 export class OraclePriceAggregatedInterval1HourMapper extends OraclePriceAggregatedInterval5MinuteMapper
   implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = 60 * 60 * 1000
+  public readonly interval: number = 60 * 60
   public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
 }
 
@@ -72,6 +72,6 @@ export class OraclePriceAggregatedInterval1HourMapper extends OraclePriceAggrega
 @Injectable()
 export class OraclePriceAggregatedInterval1DayMapper extends OraclePriceAggregatedInterval5MinuteMapper
   implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = 24 * 60 * 60 * 1000
+  public readonly interval: number = 24 * 60 * 60
   public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
 }
