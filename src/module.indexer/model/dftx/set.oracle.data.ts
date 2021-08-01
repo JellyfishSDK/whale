@@ -59,11 +59,7 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
       await this.aggregatedMapper.put(aggregated)
       for (const intervalMapper of this.intervalMappers) {
         const previous = await intervalMapper.query(`${token}-${currency}`, 1)
-        if (previous.length === 0) {
-          continue
-        }
-
-        if ((previous[0].block.medianTime + intervalMapper.interval) <= block.mediantime) {
+        if (previous.length === 0 || (previous[0].block.medianTime + intervalMapper.interval) <= block.mediantime) {
           await intervalMapper.put(aggregated)
         }
       }
