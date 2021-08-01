@@ -154,9 +154,8 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
     for (const [token, currency] of pairs) {
       await this.aggregatedMapper.delete(`${token}-${currency}-${block.height}`)
       for (const intervalMapper of this.intervalMappers) {
-        if (block.height % intervalMapper.interval === 0) {
-          await intervalMapper.delete(`${token}-${currency}-${block.height}`)
-        }
+        // In this case just always delete, if it exists
+        await intervalMapper.delete(`${token}-${currency}-${block.height}`)
       }
       // price ticker won't be deleted
     }
