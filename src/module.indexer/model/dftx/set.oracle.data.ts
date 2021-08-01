@@ -5,10 +5,10 @@ import { Injectable } from '@nestjs/common'
 import { OraclePriceAggregated, OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
 import {
   OraclePriceAggregatedIntervalMapper,
-  OraclePriceAggregatedInterval10Mapper,
-  OraclePriceAggregatedInterval20Mapper,
-  OraclePriceAggregatedInterval120Mapper,
-  OraclePriceAggregatedInterval2880Mapper
+  OraclePriceAggregatedInterval5MinuteMapper,
+  OraclePriceAggregatedInterval10MinuteMapper,
+  OraclePriceAggregatedInterval1HourMapper,
+  OraclePriceAggregatedInterval1DayMapper
 } from '@src/module.model/oracle.price.aggregated.interval'
 import { OraclePriceFeed, OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
@@ -24,20 +24,20 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
   constructor (
     private readonly feedMapper: OraclePriceFeedMapper,
     private readonly aggregatedMapper: OraclePriceAggregatedMapper,
-    private readonly aggregatedMapper10: OraclePriceAggregatedInterval10Mapper,
-    private readonly aggregatedMapper20: OraclePriceAggregatedInterval20Mapper,
-    private readonly aggregatedMapper120: OraclePriceAggregatedInterval120Mapper,
-    private readonly aggregatedMapper2880: OraclePriceAggregatedInterval2880Mapper,
+    private readonly aggregatedMapper5Minutes: OraclePriceAggregatedInterval5MinuteMapper,
+    private readonly aggregatedMapper10Minutes: OraclePriceAggregatedInterval10MinuteMapper,
+    private readonly aggregatedMapper1Hour: OraclePriceAggregatedInterval1HourMapper,
+    private readonly aggregatedMapper1Day: OraclePriceAggregatedInterval1DayMapper,
     private readonly tokenCurrencyMapper: OracleTokenCurrencyMapper,
     private readonly priceTickerMapper: PriceTickerMapper
   ) {
     super()
 
     this.intervalMappers = [
-      aggregatedMapper10,
-      aggregatedMapper20,
-      aggregatedMapper120,
-      aggregatedMapper2880
+      aggregatedMapper5Minutes,
+      aggregatedMapper10Minutes,
+      aggregatedMapper1Hour,
+      aggregatedMapper1Day
     ]
   }
 
@@ -58,7 +58,12 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
 
       await this.aggregatedMapper.put(aggregated)
       for (const intervalMapper of this.intervalMappers) {
-        if (block.height % intervalMapper.interval === 0) {
+        const previous = await intervalMapper.query(`${token}-${currency}`, 1)
+        if (previous.length === 0) {
+          continue
+        }
+
+        if ((previous[0].block.medianTime + intervalMapper.interval) <= block.mediantime) {
           await intervalMapper.put(aggregated)
         }
       }

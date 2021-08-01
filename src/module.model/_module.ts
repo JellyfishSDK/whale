@@ -11,10 +11,10 @@ import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { OracleHistoryMapper } from '@src/module.model/oracle.history'
 import { OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
 import {
-  OraclePriceAggregatedInterval10Mapper,
-  OraclePriceAggregatedInterval20Mapper,
-  OraclePriceAggregatedInterval120Mapper,
-  OraclePriceAggregatedInterval2880Mapper
+  OraclePriceAggregatedInterval5MinuteMapper,
+  OraclePriceAggregatedInterval10MinuteMapper,
+  OraclePriceAggregatedInterval1HourMapper,
+  OraclePriceAggregatedInterval1DayMapper
 } from '@src/module.model/oracle.price.aggregated.interval'
 import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 import { OracleTokenCurrencyMapper } from '@src/module.model/oracle.token.currency'
@@ -35,10 +35,10 @@ import { PriceTickerMapper } from '@src/module.model/price.ticker'
     TransactionVoutMapper,
     OracleHistoryMapper,
     OraclePriceAggregatedMapper,
-    OraclePriceAggregatedInterval10Mapper,
-    OraclePriceAggregatedInterval20Mapper,
-    OraclePriceAggregatedInterval120Mapper,
-    OraclePriceAggregatedInterval2880Mapper,
+    OraclePriceAggregatedInterval5MinuteMapper,
+    OraclePriceAggregatedInterval10MinuteMapper,
+    OraclePriceAggregatedInterval1HourMapper,
+    OraclePriceAggregatedInterval1DayMapper,
     OraclePriceFeedMapper,
     OracleTokenCurrencyMapper,
     OracleMapper,
@@ -56,10 +56,10 @@ import { PriceTickerMapper } from '@src/module.model/price.ticker'
     TransactionVoutMapper,
     OracleHistoryMapper,
     OraclePriceAggregatedMapper,
-    OraclePriceAggregatedInterval10Mapper,
-    OraclePriceAggregatedInterval20Mapper,
-    OraclePriceAggregatedInterval120Mapper,
-    OraclePriceAggregatedInterval2880Mapper,
+    OraclePriceAggregatedInterval5MinuteMapper,
+    OraclePriceAggregatedInterval10MinuteMapper,
+    OraclePriceAggregatedInterval1HourMapper,
+    OraclePriceAggregatedInterval1DayMapper,
     OraclePriceFeedMapper,
     OracleTokenCurrencyMapper,
     OracleMapper,

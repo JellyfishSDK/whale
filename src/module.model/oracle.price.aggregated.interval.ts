@@ -3,13 +3,6 @@ import { SortOrder } from '@src/module.database/database'
 import { ModelMapping } from '@src/module.database/model'
 import { OraclePriceAggregated, OraclePriceAggregatedMapper } from './oracle.price.aggregated'
 
-/**
- * Assuming 30 second blocks, these classic provide a rough interval in which
- * prices are mapped, they are post-fixed by the block count interval
- *
- * e.g. OraclePriceAggregatedInverval10Mapper refers to a 5-minute interval
- */
-
 const getOraclePriceAggregatedIntervalMapping = (interval: number): ModelMapping<OraclePriceAggregated> => ({
   type: `oracle_price_aggregated_${interval}`,
   index: {
@@ -30,14 +23,15 @@ const getOraclePriceAggregatedIntervalMapping = (interval: number): ModelMapping
 // interface
 export interface OraclePriceAggregatedIntervalMapper {
   readonly interval: number
+  query: (key: string, limit: number, lt?: string) => Promise<OraclePriceAggregated[]>
   put: (aggregated: OraclePriceAggregated) => Promise<void>
   delete: (id: string) => Promise<void>
 }
 
 // 5-minutes
-export class OraclePriceAggregatedInterval10Mapper extends OraclePriceAggregatedMapper
+export class OraclePriceAggregatedInterval5MinuteMapper extends OraclePriceAggregatedMapper
   implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = 10
+  public readonly interval: number = 5 * 60 * 1000
   public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
 
   async query (key: string, limit: number, lt?: string): Promise<OraclePriceAggregated[]> {
@@ -60,24 +54,24 @@ export class OraclePriceAggregatedInterval10Mapper extends OraclePriceAggregated
 
 // 10-minutes
 @Injectable()
-export class OraclePriceAggregatedInterval20Mapper extends OraclePriceAggregatedInterval10Mapper
+export class OraclePriceAggregatedInterval10MinuteMapper extends OraclePriceAggregatedInterval5MinuteMapper
   implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = 20
+  public readonly interval: number = 10 * 60 * 1000
   public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
 }
 
 // 1-hour
 @Injectable()
-export class OraclePriceAggregatedInterval120Mapper extends OraclePriceAggregatedInterval10Mapper
+export class OraclePriceAggregatedInterval1HourMapper extends OraclePriceAggregatedInterval5MinuteMapper
   implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = 120
+  public readonly interval: number = 60 * 60 * 1000
   public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
 }
 
 // 1-day
 @Injectable()
-export class OraclePriceAggregatedInterval2880Mapper extends OraclePriceAggregatedInterval10Mapper
+export class OraclePriceAggregatedInterval1DayMapper extends OraclePriceAggregatedInterval5MinuteMapper
   implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = 2880
+  public readonly interval: number = 24 * 60 * 60 * 1000
   public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
 }
