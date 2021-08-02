@@ -73,7 +73,7 @@ export class PoolPairService {
         }
       }
     }, {
-      ttl: 600
+      ttl: 180
     })
   }
 }
