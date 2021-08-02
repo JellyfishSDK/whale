@@ -18,7 +18,7 @@ import { ConfigService } from '@nestjs/config'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { OraclesController } from '@src/module.api/oracles.controller'
 import { PricesController } from '@src/module.api/prices.controller'
-import { StatsController } from "@src/module.api/stats.controller";
+import { StatsController } from '@src/module.api/stats.controller'
 
 /**
  * Exposed ApiModule for public interfacing

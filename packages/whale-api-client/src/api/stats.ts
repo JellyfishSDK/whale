@@ -10,21 +10,24 @@ export class Stats {
    * @return {Promise<StatsData>}
    */
   async get (): Promise<StatsData> {
-    return await this.client.requestData('GET', `stats`)
+    return await this.client.requestData('GET', 'stats')
   }
 }
 
+/**
+ * Stats data, doesn't use BigNumber is precision is not expected.
+ */
 export interface StatsData {
   count: {
     blocks: number
     tokens: number
     prices: number
-    masternodes: number
+    // TODO(fuxingloh): `masternodes: number` must be indexed via aggregator
   }
   tvl: {
     total: number
     dex: number
-    masternode: number
+    // TODO(fuxingloh): `masternode: number` must be indexed via aggregator
   }
   burned: {
     total: number

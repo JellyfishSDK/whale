@@ -13,7 +13,7 @@ import { Masternodes } from './api/masternodes'
 import { Blocks } from './api/blocks'
 import { Oracles } from './api/oracles'
 import { Prices } from './api/prices'
-import { Stats } from "./api/stats";
+import { Stats } from './api/stats'
 
 /**
  * WhaleApiClient Options
