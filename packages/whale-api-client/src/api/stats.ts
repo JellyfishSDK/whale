@@ -15,5 +15,24 @@ export class Stats {
 }
 
 export interface StatsData {
-
+  count: {
+    blocks: number
+    tokens: number
+    prices: number
+    masternodes: number
+  }
+  tvl: {
+    total: number
+    dex: number
+    masternode: number
+  }
+  burned: {
+    total: number
+    fee: number
+    emission: number
+    address: number
+  }
+  price: {
+    usdt: number
+  }
 }
