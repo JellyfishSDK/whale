@@ -13,7 +13,6 @@ let controller: PoolPairController
 
 beforeAll(async () => {
   await container.start()
-  await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
   const client = new JsonRpcClient(await container.getCachedRpcUrl())
 
@@ -33,7 +32,6 @@ beforeAll(async () => {
   controller = app.get(PoolPairController)
 
   await setup()
-  await app.get(PoolPairService).syncDfiUsdPair()
 })
 
 afterAll(async () => {
