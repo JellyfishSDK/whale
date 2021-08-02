@@ -17,6 +17,8 @@ export class SemaphoreCache {
   }
 
   /**
+   * Resolve from SemaphoreCache cache key via double-checked locking.
+   *
    * @param {string} key to use for semaphore cache
    * @param {(id: string) => Promise<T | undefined>} fetch if miss cache
    * @param {GlobalCache} options
