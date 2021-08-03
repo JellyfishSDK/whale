@@ -85,7 +85,7 @@ describe('get', () => {
       expect(err).toBeInstanceOf(NotFoundException)
       expect(err.response).toStrictEqual({
         statusCode: 404,
-        message: 'Unable to find transaction by id: invalidtransactionid',
+        message: 'transaction not found',
         error: 'Not Found'
       })
     }
@@ -140,17 +140,6 @@ describe('getVouts', () => {
     const vout = await controller.getVouts(txid, { size: 30, next: '100' })
 
     expect(vout.data.length).toBeGreaterThanOrEqual(1)
-  })
-
-  it('should return empty page if blockhash is not valid', async () => {
-    const blockHash = await container.call('getblockhash', [37])
-    const block = await client.blockchain.getBlock(blockHash, 2)
-
-    const txid = block.tx[0].txid
-    const vout = await controller.getVouts(txid, { size: 30 })
-
-    expect(vout.data.length).toStrictEqual(0)
-    expect(vout.page).toBeUndefined()
   })
 
   it('should return empty page if txid is not valid', async () => {

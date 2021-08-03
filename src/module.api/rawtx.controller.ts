@@ -4,6 +4,17 @@ import { BadRequestApiException } from '@src/module.api/_core/api.error'
 import { IsHexadecimal, IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator'
 import BigNumber from 'bignumber.js'
 
+class RawTxDto {
+  @IsNotEmpty()
+  @IsHexadecimal()
+  hex!: string
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  maxFeeRate?: number
+}
+
 @Controller('/rawtx')
 export class RawtxController {
   /**
@@ -74,15 +85,4 @@ export class RawtxController {
     }
     return this.defaultMaxFeeRate
   }
-}
-
-class RawTxDto {
-  @IsNotEmpty()
-  @IsHexadecimal()
-  hex!: string
-
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  maxFeeRate?: number
 }

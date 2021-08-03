@@ -97,7 +97,7 @@ describe('get', () => {
         code: 404,
         type: 'NotFound',
         at: expect.any(Number),
-        message: 'Unable to find transaction by id: invalidtransactionid',
+        message: 'transaction not found',
         url: '/v0.0/regtest/transactions/invalidtransactionid'
       })
     }
