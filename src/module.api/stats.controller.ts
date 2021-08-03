@@ -25,12 +25,12 @@ export class StatsController {
 
     return {
       count: {
-        ...await this.cachedGet('count', this.getCount, 1800),
+        ...await this.cachedGet('count', this.getCount.bind(this), 1800),
         blocks: height
       },
-      burned: await this.cachedGet('burned', this.getBurned, 1800),
-      tvl: await this.cachedGet('tvl', this.getTVL, 300),
-      price: await this.cachedGet('price', this.getPrice, 300)
+      burned: await this.cachedGet('burned', this.getBurned.bind(this), 1800),
+      tvl: await this.cachedGet('tvl', this.getTVL.bind(this), 300),
+      price: await this.cachedGet('price', this.getPrice.bind(this), 300)
     }
   }
 
