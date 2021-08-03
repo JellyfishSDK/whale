@@ -92,13 +92,13 @@ describe('get', () => {
   })
 })
 
-describe('getVin', () => {
+describe('getVins', () => {
   it('should return list of vin', async () => {
     const blockHash = await container.call('getblockhash', [100])
     const block = await client.blockchain.getBlock(blockHash, 2)
 
     const txid = block.tx[0].txid
-    const vin = await controller.getVin(txid, { size: 30 })
+    const vin = await controller.getVins(txid, { size: 30 })
 
     expect(vin.data.length).toBeGreaterThanOrEqual(1)
   })
@@ -108,26 +108,26 @@ describe('getVin', () => {
     const block = await client.blockchain.getBlock(blockHash, 2)
 
     const txid = block.tx[0].txid
-    const vin = await controller.getVin(txid, { size: 30, next: '100' })
+    const vin = await controller.getVins(txid, { size: 30, next: '100' })
 
     expect(vin.data.length).toBeGreaterThanOrEqual(1)
   })
 
   it('should return empty page if txid is not valid', async () => {
-    const vin = await controller.getVin('9d87a6b6b77323b6dab9d8971fff0bc7a6c341639ebae39891024f4800528532', { size: 30 })
+    const vin = await controller.getVins('9d87a6b6b77323b6dab9d8971fff0bc7a6c341639ebae39891024f4800528532', { size: 30 })
 
     expect(vin.data.length).toStrictEqual(0)
     expect(vin.page).toBeUndefined()
   })
 })
 
-describe('getVout', () => {
+describe('getVouts', () => {
   it('should return list of vout', async () => {
     const blockHash = await container.call('getblockhash', [37])
     const block = await client.blockchain.getBlock(blockHash, 2)
 
     const txid = block.tx[0].txid
-    const vout = await controller.getVout(txid, { size: 30 })
+    const vout = await controller.getVouts(txid, { size: 30 })
 
     expect(vout.data.length).toBeGreaterThanOrEqual(1)
   })
@@ -137,7 +137,7 @@ describe('getVout', () => {
     const block = await client.blockchain.getBlock(blockHash, 2)
 
     const txid = block.tx[0].txid
-    const vout = await controller.getVout(txid, { size: 30, next: '100' })
+    const vout = await controller.getVouts(txid, { size: 30, next: '100' })
 
     expect(vout.data.length).toBeGreaterThanOrEqual(1)
   })
@@ -147,14 +147,14 @@ describe('getVout', () => {
     const block = await client.blockchain.getBlock(blockHash, 2)
 
     const txid = block.tx[0].txid
-    const vout = await controller.getVout(txid, { size: 30 })
+    const vout = await controller.getVouts(txid, { size: 30 })
 
     expect(vout.data.length).toStrictEqual(0)
     expect(vout.page).toBeUndefined()
   })
 
   it('should return empty page if txid is not valid', async () => {
-    const vout = await controller.getVout('9d87a6b6b77323b6dab9d8971fff0bc7a6c341639ebae39891024f4800528532', { size: 30 })
+    const vout = await controller.getVouts('9d87a6b6b77323b6dab9d8971fff0bc7a6c341639ebae39891024f4800528532', { size: 30 })
 
     expect(vout.data.length).toStrictEqual(0)
     expect(vout.page).toBeUndefined()
