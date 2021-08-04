@@ -29,12 +29,12 @@ it('should set oracle data', async () => {
     { token: 'AAPL', currency: 'EUR' },
     { token: 'TSLA', currency: 'USD' }
   ], { weightage: 1 })
+  await container.generate(1)
 
   const oracleId2 = await client.oracle.appointOracle(await container.getNewAddress(), [
     { token: 'AAPL', currency: 'EUR' },
     { token: 'TSLA', currency: 'USD' }
   ], { weightage: 2 })
-
   await container.generate(1)
 
   const timestamp = Math.floor(new Date().getTime() / 1000)
@@ -48,12 +48,11 @@ it('should set oracle data', async () => {
   await container.generate(1)
 
   const height1 = await client.blockchain.getBlockCount()
-  await container.generate(1)
-
   const hash1 = await client.blockchain.getBlockHash(height1)
   const block1 = await client.blockchain.getBlock(hash1, 1)
   const medianTime1 = block1.mediantime
   const time1 = block1.time
+  await container.generate(1)
 
   const prices2 = [
     { tokenAmount: '1.5@AAPL', currency: 'EUR' },
@@ -64,13 +63,11 @@ it('should set oracle data', async () => {
   await container.generate(1)
 
   const height2 = await client.blockchain.getBlockCount()
-  await container.generate(1)
-
   const hash2 = await client.blockchain.getBlockHash(height2)
   const block2 = await client.blockchain.getBlock(hash2, 1)
   const medianTime2 = block2.mediantime
   const time2 = block2.time
-
+  await container.generate(1)
   await waitForIndexedHeight(app, height2)
 
   const feedMapper = app.get(OraclePriceFeedMapper)
@@ -215,9 +212,10 @@ it('should set oracle data', async () => {
   )
 
   const data = await container.call('listprices', [])
-  expect(data).toStrictEqual([
-    { token: 'AAPL', currency: 'EUR', price: 1.16666666, ok: true },
-    { token: 'TSLA', currency: 'USD', price: 1.66666666, ok: true }
-  ]
+  expect(data).toStrictEqual(
+    [
+      { token: 'AAPL', currency: 'EUR', price: 1.16666666, ok: true },
+      { token: 'TSLA', currency: 'USD', price: 1.66666666, ok: true }
+    ]
   )
 })
