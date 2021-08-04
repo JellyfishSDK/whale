@@ -27,7 +27,7 @@ export class Transactions {
    * @param {string} txid of the transaction
    * @param {number} [size=30] size to query
    * @param {string} [next] next token for next slice of vout
-   * @return {Promise<ApiPagedResponse<TransactionVin[]>>}
+   * @return {Promise<ApiPagedResponse<TransactionVout[]>>}
    */
   async getVouts (txid: string, size: number = 30, next?: string): Promise<ApiPagedResponse<TransactionVout>> {
     return await this.client.requestList('GET', `transactions/${txid}/vouts`, size, next)
