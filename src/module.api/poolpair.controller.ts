@@ -8,59 +8,8 @@ import { PoolPairService } from './poolpair.service'
 import BigNumber from 'bignumber.js'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 
-@Controller('/poolpairs')
-export class PoolPairController {
-  constructor (
-    protected readonly rpcClient: JsonRpcClient,
-    protected readonly deFiDCache: DeFiDCache,
-    private readonly poolPairService: PoolPairService
-  ) {
-  }
-
-  /**
-   * @param {PaginationQuery} query
-   * @param {number} query.size
-   * @param {string} [query.next]
-   * @return {Promise<ApiPagedResponse<PoolPairData>>}
-   */
-  @Get('')
-  async list (
-    @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<PoolPairData>> {
-    const result = await this.rpcClient.poolpair.listPoolPairs({
-      start: query.next !== undefined ? Number(query.next) : 0,
-      including_start: query.next === undefined, // TODO(fuxingloh): open issue at DeFiCh/ain, rpc_accounts.cpp#388
-      limit: query.size
-    }, true)
-
-    const items: PoolPairData[] = []
-    for (const [id, info] of Object.entries(result)) {
-      const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
-      items.push(mapPoolPair(id, info, totalLiquidityUsd))
-    }
-
-    return ApiPagedResponse.of(items, query.size, item => {
-      return item.id
-    })
-  }
-
-  /**
-   * @param {string} id of pool pair
-   * @return {Promise<PoolPairData>}
-   */
-  @Get('/:id')
-  async get (@Param('id', ParseIntPipe) id: string): Promise<PoolPairData> {
-    const info = await this.deFiDCache.getPoolPairInfo(id)
-    if (info === undefined) {
-      throw new NotFoundException('Unable to find poolpair')
-    }
-
-    const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
-    return mapPoolPair(String(id), info, totalLiquidityUsd)
-  }
-}
-
-export function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber): PoolPairData {
+function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber,
+  apr?: { total: number, reward: number }): PoolPairData {
   return {
     id: id,
     symbol: info.symbol,
@@ -92,6 +41,61 @@ export function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?:
     creation: {
       tx: info.creationTx,
       height: info.creationHeight.toNumber()
+    },
+    apr: apr ?? { total: 0, reward: 0 }
+  }
+}
+
+@Controller('/poolpairs')
+export class PoolPairController {
+  constructor (
+    protected readonly rpcClient: JsonRpcClient,
+    protected readonly deFiDCache: DeFiDCache,
+    private readonly poolPairService: PoolPairService
+  ) {
+  }
+
+  /**
+   * @param {PaginationQuery} query
+   * @param {number} query.size
+   * @param {string} [query.next]
+   * @return {Promise<ApiPagedResponse<PoolPairData>>}
+   */
+  @Get('')
+  async list (
+    @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<PoolPairData>> {
+    const result = await this.rpcClient.poolpair.listPoolPairs({
+      start: query.next !== undefined ? Number(query.next) : 0,
+      including_start: query.next === undefined, // TODO(fuxingloh): open issue at DeFiCh/ain, rpc_accounts.cpp#388
+      limit: query.size
+    }, true)
+
+    const items: PoolPairData[] = []
+    for (const [id, info] of Object.entries(result)) {
+      const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
+      const apr = await this.poolPairService.calculateAPRForPoolPair(info)
+      items.push(mapPoolPair(id, info, totalLiquidityUsd, apr))
     }
+
+    return ApiPagedResponse.of(items, query.size, item => {
+      return item.id
+    })
+  }
+
+  /**
+   * @param {string} id of pool pair
+   * @return {Promise<PoolPairData>}
+   */
+  @Get('/:id')
+  async get (@Param('id', ParseIntPipe) id: string): Promise<PoolPairData> {
+    const info = await this.deFiDCache.getPoolPairInfo(id)
+    if (info === undefined) {
+      throw new NotFoundException('Unable to find poolpair')
+    }
+
+    const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
+    const apr = await this.poolPairService.calculateAPRForPoolPair(info)
+    return mapPoolPair(String(id), info, totalLiquidityUsd, apr)
   }
 }

@@ -74,4 +74,40 @@ export class PoolPairService {
       ttl: 180
     })
   }
+
+  async getDailyDFIReward (): Promise<BigNumber> {
+    const rpcResult = await this.rpcClient.masternode.getGov('LP_DAILY_DFI_REWARD')
+    return new BigNumber(rpcResult.LP_DAILY_DFI_REWARD)
+  }
+
+  async calculateAPRForPoolPair (info: PoolPairInfo): Promise<{ total: number, reward: number }> {
+    const dfiPriceUsdt: BigNumber = await this.getUSDT_PER_DFI() ?? new BigNumber(0)
+
+    const totalCustomRewards = info.customRewards !== undefined
+      ? info.customRewards.reduce<string | BigNumber>((accum, customReward) => {
+        const [reward] = customReward.split('@')
+        const accumBigNumber = accum as BigNumber
+        accumBigNumber.plus(new BigNumber(reward))
+          .times(2880)
+          .times(365)
+          .times(dfiPriceUsdt ?? 0)
+        return accumBigNumber
+      }, new BigNumber(0)) : new BigNumber(0)
+
+    const dailyDfiReward: BigNumber = await this.getDailyDFIReward()
+    const reward = new BigNumber(dailyDfiReward)
+      .times(info.rewardPct)
+      .times(365)
+      .times(dfiPriceUsdt ?? 0)
+      .plus(totalCustomRewards).toNumber()
+
+    // Total === reward right now as there is no volume information to calculate
+    // commission
+    const total = reward
+
+    return {
+      total,
+      reward
+    }
+  }
 }
