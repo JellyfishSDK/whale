@@ -16,7 +16,8 @@
     "resolveJsonModule": true,
     "paths": {
       "@src/*": ["src/*"],
-      "@whale-api-client/api/*": ["packages/whale-api-client/src/api/*"]
+      "@defichain/whale-api-client": ["packages/whale-api-client/src/"],
+      "@defichain/whale-api-wallet": ["packages/whale-api-wallet/src/"]
     }
   }
 }
