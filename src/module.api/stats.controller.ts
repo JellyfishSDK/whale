@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common'
-import { StatsData } from '@whale-api-client/api/stats'
+import { StatsData } from '@defichain/whale-api-client'
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { BlockMapper } from '@src/module.model/block'
