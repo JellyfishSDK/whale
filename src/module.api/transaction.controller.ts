@@ -1,6 +1,6 @@
 import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common'
 import { TransactionMapper } from '@src/module.model/transaction'
-import { Transaction } from '@whale-api-client/api/transactions'
+import { Transaction } from '@defichain/whale-api-client'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { TransactionVin, TransactionVinMapper } from '@src/module.model/transaction.vin'
