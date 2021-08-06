@@ -36,7 +36,7 @@ export class PoolPairController {
     const items: PoolPairData[] = []
     for (const [id, info] of Object.entries(result)) {
       const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
-      const apr = await this.poolPairService.calculateAPRForPoolPair(info)
+      const apr = await this.poolPairService.getAPR(info)
       items.push(mapPoolPair(id, info, totalLiquidityUsd, apr))
     }
 
@@ -57,13 +57,12 @@ export class PoolPairController {
     }
 
     const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
-    const apr = await this.poolPairService.calculateAPRForPoolPair(info)
+    const apr = await this.poolPairService.getAPR(info)
     return mapPoolPair(String(id), info, totalLiquidityUsd, apr)
   }
 }
 
-function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber,
-  apr?: { total: number, reward: number }): PoolPairData {
+function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr']): PoolPairData {
   return {
     id: id,
     symbol: info.symbol,

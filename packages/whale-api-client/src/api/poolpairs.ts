@@ -62,5 +62,8 @@ export interface PoolPairData {
     tx: string
     height: number
   }
-  apr?: { total: number, reward: number }
+  apr?: {
+    total: number // fractional number
+    reward: number // fractional number
+  }
 }
