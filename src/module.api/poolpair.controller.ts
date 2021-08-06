@@ -8,44 +8,6 @@ import { PoolPairService } from './poolpair.service'
 import BigNumber from 'bignumber.js'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 
-function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber,
-  apr?: { total: number, reward: number }): PoolPairData {
-  return {
-    id: id,
-    symbol: info.symbol,
-    name: info.name,
-    status: info.status,
-    tokenA: {
-      id: info.idTokenA,
-      reserve: info.reserveA.toFixed(),
-      blockCommission: info.blockCommissionA.toFixed()
-    },
-    tokenB: {
-      id: info.idTokenB,
-      reserve: info.reserveB.toFixed(),
-      blockCommission: info.blockCommissionB.toFixed()
-    },
-    priceRatio: {
-      ab: info['reserveA/reserveB'] instanceof BigNumber ? info['reserveA/reserveB'].toFixed() : info['reserveA/reserveB'],
-      ba: info['reserveB/reserveA'] instanceof BigNumber ? info['reserveB/reserveA'].toFixed() : info['reserveB/reserveA']
-    },
-    commission: info.commission.toFixed(),
-    totalLiquidity: {
-      token: info.totalLiquidity.toFixed(),
-      usd: totalLiquidityUsd?.toFixed()
-    },
-    tradeEnabled: info.tradeEnabled,
-    ownerAddress: info.ownerAddress,
-    rewardPct: info.rewardPct.toFixed(),
-    customRewards: info.customRewards,
-    creation: {
-      tx: info.creationTx,
-      height: info.creationHeight.toNumber()
-    },
-    apr: apr ?? { total: 0, reward: 0 }
-  }
-}
-
 @Controller('/poolpairs')
 export class PoolPairController {
   constructor (
@@ -97,5 +59,43 @@ export class PoolPairController {
     const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
     const apr = await this.poolPairService.calculateAPRForPoolPair(info)
     return mapPoolPair(String(id), info, totalLiquidityUsd, apr)
+  }
+}
+
+function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber,
+  apr?: { total: number, reward: number }): PoolPairData {
+  return {
+    id: id,
+    symbol: info.symbol,
+    name: info.name,
+    status: info.status,
+    tokenA: {
+      id: info.idTokenA,
+      reserve: info.reserveA.toFixed(),
+      blockCommission: info.blockCommissionA.toFixed()
+    },
+    tokenB: {
+      id: info.idTokenB,
+      reserve: info.reserveB.toFixed(),
+      blockCommission: info.blockCommissionB.toFixed()
+    },
+    priceRatio: {
+      ab: info['reserveA/reserveB'] instanceof BigNumber ? info['reserveA/reserveB'].toFixed() : info['reserveA/reserveB'],
+      ba: info['reserveB/reserveA'] instanceof BigNumber ? info['reserveB/reserveA'].toFixed() : info['reserveB/reserveA']
+    },
+    commission: info.commission.toFixed(),
+    totalLiquidity: {
+      token: info.totalLiquidity.toFixed(),
+      usd: totalLiquidityUsd?.toFixed()
+    },
+    tradeEnabled: info.tradeEnabled,
+    ownerAddress: info.ownerAddress,
+    rewardPct: info.rewardPct.toFixed(),
+    customRewards: info.customRewards,
+    creation: {
+      tx: info.creationTx,
+      height: info.creationHeight.toNumber()
+    },
+    apr: apr ?? { total: 0, reward: 0 }
   }
 }

@@ -75,13 +75,17 @@ export class PoolPairService {
     })
   }
 
-  async getDailyDFIReward (): Promise<BigNumber> {
-    const rpcResult = await this.rpcClient.masternode.getGov('LP_DAILY_DFI_REWARD')
-    return new BigNumber(rpcResult.LP_DAILY_DFI_REWARD)
+  async getDailyDFIReward (): Promise<BigNumber | undefined> {
+    return await this.cache.get<BigNumber>('LP_DAILY_DFI_REWARD', async () => {
+      const rpcResult = await this.rpcClient.masternode.getGov('LP_DAILY_DFI_REWARD')
+      return new BigNumber(rpcResult.LP_DAILY_DFI_REWARD)
+    }, {
+      ttl: 180
+    })
   }
 
   async calculateAPRForPoolPair (info: PoolPairInfo): Promise<{ total: number, reward: number }> {
-    const dfiPriceUsdt: BigNumber = await this.getUSDT_PER_DFI() ?? new BigNumber(0)
+    const dfiPriceUsdt = await this.getUSDT_PER_DFI() ?? 0
 
     const totalCustomRewards = info.customRewards !== undefined
       ? info.customRewards.reduce<string | BigNumber>((accum, customReward) => {
@@ -90,24 +94,26 @@ export class PoolPairService {
         accumBigNumber.plus(new BigNumber(reward))
           .times(2880)
           .times(365)
-          .times(dfiPriceUsdt ?? 0)
+          .times(dfiPriceUsdt)
         return accumBigNumber
       }, new BigNumber(0)) : new BigNumber(0)
 
-    const dailyDfiReward: BigNumber = await this.getDailyDFIReward()
-    const reward = new BigNumber(dailyDfiReward)
-      .times(info.rewardPct)
+    const dailyDfiReward = await this.getDailyDFIReward() ?? 0
+    const yearlyUSDReward = info.rewardPct
+      .times(dailyDfiReward)
       .times(365)
-      .times(dfiPriceUsdt ?? 0)
-      .plus(totalCustomRewards).toNumber()
+      .times(dfiPriceUsdt)
+      .plus(totalCustomRewards)
 
-    // Total === reward right now as there is no volume information to calculate
-    // commission
-    const total = reward
+    const totalLiquidityUSD = await this.getTotalLiquidityUsd(info) ?? 0
+    const reward = yearlyUSDReward
+      .times(100)
+      .div(totalLiquidityUSD)
+      .toNumber()
 
     return {
-      total,
-      reward
+      reward,
+      total: reward
     }
   }
 }

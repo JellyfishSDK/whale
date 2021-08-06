@@ -104,8 +104,8 @@ describe('list', () => {
         blockCommission: '0'
       },
       apr: {
-        reward: 3099912.09204384,
-        total: 3099912.09204384
+        reward: 222942,
+        total: 222942
       },
       commission: '0',
       totalLiquidity: {
