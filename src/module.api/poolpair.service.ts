@@ -105,7 +105,7 @@ export class PoolPairService {
       .times(dfiPriceUsdt)
       .plus(totalCustomRewards)
 
-    const totalLiquidityUSD = await this.getTotalLiquidityUsd(info) ?? 0
+    const totalLiquidityUSD = await this.getTotalLiquidityUsd(info) ?? 1
     const reward = yearlyUSDReward
       .times(100)
       .div(totalLiquidityUSD)
