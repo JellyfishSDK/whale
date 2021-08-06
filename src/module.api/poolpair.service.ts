@@ -89,7 +89,10 @@ export class PoolPairService {
 
     const totalCustomRewards = info.customRewards !== undefined
       ? info.customRewards.reduce<string | BigNumber>((accum, customReward) => {
-        const [reward] = customReward.split('@')
+        const [reward, token] = customReward.split('@')
+        if (token !== '0' && token !== 'DFI') {
+          throw new Error('Non-DFI token detected as custom reward')
+        }
         const accumBigNumber = accum as BigNumber
         accumBigNumber.plus(new BigNumber(reward))
           .times(2880).times(365).times(dfiPriceUsdt)
