@@ -92,24 +92,17 @@ export class PoolPairService {
         const [reward] = customReward.split('@')
         const accumBigNumber = accum as BigNumber
         accumBigNumber.plus(new BigNumber(reward))
-          .times(2880)
-          .times(365)
-          .times(dfiPriceUsdt)
+          .times(2880).times(365).times(dfiPriceUsdt)
         return accumBigNumber
       }, new BigNumber(0)) : new BigNumber(0)
 
     const dailyDfiReward = await this.getDailyDFIReward() ?? 0
     const yearlyUSDReward = info.rewardPct
-      .times(dailyDfiReward)
-      .times(365)
-      .times(dfiPriceUsdt)
-      .plus(totalCustomRewards)
+      .times(dailyDfiReward).times(365).times(dfiPriceUsdt).plus(totalCustomRewards)
 
     const totalLiquidityUSD = await this.getTotalLiquidityUsd(info) ?? 1
     const reward = yearlyUSDReward
-      .times(100)
-      .div(totalLiquidityUSD)
-      .toNumber()
+      .times(100).div(totalLiquidityUSD).toNumber()
 
     return {
       reward,
