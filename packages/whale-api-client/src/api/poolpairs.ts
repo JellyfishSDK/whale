@@ -62,5 +62,5 @@ export interface PoolPairData {
     tx: string
     height: number
   }
-  apr: { total: number, reward: number } | undefined
+  apr?: { total: number, reward: number }
 }
