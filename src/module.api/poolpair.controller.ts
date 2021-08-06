@@ -96,6 +96,6 @@ function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNum
       tx: info.creationTx,
       height: info.creationHeight.toNumber()
     },
-    apr: apr ?? { total: 0, reward: 0 }
+    apr
   }
 }
