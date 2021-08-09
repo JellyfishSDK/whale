@@ -31,7 +31,7 @@ export class ModelProbeIndicator extends ProbeIndicator {
    * Readiness of Model Database
    * - unable to get the latest block
    * - synced blocks are undefined
-   * - synced blocks are more than 5 blocks behind
+   * - synced blocks are more than 4 blocks behind
    */
   async readiness (): Promise<HealthIndicatorResult> {
     let index: number | undefined
