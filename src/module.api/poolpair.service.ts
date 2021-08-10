@@ -3,7 +3,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import BigNumber from 'bignumber.js'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
-import { PoolPairData } from '@whale-api-client/api/poolpairs'
+import { PoolPairData } from '@defichain/whale-api-client'
 
 @Injectable()
 export class PoolPairService {

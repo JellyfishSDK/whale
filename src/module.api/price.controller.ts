@@ -4,7 +4,7 @@ import { OracleTokenCurrencyMapper } from '@src/module.model/oracle.token.curren
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { PriceTicker, PriceTickerMapper } from '@src/module.model/price.ticker'
-import { PriceOracle } from '@whale-api-client/api/prices'
+import { PriceOracle } from '@defichain/whale-api-client'
 import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 
 @Controller('/prices')
