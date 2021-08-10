@@ -11,8 +11,7 @@ it('should raise if error', () => {
     url: '/link/to/bad/request'
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const throwError = () => {
+  const throwError = (): void => {
     raiseIfError({
       data: undefined,
       error: error
@@ -32,8 +31,7 @@ it('should raise validation error', () => {
     url: '/link/to/validationerror/request'
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const throwError = () => {
+  const throwError = (): void => {
     raiseIfError({
       data: undefined,
       error: error
@@ -44,12 +42,10 @@ it('should raise validation error', () => {
 })
 
 it('should not raise  error if error is undefined', () => {
-  const error = undefined
-
   expect(() => {
     raiseIfError({
       data: undefined,
-      error: error
+      error: undefined
     })
   }).not.toThrow()
 })
