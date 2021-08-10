@@ -1,4 +1,6 @@
 import { raiseIfError, WhaleApiError, WhaleApiErrorType } from '../../src'
+import { WhaleApiValidationException } from '../../src/errors/api.validation.exception'
+import { WhaleApiException } from '../../src/errors/api.error'
 
 it('should raise if error', () => {
   const error: WhaleApiError = {
@@ -9,10 +11,45 @@ it('should raise if error', () => {
     url: '/link/to/bad/request'
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const throwError = () => {
+    raiseIfError({
+      data: undefined,
+      error: error
+    })
+  }
+
+  expect(throwError).toThrow('400 - BadRequest (/link/to/bad/request): bad request')
+  expect(throwError).toThrow(WhaleApiException)
+})
+
+it('should raise validation error', () => {
+  const error: WhaleApiError = {
+    code: 422,
+    type: WhaleApiErrorType.ValidationError,
+    at: 123456,
+    message: 'validation error',
+    url: '/link/to/validationerror/request'
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const throwError = () => {
+    raiseIfError({
+      data: undefined,
+      error: error
+    })
+  }
+  expect(throwError).toThrow('422 - ValidationError (/link/to/validationerror/request): validation error')
+  expect(throwError).toThrow(WhaleApiValidationException)
+})
+
+it('should not raise  error if error is undefined', () => {
+  const error = undefined
+
   expect(() => {
     raiseIfError({
       data: undefined,
       error: error
     })
-  }).toThrow('400 - BadRequest (/link/to/bad/request): bad request')
+  }).not.toThrow()
 })
