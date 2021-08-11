@@ -28,7 +28,7 @@ afterAll(async () => {
 describe('list', () => {
   it('should list masternodes', async () => {
     const data = await client.masternodes.list()
-    expect(Object.keys(data[0]).length).toStrictEqual(7)
+    expect(Object.keys(data[0]).length > 0).toBeTruthy()
     expect(data.hasNext).toStrictEqual(false)
     expect(data.nextToken).toStrictEqual(undefined)
 
@@ -42,7 +42,13 @@ describe('list', () => {
       resign: {
         tx: '0000000000000000000000000000000000000000000000000000000000000000',
         height: -1
-      }
+      },
+      banTx: '0000000000000000000000000000000000000000000000000000000000000000',
+      isMine: {
+        owner: false,
+        operator: false
+      },
+      local: false
     })
   })
 
@@ -70,7 +76,7 @@ describe('get', () => {
     const masternode = (await client.masternodes.list(1))[0]
 
     const data = await client.masternodes.get(masternode.id)
-    expect(Object.keys(data).length).toStrictEqual(7)
+    expect(Object.keys(data).length > 0).toBeTruthy()
     expect(data).toStrictEqual({
       id: masternode.id,
       state: masternode.state,

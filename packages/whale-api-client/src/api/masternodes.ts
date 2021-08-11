@@ -35,14 +35,14 @@ export class Masternodes {
  */
 export interface MasternodeData {
   id: string
-  state: MasternodeState
-  mintedBlocks: number
   owner: {
     address: string
   }
   operator: {
     address: string
   }
+  state: MasternodeState
+  mintedBlocks: number
   creation: {
     height: number
   }
@@ -50,6 +50,14 @@ export interface MasternodeData {
     tx: string
     height: number
   }
+  banTx: string
+  isMine: {
+    owner: boolean
+    operator: boolean
+  }
+  local: boolean
+  // TODO(canonbrother): add taregetMuliplier on MasternodeInfo (jellyfish-api-core)
+  // targetMultiplier: number
 }
 
 /**

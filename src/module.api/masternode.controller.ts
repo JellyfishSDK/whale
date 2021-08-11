@@ -59,20 +59,28 @@ export class MasternodeController {
 function mapMasternodeData (id: string, info: MasternodeInfo): MasternodeData {
   return {
     id,
-    state: info.state,
-    mintedBlocks: info.mintedBlocks,
     owner: {
       address: info.ownerAuthAddress
     },
     operator: {
       address: info.operatorAuthAddress
     },
+    state: info.state,
+    mintedBlocks: info.mintedBlocks,
     creation: {
       height: info.creationHeight
     },
     resign: {
       tx: info.resignTx,
       height: info.resignHeight
-    }
+    },
+    banTx: info.banTx,
+    isMine: {
+      owner: info.ownerIsMine,
+      operator: info.operatorIsMine
+    },
+    local: info.localMasternode
+    // TODO(canonbrother): add taregetMuliplier on MasternodeInfo (jellyfish-api-core)
+    // targetMultiplier: info.targetMuliplier
   }
 }
