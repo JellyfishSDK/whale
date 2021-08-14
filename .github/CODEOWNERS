@@ -3,7 +3,6 @@
 
 /.github/                                       @fuxingloh
 /.husky/                                        @fuxingloh
-/.idea/                                         @fuxingloh
 
 /packages/                                      @fuxingloh
 /packages/whale-api-client/                     @fuxingloh @canonbrother @jingyi2811 @ivan-zynesis @thedoublejay @monstrobishi
