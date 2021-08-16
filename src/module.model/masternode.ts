@@ -5,11 +5,11 @@ import { Database, SortOrder } from '@src/module.database/database'
 const MasternodeMapping: ModelMapping<Masternode> = {
   type: 'masternode',
   index: {
-    masternode_id: {
-      name: 'masternode_masternode_id',
+    sort: {
+      name: 'masternode_key_sort',
       partition: {
         type: 'string',
-        key: (b: Masternode) => b.id
+        key: (b: Masternode) => b.sort
       }
     }
   }
@@ -21,7 +21,7 @@ export class MasternodeMapper {
   }
 
   async query (limit: number, lt?: string): Promise<Masternode[]> {
-    return await this.database.query(MasternodeMapping.index.oracle_id, {
+    return await this.database.query(MasternodeMapping.index.sort, {
       limit: limit,
       order: SortOrder.DESC,
       lt: lt
@@ -42,15 +42,16 @@ export class MasternodeMapper {
 }
 
 export interface Masternode extends Model {
-  id: string // ---------| masternodeId
+  id: string // ---------| masternodeId (txid)
+  sort: string // -------| height-masternodeId
 
   ownerAddress: string
   operatorAddress: string
   creationHeight: number
   resignHeight: number
+  resignTx?: string
   mintedBlocks: number
   timelock: number // number of weeks locked up
-  state: 'ENABLED' | 'PRE_ENABLED' | 'RESIGNED' | 'PRE_RESIGNED' | 'UNKNOWN'
 
   block: {
     hash: string

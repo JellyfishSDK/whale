@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { AppModule } from '@src/app.module'
 import { ConfigService } from '@nestjs/config'
-import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
+import { DeFiDContainer, DockerOptions, GenesisKeys, MasterNodeKey, MasterNodeRegTestContainer, StartOptions } from '@defichain/testcontainers'
 import { newFastifyAdapter } from '@src/fastify'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { Indexer } from '@src/module.indexer/indexer'
@@ -124,5 +124,29 @@ class TestConfigService extends ConfigService {
         provider: 'memory'
       }
     })
+  }
+}
+
+/**
+ * Delayed EunosPaya for Masternode testing
+ */
+export class DelayedEunosPayaTestContainer extends MasterNodeRegTestContainer {
+  /**
+   * @param {string} [masternodeKey=GenesisKeys[0]] pair to use for minting
+   * @param {string} [image=DeFiDContainer.image] docker image name
+   * @param {DockerOptions} [options]
+   */
+  constructor (masternodeKey: MasterNodeKey = GenesisKeys[0], image: string = DeFiDContainer.image, options?: DockerOptions) {
+    super(masternodeKey, image, options)
+  }
+
+  /**
+   * Additional debug options turned on for traceability.
+   */
+  protected getCmd (opts: StartOptions): string[] {
+    return [
+      ...super.getCmd(opts).filter(x => !x.includes('eunospayaheight')),
+      '-eunospayaheight=200'
+    ]
   }
 }
