@@ -17,7 +17,7 @@ beforeAll(async () => {
   await service.start()
 
   await container.generate(1)
-  const height = (await client.rpc.call('getblockcount', [], 'number'))
+  const height: number = (await client.rpc.call('getblockcount', [], 'number'))
   await container.generate(1)
   await service.waitForIndexedHeight(height)
 })
