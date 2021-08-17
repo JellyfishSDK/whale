@@ -35,6 +35,7 @@ export class Masternodes {
  */
 export interface MasternodeData {
   id: string
+  sort: string
   state: MasternodeState
   mintedBlocks: number
   owner: {

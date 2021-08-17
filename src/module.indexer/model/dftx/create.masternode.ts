@@ -25,15 +25,15 @@ export class CreateMasternodeIndexer extends DfTxIndexer<CreateMasterNode> {
       let operatorAddress = ownerAddress
 
       try {
-        if (data.operatorPubKeyHash !== undefined) {
+        // This is actually the operatorPubKeyHash but jellyfish deserializes like so
+        if (data.collateralPubKeyHash !== undefined) {
           if (data.type === MasternodeKeyType.PKHashType) {
-            operatorAddress = P2PKH.to(this.network, data.operatorPubKeyHash).utf8String
+            operatorAddress = P2PKH.to(this.network, data.collateralPubKeyHash).utf8String
           } else { // WitV0KeyHashType
-            operatorAddress = P2WPKH.to(this.network, data.operatorPubKeyHash).utf8String
+            operatorAddress = P2WPKH.to(this.network, data.collateralPubKeyHash).utf8String
           }
         }
       } catch {
-        console.log('warning')
         this.logger.warn(`Parsing issue, likely encountered post EunosPaya CCreateMasterNode txn ${txn.txid}`)
         continue
       }

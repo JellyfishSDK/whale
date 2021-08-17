@@ -24,29 +24,29 @@ describe('genesis masternodes', () => {
 
   it('should index genesis masternodes', async () => {
     await container.generate(1)
-
     const height = await client.blockchain.getBlockCount()
     await container.generate(1)
     await waitForIndexedHeight(app, height)
+
+    const genesisNodeId = 'e86c027861cc0af423313f4152a44a83296a388eb51bf1a6dde9bd75bed55fb4'
+    const masternodeRPCInfo: MasternodeInfo =
+      (await client.masternode.getMasternode(genesisNodeId))[genesisNodeId]
 
     const masternodeMapper = app.get(MasternodeMapper)
     const masternodeList = await masternodeMapper.query(30)
     expect(masternodeList.length).toStrictEqual(8)
 
-    const genesisNode = masternodeList[0]
-    const genesisNodeId = genesisNode.id
-
-    const masternodeRPCInfo: MasternodeInfo =
-      (await client.masternode.getMasternode(genesisNodeId))[genesisNodeId]
-
+    const genesisNode = await masternodeMapper.get(genesisNodeId)
     expect(masternodeRPCInfo).not.toStrictEqual(undefined)
-    expect(genesisNode.creationHeight).toStrictEqual(masternodeRPCInfo.creationHeight)
-    expect(genesisNode.resignHeight).toStrictEqual(masternodeRPCInfo.resignHeight)
-    expect(genesisNode.mintedBlocks).toStrictEqual(masternodeRPCInfo.mintedBlocks)
+    expect(genesisNode?.operatorAddress).toStrictEqual(masternodeRPCInfo.operatorAuthAddress)
+    expect(genesisNode?.ownerAddress).toStrictEqual(masternodeRPCInfo.ownerAuthAddress)
+    expect(genesisNode?.creationHeight).toStrictEqual(masternodeRPCInfo.creationHeight)
+    expect(genesisNode?.resignHeight).toStrictEqual(masternodeRPCInfo.resignHeight)
+    expect(genesisNode?.mintedBlocks).toStrictEqual(masternodeRPCInfo.mintedBlocks)
   })
 })
 
-describe('create masternode', () => {
+describe('create masternode (pre euno paya)', () => {
   const container = new DelayedEunosPayaTestContainer()
   let app: NestFastifyApplication
   let client: JsonRpcClient
@@ -81,6 +81,8 @@ describe('create masternode', () => {
     const masternode = await masternodeMapper.get(masternodeId)
 
     expect(masternode).not.toStrictEqual(undefined)
+    expect(masternode?.operatorAddress).toStrictEqual(masternodeRPCInfo.operatorAuthAddress)
+    expect(masternode?.ownerAddress).toStrictEqual(masternodeRPCInfo.ownerAuthAddress)
     expect(masternode?.creationHeight).toStrictEqual(masternodeRPCInfo.creationHeight)
     expect(masternode?.resignHeight).toStrictEqual(masternodeRPCInfo.resignHeight)
     expect(masternode?.mintedBlocks).toStrictEqual(masternodeRPCInfo.mintedBlocks)

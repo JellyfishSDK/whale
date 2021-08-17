@@ -1,19 +1,27 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp, stopTestingApp } from '@src/e2e.module'
+import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { NotFoundException } from '@nestjs/common'
 import { MasternodeController } from '@src/module.api/masternode.controller'
+import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
 let controller: MasternodeController
+let client: JsonRpcClient
 
 beforeAll(async () => {
   await container.start()
   await container.waitForReady()
 
   app = await createTestingApp(container)
+  client = new JsonRpcClient(await container.getCachedRpcUrl())
   controller = app.get(MasternodeController)
+
+  await container.generate(1)
+  const height = await client.blockchain.getBlockCount()
+  await container.generate(1)
+  await waitForIndexedHeight(app, height)
 })
 
 afterAll(async () => {
@@ -24,7 +32,7 @@ describe('list', () => {
   it('should list masternodes', async () => {
     const result = await controller.list({ size: 4 })
     expect(result.data.length).toStrictEqual(4)
-    expect(Object.keys(result.data[0]).length).toStrictEqual(7)
+    expect(Object.keys(result.data[0]).length).toStrictEqual(8)
   })
 
   it('should list masternodes with pagination', async () => {
@@ -36,7 +44,7 @@ describe('list', () => {
       next: first.page?.next
     })
     expect(next.data.length).toStrictEqual(4)
-    expect(next.page?.next).toStrictEqual(next.data[3].id)
+    expect(next.page?.next).toStrictEqual(`00000000${next.data[3].id}`)
 
     const last = await controller.list({
       size: 4,
@@ -53,7 +61,7 @@ describe('get', () => {
     const masternode = (await controller.list({ size: 1 })).data[0]
 
     const result = await controller.get(masternode.id)
-    expect(Object.keys(result).length).toStrictEqual(7)
+    expect(Object.keys(result).length).toStrictEqual(8)
     expect(result).toStrictEqual(masternode)
   })
 

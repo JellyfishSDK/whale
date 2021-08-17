@@ -4,6 +4,7 @@ import { RemoveOracleIndexer } from '@src/module.indexer/model/dftx/remove.oracl
 import { UpdateOracleIndexer } from '@src/module.indexer/model/dftx/update.oracle'
 import { SetOracleDataIndexer } from '@src/module.indexer/model/dftx/set.oracle.data'
 import { CreateMasternodeIndexer } from '@src/module.indexer/model/dftx/create.masternode'
+import { ResignMasternodeIndexer } from '@src/module.indexer/model/dftx/resign.masternode'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { ConfigService } from '@nestjs/config'
 
@@ -12,7 +13,8 @@ const indexers = [
   RemoveOracleIndexer,
   SetOracleDataIndexer,
   UpdateOracleIndexer,
-  CreateMasternodeIndexer
+  CreateMasternodeIndexer,
+  ResignMasternodeIndexer
 ]
 
 @Module({
