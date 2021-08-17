@@ -62,7 +62,7 @@ describe('get', () => {
 
     const result = await controller.get(masternode.id)
     expect(Object.keys(result).length).toStrictEqual(8)
-    expect(result).toStrictEqual(masternode)
+    expect(result).toStrictEqual({ ...masternode, mintedBlocks: expect.any(Number) })
   })
 
   it('should fail due to non-existent masternode', async () => {
