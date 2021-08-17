@@ -46,8 +46,51 @@ describe('genesis masternodes', () => {
   })
 })
 
-describe('create masternode (pre euno paya)', () => {
+describe('create masternode (pre eunos paya)', () => {
   const container = new DelayedEunosPayaTestContainer()
+  let app: NestFastifyApplication
+  let client: JsonRpcClient
+
+  beforeAll(async () => {
+    await container.start()
+    await container.waitForWalletCoinbaseMaturity()
+
+    app = await createTestingApp(container)
+    client = new JsonRpcClient(await container.getCachedRpcUrl())
+  })
+
+  afterAll(async () => {
+    await stopTestingApp(container, app)
+  })
+
+  it('should index create masternode', async () => {
+    await container.generate(1)
+
+    const ownerAddress = await client.wallet.getNewAddress()
+    const masternodeId = await client.masternode.createMasternode(ownerAddress)
+    await container.generate(1)
+
+    const height = await client.blockchain.getBlockCount()
+    await container.generate(1)
+    await waitForIndexedHeight(app, height)
+
+    const masternodeMapper = app.get(MasternodeMapper)
+
+    const masternodeRPCInfo: MasternodeInfo =
+      (await client.masternode.getMasternode(masternodeId))[masternodeId]
+    const masternode = await masternodeMapper.get(masternodeId)
+
+    expect(masternode).not.toStrictEqual(undefined)
+    expect(masternode?.operatorAddress).toStrictEqual(masternodeRPCInfo.operatorAuthAddress)
+    expect(masternode?.ownerAddress).toStrictEqual(masternodeRPCInfo.ownerAuthAddress)
+    expect(masternode?.creationHeight).toStrictEqual(masternodeRPCInfo.creationHeight)
+    expect(masternode?.resignHeight).toStrictEqual(masternodeRPCInfo.resignHeight)
+    expect(masternode?.mintedBlocks).toStrictEqual(masternodeRPCInfo.mintedBlocks)
+  })
+})
+
+describe('create masternode (post eunos paya)', () => {
+  const container = new MasterNodeRegTestContainer()
   let app: NestFastifyApplication
   let client: JsonRpcClient
 
