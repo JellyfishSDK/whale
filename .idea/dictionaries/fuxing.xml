@@ -180,7 +180,9 @@
       <w>verificationprogress</w>
       <w>verifymessage</w>
       <w>vernotif</w>
+      <w>vins</w>
       <w>vout</w>
+      <w>vouts</w>
       <w>vsize</w>
       <w>walletname</w>
       <w>walletversion</w>

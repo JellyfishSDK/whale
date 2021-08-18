@@ -6,18 +6,18 @@ on:
     - cron: '0 * * * *'
 
 jobs:
-  build:
+  jellyfish:
     name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
-      - uses: actions/setup-node@aa759c6c94d3800c55b8601f21ba4b2371704cb7
+      - uses: actions/setup-node@25316bbc1f10ac9d8798711f44914b1cf3c4e954
         with:
           node-version: 15
 
       - name: Upgrade dependencies
         run: |
-          npx npm-check-updates -l m -u --deep --target newest --pre -f "/^@defichain\/.+/" -x "/^@defichain\/whale-.+/" \
+          npx npm-check-updates -l m -u --deep --target newest --pre -f "/^@defichain\/.+/" -x "/^@defichain\/(whale|playground)-.+/" \
           | grep -q 'Run npm install to install new versions' && \
           npm i
 
@@ -26,13 +26,13 @@ jobs:
         with:
           token: ${{ secrets.DEFICHAIN_BOT_GITHUB_TOKEN }}
           labels: kind/dependencies
-          commit-message: Bump @defichain dependencies
           committer: DeFiChain Bot <github-bot@defichain.com>
           author: DeFiChain Bot <github-bot@defichain.com>
-          title: Bump @defichain dependencies
+          title: Bump @defichain/jellyfish dependencies
+          commit-message: Bump @defichain/jellyfish dependencies
           body: |
             #### What kind of PR is this?:
             /kind dependencies
             #### What this PR does / why we need it:
-            Bump `@defichain/*` dependencies to the newest release.
-          branch: defichain-bot/bump-defichain-deps
+            Bump `@defichain/jellyfish` dependencies to the latest release.
+          branch: defichain-bot/bump-jellyfish-deps

@@ -7,13 +7,13 @@ import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintToken
 import { CacheModule, NotFoundException } from '@nestjs/common'
 import { DeFiDCache } from './cache/defid.cache'
 import { ConfigService } from '@nestjs/config'
+import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 
 const container = new MasterNodeRegTestContainer()
 let controller: PoolPairController
 
 beforeAll(async () => {
   await container.start()
-  await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
   const client = new JsonRpcClient(await container.getCachedRpcUrl())
 
@@ -25,6 +25,7 @@ beforeAll(async () => {
     providers: [
       { provide: JsonRpcClient, useValue: client },
       DeFiDCache,
+      SemaphoreCache,
       PoolPairService,
       ConfigService
     ]
@@ -33,7 +34,6 @@ beforeAll(async () => {
   controller = app.get(PoolPairController)
 
   await setup()
-  await app.get(PoolPairService).syncDfiUsdPair()
 })
 
 afterAll(async () => {
@@ -128,13 +128,19 @@ describe('list', () => {
       status: true,
       tokenA: {
         id: '2',
+        symbol: 'B',
         reserve: '50',
         blockCommission: '0'
       },
       tokenB: {
         id: '0',
+        symbol: 'DFI',
         reserve: '300',
         blockCommission: '0'
+      },
+      apr: {
+        reward: 0,
+        total: 0
       },
       commission: '0',
       totalLiquidity: {
@@ -200,13 +206,19 @@ describe('get', () => {
       status: true,
       tokenA: {
         id: expect.any(String),
+        symbol: 'USDT',
         reserve: '100',
         blockCommission: '0'
       },
       tokenB: {
-        id: expect.any(String),
+        id: '0',
+        symbol: 'DFI',
         reserve: '200',
         blockCommission: '0'
+      },
+      apr: {
+        reward: 0,
+        total: 0
       },
       commission: '0',
       totalLiquidity: {

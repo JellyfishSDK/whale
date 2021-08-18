@@ -3,9 +3,7 @@ import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
 import { ApiPagedResponse, WhaleApiClient, WhaleApiException } from '../../src'
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens } from '@defichain/testing'
-import { PoolPairService } from '@src/module.api/poolpair.service'
 import { PoolPairData } from '../../src/api/poolpairs'
-import waitForExpect from 'wait-for-expect'
 
 let container: MasterNodeRegTestContainer
 let service: StubService
@@ -17,16 +15,10 @@ beforeAll(async () => {
   client = new StubWhaleApiClient(service)
 
   await container.start()
-  await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
   await service.start()
 
   await setup()
-
-  await waitForExpect(() => {
-    // @ts-expect-error
-    expect(service.app?.get(PoolPairService).USDT_PER_DFI).toBeDefined()
-  }, 61000) // 60 seconds interval
 })
 
 afterAll(async () => {
@@ -103,13 +95,19 @@ describe('list', () => {
       status: true,
       tokenA: {
         id: '2',
+        symbol: 'B',
         reserve: '50',
         blockCommission: '0'
       },
       tokenB: {
         id: '0',
+        symbol: 'DFI',
         reserve: '300',
         blockCommission: '0'
+      },
+      apr: {
+        reward: 0,
+        total: 0
       },
       commission: '0',
       totalLiquidity: {
@@ -171,13 +169,19 @@ describe('get', () => {
       status: true,
       tokenA: {
         id: expect.any(String),
+        symbol: 'A',
         reserve: '100',
         blockCommission: '0'
       },
       tokenB: {
-        id: expect.any(String),
+        id: '0',
+        symbol: 'DFI',
         reserve: '200',
         blockCommission: '0'
+      },
+      apr: {
+        reward: 0,
+        total: 0
       },
       commission: '0',
       totalLiquidity: {

@@ -13,6 +13,9 @@ import { Masternodes } from './api/masternodes'
 import { Blocks } from './api/blocks'
 import { Oracles } from './api/oracles'
 import { Prices } from './api/prices'
+import { Stats } from './api/stats'
+import { Rawtx } from './api/rawtx'
+import { Fee } from './api/fee'
 
 /**
  * WhaleApiClient Options
@@ -28,8 +31,9 @@ export interface WhaleApiClientOptions {
 
   /**
    * Version of API
+   * `v{major}.{minor}` or `v{major}`
    */
-  version?: `v${number}.${number}`
+  version?: string
 
   /**
    * Network that whale client is configured to
@@ -40,7 +44,7 @@ export interface WhaleApiClientOptions {
 /**
  * WhaleApiClient default options
  */
-export const DefaultOptions: WhaleApiClientOptions = {
+const DEFAULT_OPTIONS: WhaleApiClientOptions = {
   url: 'https://ocean.defichain.com',
   timeout: 60000,
   version: version,
@@ -67,11 +71,14 @@ export class WhaleApiClient {
   public readonly blocks = new Blocks(this)
   public readonly oracles = new Oracles(this)
   public readonly prices = new Prices(this)
+  public readonly stats = new Stats(this)
+  public readonly rawtx = new Rawtx(this)
+  public readonly fee = new Fee(this)
 
   constructor (
     protected readonly options: WhaleApiClientOptions
   ) {
-    this.options = Object.assign(DefaultOptions, options ?? {})
+    this.options = { ...DEFAULT_OPTIONS, ...options }
     this.options.url = this.options.url.replace(/\/$/, '')
   }
 

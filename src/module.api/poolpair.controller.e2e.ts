@@ -4,7 +4,6 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens } from '@defichain/testing'
 import { NotFoundException } from '@nestjs/common'
-import { PoolPairService } from '@src/module.api/poolpair.service'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -12,7 +11,6 @@ let controller: PoolPairController
 
 beforeAll(async () => {
   await container.start()
-  await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
   await container.waitForWalletBalanceGTE(100)
 
@@ -22,7 +20,6 @@ beforeAll(async () => {
   await waitForIndexedHeight(app, 100)
 
   await setup()
-  await app.get(PoolPairService).syncDfiUsdPair()
 })
 
 afterAll(async () => {
@@ -77,6 +74,9 @@ async function setup (): Promise<void> {
     amountB: 431.51288,
     shareAddress: await getNewAddress(container)
   })
+
+  await container.call('setgov', [{ LP_SPLITS: { 8: 1.0 } }])
+  await container.generate(1)
 }
 
 describe('list', () => {
@@ -95,13 +95,19 @@ describe('list', () => {
       status: true,
       tokenA: {
         id: '2',
+        symbol: 'B',
         reserve: '50',
         blockCommission: '0'
       },
       tokenB: {
         id: '0',
+        symbol: 'DFI',
         reserve: '300',
         blockCommission: '0'
+      },
+      apr: {
+        reward: 2229.42,
+        total: 2229.42
       },
       commission: '0',
       totalLiquidity: {
@@ -114,7 +120,7 @@ describe('list', () => {
         ab: '0.16666666',
         ba: '6'
       },
-      rewardPct: '0',
+      rewardPct: '1',
       customRewards: undefined,
       creation: {
         tx: expect.any(String),
@@ -167,13 +173,19 @@ describe('get', () => {
       status: true,
       tokenA: {
         id: expect.any(String),
+        symbol: 'A',
         reserve: '100',
         blockCommission: '0'
       },
       tokenB: {
-        id: expect.any(String),
+        id: '0',
+        symbol: 'DFI',
         reserve: '200',
         blockCommission: '0'
+      },
+      apr: {
+        reward: 0,
+        total: 0
       },
       commission: '0',
       totalLiquidity: {

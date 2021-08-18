@@ -33,10 +33,13 @@ export class PoolPairController {
       limit: query.size
     }, true)
 
-    const items = Object.entries(result).map(([id, info]) => {
-      const totalLiquidityUsd = this.poolPairService.getTotalLiquidityUsd(info)
-      return mapPoolPair(id, info, totalLiquidityUsd)
-    })
+    const items: PoolPairData[] = []
+    for (const [id, info] of Object.entries(result)) {
+      const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
+      const apr = await this.poolPairService.getAPR(info)
+      items.push(mapPoolPair(id, info, totalLiquidityUsd, apr))
+    }
+
     return ApiPagedResponse.of(items, query.size, item => {
       return item.id
     })
@@ -53,23 +56,27 @@ export class PoolPairController {
       throw new NotFoundException('Unable to find poolpair')
     }
 
-    const totalLiquidityUsd = this.poolPairService.getTotalLiquidityUsd(info)
-    return mapPoolPair(String(id), info, totalLiquidityUsd)
+    const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
+    const apr = await this.poolPairService.getAPR(info)
+    return mapPoolPair(String(id), info, totalLiquidityUsd, apr)
   }
 }
 
-export function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber): PoolPairData {
+function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr']): PoolPairData {
+  const [symbolA, symbolB] = info.symbol.split('-')
   return {
     id: id,
     symbol: info.symbol,
     name: info.name,
     status: info.status,
     tokenA: {
+      symbol: symbolA,
       id: info.idTokenA,
       reserve: info.reserveA.toFixed(),
       blockCommission: info.blockCommissionA.toFixed()
     },
     tokenB: {
+      symbol: symbolB,
       id: info.idTokenB,
       reserve: info.reserveB.toFixed(),
       blockCommission: info.blockCommissionB.toFixed()
@@ -90,6 +97,7 @@ export function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?:
     creation: {
       tx: info.creationTx,
       height: info.creationHeight.toNumber()
-    }
+    },
+    apr
   }
 }
