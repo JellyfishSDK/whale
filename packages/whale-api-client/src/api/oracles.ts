@@ -55,3 +55,13 @@ export interface OraclePriceFeed {
     medianTime: number
   }
 }
+
+/**
+ * Time interval for graphing
+ */
+export enum OracleTimeInterval {
+  FIVE_MINUTES = 5 * 60,
+  TEN_MINUTES = 10 * 60,
+  ONE_HOUR = 60 * 60,
+  ONE_DAY = 24 * 60 * 60
+}

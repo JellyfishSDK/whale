@@ -3,6 +3,13 @@ import { SortOrder } from '@src/module.database/database'
 import { ModelMapping } from '@src/module.database/model'
 import { OraclePriceAggregated, OraclePriceAggregatedMapper } from './oracle.price.aggregated'
 
+export enum OracleIntervalSeconds {
+  FIVE_MINUTES = 5 * 60,
+  TEN_MINUTES = 10 * 60,
+  ONE_HOUR = 60 * 60,
+  ONE_DAY = 24 * 60 * 60
+}
+
 const getOraclePriceAggregatedIntervalMapping = (interval: number): ModelMapping<OraclePriceAggregated> => ({
   type: `oracle_price_aggregated_${interval}`,
   index: {
@@ -31,7 +38,7 @@ export interface OraclePriceAggregatedIntervalMapper {
 // 5-minutes
 export class OraclePriceAggregatedInterval5MinuteMapper extends OraclePriceAggregatedMapper
   implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = 5 * 60
+  public readonly interval: number = OracleIntervalSeconds.FIVE_MINUTES
   public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
 
   async query (key: string, limit: number, lt?: string): Promise<OraclePriceAggregated[]> {
@@ -56,7 +63,7 @@ export class OraclePriceAggregatedInterval5MinuteMapper extends OraclePriceAggre
 @Injectable()
 export class OraclePriceAggregatedInterval10MinuteMapper extends OraclePriceAggregatedInterval5MinuteMapper
   implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = 10 * 60
+  public readonly interval: number = OracleIntervalSeconds.TEN_MINUTES
   public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
 }
 
@@ -64,7 +71,7 @@ export class OraclePriceAggregatedInterval10MinuteMapper extends OraclePriceAggr
 @Injectable()
 export class OraclePriceAggregatedInterval1HourMapper extends OraclePriceAggregatedInterval5MinuteMapper
   implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = 60 * 60
+  public readonly interval: number = OracleIntervalSeconds.ONE_HOUR
   public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
 }
 
@@ -72,6 +79,6 @@ export class OraclePriceAggregatedInterval1HourMapper extends OraclePriceAggrega
 @Injectable()
 export class OraclePriceAggregatedInterval1DayMapper extends OraclePriceAggregatedInterval5MinuteMapper
   implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = 24 * 60 * 60
+  public readonly interval: number = OracleIntervalSeconds.ONE_DAY
   public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
 }
