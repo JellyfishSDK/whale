@@ -24,12 +24,12 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
   constructor (
     private readonly feedMapper: OraclePriceFeedMapper,
     private readonly aggregatedMapper: OraclePriceAggregatedMapper,
-    private readonly aggregatedMapper5Minutes: OraclePriceAggregatedInterval5MinuteMapper,
-    private readonly aggregatedMapper10Minutes: OraclePriceAggregatedInterval10MinuteMapper,
-    private readonly aggregatedMapper1Hour: OraclePriceAggregatedInterval1HourMapper,
-    private readonly aggregatedMapper1Day: OraclePriceAggregatedInterval1DayMapper,
     private readonly tokenCurrencyMapper: OracleTokenCurrencyMapper,
-    private readonly priceTickerMapper: PriceTickerMapper
+    private readonly priceTickerMapper: PriceTickerMapper,
+    aggregatedMapper5Minutes: OraclePriceAggregatedInterval5MinuteMapper,
+    aggregatedMapper10Minutes: OraclePriceAggregatedInterval10MinuteMapper,
+    aggregatedMapper1Hour: OraclePriceAggregatedInterval1HourMapper,
+    aggregatedMapper1Day: OraclePriceAggregatedInterval1DayMapper
   ) {
     super()
 
