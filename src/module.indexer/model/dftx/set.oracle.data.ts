@@ -57,18 +57,22 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
       }
 
       await this.aggregatedMapper.put(aggregated)
-      for (const intervalMapper of this.intervalMappers) {
-        const previous = await intervalMapper.query(`${token}-${currency}`, 1)
-        if (previous.length === 0 || (previous[0].block.medianTime + intervalMapper.interval) <= block.mediantime) {
-          await intervalMapper.put(aggregated)
-        }
-      }
+      await this.indexIntervalMappers(block, token, currency, aggregated)
 
       await this.priceTickerMapper.put({
         id: aggregated.key,
         sort: HexEncoder.encodeHeight(aggregated.aggregated.oracles.total) + HexEncoder.encodeHeight(aggregated.block.height) + aggregated.key,
         price: aggregated
       })
+    }
+  }
+
+  private async indexIntervalMappers (block: RawBlock, token: string, currency: string, aggregated: OraclePriceAggregated): Promise<void> {
+    for (const intervalMapper of this.intervalMappers) {
+      const previous = await intervalMapper.query(`${token}-${currency}`, 1)
+      if (previous.length === 0 || (previous[0].block.medianTime + intervalMapper.interval) <= block.mediantime) {
+        await intervalMapper.put(aggregated)
+      }
     }
   }
 
