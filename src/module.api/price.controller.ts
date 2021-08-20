@@ -64,22 +64,15 @@ export class PriceController {
       @Param('interval') interval: number,
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<OraclePriceAggregated>> {
-    if (interval === 0) {
-      const items = await this.oraclePriceAggregatedMapper.query(key, query.size, query.next)
-      return ApiPagedResponse.of(items, query.size, item => {
-        return item.sort
-      })
-    } else {
-      const intervalMapper = this.intervalMappers[interval]
-      if (intervalMapper === undefined) {
-        throw new BadRequestException('Specified interval does not exist')
-      }
-
-      const items = await intervalMapper.query(key, query.size, query.next)
-      return ApiPagedResponse.of(items, query.size, item => {
-        return item.sort
-      })
+    const intervalMapper = this.intervalMappers[interval]
+    if (intervalMapper === undefined) {
+      throw new BadRequestException('Specified interval does not exist')
     }
+
+    const items = await intervalMapper.query(key, query.size, query.next)
+    return ApiPagedResponse.of(items, query.size, item => {
+      return item.sort
+    })
   }
 
   @Get('/:key/oracles')

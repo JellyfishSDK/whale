@@ -1,6 +1,6 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { StubService } from '../stub.service'
-import { WhaleApiClient } from '../../src'
+import { WhaleApiClient, WhaleApiException } from '../../src'
 import { StubWhaleApiClient } from '../stub.client'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { PriceFeedTimeInterval } from '@whale-api-client/api/prices'
@@ -324,5 +324,21 @@ describe('pricefeed with interval', () => {
         '1.00000000'
       ]
     )
+  })
+
+  it('throws on bad param', async () => {
+    expect.assertions(2)
+    try {
+      await apiClient.prices.getFeedWithInterval('S1', 'USD', 1)
+    } catch (err) {
+      expect(err).toBeInstanceOf(WhaleApiException)
+      expect(err.error).toStrictEqual({
+        code: 400,
+        type: 'BadRequest',
+        at: expect.any(Number),
+        message: 'Specified interval does not exist',
+        url: '/v0.0/regtest/prices/S1-USD/1/feed?size=30'
+      })
+    }
   })
 })
