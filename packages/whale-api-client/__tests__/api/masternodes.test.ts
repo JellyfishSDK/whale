@@ -46,7 +46,7 @@ describe('list', () => {
       operator: { address: 'mswsMVsyGMj1FzDMbbxw2QW3KvQAv2FKiy' },
       creation: { height: 0 },
       resign: {
-        tx: '',
+        tx: undefined,
         height: -1
       },
       timelock: 0
