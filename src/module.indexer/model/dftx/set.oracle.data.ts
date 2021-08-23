@@ -70,7 +70,9 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
   private async indexIntervalMappers (block: RawBlock, token: string, currency: string, aggregated: OraclePriceAggregated): Promise<void> {
     for (const intervalMapper of this.intervalMappers) {
       const previous = await intervalMapper.query(`${token}-${currency}`, 1)
-      if (previous.length === 0 || (previous[0].block.medianTime + intervalMapper.interval) <= block.mediantime) {
+      if (previous.length === 0) {
+        await intervalMapper.put(aggregated)
+      } else if ((previous[0].block.medianTime + intervalMapper.interval) <= block.mediantime) {
         // Fetch all prices since the last interval
         const prices = await this.aggregatedMapper.queryGt(`${token}-${currency}`, 1000, previous[0].sort)
         if (prices.length !== 0) {
@@ -85,8 +87,6 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
               amount: averaged.dividedBy(prices.length).toFixed(8)
             }
           })
-        } else {
-          await intervalMapper.put(aggregated)
         }
       }
     }

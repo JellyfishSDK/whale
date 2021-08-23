@@ -298,16 +298,16 @@ describe('pricefeed with interval', () => {
     expect(interval5Minutes.length).toStrictEqual(11)
     expect(interval5Minutes.map(x => x.aggregated.amount)).toStrictEqual(
       [
-        '57.00000000',
-        '52.00000000',
-        '47.00000000',
-        '42.00000000',
-        '37.00000000',
-        '32.00000000',
-        '27.00000000',
-        '22.00000000',
-        '17.00000000',
-        '12.00000000',
+        '55.00000000',
+        '50.00000000',
+        '45.00000000',
+        '40.00000000',
+        '35.00000000',
+        '30.00000000',
+        '25.00000000',
+        '20.00000000',
+        '15.00000000',
+        '7.00000000',
         '1.00000000'
       ]
     )
@@ -316,11 +316,11 @@ describe('pricefeed with interval', () => {
     expect(interval10Minutes.length).toStrictEqual(6)
     expect(interval10Minutes.map(x => x.aggregated.amount)).toStrictEqual(
       [
-        '57.00000000',
-        '47.00000000',
-        '37.00000000',
-        '27.00000000',
-        '17.00000000',
+        '52.50000000',
+        '42.50000000',
+        '32.50000000',
+        '22.50000000',
+        '9.50000000',
         '1.00000000'
       ]
     )
