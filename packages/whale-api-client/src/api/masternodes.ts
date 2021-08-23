@@ -51,7 +51,7 @@ export interface MasternodeData {
     height: number
   }
   resign: {
-    tx: string
+    tx?: string
     height: number
   }
   timelock: number
