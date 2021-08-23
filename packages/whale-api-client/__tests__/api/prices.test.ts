@@ -337,7 +337,7 @@ describe('pricefeed with interval', () => {
         type: 'BadRequest',
         at: expect.any(Number),
         message: 'Specified interval does not exist',
-        url: '/v0.0/regtest/prices/S1-USD/1/feed?size=30'
+        url: '/v0.0/regtest/prices/S1-USD/feed/interval/1?size=30'
       })
     }
   })
