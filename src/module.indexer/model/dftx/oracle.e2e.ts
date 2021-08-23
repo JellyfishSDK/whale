@@ -439,11 +439,11 @@ describe('interval set oracle data', () => {
     expect(interval10Minutes.length).toStrictEqual(6)
     expect(interval10Minutes.map(x => x.aggregated.amount)).toStrictEqual(
       [
-        '57.00000000',
-        '47.00000000',
-        '37.00000000',
-        '27.00000000',
-        '17.00000000',
+        '52.50000000',
+        '42.50000000',
+        '32.50000000',
+        '22.50000000',
+        '9.50000000',
         '1.00000000'
       ]
     )
