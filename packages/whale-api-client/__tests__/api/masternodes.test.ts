@@ -33,7 +33,7 @@ afterAll(async () => {
 describe('list', () => {
   it('should list masternodes', async () => {
     const data = await client.masternodes.list()
-    expect(Object.keys(data[0]).length).toStrictEqual(8)
+    expect(Object.keys(data[0]).length).toStrictEqual(9)
     expect(data.hasNext).toStrictEqual(false)
     expect(data.nextToken).toStrictEqual(undefined)
 
@@ -76,7 +76,7 @@ describe('get', () => {
     const masternode = (await client.masternodes.list(1))[0]
 
     const data = await client.masternodes.get(masternode.id)
-    expect(Object.keys(data).length).toStrictEqual(8)
+    expect(Object.keys(data).length).toStrictEqual(9)
     expect(data).toStrictEqual({
       id: masternode.id,
       sort: '00000000e86c027861cc0af423313f4152a44a83296a388eb51bf1a6dde9bd75bed55fb4',
