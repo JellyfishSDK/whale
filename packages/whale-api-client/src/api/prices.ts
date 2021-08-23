@@ -35,7 +35,7 @@ export class Prices {
 
   async getFeedWithInterval (token: string, currency: string, interval: PriceFeedTimeInterval, size: number = 30, next?: string): Promise<ApiPagedResponse<PriceFeed>> {
     const key = `${token}-${currency}`
-    return await this.client.requestList('GET', `prices/${key}/${interval}/feed`, size, next)
+    return await this.client.requestList('GET', `prices/${key}/feed/interval/${interval}`, size, next)
   }
 
   async getOracles (token: string, currency: string, size: number = 30, next?: string): Promise<ApiPagedResponse<PriceOracle>> {
