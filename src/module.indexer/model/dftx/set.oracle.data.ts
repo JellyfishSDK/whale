@@ -74,7 +74,7 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
         await intervalMapper.put(aggregated)
       } else if ((previous[0].block.medianTime + intervalMapper.interval) <= block.mediantime) {
         // Fetch all prices since the last interval
-        const prices = await this.aggregatedMapper.queryGt(`${token}-${currency}`, 1000, previous[0].sort)
+        const prices = await this.aggregatedMapper.queryGt(`${token}-${currency}`, 5760, previous[0].sort)
         if (prices.length !== 0) {
           const averaged = prices.reduce((prev, curr): BigNumber => {
             return prev.plus(curr.aggregated.amount)
