@@ -58,7 +58,7 @@ export class PriceController {
     })
   }
 
-  @Get('/:key/:interval/feed')
+  @Get('/:key/feed/interval/:interval')
   async getFeedWithInterval (
     @Param('key') key: string,
       @Param('interval') interval: number,
