@@ -41,7 +41,7 @@ export class StatsController {
     }
   }
 
-  private async cachedGet<T> (field: string, fetch: () => Promise<T>, ttl: number): Promise<T> {
+  private async cachedGet<T>(field: string, fetch: () => Promise<T>, ttl: number): Promise<T> {
     const object = await this.cache.get(`StatsController.${field}`, fetch, { ttl })
     return requireValue(object, field)
   }
@@ -113,6 +113,47 @@ export class StatsController {
           tvl: new BigNumber(x.tvl).times(usdt).toNumber()
         }
       })
+    }
+  }
+
+  private async getEmission (): Promise<StatsData['emission']> {
+    const info = await this.rpcClient.blockchain.getBlockchainInfo()
+    const { emissionburn, amount, feeburn } = await this.rpcClient.account.getBurnInfo()
+
+    let blockSubsidy = 405.04
+    const eunosHeight = 894000
+    const emissionReductionPeriod = 32690
+    const emissionReductionAmount = 1658
+    const reductions = Math.floor((info.blocks - eunosHeight) / emissionReductionPeriod)
+
+    let reductionAmount = 0
+    for (let i = reductions; i > 0; i--) {
+      reductionAmount = (blockSubsidy * emissionReductionAmount) / 100000
+      if (reductionAmount <= 0.0000000001) {
+        blockSubsidy = 0
+        break
+      }
+
+      blockSubsidy -= reductionAmount
+    }
+    const communityRewards: Record<string, any> = {
+      masternode: 33.33 * 0.01,
+      dex: 25.45 * 0.01,
+      community: 4.91 * 0.01,
+      anchor: 0.02 * 0.01
+    }
+
+    for (const reward in communityRewards) {
+      communityRewards[reward] *= blockSubsidy
+    }
+
+    return {
+      total: blockSubsidy,
+      anchor: communityRewards.anchor,
+      dex: communityRewards.dex,
+      community: communityRewards.community,
+      masternode: communityRewards.masternode,
+      burned: amount.plus(emissionburn).plus(feeburn).toNumber()
     }
   }
 }
