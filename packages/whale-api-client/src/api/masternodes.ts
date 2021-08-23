@@ -32,6 +32,9 @@ export class Masternodes {
 
 /**
  * Masternode data
+ *
+ * timelock is the number of weeks the masternode
+ * is locked up for
  */
 export interface MasternodeData {
   id: string
@@ -51,6 +54,7 @@ export interface MasternodeData {
     tx: string
     height: number
   }
+  timelock: number
 }
 
 /**

@@ -41,7 +41,7 @@ export class CreateMasternodeIndexer extends DfTxIndexer<CreateMasternode> {
         creationHeight: block.height,
         resignHeight: -1,
         mintedBlocks: 0,
-        timelock: 0,
+        timelock: data.timelock ?? 0,
         block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
       })
     }

@@ -5,6 +5,7 @@ import { NotFoundException } from '@nestjs/common'
 import { MasternodeController } from '@src/module.api/masternode.controller'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { MasternodeState } from '@whale-api-client/api/masternodes'
+import { MasternodeTimeLock } from '@defichain/jellyfish-api-core/dist/category/masternode'
 
 describe('list', () => {
   const container = new MasterNodeRegTestContainer()
@@ -32,7 +33,7 @@ describe('list', () => {
   it('should list masternodes', async () => {
     const result = await controller.list({ size: 4 })
     expect(result.data.length).toStrictEqual(4)
-    expect(Object.keys(result.data[0]).length).toStrictEqual(8)
+    expect(Object.keys(result.data[0]).length).toStrictEqual(9)
   })
 
   it('should list masternodes with pagination', async () => {
@@ -83,7 +84,7 @@ describe('get', () => {
     const masternode = (await controller.list({ size: 1 })).data[0]
 
     const result = await controller.get(masternode.id)
-    expect(Object.keys(result).length).toStrictEqual(8)
+    expect(Object.keys(result).length).toStrictEqual(9)
     expect(result).toStrictEqual({ ...masternode, mintedBlocks: expect.any(Number) })
   })
 
@@ -148,5 +149,48 @@ describe('resign', () => {
     expect(result.state).toStrictEqual(MasternodeState.PRE_RESIGNED)
     expect(result.resign.tx).toStrictEqual(resignTx)
     expect(result.resign.height).toStrictEqual(resignHeight)
+  })
+})
+
+describe('timelock', () => {
+  const container = new MasterNodeRegTestContainer()
+  let app: NestFastifyApplication
+  let controller: MasternodeController
+  let client: JsonRpcClient
+
+  beforeAll(async () => {
+    await container.start()
+    await container.waitForWalletCoinbaseMaturity()
+
+    app = await createTestingApp(container)
+    client = new JsonRpcClient(await container.getCachedRpcUrl())
+    controller = app.get(MasternodeController)
+
+    await container.generate(1)
+    const height = await client.blockchain.getBlockCount()
+    await container.generate(1)
+    await waitForIndexedHeight(app, height)
+  })
+
+  afterAll(async () => {
+    await stopTestingApp(container, app)
+  })
+
+  it('should get masternode with timelock', async () => {
+    await container.generate(1)
+
+    const ownerAddress = await client.wallet.getNewAddress()
+    const masternodeId = await client.masternode.createMasternode(ownerAddress, undefined, {
+      timelock: MasternodeTimeLock.TEN_YEAR,
+      utxos: []
+    })
+
+    await container.generate(1)
+    const height = await client.blockchain.getBlockCount()
+    await container.generate(1)
+    await waitForIndexedHeight(app, height)
+
+    const result = await controller.get(masternodeId)
+    expect(result.timelock).toStrictEqual(520)
   })
 })

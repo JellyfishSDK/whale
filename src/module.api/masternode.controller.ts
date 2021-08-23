@@ -72,7 +72,8 @@ export class MasternodeController {
       resign: {
         tx: info.resignTx ?? '',
         height: info.resignHeight
-      }
+      },
+      timelock: info.timelock
     }
   }
 }
