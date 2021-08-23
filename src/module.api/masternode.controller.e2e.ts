@@ -147,8 +147,8 @@ describe('resign', () => {
 
     const result = await controller.get(masternodeId)
     expect(result.state).toStrictEqual(MasternodeState.PRE_RESIGNED)
-    expect(result.resign.tx).toStrictEqual(resignTx)
-    expect(result.resign.height).toStrictEqual(resignHeight)
+    expect(result?.resign?.tx).toStrictEqual(resignTx)
+    expect(result?.resign?.height).toStrictEqual(resignHeight)
   })
 })
 

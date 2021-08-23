@@ -83,8 +83,8 @@ describe('get', () => {
       operator: { address: masternode.operator.address },
       creation: { height: masternode.creation.height },
       resign: {
-        tx: masternode.resign.tx,
-        height: masternode.resign.height
+        tx: masternode?.resign?.tx,
+        height: masternode?.resign?.height
       },
       timelock: 0
     })
