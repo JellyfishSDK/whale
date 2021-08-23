@@ -45,10 +45,6 @@ describe('list', () => {
       owner: { address: 'mwsZw8nF7pKxWH8eoKL9tPxTpaFkz7QeLU' },
       operator: { address: 'mswsMVsyGMj1FzDMbbxw2QW3KvQAv2FKiy' },
       creation: { height: 0 },
-      resign: {
-        tx: undefined,
-        height: -1
-      },
       timelock: 0
     })
   })

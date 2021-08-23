@@ -69,7 +69,7 @@ export class MasternodeController {
       creation: {
         height: info.creationHeight
       },
-      resign: {
+      resign: info.resignHeight === -1 ? undefined : {
         tx: info.resignTx,
         height: info.resignHeight
       },

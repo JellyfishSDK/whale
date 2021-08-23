@@ -50,7 +50,7 @@ export interface MasternodeData {
   creation: {
     height: number
   }
-  resign: {
+  resign?: {
     tx?: string
     height: number
   }
