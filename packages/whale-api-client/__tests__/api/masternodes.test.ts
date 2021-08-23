@@ -48,7 +48,8 @@ describe('list', () => {
       resign: {
         tx: '',
         height: -1
-      }
+      },
+      timelock: 0
     })
   })
 
@@ -88,7 +89,8 @@ describe('get', () => {
       resign: {
         tx: masternode.resign.tx,
         height: masternode.resign.height
-      }
+      },
+      timelock: 0
     })
   })
 
