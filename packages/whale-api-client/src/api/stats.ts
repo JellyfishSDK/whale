@@ -38,4 +38,9 @@ export interface StatsData {
   price: {
     usdt: number
   }
+  masternodes: {
+    count: number
+    tvl: number
+    locked: Array<{weeks: number, tvl: number, count: number}>
+  }
 }

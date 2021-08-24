@@ -6,12 +6,14 @@ import { BlockMapper } from '@src/module.model/block'
 import { PoolPairService } from '@src/module.api/poolpair.service'
 import BigNumber from 'bignumber.js'
 import { PriceTickerMapper } from '@src/module.model/price.ticker'
+import { MasternodeStats, MasternodeStatsMapper } from '@src/module.model/masternode.stats'
 
 @Controller('/stats')
 export class StatsController {
   constructor (
     protected readonly blockMapper: BlockMapper,
     protected readonly priceTickerMapper: PriceTickerMapper,
+    protected readonly masternodeStatsMapper: MasternodeStatsMapper,
     protected readonly poolPairService: PoolPairService,
     protected readonly rpcClient: JsonRpcClient,
     protected readonly cache: SemaphoreCache
@@ -30,7 +32,8 @@ export class StatsController {
       },
       burned: await this.cachedGet('burned', this.getBurned.bind(this), 1800),
       tvl: await this.cachedGet('tvl', this.getTVL.bind(this), 300),
-      price: await this.cachedGet('price', this.getPrice.bind(this), 300)
+      price: await this.cachedGet('price', this.getPrice.bind(this), 300),
+      masternodes: await this.cachedGet('masternodes', this.getMasternodes.bind(this), 300)
     }
   }
 
@@ -78,6 +81,26 @@ export class StatsController {
     const usdt = await this.poolPairService.getUSDT_PER_DFI()
     return {
       usdt: requireValue(usdt, 'price.usdt').toNumber()
+    }
+  }
+
+  private async getMasternodes (): Promise<StatsData['masternodes']> {
+    const latest = await this.masternodeStatsMapper.getLatest()
+    const masternodeStats = requireValue(latest, 'masternode.stats')
+    return await this.mapMasternodeStats(masternodeStats)
+  }
+
+  private async mapMasternodeStats (masternodeStats: MasternodeStats): Promise<StatsData['masternodes']> {
+    const usdt = await this.poolPairService.getUSDT_PER_DFI()
+    return {
+      tvl: new BigNumber(masternodeStats.stats.tvl).times(usdt ?? 0).toNumber(),
+      count: masternodeStats.stats.count,
+      locked: masternodeStats.stats.locked.map(x => {
+        return {
+          ...x,
+          tvl: new BigNumber(x.tvl).times(usdt ?? 0).toNumber()
+        }
+      })
     }
   }
 }
