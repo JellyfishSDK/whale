@@ -62,13 +62,13 @@ export interface MasternodeStats extends Model {
 
   stats: {
     count: number // --------------| total count of active masternodes
-    tvl: string // ----------------| // string as decimal: 0.0000
-    locked: TimelockStats[]
+    tvl: string // ----------------| string as decimal: 0.0000
+    locked: TimelockStats[] // ----| TimelockStats[]
   }
 }
 
 export interface TimelockStats {
-  weeks: number // -----------| weeks this category is locked up for
-  tvl: string // ------------| // string as decimal: 0.0000
-  count: number // ------------| total count of active masternodes
+  weeks: number // ----------------| weeks this category is locked up for
+  tvl: string // ------------------| string as decimal: 0.0000
+  count: number // ----------------| total count of active masternodes
 }
