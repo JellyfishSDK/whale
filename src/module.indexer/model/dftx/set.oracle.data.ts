@@ -75,7 +75,7 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
         // Fetch all prices since the last interval
         const prices = await this.aggregatedMapper.queryGt(`${token}-${currency}`, 5760, previous[0].sort)
         if (prices.length !== 0) {
-          const sum = prices.reduce((prev, curr): BigNumber => {
+          const averaged = prices.reduce((prev, curr): BigNumber => {
             return prev.plus(curr.aggregated.amount)
           }, new BigNumber(0))
 
