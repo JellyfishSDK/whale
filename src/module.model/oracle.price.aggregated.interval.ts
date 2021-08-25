@@ -10,11 +10,11 @@ export enum OracleIntervalSeconds {
   ONE_DAY = 24 * 60 * 60
 }
 
-const getOraclePriceAggregatedIntervalMapping = (interval: number): ModelMapping<OraclePriceAggregated> => ({
-  type: `oracle_price_aggregated_${interval}`,
+const OraclePriceAggregatedIntervalMapping: ModelMapping<OraclePriceAggregated> = {
+  type: 'oracle_price_aggregated_interval',
   index: {
     key_sort: {
-      name: `oracle_price_aggregated_${interval}_key_sort`,
+      name: 'oracle_price_aggregated_interval_key_sort',
       partition: {
         type: 'string',
         key: (b: OraclePriceAggregated) => b.key
@@ -25,24 +25,12 @@ const getOraclePriceAggregatedIntervalMapping = (interval: number): ModelMapping
       }
     }
   }
-})
-
-// interface
-export interface OraclePriceAggregatedIntervalMapper {
-  readonly interval: number
-  query: (key: string, limit: number, lt?: string) => Promise<OraclePriceAggregated[]>
-  put: (aggregated: OraclePriceAggregated) => Promise<void>
-  delete: (id: string) => Promise<void>
 }
 
-// 5-minutes
-export class OraclePriceAggregatedInterval5MinuteMapper extends OraclePriceAggregatedMapper
-  implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = OracleIntervalSeconds.FIVE_MINUTES
-  public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
-
+@Injectable()
+export class OraclePriceAggregatedIntervalMapper extends OraclePriceAggregatedMapper {
   async query (key: string, limit: number, lt?: string): Promise<OraclePriceAggregated[]> {
-    return await this.database.query(this.mapping.index.key_sort, {
+    return await this.database.query(OraclePriceAggregatedIntervalMapping.index.key_sort, {
       partitionKey: key,
       limit: limit,
       order: SortOrder.DESC,
@@ -51,34 +39,10 @@ export class OraclePriceAggregatedInterval5MinuteMapper extends OraclePriceAggre
   }
 
   async put (aggregated: OraclePriceAggregated): Promise<void> {
-    return await this.database.put(this.mapping, aggregated)
+    return await this.database.put(OraclePriceAggregatedIntervalMapping, aggregated)
   }
 
   async delete (id: string): Promise<void> {
-    return await this.database.delete(this.mapping, id)
+    return await this.database.delete(OraclePriceAggregatedIntervalMapping, id)
   }
-}
-
-// 10-minutes
-@Injectable()
-export class OraclePriceAggregatedInterval10MinuteMapper extends OraclePriceAggregatedInterval5MinuteMapper
-  implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = OracleIntervalSeconds.TEN_MINUTES
-  public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
-}
-
-// 1-hour
-@Injectable()
-export class OraclePriceAggregatedInterval1HourMapper extends OraclePriceAggregatedInterval5MinuteMapper
-  implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = OracleIntervalSeconds.ONE_HOUR
-  public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
-}
-
-// 1-day
-@Injectable()
-export class OraclePriceAggregatedInterval1DayMapper extends OraclePriceAggregatedInterval5MinuteMapper
-  implements OraclePriceAggregatedIntervalMapper {
-  public readonly interval: number = OracleIntervalSeconds.ONE_DAY
-  public readonly mapping: ModelMapping<OraclePriceAggregated> = getOraclePriceAggregatedIntervalMapping(this.interval)
 }

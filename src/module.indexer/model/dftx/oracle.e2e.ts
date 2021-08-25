@@ -7,7 +7,7 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, invalidateFromHeight, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 import { OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
-import { OraclePriceAggregatedInterval10MinuteMapper, OraclePriceAggregatedInterval5MinuteMapper } from '@src/module.model/oracle.price.aggregated.interval'
+import { OracleIntervalSeconds, OraclePriceAggregatedIntervalMapper } from '@src/module.model/oracle.price.aggregated.interval'
 
 describe('invalidate appoint/remove/update oracle', () => {
   const container = new MasterNodeRegTestContainer()
@@ -417,7 +417,7 @@ describe('interval set oracle data', () => {
     const noInterval = await app.get(OraclePriceAggregatedMapper).query('S1-USD', Number.MAX_SAFE_INTEGER)
     expect(noInterval.length).toStrictEqual(60)
 
-    const interval5Minutes = await app.get(OraclePriceAggregatedInterval5MinuteMapper).query('S1-USD', Number.MAX_SAFE_INTEGER)
+    const interval5Minutes = await app.get(OraclePriceAggregatedIntervalMapper).query(`S1-USD-${OracleIntervalSeconds.FIVE_MINUTES}`, Number.MAX_SAFE_INTEGER)
     expect(interval5Minutes.length).toStrictEqual(11)
     expect(interval5Minutes.map(x => x.aggregated.amount)).toStrictEqual(
       [
@@ -435,7 +435,7 @@ describe('interval set oracle data', () => {
       ]
     )
 
-    const interval10Minutes = await app.get(OraclePriceAggregatedInterval10MinuteMapper).query('S1-USD', Number.MAX_SAFE_INTEGER)
+    const interval10Minutes = await app.get(OraclePriceAggregatedIntervalMapper).query(`S1-USD-${OracleIntervalSeconds.TEN_MINUTES}`, Number.MAX_SAFE_INTEGER)
     expect(interval10Minutes.length).toStrictEqual(6)
     expect(interval10Minutes.map(x => x.aggregated.amount)).toStrictEqual(
       [

@@ -4,11 +4,8 @@ import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable } from '@nestjs/common'
 import { OraclePriceAggregated, OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
 import {
-  OraclePriceAggregatedIntervalMapper,
-  OraclePriceAggregatedInterval5MinuteMapper,
-  OraclePriceAggregatedInterval10MinuteMapper,
-  OraclePriceAggregatedInterval1HourMapper,
-  OraclePriceAggregatedInterval1DayMapper
+  OracleIntervalSeconds,
+  OraclePriceAggregatedIntervalMapper
 } from '@src/module.model/oracle.price.aggregated.interval'
 import { OraclePriceFeed, OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
@@ -19,25 +16,22 @@ import { PriceTickerMapper } from '@src/module.model/price.ticker'
 @Injectable()
 export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
   OP_CODE: number = CSetOracleData.OP_CODE
-  intervalMappers: OraclePriceAggregatedIntervalMapper[]
+  intervals: OracleIntervalSeconds[]
 
   constructor (
     private readonly feedMapper: OraclePriceFeedMapper,
     private readonly aggregatedMapper: OraclePriceAggregatedMapper,
     private readonly tokenCurrencyMapper: OracleTokenCurrencyMapper,
     private readonly priceTickerMapper: PriceTickerMapper,
-    aggregatedMapper5Minutes: OraclePriceAggregatedInterval5MinuteMapper,
-    aggregatedMapper10Minutes: OraclePriceAggregatedInterval10MinuteMapper,
-    aggregatedMapper1Hour: OraclePriceAggregatedInterval1HourMapper,
-    aggregatedMapper1Day: OraclePriceAggregatedInterval1DayMapper
+    private readonly aggregatedIntervalMapper: OraclePriceAggregatedIntervalMapper
   ) {
     super()
 
-    this.intervalMappers = [
-      aggregatedMapper5Minutes,
-      aggregatedMapper10Minutes,
-      aggregatedMapper1Hour,
-      aggregatedMapper1Day
+    this.intervals = [
+      OracleIntervalSeconds.FIVE_MINUTES,
+      OracleIntervalSeconds.TEN_MINUTES,
+      OracleIntervalSeconds.ONE_HOUR,
+      OracleIntervalSeconds.ONE_DAY
     ]
   }
 
@@ -68,11 +62,16 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
   }
 
   private async indexIntervalMappers (block: RawBlock, token: string, currency: string, aggregated: OraclePriceAggregated): Promise<void> {
-    for (const intervalMapper of this.intervalMappers) {
-      const previous = await intervalMapper.query(`${token}-${currency}`, 1)
+    for (const interval of this.intervals) {
+      const intervalKey = `${token}-${currency}-${interval}`
+      const previous = await this.aggregatedIntervalMapper.query(intervalKey, 1)
       if (previous.length === 0) {
-        await intervalMapper.put(aggregated)
-      } else if ((previous[0].block.medianTime + intervalMapper.interval) <= block.mediantime) {
+        await this.aggregatedIntervalMapper.put({
+          ...aggregated,
+          id: `${token}-${currency}-${interval}-${block.height}`,
+          key: intervalKey
+        })
+      } else if ((previous[0].block.medianTime + (interval as number)) <= block.mediantime) {
         // Fetch all prices since the last interval
         const prices = await this.aggregatedMapper.queryGt(`${token}-${currency}`, 5760, previous[0].sort)
         if (prices.length !== 0) {
@@ -80,12 +79,14 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
             return prev.plus(curr.aggregated.amount)
           }, new BigNumber(0))
 
-          await intervalMapper.put({
+          await this.aggregatedIntervalMapper.put({
             ...aggregated,
             aggregated: {
               ...aggregated.aggregated,
               amount: averaged.dividedBy(prices.length).toFixed(8)
-            }
+            },
+            id: `${token}-${currency}-${interval}-${block.height}`,
+            key: intervalKey
           })
         }
       }
@@ -173,9 +174,9 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
 
     for (const [token, currency] of pairs) {
       await this.aggregatedMapper.delete(`${token}-${currency}-${block.height}`)
-      for (const intervalMapper of this.intervalMappers) {
+      for (const interval of this.intervals) {
         // In this case just always delete, if it exists
-        await intervalMapper.delete(`${token}-${currency}-${block.height}`)
+        await this.aggregatedIntervalMapper.delete(`${token}-${currency}-${interval}-${block.height}`)
       }
       // price ticker won't be deleted
     }
