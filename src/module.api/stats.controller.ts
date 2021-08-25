@@ -91,14 +91,15 @@ export class StatsController {
   }
 
   private async mapMasternodeStats (masternodeStats: MasternodeStats): Promise<StatsData['masternodes']> {
-    const usdt = await this.poolPairService.getUSDT_PER_DFI()
+    const optionalUsdt = await this.poolPairService.getUSDT_PER_DFI()
+    const usdt = requireValue(optionalUsdt, 'price.usdt')
     return {
-      tvl: new BigNumber(masternodeStats.stats.tvl).times(usdt ?? 0).toNumber(),
+      tvl: new BigNumber(masternodeStats.stats.tvl).times(usdt).toNumber(),
       count: masternodeStats.stats.count,
       locked: masternodeStats.stats.locked.map(x => {
         return {
           ...x,
-          tvl: new BigNumber(x.tvl).times(usdt ?? 0).toNumber()
+          tvl: new BigNumber(x.tvl).times(usdt).toNumber()
         }
       })
     }
