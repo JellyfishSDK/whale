@@ -25,6 +25,8 @@ export class StatsController {
     const block = await this.blockMapper.getHighest()
     const height = requireValue(block?.height, 'count.blocks')
 
+    const masternodes = await this.cachedGet('masternodes', this.getMasternodes.bind(this), 300)
+
     return {
       count: {
         ...await this.cachedGet('count', this.getCount.bind(this), 1800),
@@ -33,7 +35,9 @@ export class StatsController {
       burned: await this.cachedGet('burned', this.getBurned.bind(this), 1800),
       tvl: await this.cachedGet('tvl', this.getTVL.bind(this), 300),
       price: await this.cachedGet('price', this.getPrice.bind(this), 300),
-      masternodes: await this.cachedGet('masternodes', this.getMasternodes.bind(this), 300)
+      masternodes: {
+        locked: masternodes.locked
+      }
     }
   }
 
@@ -45,11 +49,13 @@ export class StatsController {
   private async getCount (): Promise<StatsData['count']> {
     const tokens = await this.rpcClient.token.listTokens({ including_start: true, start: 0, limit: 1000 }, false)
     const prices = await this.priceTickerMapper.query(1000)
+    const masternodes = await this.masternodeStatsMapper.getLatest()
 
     return {
       blocks: 0,
       prices: prices.length,
-      tokens: Object.keys(tokens).length
+      tokens: Object.keys(tokens).length,
+      masternodes: requireValue(masternodes?.stats?.count, 'masternodes.stats.count')
     }
   }
 
@@ -61,9 +67,15 @@ export class StatsController {
       dex = dex.plus(requireValue(liq, `tvl.dex.${pair.symbol}`))
     }
 
+    const optionalUsdt = await this.poolPairService.getUSDT_PER_DFI()
+    const usdt = requireValue(optionalUsdt, 'price.usdt')
+    const masternodes = await this.masternodeStatsMapper.getLatest()
+    const masternodeTvl = requireValue(masternodes?.stats?.tvl, 'masternodes.stats.tvl')
+
     return {
       dex: dex.toNumber(),
-      total: dex.toNumber()
+      total: dex.toNumber(),
+      masternodes: new BigNumber(masternodeTvl).times(usdt).toNumber()
     }
   }
 
@@ -94,8 +106,6 @@ export class StatsController {
     const optionalUsdt = await this.poolPairService.getUSDT_PER_DFI()
     const usdt = requireValue(optionalUsdt, 'price.usdt')
     return {
-      tvl: new BigNumber(masternodeStats.stats.tvl).times(usdt).toNumber(),
-      count: masternodeStats.stats.count,
       locked: masternodeStats.stats.locked.map(x => {
         return {
           ...x,

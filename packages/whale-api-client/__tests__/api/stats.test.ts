@@ -65,20 +65,18 @@ describe('stats', () => {
   it('should get', async () => {
     const data = await client.stats.get()
     expect(data).toStrictEqual({
-      count: { blocks: 117, prices: 0, tokens: 7 },
+      count: { blocks: 117, prices: 0, tokens: 7, masternodes: 8 },
       burned: { address: 0, emission: 7014.88, fee: 3, total: 7017.88 },
-      tvl: { dex: 3853.9423279032194, total: 3853.9423279032194 },
+      tvl: { dex: 3853.9423279032194, total: 3853.9423279032194, masternodes: 185.3942336 },
       price: { usdt: 2.31742792 },
       masternodes: {
-        count: 8,
         locked: [
           {
             count: 8,
             tvl: 185.3942336,
             weeks: 0
           }
-        ],
-        tvl: 185.3942336
+        ]
       }
     })
   })
