@@ -71,11 +71,12 @@ export class StatsController {
     const usdt = requireValue(optionalUsdt, 'price.usdt')
     const masternodes = await this.masternodeStatsMapper.getLatest()
     const masternodeTvl = requireValue(masternodes?.stats?.tvl, 'masternodes.stats.tvl')
+    const masternodeTvlUSD = new BigNumber(masternodeTvl).times(usdt).toNumber()
 
     return {
       dex: dex.toNumber(),
-      total: dex.toNumber(),
-      masternodes: new BigNumber(masternodeTvl).times(usdt).toNumber()
+      masternodes: masternodeTvlUSD,
+      total: dex.toNumber() + masternodeTvlUSD
     }
   }
 
