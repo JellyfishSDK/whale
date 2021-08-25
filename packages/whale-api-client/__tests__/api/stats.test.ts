@@ -67,7 +67,7 @@ describe('stats', () => {
     expect(data).toStrictEqual({
       count: { blocks: 117, prices: 0, tokens: 7, masternodes: 8 },
       burned: { address: 0, emission: 7014.88, fee: 3, total: 7017.88 },
-      tvl: { dex: 3853.9423279032194, total: 3853.9423279032194, masternodes: 185.3942336 },
+      tvl: { dex: 3853.9423279032194, total: 4039.3365615032194, masternodes: 185.3942336 },
       price: { usdt: 2.31742792 },
       masternodes: {
         locked: [
