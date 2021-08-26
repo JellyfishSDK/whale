@@ -48,8 +48,8 @@ export class OraclePriceAggregatedIntervalMapper extends OraclePriceAggregatedMa
 }
 
 export interface OraclePriceAggregatedInterval extends Model {
-  id: string // ---------| token-currency-height
-  key: string // --------| token-currency
+  id: string // ---------| token-currency-interval-height
+  key: string // --------| token-currency-interval
   sort: string // -------| medianTime-height
 
   token: string
