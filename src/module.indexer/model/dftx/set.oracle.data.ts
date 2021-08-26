@@ -63,34 +63,42 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
 
   private async indexIntervalMappers (block: RawBlock, token: string, currency: string, aggregated: OraclePriceAggregated): Promise<void> {
     for (const interval of this.intervals) {
-      const intervalKey = `${token}-${currency}-${interval}`
-      const previous = await this.aggregatedIntervalMapper.query(intervalKey, 1)
-      if (previous.length === 0) {
+      const previous = await this.aggregatedIntervalMapper.query(`${token}-${currency}-${interval}`, 2)
+      // Start a new bucket
+      if (previous.length < 2 ||
+        (previous[1].block.medianTime + (interval as number)) < previous[0].block.medianTime) {
+        await this.startNewBucket(block, token, currency, aggregated, interval)
+      } else {
+        // Forward aggregate
+        const lastPrice = previous[0].aggregated
+        const count = lastPrice.count + 1
         await this.aggregatedIntervalMapper.put({
           ...aggregated,
+          aggregated: {
+            ...lastPrice,
+            amount: new BigNumber(lastPrice.amount)
+              .times(lastPrice.count).plus(aggregated.aggregated.amount).dividedBy(count).toFixed(8),
+            count
+          },
           id: `${token}-${currency}-${interval}-${block.height}`,
-          key: intervalKey
+          key: `${token}-${currency}-${interval}`
         })
-      } else if ((previous[0].block.medianTime + (interval as number)) <= block.mediantime) {
-        // Fetch all prices since the last interval
-        const prices = await this.aggregatedMapper.queryGt(`${token}-${currency}`, 5760, previous[0].sort)
-        if (prices.length !== 0) {
-          const averaged = prices.reduce((prev, curr): BigNumber => {
-            return prev.plus(curr.aggregated.amount)
-          }, new BigNumber(0))
-
-          await this.aggregatedIntervalMapper.put({
-            ...aggregated,
-            aggregated: {
-              ...aggregated.aggregated,
-              amount: averaged.dividedBy(prices.length).toFixed(8)
-            },
-            id: `${token}-${currency}-${interval}-${block.height}`,
-            key: intervalKey
-          })
-        }
+        await this.aggregatedIntervalMapper.delete(previous[0].id)
       }
     }
+  }
+
+  private async startNewBucket (block: RawBlock, token: string, currency: string,
+    aggregated: OraclePriceAggregated, interval: OracleIntervalSeconds): Promise<void> {
+    await this.aggregatedIntervalMapper.put({
+      ...aggregated,
+      aggregated: {
+        ...aggregated.aggregated,
+        count: 0
+      },
+      id: `${token}-${currency}-${interval}-${block.height}`,
+      key: `${token}-${currency}-${interval}`
+    })
   }
 
   private mapPriceFeeds (block: RawBlock, txns: Array<DfTxTransaction<SetOracleData>>): OraclePriceFeed[] {

@@ -33,15 +33,6 @@ export class OraclePriceAggregatedMapper {
     })
   }
 
-  async queryGt (key: string, limit: number, gt?: string): Promise<OraclePriceAggregated[]> {
-    return await this.database.query(OraclePriceAggregatedMapping.index.key_sort, {
-      partitionKey: key,
-      limit: limit,
-      order: SortOrder.ASC,
-      gt: gt
-    })
-  }
-
   async put (aggregated: OraclePriceAggregated): Promise<void> {
     return await this.database.put(OraclePriceAggregatedMapping, aggregated)
   }
