@@ -53,7 +53,8 @@ export class PriceController {
       @Param('interval') interval: number,
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<OraclePriceAggregated>> {
-    const items = await this.oraclePriceAggregatedMapper.query(`${key}-${interval}`, query.size, query.next)
+    const priceKey = `${key}-${interval}`
+    const items = await this.oraclePriceAggregatedIntervalMapper.query(priceKey, query.size, query.next)
     return ApiPagedResponse.of(items, query.size, item => {
       return item.sort
     })
