@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Model, ModelMapping } from '@src/module.database/model'
 import { Database, SortOrder } from '@src/module.database/database'
+import { ScriptTokenActivityType } from '@src/module.indexer/model/token_activity/_abstract'
 
 const ScriptActivityMapping: ModelMapping<ScriptActivity> = {
   type: 'script_activity',
@@ -52,7 +53,7 @@ export class ScriptActivityMapper {
   }
 }
 
-export type ScriptActivityType = 'vin' | 'vout'
+export type ScriptActivityType = 'vin' | 'vout' | ScriptTokenActivityType
 
 export enum ScriptActivityTypeHex {
   VIN = '00',

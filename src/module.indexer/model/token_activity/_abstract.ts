@@ -1,4 +1,4 @@
-import { ScriptActivity, ScriptActivityMapper, ScriptActivityType, ScriptActivityTypeHex } from '@src/module.model/script.activity'
+import { ScriptActivity, ScriptActivityMapper, ScriptActivityTypeHex } from '@src/module.model/script.activity'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { DfTxTransaction } from '../dftx/_abstract'
 import { RawBlock } from '../_abstract'
@@ -16,7 +16,7 @@ export interface ScriptTokenActivity {
     type: string
     hex: string
   }
-  type: ScriptActivityType
+  type: ScriptTokenActivityType
   tokenId: number
   value: string
 }
