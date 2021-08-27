@@ -57,6 +57,7 @@ export type ScriptActivityType = 'vin' | 'vout'
 export enum ScriptActivityTypeHex {
   VIN = '00',
   VOUT = '01',
+  DFTX = 'FF' // ---------------| not meant to be used
 }
 
 /**
