@@ -42,7 +42,7 @@ export class ScriptActivityMapper {
     return await this.database.delete(ScriptActivityMapping, id)
   }
 
-  static typeAsHex (type: ScriptActivityType): ScriptActivityTypeHex {
+  static typeAsHex (type: 'vin' | 'vout'): ScriptActivityTypeHex {
     // TODO(fuxingloh): not a good design, need to deprecate this
     switch (type) {
       case 'vin':

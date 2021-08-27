@@ -1,4 +1,4 @@
-import { UtxosToAccount, CUtxosToAccount, OP_PUSHDATA } from '@defichain/jellyfish-transaction'
+import { UtxosToAccount, CUtxosToAccount, CScript } from '@defichain/jellyfish-transaction'
 import { Injectable } from '@nestjs/common'
 import { ScriptTokenActivity, TokenActivityIndexer } from './_abstract'
 
@@ -10,12 +10,12 @@ export class UtxosToAccountIndexer extends TokenActivityIndexer<UtxosToAccount> 
     const result: ScriptTokenActivity[] = []
     const scriptBalances = utxosToAccount.to
     for (const { script, balances } of scriptBalances) {
-      const scriptPubKey = script.stack[1] as OP_PUSHDATA
+      const scriptPubKey = new CScript(script).toHex()
       for (const bal of balances) {
         result.push({
           script: {
-            type: scriptPubKey.type,
-            hex: scriptPubKey.hex
+            type: 'scripthash',
+            hex: scriptPubKey
           },
           type: 'utxos-to-account-gain',
           tokenId: bal.token,
