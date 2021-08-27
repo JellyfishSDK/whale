@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common'
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common'
 import { OraclePriceAggregated, OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
 import { OracleTokenCurrencyMapper } from '@src/module.model/oracle.token.currency'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
@@ -50,7 +50,7 @@ export class PriceController {
   @Get('/:key/feed/interval/:interval')
   async getFeedWithInterval (
     @Param('key') key: string,
-      @Param('interval') interval: number,
+      @Param('interval', ParseIntPipe) interval: number,
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<OraclePriceAggregated>> {
     const priceKey = `${key}-${interval}`
