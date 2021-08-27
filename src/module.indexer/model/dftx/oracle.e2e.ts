@@ -399,14 +399,14 @@ describe('interval set oracle data', () => {
     const oneMinute = 60
     const timeNow = Math.floor(new Date().getTime() / 1000)
     for (let i = 0; i < 60; i++) {
-      const mockTIme = timeNow + i * oneMinute
+      const mockTime = timeNow + i * oneMinute
       const price = (i + 1).toFixed(2)
       await client.oracle.setOracleData(oracleId, timeNow + 5 * 60 - 1, {
         prices: [
           { tokenAmount: `${price}@S1`, currency: 'USD' }
         ]
       })
-      await client.call('setmocktime', [mockTIme], 'number')
+      await client.call('setmocktime', [mockTime], 'number')
       await container.generate(1)
     }
 
