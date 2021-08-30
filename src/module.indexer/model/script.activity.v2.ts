@@ -5,13 +5,19 @@ import { SmartBuffer } from 'smart-buffer'
 import { Injectable, Logger } from '@nestjs/common'
 import { DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
 import { TokenActivityIndexer } from './script.activity.v2/token.activity/_abstract'
-import { UtxosToAccountIndexer } from './script.activity.v2/token.activity/utxos.to.account'
 import { VoutFinder } from './_vout_finder'
 import { NotFoundIndexerError } from '../error'
 import { ScriptActivityV2, ScriptActivityV2Mapper } from '@src/module.model/script.activity.v2'
 import { TransactionVout } from '@whale-api-client/api/transactions'
 import { mapId } from './script.activity.v2/common'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
+import { UtxosToAccountIndexer } from './script.activity.v2/token.activity/account/utxos.to.account'
+import { AccountToUtxosIndexer } from './script.activity.v2/token.activity/account/account.to.utxos'
+import { AccountToAccountIndexer } from './script.activity.v2/token.activity/account/account.to.account'
+import { AnyAccountToAccountIndexer } from './script.activity.v2/token.activity/account/any.account.to.account'
+import { PoolSwapIndexer } from './script.activity.v2/token.activity/dex/poolswap'
+import { AddLiquidityIndexer } from './script.activity.v2/token.activity/dex/add.liquidity'
+import { RemoveLiquidityIndexer } from './script.activity.v2/token.activity/dex/remove.liquidity'
 
 @Injectable()
 export class MainScriptActivityIndexer extends Indexer {
@@ -21,13 +27,23 @@ export class MainScriptActivityIndexer extends Indexer {
   constructor (
     private readonly mapper: ScriptActivityV2Mapper,
     private readonly voutFinder: VoutFinder,
-    private readonly utxosToAccount: UtxosToAccountIndexer
-    // TODO(@ivan-zynesis)
+    private readonly utxosToAccount: UtxosToAccountIndexer,
+    private readonly accountToUtxos: AccountToUtxosIndexer,
+    private readonly accountToAccount: AccountToAccountIndexer,
+    private readonly anyAccountToAccount: AnyAccountToAccountIndexer,
+    private readonly poolSwap: PoolSwapIndexer,
+    private readonly addLiquidity: AddLiquidityIndexer,
+    private readonly removeLiquidity: RemoveLiquidityIndexer
   ) {
     super()
     this.indexers = [
-      utxosToAccount
-      // TODO(@ivan-zynesis)
+      utxosToAccount,
+      accountToUtxos,
+      accountToAccount,
+      anyAccountToAccount,
+      poolSwap,
+      addLiquidity,
+      removeLiquidity
     ]
   }
 
