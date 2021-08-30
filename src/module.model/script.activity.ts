@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Model, ModelMapping } from '@src/module.database/model'
 import { Database, SortOrder } from '@src/module.database/database'
-import { ScriptTokenActivityType } from '@src/module.indexer/model/token_activity/_abstract'
 
 const ScriptActivityMapping: ModelMapping<ScriptActivity> = {
   type: 'script_activity',
@@ -42,7 +41,7 @@ export class ScriptActivityMapper {
     return await this.database.delete(ScriptActivityMapping, id)
   }
 
-  static typeAsHex (type: 'vin' | 'vout'): ScriptActivityTypeHex {
+  static typeAsHex (type: ScriptActivityType): ScriptActivityTypeHex {
     // TODO(fuxingloh): not a good design, need to deprecate this
     switch (type) {
       case 'vin':
@@ -53,12 +52,11 @@ export class ScriptActivityMapper {
   }
 }
 
-export type ScriptActivityType = 'vin' | 'vout' | ScriptTokenActivityType
+export type ScriptActivityType = 'vin' | 'vout'
 
 export enum ScriptActivityTypeHex {
   VIN = '00',
-  VOUT = '01',
-  DFTX = 'FF' // ---------------| not meant to be used
+  VOUT = '01'
 }
 
 /**
