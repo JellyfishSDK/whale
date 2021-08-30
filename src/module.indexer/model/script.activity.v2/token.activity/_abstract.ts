@@ -1,7 +1,8 @@
-import { ScriptActivity, ScriptActivityMapper, ScriptActivityTypeHex } from '@src/module.model/script.activity'
+import { ScriptActivityV2, ScriptActivityV2Mapper } from '@src/module.model/script.activity.v2'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
-import { DfTxTransaction } from '../dftx/_abstract'
-import { RawBlock } from '../_abstract'
+import { DfTxTransaction } from '../../dftx/_abstract'
+import { RawBlock } from '../../_abstract'
+import { mapId } from '../common'
 
 /**
  * activity types from 1 script perspective
@@ -25,7 +26,7 @@ export abstract class TokenActivityIndexer<T> {
   abstract OP_CODE: number
 
   constructor (
-    private readonly mapper: ScriptActivityMapper
+    private readonly mapper: ScriptActivityV2Mapper
   ) {
   }
 
@@ -34,7 +35,7 @@ export abstract class TokenActivityIndexer<T> {
     for (const txn of txns) {
       const activities = await this.extractTokenActivities(txn.dftx.data)
       for (const activity of activities) {
-        const simpleScriptActivity = this.mapToGenericScriptActivity(block, txn, activity, i++)
+        const simpleScriptActivity = this.mapToScriptActivityV2(block, txn, activity, i++)
         await this.mapper.put(simpleScriptActivity)
       }
     }
@@ -44,7 +45,7 @@ export abstract class TokenActivityIndexer<T> {
     for (const txn of txns) {
       const activities = await this.extractTokenActivities(txn.dftx.data)
       for (let i = 0; i < activities.length; i++) {
-        const id = this.mapId(block, txn.txn.txid, i)
+        const id = mapId(block, txn.txn.txid, 'dftx', i)
         await this.mapper.delete(id)
       }
     }
@@ -52,12 +53,10 @@ export abstract class TokenActivityIndexer<T> {
 
   abstract extractTokenActivities (tx: T): Promise<ScriptTokenActivity[]>
 
-  mapToGenericScriptActivity (block: RawBlock, dfTx: DfTxTransaction<any>, tokenSA: ScriptTokenActivity, activitySerialNumber: number): ScriptActivity {
+  mapToScriptActivityV2 (block: RawBlock, dfTx: DfTxTransaction<any>, tokenSA: ScriptTokenActivity, activitySerialNumber: number): ScriptActivityV2 {
     return {
-      id: this.mapId(block, dfTx.txn.txid, activitySerialNumber),
+      id: mapId(block, dfTx.txn.txid, 'dftx', activitySerialNumber),
       hid: HexEncoder.asSHA256(tokenSA.script.hex),
-      type: tokenSA.type,
-      typeHex: ScriptActivityTypeHex.DFTX,
       txid: dfTx.txn.txid,
       block: {
         hash: block.hash,
@@ -67,15 +66,12 @@ export abstract class TokenActivityIndexer<T> {
       },
       script: tokenSA.script,
       value: tokenSA.value,
-      tokenId: tokenSA.tokenId
+      tokenId: tokenSA.tokenId,
+      category: 'dftx',
+      dftx: {
+        type: tokenSA.type,
+        raw: dfTx.dftx.data
+      }
     }
-  }
-
-  mapId (block: RawBlock, txid: string, n: number): string {
-    const height = HexEncoder.encodeHeight(block.height)
-    const typeHex = ScriptActivityTypeHex.DFTX
-    // TBD: may reduce encoding to simpler number to reduce indexing workload
-    const index = HexEncoder.encodeVoutIndex(n)
-    return `${height}${typeHex}${txid}${index}`
   }
 }

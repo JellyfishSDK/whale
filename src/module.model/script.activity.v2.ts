@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Model, ModelMapping } from '@src/module.database/model'
 import { Database, SortOrder } from '@src/module.database/database'
-import { ScriptTokenActivityType } from '@src/module.indexer/model/token_activity/_abstract'
+import { ScriptTokenActivityType } from '@src/module.indexer/model/script.activity.v2/token.activity/_abstract'
 
 const ScriptActivityV2Mapping: ModelMapping<ScriptActivityV2> = {
   type: 'script_activity_v2',
@@ -53,7 +53,7 @@ export class ScriptActivityV2Mapper {
 
 // TODO(@ivan-zynesis): future improvement, vin|vout should be imported as ScriptUtxoActivityType from ScriptActivityIndexer
 // there are more detail can be extracted from utxo type transaction (fee spent, send, receive, mining reward)
-export type ScriptActivityV2Type = 'vin' | 'vout' | ScriptTokenActivityType
+export type ScriptUtxosActivityType = 'vin' | 'vout'
 export type ScriptActivityCategory = 'utxo' | 'dftx'
 
 /**
@@ -78,12 +78,17 @@ export interface ScriptActivityV2 extends Model {
 
   value: string // -------------| output value stored as string, string as decimal: 0.0000
   tokenId: number // -----------| 0: DFI, 1: BTC, etc
-  type: ScriptActivityV2Type
 
   category: ScriptActivityCategory
 
   utxo?: {
-    txid: string
+    type: ScriptUtxosActivityType
+    txid: string // ------------| vin: spent, vout: new unspent
     n: number
+  }
+
+  dftx?: {
+    type: ScriptTokenActivityType
+    raw: string
   }
 }

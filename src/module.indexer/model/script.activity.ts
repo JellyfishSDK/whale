@@ -17,6 +17,8 @@ export class ScriptActivityIndexer extends Indexer {
 
   async index (block: RawBlock): Promise<void> {
     for (const txn of block.tx) {
+      // TODO(@ivan-zynesis): refactor Vin/Vout activity indexer to another abstract layer
+      // which can differentiante utxos type is: fee, send, receive, rewards etc
       for (const vin of txn.vin) {
         if (vin.coinbase !== undefined) {
           continue
