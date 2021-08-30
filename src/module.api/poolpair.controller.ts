@@ -71,12 +71,14 @@ function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNum
     status: info.status,
     tokenA: {
       symbol: symbolA,
+      displaySymbol: `d${symbolA}`,
       id: info.idTokenA,
       reserve: info.reserveA.toFixed(),
       blockCommission: info.blockCommissionA.toFixed()
     },
     tokenB: {
       symbol: symbolB,
+      displaySymbol: `d${symbolB}`,
       id: info.idTokenB,
       reserve: info.reserveB.toFixed(),
       blockCommission: info.blockCommissionB.toFixed()
