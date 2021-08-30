@@ -1,6 +1,6 @@
 import { UtxosToAccount, CUtxosToAccount, CScript } from '@defichain/jellyfish-transaction'
 import { Injectable } from '@nestjs/common'
-import { ScriptTokenActivity, TokenActivityIndexer } from './_abstract'
+import { ScriptTokenActivity, TokenActivityIndexer } from '../_abstract'
 
 @Injectable()
 export class UtxosToAccountIndexer extends TokenActivityIndexer<UtxosToAccount> {

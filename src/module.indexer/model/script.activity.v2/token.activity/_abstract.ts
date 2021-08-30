@@ -10,7 +10,20 @@ import { mapId } from '../common'
  * A: spend-account-to-account
  * B: account-to-account-gain
  */
-export type ScriptTokenActivityType = 'spend-account-to-account' | 'account-to-account-gain' | 'utxos-to-account-gain'
+export type ScriptTokenActivityType =
+  'utxos-to-account-gain' |
+  'spend-account-to-utxos' |
+  'spend-account-to-account' |
+  'account-to-account-gain' |
+  'spend-any-account-to-account' |
+  'any-account-to-account-gain' |
+
+  'spend-add-liquidity' | // each in pair, spend BTC, spend DFI
+  'add-liquidity-gain' | // gain (BTC-DFI)
+  'spend-remove-liquidity' | // spend (BTC-DFI)
+  'remove-liquidity-gain' | // unused
+  'spend-poolswap' |
+  'poolswap-gain'
 
 export interface ScriptTokenActivity {
   script: {
