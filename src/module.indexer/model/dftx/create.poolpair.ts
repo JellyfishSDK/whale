@@ -3,6 +3,7 @@ import { PoolCreatePair, CPoolCreatePair } from '@defichain/jellyfish-transactio
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable, Logger } from '@nestjs/common'
 import { PoolPairMapper } from '@src/module.model/poolpair'
+import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 
 @Injectable()
 export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
@@ -10,7 +11,8 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
   private readonly logger = new Logger(CreatePoolPairIndexer.name)
 
   constructor (
-    private readonly poolPairMapper: PoolPairMapper
+    private readonly poolPairMapper: PoolPairMapper,
+    private readonly poolPairTokenMapper: PoolPairTokenMapper
   ) {
     super()
   }
@@ -20,8 +22,8 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
       const id: string = `${data.tokenA}-${data.tokenB}-${block.height}`
       await this.poolPairMapper.put({
         id,
-        key: `${data.tokenA}-${data.tokenB}`,
         pairSymbol: data.pairSymbol,
+        poolPairId: 0, // TODO: Calculate id
         tokenA: {
           id: data.tokenA
         },
@@ -31,6 +33,12 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
         block: { hash: block.hash, height: block.height },
         status: data.status,
         commission: data.commission.toFixed(8)
+      })
+
+      await this.poolPairTokenMapper.put({
+        id: `${data.tokenA}-${data.tokenB}`,
+        poolpairId: 0, // Calculate id
+        block: { hash: block.hash, height: block.height }
       })
     }
   }

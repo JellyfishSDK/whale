@@ -8,8 +8,8 @@ const PoolPairMapping: ModelMapping<PoolPair> = {
     sort: {
       name: 'poolpair_key_sort',
       partition: {
-        type: 'string',
-        key: (p: PoolPair) => p.key
+        type: 'number',
+        key: (p: PoolPair) => p.poolPairId
       },
       sort: {
         type: 'number',
@@ -24,16 +24,18 @@ export class PoolPairMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async getLatest (): Promise<PoolPair | undefined> {
+  async getLatest (key: number): Promise<PoolPair | undefined> {
     const latest = await this.database.query(PoolPairMapping.index.height, {
+      partitionKey: key,
       order: SortOrder.DESC,
       limit: 1
     })
     return latest[0]
   }
 
-  async query (limit: number, lt?: string): Promise<PoolPair[]> {
+  async query (key: number, limit: number, lt?: string): Promise<PoolPair[]> {
     return await this.database.query(PoolPairMapping.index.sort, {
+      partitionKey: key,
       limit: limit,
       order: SortOrder.DESC,
       lt: lt
@@ -54,8 +56,8 @@ export class PoolPairMapper {
 }
 
 export interface PoolPair extends Model {
-  id: string // tokenAId-tokenBId-blockHeight
-  key: string // tokenAId-tokenBId
+  id: string // poolPairId-blockHeight
+  poolPairId: number
   pairSymbol: string // string
   tokenA: {
     id: number // numerical id
