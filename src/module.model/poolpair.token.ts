@@ -9,7 +9,7 @@ const PoolPairTokenMapping: ModelMapping<PoolPairToken> = {
       name: 'poolpair_token_key_sort',
       partition: {
         type: 'string',
-        key: (b: PoolPairToken) => b.id
+        key: (b: PoolPairToken) => b.key
       }
     }
   }
@@ -29,6 +29,14 @@ export class PoolPairTokenMapper {
     })
   }
 
+  async list (limit: number, lt?: string): Promise<PoolPairToken[]> {
+    return await this.database.query(PoolPairTokenMapping.index.sort, {
+      limit: limit,
+      order: SortOrder.DESC,
+      lt: lt
+    })
+  }
+
   async put (pool: PoolPairToken): Promise<void> {
     return await this.database.put(PoolPairTokenMapping, pool)
   }
@@ -39,7 +47,8 @@ export class PoolPairTokenMapper {
 }
 
 export interface PoolPairToken extends Model {
-  id: string // ---------| tokenA-tokenB
+  id: string // ---------| tokenA-tokenB-poolPairId
+  key: string // --------| tokenA-tokenB
   poolpairId: number
 
   block: {

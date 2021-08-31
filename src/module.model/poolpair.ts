@@ -42,6 +42,14 @@ export class PoolPairMapper {
     })
   }
 
+  async list (limit: number, lt?: string): Promise<PoolPair[]> {
+    return await this.database.query(PoolPairMapping.index.sort, {
+      limit: limit,
+      order: SortOrder.DESC,
+      lt: lt
+    })
+  }
+
   async get (id: string): Promise<PoolPair | undefined> {
     return await this.database.get(PoolPairMapping, id)
   }

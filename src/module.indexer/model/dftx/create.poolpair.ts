@@ -41,7 +41,8 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
       })
 
       await this.poolPairTokenMapper.put({
-        id: `${data.tokenA}-${data.tokenB}`,
+        id: `${data.tokenA}-${data.tokenB}-${tokenId}`,
+        key: `${data.tokenA}-${data.tokenB}`,
         poolpairId: tokenId,
         block: { hash: block.hash, height: block.height }
       })

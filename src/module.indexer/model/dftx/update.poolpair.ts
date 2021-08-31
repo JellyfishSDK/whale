@@ -5,9 +5,9 @@ import { Injectable, Logger } from '@nestjs/common'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 
 @Injectable()
-export class CreatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
+export class UpdatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
   OP_CODE: number = CPoolUpdatePair.OP_CODE
-  private readonly logger = new Logger(CreatePoolPairIndexer.name)
+  private readonly logger = new Logger(UpdatePoolPairIndexer.name)
 
   constructor (
     private readonly poolPairMapper: PoolPairMapper
