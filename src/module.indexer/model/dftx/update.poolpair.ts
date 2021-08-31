@@ -17,7 +17,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
 
   async index (block: RawBlock, txns: Array<DfTxTransaction<PoolUpdatePair>>): Promise<void> {
     for (const { dftx: { data } } of txns) {
-      const poolPair = await this.poolPairMapper.getLatest(data.poolId)
+      const poolPair = await this.poolPairMapper.getLatest(`${data.poolId}`)
       if (poolPair !== undefined) {
         await this.poolPairMapper.put({
           id: poolPair.id,
@@ -39,9 +39,9 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
 
   async invalidate (block: RawBlock, txns: Array<DfTxTransaction<PoolUpdatePair>>): Promise<void> {
     for (const { dftx: { data } } of txns) {
-      const poolPair = await this.poolPairMapper.getLatest(data.poolId)
+      const poolPair = await this.poolPairMapper.getLatest(`${data.poolId}`)
       if (poolPair !== undefined) {
-        await this.poolPairMapper.delete(`${poolPair.tokenA.id}-${poolPair.tokenB.id}-${block.height}`)
+        await this.poolPairMapper.delete(`${data.poolId}-${block.height}`)
       }
     }
   }

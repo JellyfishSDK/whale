@@ -4,7 +4,7 @@ import { Database, SortOrder } from '@src/module.database/database'
 import { HexEncoder } from './_hex.encoder'
 import BigNumber from 'bignumber.js'
 
-export const DCT_ID_START = 128
+const DCT_ID_START = 128
 
 const TokenMapping: ModelMapping<Token> = {
   type: 'token',
@@ -65,6 +65,23 @@ export class TokenMapper {
 
   async delete (id: string): Promise<void> {
     return await this.database.delete(TokenMapping, id)
+  }
+
+  async getNextTokenID (isDAT: boolean): Promise<number> {
+    const latest = isDAT ? await this.getLatestDAT()
+      : await this.getLatestDST()
+
+    if (latest === undefined) {
+      // Default to 1 as 0 is reserved for DFI
+      return isDAT ? 1 : DCT_ID_START
+    }
+
+    if (isDAT && !(new BigNumber(latest.id).lt(DCT_ID_START - 1))) {
+      const latestDST = await this.getLatestDST()
+      return latestDST !== undefined ? new BigNumber(latestDST.id).plus(1).toNumber() : DCT_ID_START
+    }
+
+    return new BigNumber(latest.id).plus(1).toNumber()
   }
 }
 

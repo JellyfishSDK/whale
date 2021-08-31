@@ -3,8 +3,7 @@ import { TokenCreate, CTokenCreate } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable, Logger } from '@nestjs/common'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
-import { DCT_ID_START, TokenMapper } from '@src/module.model/token'
-import BigNumber from 'bignumber.js'
+import { TokenMapper } from '@src/module.model/token'
 
 @Injectable()
 export class CreateTokenIndexer extends DfTxIndexer<TokenCreate> {
@@ -19,7 +18,7 @@ export class CreateTokenIndexer extends DfTxIndexer<TokenCreate> {
 
   async index (block: RawBlock, txns: Array<DfTxTransaction<TokenCreate>>): Promise<void> {
     for (const { dftx: { data } } of txns) {
-      const tokenId = await this.getNextTokenID(data.isDAT)
+      const tokenId = await this.tokenMapper.getNextTokenID(data.isDAT)
       await this.tokenMapper.put({
         id: `${tokenId}`,
         sort: HexEncoder.encodeHeight(tokenId),
@@ -38,25 +37,8 @@ export class CreateTokenIndexer extends DfTxIndexer<TokenCreate> {
 
   async invalidate (_: RawBlock, txns: Array<DfTxTransaction<TokenCreate>>): Promise<void> {
     for (const { dftx: { data } } of txns) {
-      const tokenId = await this.getNextTokenID(data.isDAT)
+      const tokenId = await this.tokenMapper.getNextTokenID(data.isDAT)
       await this.tokenMapper.delete(`${tokenId - 1}`)
     }
-  }
-
-  async getNextTokenID (isDAT: boolean): Promise<number> {
-    const latest = isDAT ? await this.tokenMapper.getLatestDAT()
-      : await this.tokenMapper.getLatestDST()
-
-    if (latest === undefined) {
-      // Default to 1 as 0 is reserved for DFI
-      return isDAT ? 1 : DCT_ID_START
-    }
-
-    if (isDAT && !(new BigNumber(latest.id).lt(DCT_ID_START - 1))) {
-      const latestDST = await this.tokenMapper.getLatestDST()
-      return latestDST !== undefined ? new BigNumber(latestDST.id).plus(1).toNumber() : DCT_ID_START
-    }
-
-    return new BigNumber(latest.id).plus(1).toNumber()
   }
 }
