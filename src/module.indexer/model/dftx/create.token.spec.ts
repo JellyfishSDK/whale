@@ -42,7 +42,7 @@ describe('create token', () => {
 
     const tokenMapper = app.get(TokenMapper)
     const result = await tokenMapper.query(30)
-    expect(result.length).toStrictEqual(2)
+    expect(result.length).toStrictEqual(3)
 
     expect(result[1]).toStrictEqual({
       id: '1',
