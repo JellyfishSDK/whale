@@ -30,8 +30,8 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
             id: poolPair.tokenB.id
           },
           block: { hash: block.hash, height: block.height },
-          status: poolPair.status,
-          commission: poolPair.commission
+          status: data.status, // Always override status
+          commission: data.commission.eq(-1) ? poolPair.commission : data.commission.toFixed(8)
         })
       }
     }

@@ -20,6 +20,8 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
   async index (block: RawBlock, txns: Array<DfTxTransaction<PoolCreatePair>>): Promise<void> {
     for (const { dftx: { data } } of txns) {
       const id: string = `${data.tokenA}-${data.tokenB}-${block.height}`
+
+      // TODO: Index customRewards, ownerAddress
       await this.poolPairMapper.put({
         id,
         pairSymbol: data.pairSymbol,
