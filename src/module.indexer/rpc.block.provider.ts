@@ -81,8 +81,6 @@ export class RPCBlockProvider {
   }
 
   private async indexGenesis (): Promise<boolean> {
-    this.logger.error('indexGenesis')
-
     const hash = await this.client.blockchain.getBlockHash(0)
     const block = await this.client.blockchain.getBlock(hash, 2)
     await this.indexer.index(block)
