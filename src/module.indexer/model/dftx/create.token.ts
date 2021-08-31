@@ -47,9 +47,16 @@ export class CreateTokenIndexer extends DfTxIndexer<TokenCreate> {
     const latest = isDAT ? await this.tokenMapper.getLatestDAT()
       : await this.tokenMapper.getLatestDST()
 
-    // Default to 1 as 0 is reserved for DFI
-    const startId = isDAT ? 1 : DCT_ID_START
+    if (latest === undefined) {
+      // Default to 1 as 0 is reserved for DFI
+      return isDAT ? 1 : DCT_ID_START
+    }
 
-    return latest !== undefined ? new BigNumber(latest.id).plus(1).toNumber() : startId
+    if (isDAT && !(new BigNumber(latest.id).lt(DCT_ID_START - 1))) {
+      const latestDST = await this.tokenMapper.getLatestDST()
+      return latestDST !== undefined ? new BigNumber(latestDST.id).plus(1).toNumber() : DCT_ID_START
+    }
+
+    return new BigNumber(latest.id).plus(1).toNumber()
   }
 }

@@ -24,8 +24,6 @@ export class TokenMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  // Note this will work until we have created over 128 DAT tokens,
-  // as of implementation time, there exist 14 DAT tokens
   async getLatestDAT (): Promise<Token | undefined> {
     const latest = await this.database.query(TokenMapping.index.sort, {
       limit: 1,
