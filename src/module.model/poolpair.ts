@@ -5,10 +5,10 @@ import { Database, SortOrder } from '@src/module.database/database'
 const PoolPairMapping: ModelMapping<PoolPair> = {
   type: 'poolpair',
   index: {
-    sort: {
+    poolpair_id: {
       name: 'poolpair_key_sort',
       partition: {
-        type: 'number',
+        type: 'string',
         key: (p: PoolPair) => p.poolPairId
       },
       sort: {
@@ -24,18 +24,18 @@ export class PoolPairMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async getLatest (key: number): Promise<PoolPair | undefined> {
-    const latest = await this.database.query(PoolPairMapping.index.height, {
-      partitionKey: key,
+  async getLatest (poolPairId: string): Promise<PoolPair | undefined> {
+    const latest = await this.database.query(PoolPairMapping.index.sort, {
+      partitionKey: poolPairId,
       order: SortOrder.DESC,
       limit: 1
     })
     return latest[0]
   }
 
-  async query (key: number, limit: number, lt?: string): Promise<PoolPair[]> {
+  async query (poolPairId: string, limit: number, lt?: string): Promise<PoolPair[]> {
     return await this.database.query(PoolPairMapping.index.sort, {
-      partitionKey: key,
+      partitionKey: poolPairId,
       limit: limit,
       order: SortOrder.DESC,
       lt: lt
@@ -57,7 +57,7 @@ export class PoolPairMapper {
 
 export interface PoolPair extends Model {
   id: string // poolPairId-blockHeight
-  poolPairId: number
+  poolPairId: string // poolPairId (decimal encoded integer as string)
   pairSymbol: string // string
   tokenA: {
     id: number // numerical id
