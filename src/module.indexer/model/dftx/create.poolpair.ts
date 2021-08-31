@@ -4,8 +4,9 @@ import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable, Logger } from '@nestjs/common'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
-import { TokenMapper } from '@src/module.model/token'
+import { MAX_TOKEN_SYMBOL_LENGTH, TokenMapper } from '@src/module.model/token'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
+import { IndexerError } from '@src/module.indexer/error'
 
 @Injectable()
 export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
@@ -24,16 +25,32 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
     for (const { dftx: { data } } of txns) {
       const tokenId = await this.tokenMapper.getNextTokenID(true)
 
+      const tokenA = await this.tokenMapper.get(`${data.tokenA}`)
+      const tokenB = await this.tokenMapper.get(`${data.tokenB}`)
+
+      if (tokenA === undefined || tokenB === undefined) {
+        throw new IndexerError(`Tokens (${data.tokenA}, ${data.tokenB}) referenced by PoolPair (${tokenId}) do not exist`)
+      }
+
+      let pairSymbol
+      if (data.pairSymbol.length === 0) {
+        pairSymbol = (tokenA?.symbol + '-' + tokenB?.symbol).trim().substr(0, MAX_TOKEN_SYMBOL_LENGTH)
+      } else {
+        pairSymbol = data.pairSymbol.trim().substr(0, MAX_TOKEN_SYMBOL_LENGTH)
+      }
+
       // TODO: Index customRewards, ownerAddress
       await this.poolPairMapper.put({
         id: `${tokenId}-${block.height}`,
-        pairSymbol: data.pairSymbol,
+        pairSymbol,
         poolPairId: `${tokenId}`,
         tokenA: {
-          id: data.tokenA
+          id: data.tokenA,
+          symbol: tokenA.symbol
         },
         tokenB: {
-          id: data.tokenB
+          id: data.tokenB,
+          symbol: tokenB.symbol
         },
         block: { hash: block.hash, height: block.height },
         status: data.status,

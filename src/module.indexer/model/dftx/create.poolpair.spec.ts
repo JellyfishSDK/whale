@@ -1,6 +1,6 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
+import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { createPoolPair, createToken, mintTokens } from '@defichain/testing'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
@@ -10,6 +10,7 @@ let app: NestFastifyApplication
 
 beforeAll(async () => {
   await container.start()
+  app = await createTestingApp(container)
   await container.waitForWalletCoinbaseMaturity()
   await container.waitForWalletBalanceGTE(101) // token creation fee
 
@@ -49,31 +50,20 @@ describe('create poolpair', () => {
     }))
 
     expect(poolPairs[1]).toStrictEqual({
-      id: '1',
-      symbol: 'DBTC',
-      name: 'DBTC',
-      decimal: 8,
-      limit: '0.00000000',
-      sort: '00000001',
-      mintable: true,
-      tradeable: true,
-      isDAT: true,
-      isLPS: false,
-      block: expect.any(Object)
+      commission: '0.00000000',
+      id: '11-124',
+      pairSymbol: '',
+      poolPairId: '11',
+      status: true,
+      tokenA: {
+        id: 5
+      },
+      tokenB: {
+        id: 0
+      }
     })
 
     expect(poolPairs[0]).toStrictEqual({
-      id: '128',
-      symbol: 'MT',
-      name: 'MYTOKEN',
-      decimal: 8,
-      limit: '0.00000000',
-      sort: '00000080',
-      mintable: true,
-      tradeable: true,
-      isDAT: false,
-      isLPS: false,
-      block: expect.any(Object)
     })
   })
 })

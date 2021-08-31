@@ -3,7 +3,7 @@ import { TokenCreate, CTokenCreate } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable, Logger } from '@nestjs/common'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
-import { TokenMapper } from '@src/module.model/token'
+import { MAX_TOKEN_NAME_LENGTH, MAX_TOKEN_SYMBOL_LENGTH, TokenMapper } from '@src/module.model/token'
 
 @Injectable()
 export class CreateTokenIndexer extends DfTxIndexer<TokenCreate> {
@@ -22,8 +22,8 @@ export class CreateTokenIndexer extends DfTxIndexer<TokenCreate> {
       await this.tokenMapper.put({
         id: `${tokenId}`,
         sort: HexEncoder.encodeHeight(tokenId),
-        symbol: data.symbol,
-        name: data.name,
+        symbol: data.symbol.trim().substr(0, MAX_TOKEN_SYMBOL_LENGTH),
+        name: data.name.trim().substr(0, MAX_TOKEN_NAME_LENGTH),
         isDAT: data.isDAT,
         isLPS: false,
         limit: data.limit.toFixed(8),

@@ -4,7 +4,9 @@ import { Database, SortOrder } from '@src/module.database/database'
 import { HexEncoder } from './_hex.encoder'
 import BigNumber from 'bignumber.js'
 
-const DCT_ID_START = 128
+export const MAX_TOKEN_SYMBOL_LENGTH: number = 8
+export const MAX_TOKEN_NAME_LENGTH: number = 128
+const DCT_ID_START: number = 128
 
 const TokenMapping: ModelMapping<Token> = {
   type: 'token',

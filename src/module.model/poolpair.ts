@@ -25,7 +25,7 @@ export class PoolPairMapper {
   }
 
   async getLatest (poolPairId: string): Promise<PoolPair | undefined> {
-    const latest = await this.database.query(PoolPairMapping.index.sort, {
+    const latest = await this.database.query(PoolPairMapping.index.poolpair_id, {
       partitionKey: poolPairId,
       order: SortOrder.DESC,
       limit: 1
@@ -34,7 +34,7 @@ export class PoolPairMapper {
   }
 
   async query (poolPairId: string, limit: number, lt?: string): Promise<PoolPair[]> {
-    return await this.database.query(PoolPairMapping.index.sort, {
+    return await this.database.query(PoolPairMapping.index.poolpair_id, {
       partitionKey: poolPairId,
       limit: limit,
       order: SortOrder.DESC,
@@ -43,7 +43,7 @@ export class PoolPairMapper {
   }
 
   async list (limit: number, lt?: string): Promise<PoolPair[]> {
-    return await this.database.query(PoolPairMapping.index.sort, {
+    return await this.database.query(PoolPairMapping.index.poolpair_id, {
       limit: limit,
       order: SortOrder.DESC,
       lt: lt
@@ -69,9 +69,11 @@ export interface PoolPair extends Model {
   pairSymbol: string // string
   tokenA: {
     id: number // numerical id
+    symbol: string
   }
   tokenB: {
     id: number // numerical id
+    symbol: string
   }
   block: {
     hash: string

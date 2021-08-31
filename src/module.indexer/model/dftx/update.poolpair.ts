@@ -20,15 +20,7 @@ export class UpdatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
       const poolPair = await this.poolPairMapper.getLatest(`${data.poolId}`)
       if (poolPair !== undefined) {
         await this.poolPairMapper.put({
-          id: poolPair.id,
-          poolPairId: poolPair.poolPairId,
-          pairSymbol: poolPair.pairSymbol,
-          tokenA: {
-            id: poolPair.tokenA.id
-          },
-          tokenB: {
-            id: poolPair.tokenB.id
-          },
+          ...poolPair,
           block: { hash: block.hash, height: block.height },
           status: data.status, // Always override status
           commission: data.commission.eq(-1) ? poolPair.commission : data.commission.toFixed(8)
