@@ -52,15 +52,18 @@ describe('create poolpair', () => {
     expect(poolPairs[1]).toStrictEqual({
       commission: '0.00000000',
       id: '11-124',
-      pairSymbol: '',
+      pairSymbol: 'E-DFI',
       poolPairId: '11',
       status: true,
       tokenA: {
-        id: 5
+        id: 5,
+        symbol: 'E'
       },
       tokenB: {
-        id: 0
-      }
+        id: 0,
+        symbol: 'DFI'
+      },
+      block: expect.any(Object)
     })
 
     expect(poolPairs[0]).toStrictEqual({
