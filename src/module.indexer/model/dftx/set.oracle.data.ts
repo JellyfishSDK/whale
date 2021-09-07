@@ -12,6 +12,7 @@ import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { OracleTokenCurrencyMapper } from '@src/module.model/oracle.token.currency'
 import BigNumber from 'bignumber.js'
 import { PriceTickerMapper } from '@src/module.model/price.ticker'
+import { IndexerError } from '@src/module.indexer/error'
 
 @Injectable()
 export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
@@ -66,10 +67,9 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
 
   private async indexIntervalMapper (block: RawBlock, token: string, currency: string, aggregated: OraclePriceAggregated,
     interval: OracleIntervalSeconds): Promise<void> {
-    const previous = await this.aggregatedIntervalMapper.query(`${token}-${currency}-${interval}`, 2)
+    const previous = await this.aggregatedIntervalMapper.query(`${token}-${currency}-${interval}`, 1)
     // Start a new bucket
-    if (previous.length < 2 ||
-      (previous[1].block.medianTime + (interval as number)) < previous[0].block.medianTime) {
+    if (previous.length === 0 || previous[0].aggregated.timeCount >= (interval as number)) {
       await this.startNewBucket(block, token, currency, aggregated, interval)
     } else {
       // Forward aggregate
@@ -85,7 +85,9 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
           oracles: lastPrice.oracles,
           amount: new BigNumber(lastPrice.amount)
             .times(lastPrice.count).plus(aggregated.aggregated.amount).dividedBy(count).toFixed(8),
-          count
+          count: count,
+          timeCount: lastPrice.timeCount + (aggregated.block.medianTime - previous[0].block.medianTime),
+          latestTimeInterval: aggregated.block.medianTime - previous[0].block.medianTime
         },
         id: `${token}-${currency}-${interval}-${block.height}`,
         key: `${token}-${currency}-${interval}`,
@@ -105,6 +107,8 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
         weightage: aggregated.aggregated.weightage,
         oracles: aggregated.aggregated.oracles,
         amount: aggregated.aggregated.amount,
+        latestTimeInterval: 0,
+        timeCount: 0,
         count: 0
       },
       id: `${token}-${currency}-${interval}-${block.height}`,
@@ -183,6 +187,37 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
     }
   }
 
+  async invalidateIntervalMapper (block: RawBlock, token: string, currency: string, aggregated: OraclePriceAggregated,
+    interval: OracleIntervalSeconds): Promise<void> {
+    const previous = await this.aggregatedIntervalMapper.query(`${token}-${currency}-${interval}`, 1)
+    // If count is 0 just delete
+    if (previous[0].aggregated.count === 0) {
+      await this.aggregatedIntervalMapper.delete(`${token}-${currency}-${interval}-${block.height}`)
+    } else {
+      // Reverse forward aggregate
+      const lastPrice = previous[0].aggregated
+      const count = lastPrice.count - 1
+
+      await this.aggregatedIntervalMapper.put({
+        block: aggregated.block,
+        currency: aggregated.currency,
+        token: aggregated.token,
+        aggregated: {
+          weightage: lastPrice.weightage,
+          oracles: lastPrice.oracles,
+          amount: new BigNumber(lastPrice.amount)
+            .times(lastPrice.count).minus(aggregated.aggregated.amount).dividedBy(count).toFixed(8),
+          count: count,
+          timeCount: lastPrice.timeCount - lastPrice.latestTimeInterval,
+          latestTimeInterval: lastPrice.timeCount - (lastPrice.timeCount / lastPrice.count)
+        },
+        id: `${token}-${currency}-${interval}-${block.height}`,
+        key: `${token}-${currency}-${interval}`,
+        sort: aggregated.sort
+      })
+    }
+  }
+
   async invalidate (block: RawBlock, txns: Array<DfTxTransaction<SetOracleData>>): Promise<void> {
     const feeds = this.mapPriceFeeds(block, txns)
     const pairs = new Set<[string, string]>()
@@ -193,10 +228,15 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
     }
 
     for (const [token, currency] of pairs) {
+      const aggregated = await this.aggregatedMapper.get(`${token}-${currency}-${block.height}`)
+
+      if (aggregated === undefined) {
+        throw new IndexerError('Previous aggregation cannot be undefined during invalidate')
+      }
+
       await this.aggregatedMapper.delete(`${token}-${currency}-${block.height}`)
       for (const interval of this.intervals) {
-        // In this case just always delete, if it exists
-        await this.aggregatedIntervalMapper.delete(`${token}-${currency}-${interval}-${block.height}`)
+        await this.invalidateIntervalMapper(block, token, currency, aggregated, interval)
       }
       // price ticker won't be deleted
     }
