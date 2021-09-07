@@ -6,8 +6,8 @@ import { Block, BlockMapper } from '@src/module.model/block'
 import { IndexStatusMapper, Status } from '@src/module.indexer/status'
 
 @Injectable()
-export class Indexer {
-  private readonly logger = new Logger(Indexer.name)
+export class RPCBlockProvider {
+  private readonly logger = new Logger(RPCBlockProvider.name)
   private indexing = false
 
   constructor (
@@ -77,7 +77,7 @@ export class Indexer {
     return hash === indexed.hash
   }
 
-  private async indexGenesis (): Promise<boolean> {
+  public async indexGenesis (): Promise<boolean> {
     const hash = await this.client.blockchain.getBlockHash(0)
     const block = await this.client.blockchain.getBlock(hash, 2)
     await this.indexer.index(block)
