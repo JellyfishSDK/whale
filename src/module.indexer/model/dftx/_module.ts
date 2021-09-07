@@ -3,6 +3,7 @@ import { AppointOracleIndexer } from '@src/module.indexer/model/dftx/appoint.ora
 import { RemoveOracleIndexer } from '@src/module.indexer/model/dftx/remove.oracle'
 import { UpdateOracleIndexer } from '@src/module.indexer/model/dftx/update.oracle'
 import { SetOracleDataIndexer } from '@src/module.indexer/model/dftx/set.oracle.data'
+import { SetOracleDataIntervalIndexer } from '@src/module.indexer/model/dftx/set.oracle.data.interval'
 import { CreateMasternodeIndexer } from '@src/module.indexer/model/dftx/create.masternode'
 import { ResignMasternodeIndexer } from '@src/module.indexer/model/dftx/resign.masternode'
 import { NetworkName } from '@defichain/jellyfish-network'
@@ -14,7 +15,8 @@ const indexers = [
   SetOracleDataIndexer,
   UpdateOracleIndexer,
   CreateMasternodeIndexer,
-  ResignMasternodeIndexer
+  ResignMasternodeIndexer,
+  SetOracleDataIntervalIndexer
 ]
 
 @Module({
