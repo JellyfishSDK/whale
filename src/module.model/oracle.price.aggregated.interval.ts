@@ -59,8 +59,6 @@ export interface OraclePriceAggregatedInterval extends Model {
     amount: string
     weightage: number
     count: number
-    timeCount: number
-    latestTimeInterval: number
     oracles: {
       active: number
       total: number
