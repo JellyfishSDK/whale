@@ -45,7 +45,8 @@ const ExpectedBlock = {
   merkleroot: expect.stringMatching(/[0-f]{64}/),
   size: expect.any(Number),
   sizeStripped: expect.any(Number),
-  weight: expect.any(Number)
+  weight: expect.any(Number),
+  reward: expect.any(String)
 }
 
 describe('list', () => {
@@ -53,7 +54,7 @@ describe('list', () => {
     const first = await client.blocks.list(35)
 
     expect(first.length).toStrictEqual(35)
-    expect(first[0]).toStrictEqual({ ...ExpectedBlock, reward: '33.33000000' })
+    expect(first[0]).toStrictEqual(ExpectedBlock)
     expect(first[0].height).toBeGreaterThanOrEqual(100 - 35)
     expect(first[34].height).toBeGreaterThanOrEqual(first[0].height - 35)
 
@@ -69,14 +70,14 @@ describe('list', () => {
     const first = await client.blocks.list(100)
 
     expect(first.length).toStrictEqual(60)
-    expect(first[0]).toStrictEqual({ ...ExpectedBlock, reward: '33.33000000' })
+    expect(first[0]).toStrictEqual(ExpectedBlock)
   })
 
   it('should get paginated list of blocks when next is out of range', async () => {
     const blocks = await client.blocks.list(15, '1000000')
     expect(blocks.length).toStrictEqual(15)
 
-    expect(blocks[0]).toStrictEqual({ ...ExpectedBlock, reward: '33.33000000' })
+    expect(blocks[0]).toStrictEqual(ExpectedBlock)
     expect(blocks[0].height).toBeGreaterThanOrEqual(40)
   })
 
@@ -90,7 +91,7 @@ describe('list', () => {
     const blocks = await client.blocks.list(60)
     expect(blocks.length).toBeGreaterThanOrEqual(40)
 
-    expect(blocks[0]).toStrictEqual({ ...ExpectedBlock, reward: '33.33000000' })
+    expect(blocks[0]).toStrictEqual(ExpectedBlock)
     expect(blocks[0].height).toBeGreaterThanOrEqual(40)
   })
 })
@@ -99,14 +100,14 @@ describe('get', () => {
   it('should get block through height', async () => {
     const block = await client.blocks.get('37')
 
-    expect(block).toStrictEqual({ ...ExpectedBlock, reward: '33.33000000' })
+    expect(block).toStrictEqual(ExpectedBlock)
     expect(block?.height).toStrictEqual(37)
   })
 
   it('should get block through hash', async () => {
     const blockHash = await container.call('getblockhash', [37])
     const block = await client.blocks.get(blockHash)
-    expect(block).toStrictEqual({ ...ExpectedBlock, reward: '33.33000000' })
+    expect(block).toStrictEqual(ExpectedBlock)
     expect(block?.height).toStrictEqual(37)
   })
 
@@ -138,17 +139,15 @@ describe('getTransactions', () => {
     weight: expect.any(Number),
     lockTime: expect.any(Number),
     vinCount: expect.any(Number),
-    voutCount: expect.any(Number)
+    voutCount: expect.any(Number),
+    totalVoutValue: expect.any(String),
+    sort: expect.any(String)
   }
 
   it('should getTransactions through hash', async () => {
     const blockHash = await container.call('getblockhash', [37])
     const transactions = await client.blocks.getTransactions(blockHash)
-    expect(transactions[0]).toStrictEqual({
-      ...ExpectedTransaction,
-      totalVOut: '38.24000000',
-      sort: expect.any(String)
-    })
+    expect(transactions[0]).toStrictEqual(ExpectedTransaction)
     expect(transactions[0].block.height).toStrictEqual(37)
   })
 

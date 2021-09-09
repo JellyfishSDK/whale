@@ -54,7 +54,7 @@ export interface Transaction {
   lockTime: number
   vinCount: number
   voutCount: number
-  totalVOut: string
+  totalVoutValue: string
 }
 
 /**

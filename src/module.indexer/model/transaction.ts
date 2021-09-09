@@ -44,7 +44,7 @@ export class TransactionIndexer extends Indexer {
       lockTime: txn.locktime,
       vinCount: txn.vin.length,
       voutCount: txn.vout.length,
-      totalVOut: totalVOut
+      totalVoutValue: totalVOut
     }
   }
 }

@@ -65,6 +65,6 @@ function mapTransaction (tx: ModelTransaction): Transaction {
     lockTime: tx.lockTime,
     vinCount: tx.vinCount,
     voutCount: tx.voutCount,
-    totalVOut: tx.totalVOut
+    totalVoutValue: tx.totalVoutValue
   }
 }

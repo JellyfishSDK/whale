@@ -51,7 +51,7 @@ export class TransactionMapper {
  */
 export interface Transaction extends Model {
   id: string // ----------------| unique id of the transaction, same as the txid
-  sort: string // --------------| height-order
+  sort: string // --------------| blockHash-order
 
   block: {
     hash: string
@@ -67,7 +67,7 @@ export interface Transaction extends Model {
   size: number
   vSize: number
   weight: number
-  totalVOut: string
+  totalVoutValue: string
 
   lockTime: number
 
