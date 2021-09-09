@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Query } from '@nestjs/common'
-import { Block, BlockMapper } from '@src/module.model/block'
+import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common'
+import { BlockMapper, Block as ModelBlock } from '@src/module.model/block'
+import { Block } from '@whale-api-client/api/blocks'
 import { Transaction, TransactionMapper } from '@src/module.model/transaction'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
@@ -28,7 +29,7 @@ export class BlockController {
   ): Promise<ApiPagedResponse<Block>> {
     const height = parseHeight(query.next)
     const blocks = await this.blockMapper.queryByHeight(query.size, height)
-    return ApiPagedResponse.of(blocks, query.size, item => {
+    return ApiPagedResponse.of(blocks.map(block => mapBlock(block)), query.size, item => {
       return item.height.toString()
     })
   }
@@ -37,11 +38,21 @@ export class BlockController {
   async get (@Param('id') hashOrHeight: string): Promise<Block | undefined> {
     const height = parseHeight(hashOrHeight)
     if (height !== undefined) {
-      return await this.blockMapper.getByHeight(height)
+      const block = await this.blockMapper.getByHeight(height)
+      if (block === undefined) {
+        throw new NotFoundException('Unable to find block')
+      }
+
+      return mapBlock(block)
     }
 
     if (isSHA256Hash(hashOrHeight)) {
-      return await this.blockMapper.getByHash(hashOrHeight)
+      const block = await this.blockMapper.getByHash(hashOrHeight)
+      if (block === undefined) {
+        throw new NotFoundException('Unable to find block')
+      }
+
+      return mapBlock(block)
     }
   }
 
@@ -55,5 +66,28 @@ export class BlockController {
     return ApiPagedResponse.of(transactions, query.size, transaction => {
       return transaction.id
     })
+  }
+}
+
+function mapBlock (block: ModelBlock): Block {
+  return {
+    id: block.id,
+    hash: block.hash,
+    previousHash: block.previousHash,
+    height: block.height,
+    version: block.version,
+    time: block.time,
+    medianTime: block.medianTime,
+    transactionCount: block.transactionCount,
+    difficulty: block.difficulty,
+    masternode: block.masternode,
+    minter: block.minter,
+    minterBlockCount: block.minterBlockCount,
+    stakeModifier: block.stakeModifier,
+    merkleroot: block.merkleroot,
+    size: block.size,
+    sizeStripped: block.sizeStripped,
+    weight: block.weight,
+    reward: block.reward
   }
 }

@@ -13,7 +13,7 @@ const TransactionMapping: ModelMapping<Transaction> = {
       },
       sort: {
         type: 'string',
-        key: (b: Transaction) => b.txid
+        key: (b: Transaction) => b.sort
       }
     }
   }
@@ -51,6 +51,7 @@ export class TransactionMapper {
  */
 export interface Transaction extends Model {
   id: string // ----------------| unique id of the transaction, same as the txid
+  sort: string // --------------| height-order
 
   block: {
     hash: string
@@ -66,6 +67,7 @@ export interface Transaction extends Model {
   size: number
   vSize: number
   weight: number
+  totalVOut: string
 
   lockTime: number
 
