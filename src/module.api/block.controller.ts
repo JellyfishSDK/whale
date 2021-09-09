@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common'
+import { Controller, Get, Param, Query } from '@nestjs/common'
 import { BlockMapper, Block as ModelBlock } from '@src/module.model/block'
 import { Block } from '@whale-api-client/api/blocks'
 import { Transaction, TransactionMapper } from '@src/module.model/transaction'
@@ -40,7 +40,7 @@ export class BlockController {
     if (height !== undefined) {
       const block = await this.blockMapper.getByHeight(height)
       if (block === undefined) {
-        throw new NotFoundException('Unable to find block')
+        return undefined
       }
 
       return mapBlock(block)
@@ -49,7 +49,7 @@ export class BlockController {
     if (isSHA256Hash(hashOrHeight)) {
       const block = await this.blockMapper.getByHash(hashOrHeight)
       if (block === undefined) {
-        throw new NotFoundException('Unable to find block')
+        return undefined
       }
 
       return mapBlock(block)

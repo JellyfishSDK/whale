@@ -83,7 +83,8 @@ describe('get', () => {
       weight: expect.any(Number),
       lockTime: expect.any(Number),
       vinCount: expect.any(Number),
-      voutCount: expect.any(Number)
+      voutCount: expect.any(Number),
+      totalVOut: expect.any(String)
     })
   })
 

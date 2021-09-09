@@ -1,6 +1,7 @@
 import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common'
-import { TransactionMapper } from '@src/module.model/transaction'
+import { TransactionMapper, Transaction as ModelTransaction } from '@src/module.model/transaction'
 import { Transaction } from '@whale-api-client/api/transactions'
+
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { TransactionVin, TransactionVinMapper } from '@src/module.model/transaction.vin'
@@ -29,7 +30,7 @@ export class TransactionController {
       throw new NotFoundException('transaction not found')
     }
 
-    return transaction
+    return mapTransaction(transaction)
   }
 
   @Get('/:txid/vins')
@@ -48,5 +49,22 @@ export class TransactionController {
     return ApiPagedResponse.of(vout, query.size, vout => {
       return vout.n.toString()
     })
+  }
+}
+
+function mapTransaction (tx: ModelTransaction): Transaction {
+  return {
+    id: tx.id,
+    block: tx.block,
+    txid: tx.txid,
+    hash: tx.hash,
+    version: tx.version,
+    size: tx.size,
+    vSize: tx.vSize,
+    weight: tx.weight,
+    lockTime: tx.lockTime,
+    vinCount: tx.vinCount,
+    voutCount: tx.voutCount,
+    totalVOut: tx.totalVOut
   }
 }
