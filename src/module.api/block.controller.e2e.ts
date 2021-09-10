@@ -95,7 +95,7 @@ describe('list', () => {
 describe('getTransactions', () => {
   it('should get transactions from a block by hash', async () => {
     const blockHash = await container.call('getblockhash', [100])
-    const paginatedTransactions = await controller.getTransactions(blockHash, { size: 30, next: '10' })
+    const paginatedTransactions = await controller.getTransactions(blockHash, { size: 30 })
 
     expect(paginatedTransactions.data.length).toBeGreaterThanOrEqual(1)
     expect(paginatedTransactions.data[0].block.height).toStrictEqual(100)
@@ -121,7 +121,7 @@ describe('getTransactions', () => {
 
   it('should list transactions in the right order', async () => {
     const blockHash = await container.call('getblockhash', [103])
-    const paginatedTransactions = await controller.getTransactions(blockHash, { size: 30, next: '10' })
+    const paginatedTransactions = await controller.getTransactions(blockHash, { size: 30 })
 
     expect(paginatedTransactions.data.length).toBeGreaterThanOrEqual(4)
     expect(paginatedTransactions.data[0].block.height).toStrictEqual(103)

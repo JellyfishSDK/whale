@@ -59,6 +59,7 @@ describe('get', () => {
     const transaction = await controller.get(txid)
     expect(transaction).toStrictEqual({
       id: txid,
+      order: expect.any(Number),
       block: {
         hash: expect.any(String),
         height: expect.any(Number),

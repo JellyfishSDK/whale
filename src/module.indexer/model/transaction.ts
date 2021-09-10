@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { defid, Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { Transaction, TransactionMapper } from '@src/module.model/transaction'
-import { HexEncoder } from '@src/module.model/_hex.encoder'
 import BigNumber from 'bignumber.js'
 
 @Injectable()
@@ -28,7 +27,7 @@ export class TransactionIndexer extends Indexer {
   map (block: RawBlock, txn: defid.Transaction, order: number, totalVOut: string): Transaction {
     return {
       id: txn.txid,
-      sort: `${block.hash}-${HexEncoder.encodeHeight(order)}`,
+      order: order,
       block: {
         hash: block.hash,
         height: block.height,

@@ -125,6 +125,7 @@ describe('get', () => {
 describe('getTransactions', () => {
   const ExpectedTransaction = {
     id: expect.stringMatching(/[0-f]{64}/),
+    sort: expect.any(String),
     block: {
       hash: expect.stringMatching(/[0-f]{64}/),
       height: expect.any(Number),
@@ -140,8 +141,7 @@ describe('getTransactions', () => {
     lockTime: expect.any(Number),
     vinCount: expect.any(Number),
     voutCount: expect.any(Number),
-    totalVoutValue: expect.any(String),
-    sort: expect.any(String)
+    totalVoutValue: expect.any(String)
   }
 
   it('should getTransactions through hash', async () => {
