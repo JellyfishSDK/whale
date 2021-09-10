@@ -102,7 +102,7 @@ describe('getTransactions', () => {
   })
 
   it('getTransactions should not get transactions by height', async () => {
-    const paginatedTransactions = await controller.getTransactions('0', { size: 30, next: '10' })
+    const paginatedTransactions = await controller.getTransactions('0', { size: 30 })
 
     expect(paginatedTransactions.data.length).toStrictEqual(0)
   })
