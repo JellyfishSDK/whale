@@ -125,7 +125,7 @@ describe('get', () => {
 describe('getTransactions', () => {
   const ExpectedTransaction = {
     id: expect.stringMatching(/[0-f]{64}/),
-    sort: expect.any(String),
+    order: expect.any(Number),
     block: {
       hash: expect.stringMatching(/[0-f]{64}/),
       height: expect.any(Number),
