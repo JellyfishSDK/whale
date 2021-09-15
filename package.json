@@ -31,6 +31,7 @@
     "@defichain/jellyfish-api-jsonrpc": ">=0.43.0",
     "@defichain/jellyfish-json": ">=0.43.0",
     "@defichain/jellyfish-network": ">=0.43.0",
+    "@defichain/jellyfish-testing": "^0.43.0",
     "@defichain/jellyfish-transaction": ">=0.43.0",
     "@nestjs/common": "^8.0.6",
     "@nestjs/config": "^1.0.1",

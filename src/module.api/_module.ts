@@ -22,6 +22,7 @@ import { PriceController } from '@src/module.api/price.controller'
 import { StatsController } from '@src/module.api/stats.controller'
 import { FeeController } from '@src/module.api/fee.controller'
 import { RawtxController } from '@src/module.api/rawtx.controller'
+import { AnchorsController } from '@src/module.api/anchors.controller'
 
 /**
  * Exposed ApiModule for public interfacing
@@ -41,7 +42,8 @@ import { RawtxController } from '@src/module.api/rawtx.controller'
     PriceController,
     StatsController,
     FeeController,
-    RawtxController
+    RawtxController,
+    AnchorsController
   ],
   providers: [
     { provide: APP_PIPE, useClass: ApiValidationPipe },
