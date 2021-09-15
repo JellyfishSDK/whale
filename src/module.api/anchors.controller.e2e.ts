@@ -1,35 +1,31 @@
 import { GenesisKeys, MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { StubWhaleApiClient } from '../stub.client'
-import { StubService } from '../stub.service'
-import { WhaleApiClient } from '../../src'
+import { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { createTestingApp, stopTestingApp } from '@src/e2e.module'
+import { AnchorsController } from '@src/module.api/anchors.controller'
 import { TestingGroup } from '@defichain/jellyfish-testing'
 
 let tGroup: TestingGroup
 let container: MasterNodeRegTestContainer
-let service: StubService
-let client: WhaleApiClient
+let app: NestFastifyApplication
+let controller: AnchorsController
 
 beforeAll(async () => {
   tGroup = TestingGroup.create(3)
   container = tGroup.group.get(0)
-  service = new StubService(container)
-  client = new StubWhaleApiClient(service)
 
-  await container.start()
   await tGroup.start()
-  await service.start()
+
+  app = await createTestingApp(container)
+  controller = app.get(AnchorsController)
 
   await setup()
 })
 
 afterAll(async () => {
-  try {
-    await service.stop()
-  } finally {
-    await tGroup.stop()
-    await container.stop()
-  }
+  await stopTestingApp(container, app)
+  await tGroup.stop()
 })
+
 async function setMockTime (offsetHour: number): Promise<void> {
   await tGroup.exec(async (testing: any) => {
     await testing.misc.offsetTimeHourly(offsetHour)
@@ -116,10 +112,11 @@ async function createAnchor (): Promise<any> {
     privkey: 'b0528d87cfdb09f72c9d10b7b3cc00727062d93537a3e8abcf1fde821d08b59d'
   }], rewardAddress)
 }
+
 describe('list', () => {
   it('should list anchors', async () => {
-    const response = await client.anchors.list()
-
+    const response = await controller.list()
+    expect(response.length).toStrictEqual(4)
     expect(response[0]).toStrictEqual({
       btcBlock: {
         height: 4,
