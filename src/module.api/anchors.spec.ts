@@ -1,35 +1,42 @@
+import { Test, TestingModule } from '@nestjs/testing'
 import { GenesisKeys, MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { StubWhaleApiClient } from '../stub.client'
-import { StubService } from '../stub.service'
-import { WhaleApiClient } from '../../src'
+import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
+import { CacheModule } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { TestingGroup } from '@defichain/jellyfish-testing'
+import { AnchorsController } from '@src/module.api/anchors.controller'
 
 let tGroup: TestingGroup
+let controller: AnchorsController
 let container: MasterNodeRegTestContainer
-let service: StubService
-let client: WhaleApiClient
 
 beforeAll(async () => {
   tGroup = TestingGroup.create(3)
   container = tGroup.group.get(0)
-  service = new StubService(container)
-  client = new StubWhaleApiClient(service)
 
   await tGroup.start()
-  await container.start()
-  await service.start()
+  const client = new JsonRpcClient(await container.getCachedRpcUrl())
+
+  const app: TestingModule = await Test.createTestingModule({
+    imports: [
+      CacheModule.register()
+    ],
+    controllers: [AnchorsController],
+    providers: [
+      { provide: JsonRpcClient, useValue: client },
+      ConfigService
+    ]
+  }).compile()
+
+  controller = app.get(AnchorsController)
 
   await setup()
 })
 
 afterAll(async () => {
-  try {
-    await service.stop()
-  } finally {
-    await tGroup.stop()
-    await container.stop()
-  }
+  await tGroup.stop()
 })
+
 async function setMockTime (offsetHour: number): Promise<void> {
   await tGroup.exec(async (testing: any) => {
     await testing.misc.offsetTimeHourly(offsetHour)
@@ -116,10 +123,11 @@ async function createAnchor (): Promise<any> {
     privkey: 'b0528d87cfdb09f72c9d10b7b3cc00727062d93537a3e8abcf1fde821d08b59d'
   }], rewardAddress)
 }
-describe('list', () => {
-  it('should list anchors', async () => {
-    const response = await client.anchors.list()
 
+describe('list', () => {
+  it('should get list of anchors rewards of four anchors', async function () {
+    const response = await controller.list()
+    expect(response.length).toStrictEqual(4)
     expect(response[0]).toStrictEqual({
       btcBlock: {
         height: 4,
