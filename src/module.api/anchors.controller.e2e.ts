@@ -13,6 +13,7 @@ beforeAll(async () => {
   tGroup = TestingGroup.create(3)
   container = tGroup.group.get(0)
 
+  await container.start()
   await tGroup.start()
 
   app = await createTestingApp(container)
