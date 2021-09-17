@@ -9,7 +9,7 @@ COPY LICENSE ./
 COPY package.json ./
 COPY package-lock.json ./
 
-RUN npm ci
+RUN npm i && ci
 
 COPY tsconfig.json ./
 COPY tsconfig.build.json ./
