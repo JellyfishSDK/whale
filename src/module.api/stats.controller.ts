@@ -7,6 +7,8 @@ import { PoolPairService } from '@src/module.api/poolpair.service'
 import BigNumber from 'bignumber.js'
 import { PriceTickerMapper } from '@src/module.model/price.ticker'
 import { MasternodeStats, MasternodeStatsMapper } from '@src/module.model/masternode.stats'
+import { BurnInfo } from '@defichain/jellyfish-api-core/dist/category/account'
+import { BlockchainInfo } from '@defichain/jellyfish-api-core/dist/category/blockchain'
 
 @Controller('/stats')
 export class StatsController {
@@ -37,7 +39,8 @@ export class StatsController {
       price: await this.cachedGet('price', this.getPrice.bind(this), 300),
       masternodes: {
         locked: masternodes.locked
-      }
+      },
+      emission: await this.cachedGet('emission', this.getEmission.bind(this), 1000)
     }
   }
 
@@ -117,44 +120,70 @@ export class StatsController {
   }
 
   private async getEmission (): Promise<StatsData['emission']> {
-    const info = await this.rpcClient.blockchain.getBlockchainInfo()
-    const { emissionburn, amount, feeburn } = await this.rpcClient.account.getBurnInfo()
+    const burnInfo = await this.getBurnInfo()
+    const blockInfo = await this.getBlockChainInfo()
+    const isMain = blockInfo?.chain === 'main'
 
+    let nBlocks = 0
+    let eunosHeight = 0
+    let burned = 0
     let blockSubsidy = 405.04
-    const eunosHeight = 894000
-    const emissionReductionPeriod = 32690
-    const emissionReductionAmount = 1658
-    const reductions = Math.floor((info.blocks - eunosHeight) / emissionReductionPeriod)
 
-    let reductionAmount = 0
-    for (let i = reductions; i > 0; i--) {
-      reductionAmount = (blockSubsidy * emissionReductionAmount) / 100000
-      if (reductionAmount <= 0.0000000001) {
-        blockSubsidy = 0
-        break
-      }
-
-      blockSubsidy -= reductionAmount
+    if (blockInfo != null) {
+      eunosHeight = blockInfo.softforks.eunos.height
+      nBlocks = blockInfo.blocks
     }
-    const communityRewards: Record<string, any> = {
-      masternode: 33.33 * 0.01,
-      dex: 25.45 * 0.01,
-      community: 4.91 * 0.01,
-      anchor: 0.02 * 0.01
+    if (burnInfo != null) {
+      burned = burnInfo.amount.plus(burnInfo.emissionburn).plus(burnInfo.feeburn).toNumber()
+    }
+
+    if (isMain) {
+      const emissionReductionPeriod = 32690 // Two weeks
+      const emissionReductionAmount = 1658
+      const reductions = Math.floor((nBlocks - eunosHeight) / emissionReductionPeriod)
+
+      let reductionAmount = new BigNumber(0)
+      for (let i = reductions; i > 0; i--) {
+        reductionAmount = new BigNumber(blockSubsidy * emissionReductionAmount / 100000)
+        if (reductionAmount.lte(0.00001)) {
+          blockSubsidy = 0
+          break
+        }
+
+        blockSubsidy -= reductionAmount.toNumber()
+      }
+    }
+    const communityRewards: Record<string, BigNumber> = {
+      masternode: new BigNumber(0.3333),
+      dex: new BigNumber(0.2445),
+      community: new BigNumber(0.0491),
+      anchor: new BigNumber(0.0002)
     }
 
     for (const reward in communityRewards) {
-      communityRewards[reward] *= blockSubsidy
+      communityRewards[reward] = communityRewards[reward].times(blockSubsidy)
     }
 
     return {
       total: blockSubsidy,
-      anchor: communityRewards.anchor,
-      dex: communityRewards.dex,
-      community: communityRewards.community,
-      masternode: communityRewards.masternode,
-      burned: amount.plus(emissionburn).plus(feeburn).toNumber()
+      anchor: communityRewards.anchor.toNumber(),
+      dex: communityRewards.dex.toNumber(),
+      community: communityRewards.community.toNumber(),
+      masternode: communityRewards.masternode.toNumber(),
+      burned
     }
+  }
+
+  private async getBlockChainInfo (): Promise<BlockchainInfo | undefined> {
+    return await this.cache.get<BlockchainInfo>('BLOCK_INFO', async () => {
+      return await this.rpcClient.blockchain.getBlockchainInfo()
+    })
+  }
+
+  private async getBurnInfo (): Promise<BurnInfo | undefined> {
+    return await this.cache.get<BurnInfo>('BURN_INFO', async () => {
+      return await this.rpcClient.account.getBurnInfo()
+    })
   }
 }
 
