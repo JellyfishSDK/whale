@@ -122,37 +122,19 @@ export class StatsController {
   private async getEmission (): Promise<StatsData['emission']> {
     const burnInfo = await this.getBurnInfo()
     const blockInfo = await this.getBlockChainInfo()
-    const isMain = blockInfo?.chain === 'main'
 
-    let nBlocks = 0
     let eunosHeight = 0
     let burned = 0
-    let blockSubsidy = 405.04
 
     if (blockInfo != null) {
       eunosHeight = blockInfo.softforks.eunos.height
-      nBlocks = blockInfo.blocks
     }
     if (burnInfo != null) {
       burned = burnInfo.amount.plus(burnInfo.emissionburn).plus(burnInfo.feeburn).toNumber()
     }
 
-    if (isMain) {
-      const emissionReductionPeriod = 32690 // Two weeks
-      const emissionReductionAmount = 1658
-      const reductions = Math.floor((nBlocks - eunosHeight) / emissionReductionPeriod)
+    const blockSubsidy = getBlockSubsidy(eunosHeight, blockInfo?.blocks)
 
-      let reductionAmount = new BigNumber(0)
-      for (let i = reductions; i > 0; i--) {
-        reductionAmount = new BigNumber(blockSubsidy * emissionReductionAmount / 100000)
-        if (reductionAmount.lte(0.00001)) {
-          blockSubsidy = 0
-          break
-        }
-
-        blockSubsidy -= reductionAmount.toNumber()
-      }
-    }
     const communityRewards: Record<string, BigNumber> = {
       masternode: new BigNumber(0.3333),
       dex: new BigNumber(0.2445),
@@ -185,6 +167,26 @@ export class StatsController {
       return await this.rpcClient.account.getBurnInfo()
     })
   }
+}
+
+function getBlockSubsidy (eunosHeight: number, nHeight: number = 0): number {
+  let nSubsidy = 405.04
+  const emissionReductionPeriod = 32690 // Two weeks
+  const emissionReductionAmount = new BigNumber(0.01658) //
+  const reductions = Math.floor((nHeight - eunosHeight) / emissionReductionPeriod)
+
+  if (nHeight >= eunosHeight) {
+    for (let i = reductions; i > 0; i--) {
+      const reductionAmount = emissionReductionAmount.times(405.04)
+      if (reductionAmount.lte(0.00001)) {
+        nSubsidy = 0
+        break
+      }
+      nSubsidy -= reductionAmount.toNumber()
+    }
+    return nSubsidy
+  }
+  return nSubsidy
 }
 
 function requireValue<T> (value: T | undefined, name: string): T {
