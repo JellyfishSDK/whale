@@ -76,7 +76,7 @@ export class PoolPairService {
     })
   }
 
-  private async getDailyDFIReward (): Promise<BigNumber | undefined> {
+  public async getDailyDFIReward (): Promise<BigNumber | undefined> {
     return await this.cache.get<BigNumber>('LP_DAILY_DFI_REWARD', async () => {
       const rpcResult = await this.rpcClient.masternode.getGov('LP_DAILY_DFI_REWARD')
       return new BigNumber(rpcResult.LP_DAILY_DFI_REWARD)
