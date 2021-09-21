@@ -169,7 +169,7 @@ export class StatsController {
   }
 }
 
-function getBlockSubsidy (eunosHeight: number, nHeight: number = 0): number {
+export function getBlockSubsidy (eunosHeight: number, nHeight: number = 0): number {
   let blockSubsidy = 405.04
   const emissionReductionPeriod = 32690 // Two weeks
   const emissionReductionAmount = new BigNumber(0.01658) // 1.658%

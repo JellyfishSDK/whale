@@ -1,21 +1,9 @@
-import { MasterNodeRegTestContainer, StartOptions } from '@defichain/testcontainers'
+import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
 import { WhaleApiClient } from '../../src'
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens } from '@defichain/testing'
-import BigNumber from 'bignumber.js'
-
-export class StatsContainer extends MasterNodeRegTestContainer {
-  constructor () {
-    super(undefined, 'defi/defichain:1.8.0')
-  }
-
-  protected getCmd (opts: StartOptions): string[] {
-    return [
-      ...super.getCmd(opts).filter(cmd => cmd !== '-jellyfish_regtest=1')
-    ]
-  }
-}
+import { getBlockSubsidy } from '@src/module.api/stats.controller'
 
 describe('stats', () => {
   let container: MasterNodeRegTestContainer
@@ -87,26 +75,6 @@ describe('stats', () => {
     return consensusParams.eunosHeight + (reductions * consensusParams.emissionReductionPeriod)
   }
 
-  function getBlockSubsidy (eunosHeight: number, nHeight: number = 0): number {
-    let nSubsidy = 405.04
-    const emissionReductionPeriod = 1658 // Two weeks
-    const emissionReductionAmount = new BigNumber(0.01658) // 1.658%
-    const reductions = Math.floor((nHeight - eunosHeight) / emissionReductionPeriod)
-
-    if (nHeight >= eunosHeight) {
-      for (let i = reductions; i > 0; i--) {
-        const reductionAmount = emissionReductionAmount.times(405.04)
-        if (reductionAmount.lte(0.00001)) {
-          nSubsidy = 0
-          break
-        }
-        nSubsidy -= reductionAmount.toNumber()
-      }
-      return nSubsidy
-    }
-    return nSubsidy
-  }
-
   it('should get', async () => {
     const data = await client.stats.get()
     expect(data).toStrictEqual({
@@ -135,25 +103,23 @@ describe('stats', () => {
   })
 
   it('should check emission with reduction 0', async () => {
-    const data = (await client.stats.get()).emission
-
     const blockSubsidy = getBlockSubsidy(consensusParams.eunosHeight, calculateReductionHeight(0))
     expect(blockSubsidy).toStrictEqual(405.04)
 
     // masternode
     expect(calculateCoinbaseRewards(blockSubsidy, 3333)
-      .toFixed(5)).toStrictEqual(data.masternode.toFixed(5))
+      .toFixed(5)).toStrictEqual('134.99983')
 
     // anchors
     expect(calculateCoinbaseRewards(blockSubsidy, 2).toFixed(5))
-      .toStrictEqual(data.anchor.toFixed(5))
+      .toStrictEqual('0.08101')
 
     // dex
     expect(calculateCoinbaseRewards(blockSubsidy, 2445)
-      .toFixed(5)).toStrictEqual(data.dex.toFixed(5))
+      .toFixed(5)).toStrictEqual('99.03228')
 
     // community
     expect(calculateCoinbaseRewards(blockSubsidy, 491)
-      .toFixed(5)).toStrictEqual(data.community.toFixed(5))
+      .toFixed(5)).toStrictEqual('19.88746')
   })
 })
