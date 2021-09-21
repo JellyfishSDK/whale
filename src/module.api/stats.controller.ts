@@ -26,6 +26,7 @@ export class StatsController {
     const height = requireValue(block?.height, 'count.blocks')
 
     const masternodes = await this.cachedGet('masternodes', this.getMasternodes.bind(this), 300)
+    const dailyRewards = await this.getDailyDFIReward()
 
     return {
       count: {
@@ -37,11 +38,14 @@ export class StatsController {
       price: await this.cachedGet('price', this.getPrice.bind(this), 300),
       masternodes: {
         locked: masternodes.locked
+      },
+      rewards: {
+        daily: dailyRewards
       }
     }
   }
 
-  private async cachedGet<T> (field: string, fetch: () => Promise<T>, ttl: number): Promise<T> {
+  private async cachedGet<T>(field: string, fetch: () => Promise<T>, ttl: number): Promise<T> {
     const object = await this.cache.get(`StatsController.${field}`, fetch, { ttl })
     return requireValue(object, field)
   }
@@ -57,6 +61,15 @@ export class StatsController {
       tokens: Object.keys(tokens).length,
       masternodes: requireValue(masternodes?.stats?.count, 'masternodes.stats.count')
     }
+  }
+
+  private async getDailyDFIReward (): Promise<BigNumber | undefined> {
+    return await this.cache.get<BigNumber>('LP_DAILY_DFI_REWARD', async () => {
+      const rpcResult = await this.rpcClient.masternode.getGov('LP_DAILY_DFI_REWARD')
+      return new BigNumber(rpcResult.LP_DAILY_DFI_REWARD)
+    }, {
+      ttl: 3600 // 60 minutes
+    })
   }
 
   private async getTVL (): Promise<StatsData['tvl']> {
