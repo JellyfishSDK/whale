@@ -75,7 +75,7 @@ describe('stats', () => {
     return consensusParams.eunosHeight + (reductions * consensusParams.emissionReductionPeriod)
   }
 
-  it('should get', async () => {
+  it('should get stat data', async () => {
     const data = await client.stats.get()
     expect(data).toStrictEqual({
       count: { blocks: 117, prices: 0, tokens: 7, masternodes: 8 },
@@ -121,5 +121,26 @@ describe('stats', () => {
     // community
     expect(calculateCoinbaseRewards(blockSubsidy, 491)
       .toFixed(5)).toStrictEqual('19.88746')
+  })
+
+  it('should check emission with reduction 1', async () => {
+    const blockSubsidy = getBlockSubsidy(consensusParams.eunosHeight, calculateReductionHeight(1))
+    expect(blockSubsidy).toStrictEqual(398.3244368)
+
+    // masternode
+    expect(calculateCoinbaseRewards(blockSubsidy, 3333)
+      .toFixed(5)).toStrictEqual('132.76153')
+
+    // anchors
+    expect(calculateCoinbaseRewards(blockSubsidy, 2).toFixed(5))
+      .toStrictEqual('0.07966')
+
+    // dex
+    expect(calculateCoinbaseRewards(blockSubsidy, 2445)
+      .toFixed(5)).toStrictEqual('97.39032')
+
+    // community
+    expect(calculateCoinbaseRewards(blockSubsidy, 491)
+      .toFixed(5)).toStrictEqual('19.55773')
   })
 })
