@@ -40,7 +40,7 @@ export class StatsController {
         locked: masternodes.locked
       },
       rewards: {
-        daily: dailyRewards
+        daily: dailyRewards !== undefined ? dailyRewards.toNumber() : -1
       }
     }
   }
