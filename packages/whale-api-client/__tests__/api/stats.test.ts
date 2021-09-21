@@ -90,7 +90,7 @@ describe('stats', () => {
   function getBlockSubsidy (eunosHeight: number, nHeight: number = 0): number {
     let nSubsidy = 405.04
     const emissionReductionPeriod = 1658 // Two weeks
-    const emissionReductionAmount = new BigNumber(0.01658)
+    const emissionReductionAmount = new BigNumber(0.01658) // 1.658%
     const reductions = Math.floor((nHeight - eunosHeight) / emissionReductionPeriod)
 
     if (nHeight >= eunosHeight) {

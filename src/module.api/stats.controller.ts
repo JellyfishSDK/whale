@@ -170,23 +170,23 @@ export class StatsController {
 }
 
 function getBlockSubsidy (eunosHeight: number, nHeight: number = 0): number {
-  let nSubsidy = 405.04
+  let blockSubsidy = 405.04
   const emissionReductionPeriod = 32690 // Two weeks
-  const emissionReductionAmount = new BigNumber(0.01658) //
+  const emissionReductionAmount = new BigNumber(0.01658) // 1.658%
   const reductions = Math.floor((nHeight - eunosHeight) / emissionReductionPeriod)
 
   if (nHeight >= eunosHeight) {
     for (let i = reductions; i > 0; i--) {
-      const reductionAmount = emissionReductionAmount.times(405.04)
+      const reductionAmount = emissionReductionAmount.times(blockSubsidy)
       if (reductionAmount.lte(0.00001)) {
-        nSubsidy = 0
+        blockSubsidy = 0
         break
       }
-      nSubsidy -= reductionAmount.toNumber()
+      blockSubsidy -= reductionAmount.toNumber()
     }
-    return nSubsidy
+    return blockSubsidy
   }
-  return nSubsidy
+  return blockSubsidy
 }
 
 function requireValue<T> (value: T | undefined, name: string): T {
