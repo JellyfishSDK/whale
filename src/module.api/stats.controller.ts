@@ -10,7 +10,7 @@ import { MasternodeStats, MasternodeStatsMapper } from '@src/module.model/master
 
 @Controller('/stats')
 export class StatsController {
-  constructor(
+  constructor (
     protected readonly blockMapper: BlockMapper,
     protected readonly priceTickerMapper: PriceTickerMapper,
     protected readonly masternodeStatsMapper: MasternodeStatsMapper,
@@ -21,7 +21,7 @@ export class StatsController {
   }
 
   @Get()
-  async get(): Promise<StatsData> {
+  async get (): Promise<StatsData> {
     const block = await this.blockMapper.getHighest()
     const height = requireValue(block?.height, 'count.blocks')
 
@@ -40,7 +40,7 @@ export class StatsController {
         locked: masternodes.locked
       },
       rewards: {
-        daily: dailyRewards !== undefined ? dailyRewards.toNumber() : -1
+        daily: dailyRewards !== undefined ? dailyRewards.toNumber() : -1 
       }
     }
   }
@@ -50,7 +50,7 @@ export class StatsController {
     return requireValue(object, field)
   }
 
-  private async getCount(): Promise<StatsData['count']> {
+  private async getCount (): Promise<StatsData['count']> {
     const tokens = await this.rpcClient.token.listTokens({ including_start: true, start: 0, limit: 1000 }, false)
     const prices = await this.priceTickerMapper.query(1000)
     const masternodes = await this.masternodeStatsMapper.getLatest()
@@ -63,7 +63,7 @@ export class StatsController {
     }
   }
 
-  private async getTVL(): Promise<StatsData['tvl']> {
+  private async getTVL (): Promise<StatsData['tvl']> {
     let dex = new BigNumber(0)
     const pairs = await this.rpcClient.poolpair.listPoolPairs({ including_start: true, start: 0, limit: 1000 }, true)
     for (const pair of Object.values(pairs)) {
@@ -84,7 +84,7 @@ export class StatsController {
     }
   }
 
-  private async getBurned(): Promise<StatsData['burned']> {
+  private async getBurned (): Promise<StatsData['burned']> {
     const { emissionburn, amount, feeburn } = await this.rpcClient.account.getBurnInfo()
     return {
       address: amount.toNumber(),
@@ -94,20 +94,20 @@ export class StatsController {
     }
   }
 
-  private async getPrice(): Promise<StatsData['price']> {
+  private async getPrice (): Promise<StatsData['price']> {
     const usdt = await this.poolPairService.getUSDT_PER_DFI()
     return {
       usdt: requireValue(usdt, 'price.usdt').toNumber()
     }
   }
 
-  private async getMasternodes(): Promise<StatsData['masternodes']> {
+  private async getMasternodes (): Promise<StatsData['masternodes']> {
     const latest = await this.masternodeStatsMapper.getLatest()
     const masternodeStats = requireValue(latest, 'masternode.stats')
     return await this.mapMasternodeStats(masternodeStats)
   }
 
-  private async mapMasternodeStats(masternodeStats: MasternodeStats): Promise<StatsData['masternodes']> {
+  private async mapMasternodeStats (masternodeStats: MasternodeStats): Promise<StatsData['masternodes']> {
     const optionalUsdt = await this.poolPairService.getUSDT_PER_DFI()
     const usdt = requireValue(optionalUsdt, 'price.usdt')
     return {
@@ -121,7 +121,7 @@ export class StatsController {
   }
 }
 
-function requireValue<T>(value: T | undefined, name: string): T {
+function requireValue<T> (value: T | undefined, name: string): T {
   if (value === undefined) {
     throw new Error(`failed to compute: ${name}`)
   }
