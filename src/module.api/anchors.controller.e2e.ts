@@ -115,7 +115,7 @@ async function createAnchor (): Promise<any> {
 }
 
 describe('list', () => {
-  it('should list anchors', async () => {
+  it('should list anchors = 4', async () => {
     const response = await controller.list({ size: 2 })
     expect(response.data.length).toStrictEqual(4)
     expect(response.data[0]).toStrictEqual({

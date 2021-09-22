@@ -1,40 +1,23 @@
-import { Test, TestingModule } from '@nestjs/testing'
 import { GenesisKeys, MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-import { CacheModule } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
+import { StubService } from '../stub.service'
+import { StubWhaleApiClient } from '../stub.client'
+import { WhaleApiClient } from '../../src'
 import { TestingGroup } from '@defichain/jellyfish-testing'
-import { AnchorsController } from '@src/module.api/anchors.controller'
 
-let tGroup: TestingGroup
-let controller: AnchorsController
 let container: MasterNodeRegTestContainer
+let service: StubService
+let client: WhaleApiClient
+let tGroup: TestingGroup
 
 beforeAll(async () => {
   tGroup = TestingGroup.create(3)
   container = tGroup.group.get(0)
+  service = new StubService(container)
+  client = new StubWhaleApiClient(service)
 
-  await tGroup.start()
-  const client = new JsonRpcClient(await container.getCachedRpcUrl())
-
-  const app: TestingModule = await Test.createTestingModule({
-    imports: [
-      CacheModule.register()
-    ],
-    controllers: [AnchorsController],
-    providers: [
-      { provide: JsonRpcClient, useValue: client },
-      ConfigService
-    ]
-  }).compile()
-
-  controller = app.get(AnchorsController)
-
+  await tGroup.group.start()
+  await service.start()
   await setup()
-})
-
-afterAll(async () => {
-  await tGroup.group.stop()
 })
 
 async function setMockTime (offsetHour: number): Promise<void> {
@@ -124,13 +107,20 @@ async function createAnchor (): Promise<any> {
   }], rewardAddress)
 }
 
-describe('list', () => {
-  it('should list anchors rewards = 4', async function () {
-    // TODO(siradji) Test Pagination
-    const response = await controller.list({ size: 2 })
+afterAll(async () => {
+  try {
+    await service.stop()
+  } finally {
+    await tGroup.group.stop()
+  }
+})
 
-    expect(response.data.length).toStrictEqual(4)
-    expect(response.data[0]).toStrictEqual({
+describe('list', () => {
+  it('should list anchors =4', async () => {
+    const result = await client.anchors.list()
+
+    expect(result.length).toStrictEqual(4)
+    expect(result[0]).toStrictEqual({
       id: '1',
       btcBlock: {
         height: 4,
