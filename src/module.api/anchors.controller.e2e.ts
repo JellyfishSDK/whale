@@ -119,6 +119,7 @@ describe('list', () => {
     const response = await controller.list({ size: 2 })
     expect(response.data.length).toStrictEqual(4)
     expect(response.data[0]).toStrictEqual({
+      id: '1',
       btcBlock: {
         height: 4,
         hash: '0000000000000001000000000000000100000000000000010000000000000001',
