@@ -116,9 +116,9 @@ async function createAnchor (): Promise<any> {
 
 describe('list', () => {
   it('should list anchors', async () => {
-    const response = await controller.list()
-    expect(response.length).toStrictEqual(4)
-    expect(response[0]).toStrictEqual({
+    const response = await controller.list({ size: 2 })
+    expect(response.data.length).toStrictEqual(4)
+    expect(response.data[0]).toStrictEqual({
       btcBlock: {
         height: 4,
         hash: '0000000000000001000000000000000100000000000000010000000000000001',

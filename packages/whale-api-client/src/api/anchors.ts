@@ -17,6 +17,7 @@ export class Anchors {
 }
 
 export interface AnchorData {
+  id: string
   btcBlock: {
     height: number
     hash: string
