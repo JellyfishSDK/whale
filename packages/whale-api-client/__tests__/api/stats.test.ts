@@ -72,7 +72,7 @@ describe('stats', () => {
   }
 
   function calculateReductionHeight (reductions: number): number {
-    return consensusParams.eunosHeight + (reductions * consensusParams.emissionReductionPeriod)
+    return consensusParams.eunosHeight + reductions * consensusParams.emissionReductionPeriod
   }
 
   it('should get stat data', async () => {

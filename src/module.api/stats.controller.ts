@@ -123,12 +123,9 @@ export class StatsController {
     const burnInfo = await this.getBurnInfo()
     const blockInfo = await this.getBlockChainInfo()
 
-    let eunosHeight = 0
+    const eunosHeight = blockInfo?.softforks.eunos.height ?? 0
     let burned = 0
 
-    if (blockInfo != null) {
-      eunosHeight = blockInfo.softforks.eunos.height
-    }
     if (burnInfo != null) {
       burned = burnInfo.amount.plus(burnInfo.emissionburn).plus(burnInfo.feeburn).toNumber()
     }
@@ -184,7 +181,6 @@ export function getBlockSubsidy (eunosHeight: number, nHeight: number = 0): numb
       }
       blockSubsidy -= reductionAmount.toNumber()
     }
-    return blockSubsidy
   }
   return blockSubsidy
 }
