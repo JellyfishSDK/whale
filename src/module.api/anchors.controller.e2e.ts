@@ -1,6 +1,6 @@
 import { GenesisKeys, MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp, stopTestingApp } from '@src/e2e.module'
+import { createTestingApp } from '@src/e2e.module'
 import { AnchorsController } from '@src/module.api/anchors.controller'
 import { TestingGroup } from '@defichain/jellyfish-testing'
 
@@ -23,8 +23,8 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await stopTestingApp(container, app)
-  await tGroup.stop()
+  await app.close()
+  await tGroup.group.stop()
 })
 
 async function setMockTime (offsetHour: number): Promise<void> {

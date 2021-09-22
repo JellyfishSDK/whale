@@ -1,7 +1,9 @@
-import { Controller, Get } from '@nestjs/common'
+import { Controller, Get, Query } from '@nestjs/common'
 import { ListAnchorsResult } from '@defichain/jellyfish-api-core/dist/category/spv'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { AnchorData } from '@whale-api-client/api/anchors'
+import { PaginationQuery } from '@src/module.api/_core/api.query'
+import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 
 @Controller('/anchors')
 export class AnchorsController {
@@ -14,16 +16,20 @@ export class AnchorsController {
    *  List anchors
    */
   @Get('')
-  async list (): Promise<AnchorData[]> {
+  async list (
+    @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<AnchorData>> {
     const result = await this.rpcClient.spv.listAnchors()
-    return result.map(anchor => {
-      return mapAnchors(anchor)
+    const anchors = result.map((anchor, index) => {
+      return mapAnchors(index + 1, anchor)
     })
+    return ApiPagedResponse.of(anchors, query.size, item => item.id)
   }
 }
 
-function mapAnchors (anchors: ListAnchorsResult): AnchorData {
+function mapAnchors (id: number, anchors: ListAnchorsResult): AnchorData {
   return {
+    id: id.toString(),
     btcBlock: {
       height: anchors.btcBlockHeight,
       hash: anchors.btcBlockHash,
