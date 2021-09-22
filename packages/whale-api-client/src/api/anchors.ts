@@ -1,7 +1,7 @@
 import { WhaleApiClient } from '../whale.api.client'
 
 /**
- * DeFi whale endpoint for poolpair related services.
+ * DeFi whale endpoint for anchors related services.
  */
 
 export class Anchors {

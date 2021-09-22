@@ -127,7 +127,7 @@ async function createAnchor (): Promise<any> {
 describe('list', () => {
   it('should list anchors rewards = 4', async function () {
     // TODO(siradji) Test Pagination
-    const response = await controller.list({ size: 2 })
+    const response = await controller.list({ size: 4 })
 
     expect(response.data.length).toStrictEqual(4)
     expect(response.data[0]).toStrictEqual({

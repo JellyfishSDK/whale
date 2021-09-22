@@ -116,10 +116,8 @@ afterAll(async () => {
 })
 
 describe('list', () => {
-  it('should list anchors =4', async () => {
+  it('should list anchors', async () => {
     const result = await client.anchors.list()
-
-    expect(result.length).toStrictEqual(4)
     expect(result[0]).toStrictEqual({
       id: '1',
       btcBlock: {
