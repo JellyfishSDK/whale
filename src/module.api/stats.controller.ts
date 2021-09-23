@@ -44,7 +44,7 @@ export class StatsController {
     }
   }
 
-  private async cachedGet<T>(field: string, fetch: () => Promise<T>, ttl: number): Promise<T> {
+  private async cachedGet<T> (field: string, fetch: () => Promise<T>, ttl: number): Promise<T> {
     const object = await this.cache.get(`StatsController.${field}`, fetch, { ttl })
     return requireValue(object, field)
   }
@@ -133,14 +133,10 @@ export class StatsController {
     const blockSubsidy = getBlockSubsidy(eunosHeight, blockInfo?.blocks)
 
     const communityRewards: Record<string, BigNumber> = {
-      masternode: new BigNumber(0.3333),
-      dex: new BigNumber(0.2445),
-      community: new BigNumber(0.0491),
-      anchor: new BigNumber(0.0002)
-    }
-
-    for (const reward in communityRewards) {
-      communityRewards[reward] = communityRewards[reward].times(blockSubsidy)
+      masternode: new BigNumber(0.3333).times(blockSubsidy),
+      dex: new BigNumber(0.2445).times(blockSubsidy),
+      community: new BigNumber(0.0491).times(blockSubsidy),
+      anchor: new BigNumber(0.0002).times(blockSubsidy)
     }
 
     return {
