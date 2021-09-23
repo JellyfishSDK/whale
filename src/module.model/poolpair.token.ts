@@ -29,6 +29,28 @@ export class PoolPairTokenMapper {
     })
   }
 
+  async queryForTokenPair (tokenA: number, tokenB: number, lt?: string): Promise<PoolPairToken | undefined> {
+    const result = await this.database.query(PoolPairTokenMapping.index.sort, {
+      partitionKey: `${tokenA}-${tokenB}`,
+      limit: 1,
+      order: SortOrder.DESC,
+      lt: lt
+    })
+
+    if (result.length === 0) {
+      const swappedResult = await this.database.query(PoolPairTokenMapping.index.sort, {
+        partitionKey: `${tokenB}-${tokenA}`,
+        limit: 1,
+        order: SortOrder.DESC,
+        lt: lt
+      })
+
+      return swappedResult[0]
+    }
+
+    return result[0]
+  }
+
   async list (limit: number, lt?: string): Promise<PoolPairToken[]> {
     return await this.database.query(PoolPairTokenMapping.index.sort, {
       limit: limit,

@@ -13,6 +13,9 @@ import { CreatePoolPairIndexer } from '@src/module.indexer/model/dftx/create.poo
 import { UpdatePoolPairIndexer } from '@src/module.indexer/model/dftx/update.poolpair'
 import { Injectable, Logger } from '@nestjs/common'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
+import { PoolAddLiquidityIndexer } from './dftx/pool.add.liquidity'
+import { PoolRemoveLiquidityIndexer } from './dftx/pool.remove.liquidity'
+import { PoolSwapIndexer } from './dftx/poolswap'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
@@ -20,15 +23,18 @@ export class MainDfTxIndexer extends Indexer {
   private readonly indexers: Array<DfTxIndexer<any>>
 
   constructor (
-    private readonly appointOracle: AppointOracleIndexer,
-    private readonly removeOracle: RemoveOracleIndexer,
-    private readonly updateOracle: UpdateOracleIndexer,
-    private readonly setOracleData: SetOracleDataIndexer,
-    private readonly createMasternode: CreateMasternodeIndexer,
-    private readonly resignMasternode: ResignMasternodeIndexer,
-    private readonly createToken: CreateTokenIndexer,
-    private readonly createPoolPair: CreatePoolPairIndexer,
-    private readonly updatePoolPair: UpdatePoolPairIndexer
+    appointOracle: AppointOracleIndexer,
+    removeOracle: RemoveOracleIndexer,
+    updateOracle: UpdateOracleIndexer,
+    setOracleData: SetOracleDataIndexer,
+    createMasternode: CreateMasternodeIndexer,
+    resignMasternode: ResignMasternodeIndexer,
+    createToken: CreateTokenIndexer,
+    createPoolPair: CreatePoolPairIndexer,
+    updatePoolPair: UpdatePoolPairIndexer,
+    poolAddLiquidityIndexer: PoolAddLiquidityIndexer,
+    poolRemoveLiquidityIndexer: PoolRemoveLiquidityIndexer,
+    poolSwapIndexer: PoolSwapIndexer
   ) {
     super()
     this.indexers = [
@@ -40,7 +46,10 @@ export class MainDfTxIndexer extends Indexer {
       resignMasternode,
       createToken,
       createPoolPair,
-      updatePoolPair
+      updatePoolPair,
+      poolAddLiquidityIndexer,
+      poolRemoveLiquidityIndexer,
+      poolSwapIndexer
     ]
   }
 
