@@ -79,7 +79,7 @@ export class PoolPairController {
       id: id,
       symbol: info.pairSymbol,
       name: info.pairSymbol,
-      status: info.status ? 'enabled' : 'disabled',
+      status: info.status ? 'true' : 'false',
       tokenA: {
         symbol: info.tokenA.symbol,
         displaySymbol: info.tokenA.id === 0 ? info.tokenA.symbol : `d${info.tokenA.symbol}`,
