@@ -44,7 +44,8 @@ export class PoolPairController {
 
       const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
       const apr = await this.poolPairService.getAPR(info)
-      items.push(this.mapPoolPair(`${poolpairId}`, info, totalLiquidityUsd, apr))
+      const lpSplits = await this.poolPairService.getLPSplits()
+      items.push(this.mapPoolPair(`${poolpairId}`, info, totalLiquidityUsd, apr, lpSplits))
     }
 
     return ApiPagedResponse.of(items, query.size, item => {
@@ -65,10 +66,12 @@ export class PoolPairController {
 
     const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(poolPair)
     const apr = await this.poolPairService.getAPR(poolPair)
-    return this.mapPoolPair(String(id), poolPair, totalLiquidityUsd, apr)
+    const lpSplits = await this.poolPairService.getLPSplits()
+    return this.mapPoolPair(String(id), poolPair, totalLiquidityUsd, apr, lpSplits)
   }
 
-  mapPoolPair (id: string, info: PoolPair, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr']): PoolPairData {
+  mapPoolPair (id: string, info: PoolPair, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr'],
+    lpSplits?: Record<string, any>): PoolPairData {
     const ownerScriptBuffer = SmartBuffer.fromBuffer(Buffer.from(info.ownerScript, 'hex'))
     const ownerStack = toOPCodes(ownerScriptBuffer)
     const ownerAddress = fromScript({ stack: ownerStack }, this.network)
@@ -100,7 +103,7 @@ export class PoolPairController {
       },
       tradeEnabled: (new BigNumber(info.tokenA.reserve)).gte(1000) && (new BigNumber(info.tokenB.reserve)).gte(1000),
       ownerAddress: ownerAddress?.address ?? '',
-      rewardPct: 'TBC',
+      rewardPct: lpSplits?.[info.poolPairId] ?? 0,
       customRewards: info.customRewards,
       creation: {
         tx: info.creationTx,

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import BigNumber from 'bignumber.js'
-import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 import { PoolPairData } from '@whale-api-client/api/poolpairs'
 import { PoolPair, PoolPairMapper } from '@src/module.model/poolpair'
@@ -101,8 +100,13 @@ export class PoolPairService {
     }, new BigNumber(0))
   }
 
-  private async getYearlyRewardPCTUSD (info: PoolPairInfo): Promise<BigNumber | undefined> {
-    if (info.rewardPct === undefined) {
+  private async getYearlyRewardPCTUSD (info: PoolPair): Promise<BigNumber | undefined> {
+    const lpSplits = await this.getLPSplits()
+    if (lpSplits === undefined) {
+      return new BigNumber(0)
+    }
+    const rewardPct = lpSplits[info.poolPairId]
+    if (rewardPct === undefined) {
       return new BigNumber(0)
     }
 
@@ -113,17 +117,24 @@ export class PoolPairService {
       return undefined
     }
 
-    return info.rewardPct
+    return rewardPct
       .times(dailyDfiReward)
       .times(365)
       .times(dfiPriceUsdt)
   }
 
+  async getLPSplits (): Promise<Record<string, any> | undefined> {
+    return await this.cache.get<Record<string, any>>('LP_SPLITS', async () => {
+      const rpcResult = await this.rpcClient.masternode.getGov('LP_SPLITS')
+      return rpcResult
+    }, {
+      ttl: 3600 // 60 minutes
+    })
+  }
+
   async getAPR (info: PoolPair): Promise<PoolPairData['apr'] | undefined> {
     const customUSD = await this.getYearlyCustomRewardUSD(info)
-
-    // !TODO
-    const pctUSD = new BigNumber(0)// await this.getYearlyRewardPCTUSD(info)
+    const pctUSD = await this.getYearlyRewardPCTUSD(info)
     const totalLiquidityUSD = await this.getTotalLiquidityUsd(info)
 
     if (customUSD === undefined || pctUSD === undefined || totalLiquidityUSD === undefined) {
