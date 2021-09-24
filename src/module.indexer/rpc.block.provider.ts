@@ -92,7 +92,7 @@ export class RPCBlockProvider {
       id: '0',
       sort: HexEncoder.encodeHeight(0),
       symbol: 'DFI',
-      name: 'DefiChain Token',
+      name: 'Default Defi token',
       decimal: 8,
       limit: '0.0',
       isDAT: true,

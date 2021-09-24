@@ -41,8 +41,10 @@ export class PoolPairService {
 
   async getUSDT_PER_DFI (): Promise<BigNumber | undefined> {
     return await this.cache.get<BigNumber>('USDT_PER_DFI', async () => {
-      const usdtToken = await this.tokenMapper.getBySymbol('USDT')
-
+      // TODO: Improve this, in practical use there's no performance hit as
+      // USDT is the 7th or 8th token in the list
+      const tokenList = await this.tokenMapper.queryAsc(128)
+      const usdtToken = tokenList.find(x => x.symbol === 'USDT')
       if (usdtToken === undefined) {
         return undefined
       }
@@ -117,7 +119,8 @@ export class PoolPairService {
       return undefined
     }
 
-    return rewardPct
+    const rewardPctBigNum = new BigNumber(rewardPct)
+    return rewardPctBigNum
       .times(dailyDfiReward)
       .times(365)
       .times(dfiPriceUsdt)

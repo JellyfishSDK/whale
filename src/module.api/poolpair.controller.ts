@@ -78,8 +78,8 @@ export class PoolPairController {
     return {
       id: id,
       symbol: info.pairSymbol,
-      name: info.pairSymbol,
-      status: info.status ? 'true' : 'false',
+      name: info.name,
+      status: info.status,
       tokenA: {
         symbol: info.tokenA.symbol,
         displaySymbol: info.tokenA.id === 0 ? info.tokenA.symbol : `d${info.tokenA.symbol}`,
@@ -99,11 +99,11 @@ export class PoolPairController {
       commission: info.commission,
       totalLiquidity: {
         token: info.totalLiquidity,
-        usd: totalLiquidityUsd?.toFixed()
+        usd: totalLiquidityUsd?.toFixed(8)
       },
-      tradeEnabled: (new BigNumber(info.tokenA.reserve)).gte(1000) && (new BigNumber(info.tokenB.reserve)).gte(1000),
+      tradeEnabled: (new BigNumber(info.tokenA.reserve)).gte(0.00001) && (new BigNumber(info.tokenB.reserve)).gte(0.00001),
       ownerAddress: ownerAddress?.address ?? '',
-      rewardPct: lpSplits?.[info.poolPairId] ?? 0,
+      rewardPct: lpSplits?.[info.poolPairId] !== undefined ? `${lpSplits?.[info.poolPairId] as number}` : '0',
       customRewards: info.customRewards,
       creation: {
         tx: info.creationTx,

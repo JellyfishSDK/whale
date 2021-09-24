@@ -52,18 +52,26 @@ describe('update poolpair', () => {
 
     expect(poolPairs[1]).toStrictEqual({
       commission: '0.50000000',
+      creationHeight: 124,
+      creationTx: expect.any(String),
+      customRewards: expect.any(Array),
       id: '11-124',
+      name: 'E-Default Defi token',
+      ownerScript: expect.any(String),
       pairSymbol: 'E-DFI',
       poolPairId: '11',
       status: false,
       tokenA: {
         id: 5,
-        symbol: 'E'
+        symbol: 'E',
+        reserve: '0'
       },
       tokenB: {
         id: 0,
-        symbol: 'DFI'
+        symbol: 'DFI',
+        reserve: '0'
       },
+      totalLiquidity: '0',
       block: expect.any(Object)
     })
   })

@@ -79,6 +79,11 @@ async function setup (): Promise<void> {
     amountB: 431.51288,
     shareAddress: await getNewAddress(container)
   })
+
+  const height = await container.getBlockCount()
+  await container.generate(1)
+  await service.waitForIndexedHeight(height)
+  await container.generate(1)
 }
 
 describe('list', () => {
@@ -96,22 +101,20 @@ describe('list', () => {
       tokenA: {
         id: '2',
         symbol: 'B',
-        reserve: '50',
-        blockCommission: '0',
+        reserve: '50.00000000',
         displaySymbol: 'dB'
       },
       tokenB: {
         id: '0',
         symbol: 'DFI',
-        reserve: '300',
-        blockCommission: '0',
+        reserve: '300.00000000',
         displaySymbol: 'DFI'
       },
       apr: {
         reward: 0,
         total: 0
       },
-      commission: '0',
+      commission: '0.00000000',
       totalLiquidity: {
         token: '122.47448713',
         usd: '1390.456752'
@@ -172,37 +175,36 @@ describe('get', () => {
       tokenA: {
         id: expect.any(String),
         symbol: 'A',
-        reserve: '100',
-        blockCommission: '0',
+        reserve: '100.00000000',
         displaySymbol: 'dA'
       },
       tokenB: {
         id: '0',
         symbol: 'DFI',
-        reserve: '200',
-        blockCommission: '0',
+        reserve: '200.00000000',
         displaySymbol: 'DFI'
       },
       apr: {
         reward: 0,
         total: 0
       },
-      commission: '0',
+      commission: '0.00000000',
       totalLiquidity: {
-        token: '141.42135623',
-        usd: '926.971168'
+        token: '141.42135624',
+        usd: '926.97117175'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
-        ab: '0.5',
-        ba: '2'
+        ab: '0.50000000',
+        ba: '2.00000000'
       },
       rewardPct: '0',
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
-      }
+      },
+      customRewards: expect.any(Array)
     })
   })
 

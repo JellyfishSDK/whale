@@ -23,9 +23,9 @@ export class PoolAddLiquidityIndexer extends DfTxIndexer<PoolAddLiquidity> {
 
   async index (block: RawBlock, txns: Array<DfTxTransaction<PoolAddLiquidity>>): Promise<void> {
     for (const { dftx: { data } } of txns) {
-      const tokenA = data.from[0]
-      const tokenB = data.from[1]
-      const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(tokenA.balances[0].token, tokenB.balances[0].token)
+      const token1 = data.from[0]
+      const token2 = data.from[1]
+      const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(token1.balances[0].token, token2.balances[0].token)
 
       if (poolPairToken === undefined) {
         continue
@@ -36,10 +36,14 @@ export class PoolAddLiquidityIndexer extends DfTxIndexer<PoolAddLiquidity> {
         continue
       }
 
+      const forward = poolPair.tokenA.id === token1.balances[0].token
+      const tokenA = forward ? token1 : token2
+      const tokenB = forward ? token2 : token1
+
       let liquidity = new BigNumber(0)
       let totalLiquidity = new BigNumber(poolPair.totalLiquidity)
       if (totalLiquidity.isEqualTo(0)) {
-        liquidity = tokenA.balances[0].amount.times(tokenB.balances[0].amount)
+        liquidity = tokenA.balances[0].amount.times(tokenB.balances[0].amount).sqrt()
         liquidity = liquidity.minus(MINIMUM_LIQUIDITY)
         totalLiquidity = new BigNumber(MINIMUM_LIQUIDITY)
       } else {
