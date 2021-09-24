@@ -77,7 +77,8 @@ describe('stats', () => {
             weeks: 0
           }
         ]
-      }
+      },
+      difficulty: expect.any(Number)
     })
   })
 })
