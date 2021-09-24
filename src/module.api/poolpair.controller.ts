@@ -70,8 +70,8 @@ export class PoolPairController {
 
   mapPoolPair (id: string, info: PoolPair, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr']): PoolPairData {
     const ownerScriptBuffer = SmartBuffer.fromBuffer(Buffer.from(info.ownerScript, 'hex'))
-    const ownerScript = toOPCodes(ownerScriptBuffer)
-    const ownerAddress = fromScript(ownerScript, this.network)
+    const ownerStack = toOPCodes(ownerScriptBuffer)
+    const ownerAddress = fromScript({ stack: ownerStack }, this.network)
     return {
       id: id,
       symbol: info.pairSymbol,
@@ -99,7 +99,7 @@ export class PoolPairController {
         usd: totalLiquidityUsd?.toFixed()
       },
       tradeEnabled: (new BigNumber(info.tokenA.reserve)).gte(1000) && (new BigNumber(info.tokenB.reserve)).gte(1000),
-      ownerAddress: ownerAddress,
+      ownerAddress: ownerAddress?.address ?? '',
       rewardPct: 'TBC',
       customRewards: info.customRewards,
       creation: {
