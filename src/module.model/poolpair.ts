@@ -64,24 +64,29 @@ export class PoolPairMapper {
 }
 
 export interface PoolPair extends Model {
-  id: string // poolPairId-blockHeight
-  poolPairId: string // poolPairId (decimal encoded integer as string)
-  pairSymbol: string // string
+  id: string // --------------| poolPairId-blockHeight
+  poolPairId: string // ------| poolPairId (decimal encoded integer as string)
+  pairSymbol: string // ------| string
+  name: string // ------------| string
   tokenA: {
-    id: number // numerical id
-    symbol: string
-    reserve: string // bignumber
+    id: number // ------------| numerical id
+    symbol: string // --------| string
+    reserve: string // -------| bignumber
   }
   tokenB: {
-    id: number // numerical id
-    symbol: string
-    reserve: string // bignumber
+    id: number // ------------| numerical id
+    symbol: string // --------| string
+    reserve: string // -------| bignumber
   }
   block: {
     hash: string
     height: number
   }
-  status: boolean // active
-  commission: string // bignumber
-  totalLiquidity: string // bignumber
+  status: boolean // ---------| active / not active
+  commission: string // ------| bignumber
+  totalLiquidity: string // --| bignumber
+  creationHeight: number // --| number
+  creationTx: string // ------| txid string
+  customRewards: string[] // -| array of strings
+  ownerScript: string // -----| hex string
 }

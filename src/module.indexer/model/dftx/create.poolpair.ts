@@ -7,6 +7,7 @@ import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { MAX_TOKEN_SYMBOL_LENGTH, TokenMapper } from '@src/module.model/token'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { IndexerError } from '@src/module.indexer/error'
+import { toBuffer } from '@defichain/jellyfish-transaction/dist/script/_buffer'
 
 @Injectable()
 export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
@@ -22,7 +23,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
   }
 
   async index (block: RawBlock, txns: Array<DfTxTransaction<PoolCreatePair>>): Promise<void> {
-    for (const { dftx: { data } } of txns) {
+    for (const { txn, dftx: { data } } of txns) {
       const tokenId = await this.tokenMapper.getNextTokenID(true)
 
       const tokenA = await this.tokenMapper.get(`${data.tokenA}`)
@@ -39,10 +40,10 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
         pairSymbol = data.pairSymbol.trim().substr(0, MAX_TOKEN_SYMBOL_LENGTH)
       }
 
-      // TODO: Index customRewards, ownerAddress
       await this.poolPairMapper.put({
         id: `${tokenId}-${block.height}`,
         pairSymbol,
+        name: `${tokenA.name}-${tokenB.name}`,
         poolPairId: `${tokenId}`,
         tokenA: {
           id: data.tokenA,
@@ -57,7 +58,13 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
         block: { hash: block.hash, height: block.height },
         status: data.status,
         commission: data.commission.toFixed(8),
-        totalLiquidity: '0'
+        totalLiquidity: '0',
+        creationHeight: block.height,
+        creationTx: txn.txid,
+        customRewards: data.customRewards.map(x => {
+          return `${x.amount.toFixed(8)}@${~~x.token}`
+        }),
+        ownerScript: toBuffer(data.ownerAddress.stack).toString('hex')
       })
 
       await this.poolPairTokenMapper.put({
@@ -71,7 +78,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
         id: `${tokenId}`,
         sort: HexEncoder.encodeHeight(tokenId),
         symbol: data.pairSymbol,
-        name: `${data.tokenA}-${data.tokenB} LP Token`,
+        name: `${tokenA.symbol}-${tokenA.symbol} LP Token`,
         isDAT: true,
         isLPS: true,
         limit: '0.0',
@@ -84,7 +91,8 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
   }
 
   async invalidate (block: RawBlock, txns: Array<DfTxTransaction<PoolCreatePair>>): Promise<void> {
-    for (const { dftx: { data } } of txns) {
+    const reversedTxn = txns.reverse()
+    for (const { dftx: { data } } of reversedTxn) {
       const tokenId = await this.tokenMapper.getNextTokenID(true)
       await this.poolPairMapper.delete(`${tokenId - 1}-${block.height}`)
       await this.poolPairTokenMapper.delete(`${data.tokenA}-${data.tokenB}`)

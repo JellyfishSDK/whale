@@ -17,6 +17,13 @@ const TokenMapping: ModelMapping<Token> = {
         type: 'string',
         key: (b: Token) => b.sort
       }
+    },
+    symbol_key: {
+      name: 'token_symbol_key',
+      partition: {
+        type: 'string',
+        key: (b: Token) => b.symbol
+      }
     }
   }
 }
@@ -47,6 +54,16 @@ export class TokenMapper {
     }
 
     return latest[0]
+  }
+
+  async getBySymbol (symbol: string): Promise<Token | undefined> {
+    const result = await this.database.query(TokenMapping.index.symbol_key, {
+      partitionKey: symbol,
+      limit: 1,
+      order: SortOrder.DESC
+    })
+
+    return result.length > 0 ? result[0] : undefined
   }
 
   async query (limit: number, lt?: string): Promise<Token[]> {

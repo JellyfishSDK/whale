@@ -3,6 +3,7 @@ import { PoolUpdatePair, CPoolUpdatePair } from '@defichain/jellyfish-transactio
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable, Logger } from '@nestjs/common'
 import { PoolPairMapper } from '@src/module.model/poolpair'
+import { toBuffer } from '@defichain/jellyfish-transaction/dist/script/_buffer'
 
 @Injectable()
 export class UpdatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
@@ -21,9 +22,13 @@ export class UpdatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
       if (poolPair !== undefined) {
         await this.poolPairMapper.put({
           ...poolPair,
+          customRewards: data.customRewards.length > 0 ? data.customRewards.map(x => {
+            return `${x.amount.toFixed(8)}@${~~x.token}`
+          }) : poolPair.customRewards,
+          ownerScript: data.ownerAddress.stack.length > 0 ? toBuffer(data.ownerAddress.stack).toString('hex') : poolPair.ownerScript,
           block: { hash: block.hash, height: block.height },
           status: data.status, // Always override status
-          commission: data.commission.eq(-1) ? poolPair.commission : data.commission.toFixed(8)
+          commission: data.commission.gte(0) ? data.commission.toFixed(8) : poolPair.commission
         })
       }
     }
