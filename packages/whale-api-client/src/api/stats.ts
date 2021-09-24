@@ -41,4 +41,5 @@ export interface StatsData {
   masternodes: {
     locked: Array<{weeks: number, tvl: number, count: number}>
   }
+  difficulty: number
 }
