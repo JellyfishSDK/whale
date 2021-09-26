@@ -37,21 +37,11 @@ export class BlockController {
   async get (@Param('id') hashOrHeight: string): Promise<Block | undefined> {
     const height = parseHeight(hashOrHeight)
     if (height !== undefined) {
-      const block = await this.blockMapper.getByHeight(height)
-      if (block === undefined) {
-        return undefined
-      }
-
-      return block
+      return await this.blockMapper.getByHeight(height)
     }
 
     if (isSHA256Hash(hashOrHeight)) {
-      const block = await this.blockMapper.getByHash(hashOrHeight)
-      if (block === undefined) {
-        return undefined
-      }
-
-      return block
+      return await this.blockMapper.getByHash(hashOrHeight)
     }
   }
 
