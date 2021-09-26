@@ -38,7 +38,9 @@ export class StatsController {
       masternodes: {
         locked: masternodes.locked
       },
-      difficulty: await this.cachedGet('difficulty', this.getDifficulty.bind(this), 300) ?? 0
+      blockChain: {
+        difficulty: await this.cachedGet('difficulty', this.getDifficulty.bind(this), 300) ?? 0
+      }
     }
   }
 
