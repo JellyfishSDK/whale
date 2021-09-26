@@ -10,7 +10,6 @@ export class Anchors {
   /**
    * List anchors
    */
-
   async list (): Promise<AnchorData[]> {
     return await this.client.requestData('GET', 'anchors')
   }
