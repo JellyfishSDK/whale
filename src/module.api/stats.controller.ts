@@ -39,7 +39,7 @@ export class StatsController {
         locked: masternodes.locked
       },
       blockchain: {
-        difficulty: await this.cachedGet('difficulty', this.getDifficulty.bind(this), 300) ?? 0
+        difficulty: block?.difficulty ?? 0
       }
     }
   }
@@ -104,12 +104,6 @@ export class StatsController {
     const latest = await this.masternodeStatsMapper.getLatest()
     const masternodeStats = requireValue(latest, 'masternode.stats')
     return await this.mapMasternodeStats(masternodeStats)
-  }
-
-  private async getDifficulty (): Promise<number | undefined> {
-    return await this.cache.get<number>('GET_DIFFICULTY', async () => {
-      return await this.rpcClient.blockchain.getDifficulty()
-    })
   }
 
   private async mapMasternodeStats (masternodeStats: MasternodeStats): Promise<StatsData['masternodes']> {
