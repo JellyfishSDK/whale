@@ -95,6 +95,7 @@ describe('list', () => {
 
     expect(response[1]).toStrictEqual({
       id: '10',
+      sort: '0000000a',
       symbol: 'B-DFI',
       name: 'B-Default Defi token',
       status: true,
@@ -116,20 +117,21 @@ describe('list', () => {
       },
       commission: '0.00000000',
       totalLiquidity: {
-        token: '122.47448713',
-        usd: '1390.456752'
+        token: '122.47448714',
+        usd: '1390.45675763'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
-        ab: '0.16666666',
-        ba: '6'
+        ab: '0.16666667',
+        ba: '6.00000000'
       },
       rewardPct: '0',
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
-      }
+      },
+      customRewards: expect.any(Array)
     })
   })
 
@@ -137,7 +139,7 @@ describe('list', () => {
     const first = await client.poolpairs.list(4)
     expect(first.length).toStrictEqual(4)
     expect(first.hasNext).toStrictEqual(true)
-    expect(first.nextToken).toStrictEqual('12')
+    expect(first.nextToken).toStrictEqual('0000000c')
 
     expect(first[0].symbol).toStrictEqual('A-DFI')
     expect(first[1].symbol).toStrictEqual('B-DFI')
@@ -147,7 +149,7 @@ describe('list', () => {
     const next = await client.paginate(first)
     expect(next.length).toStrictEqual(4)
     expect(next.hasNext).toStrictEqual(true)
-    expect(next.nextToken).toStrictEqual('16')
+    expect(next.nextToken).toStrictEqual('00000010')
 
     expect(next[0].symbol).toStrictEqual('E-DFI')
     expect(next[1].symbol).toStrictEqual('F-DFI')
@@ -169,6 +171,7 @@ describe('get', () => {
 
     expect(response).toStrictEqual({
       id: '9',
+      sort: '00000009',
       symbol: 'A-DFI',
       name: 'A-Default Defi token',
       status: true,

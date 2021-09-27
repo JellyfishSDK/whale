@@ -42,6 +42,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
 
       await this.poolPairMapper.put({
         id: `${tokenId}-${block.height}`,
+        sort: HexEncoder.encodeHeight(tokenId),
         pairSymbol,
         name: `${tokenA.name}-${tokenB.name}`,
         poolPairId: `${tokenId}`,
@@ -68,9 +69,9 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
       })
 
       await this.poolPairTokenMapper.put({
-        id: `${data.tokenA}-${data.tokenB}-${tokenId}`,
-        key: `${data.tokenA}-${data.tokenB}`,
-        poolpairId: tokenId,
+        id: `${data.tokenA}-${data.tokenB}`,
+        sort: HexEncoder.encodeHeight(tokenId),
+        poolPairId: tokenId,
         block: { hash: block.hash, height: block.height }
       })
 
@@ -95,7 +96,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
     for (const { dftx: { data } } of reversedTxn) {
       const tokenId = await this.tokenMapper.getNextTokenID(true)
       await this.poolPairMapper.delete(`${tokenId - 1}-${block.height}`)
-      await this.poolPairTokenMapper.delete(`${data.tokenA}-${data.tokenB}`)
+      await this.poolPairTokenMapper.delete(`${data.tokenA}-${data.tokenB}-${tokenId}`)
       await this.tokenMapper.delete(`${tokenId - 1}`)
     }
   }

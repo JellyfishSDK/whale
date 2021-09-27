@@ -36,8 +36,8 @@ export class PoolPairController {
     const result = await this.poolPairTokenMapper.list(query.size, query.next)
 
     const items: PoolPairData[] = []
-    for (const { poolpairId } of result) {
-      const info = await this.poolPairMapper.getLatest(`${poolpairId}`)
+    for (const { poolPairId } of result) {
+      const info = await this.poolPairMapper.getLatest(`${poolPairId}`)
       if (info === undefined) {
         continue
       }
@@ -45,11 +45,11 @@ export class PoolPairController {
       const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
       const apr = await this.poolPairService.getAPR(info)
       const lpSplits = await this.poolPairService.getLPSplits()
-      items.push(this.mapPoolPair(`${poolpairId}`, info, totalLiquidityUsd, apr, lpSplits))
+      items.push(this.mapPoolPair(`${poolPairId}`, info, totalLiquidityUsd, apr, lpSplits))
     }
 
     return ApiPagedResponse.of(items, query.size, item => {
-      return item.id
+      return item.sort
     })
   }
 
@@ -80,6 +80,7 @@ export class PoolPairController {
       symbol: info.pairSymbol,
       name: info.name,
       status: info.status,
+      sort: info.sort,
       tokenA: {
         symbol: info.tokenA.symbol,
         displaySymbol: info.tokenA.id === 0 ? info.tokenA.symbol : `d${info.tokenA.symbol}`,

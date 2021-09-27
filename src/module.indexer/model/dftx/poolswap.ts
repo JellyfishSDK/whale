@@ -41,7 +41,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
         continue
       }
 
-      const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolpairId}`)
+      const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
 
       if (poolPair !== undefined) {
         const forward = data.fromTokenId === poolPair.tokenA.id
@@ -104,7 +104,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
         continue
       }
 
-      const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolpairId}`)
+      const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
       if (poolPair !== undefined) {
         await this.poolPairMapper.delete(`${poolPair.poolPairId}-${block.height}`)
       }

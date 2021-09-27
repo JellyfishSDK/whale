@@ -67,8 +67,8 @@ export class StatsController {
     let dex = new BigNumber(0)
     const poolPairTokens = await this.poolPairTokenMapper.list(1000)
 
-    for (const { poolpairId } of poolPairTokens) {
-      const pair = await this.poolPairMapper.getLatest(`${poolpairId}`)
+    for (const { poolPairId } of poolPairTokens) {
+      const pair = await this.poolPairMapper.getLatest(`${poolPairId}`)
       if (pair === undefined) {
         continue
       }

@@ -46,48 +46,23 @@ describe('create poolpair', () => {
     expect(result.length).toStrictEqual(6)
 
     const poolPairs = await Promise.all(result.map(async x => {
-      return await poolPairMapper.getLatest(`${x.poolpairId}`)
+      return await poolPairMapper.getLatest(`${x.poolPairId}`)
     }))
-
-    expect(poolPairs[1]).toStrictEqual({
-      commission: '0.00000000',
-      creationHeight: 124,
-      creationTx: expect.any(String),
-      customRewards: expect.any(Array),
-      id: '11-124',
-      name: 'E-Default Defi token',
-      ownerScript: expect.any(String),
-      pairSymbol: 'E-DFI',
-      poolPairId: '11',
-      status: true,
-      tokenA: {
-        id: 5,
-        symbol: 'E',
-        reserve: '0'
-      },
-      tokenB: {
-        id: 0,
-        symbol: 'DFI',
-        reserve: '0'
-      },
-      totalLiquidity: '0',
-      block: expect.any(Object)
-    })
 
     expect(poolPairs[0]).toStrictEqual({
       commission: '0.00000000',
-      creationHeight: 125,
+      creationHeight: 120,
       creationTx: expect.any(String),
       customRewards: expect.any(Array),
-      id: '12-125',
-      name: 'F-Default Defi token',
+      id: '7-120',
+      name: 'USDT-Default Defi token',
       ownerScript: expect.any(String),
-      pairSymbol: 'F-DFI',
-      poolPairId: '12',
+      pairSymbol: 'USDT-DFI',
+      poolPairId: '7',
       status: true,
       tokenA: {
-        id: 6,
-        symbol: 'F',
+        id: 1,
+        symbol: 'USDT',
         reserve: '0'
       },
       tokenB: {
@@ -96,7 +71,34 @@ describe('create poolpair', () => {
         reserve: '0'
       },
       totalLiquidity: '0',
-      block: expect.any(Object)
+      block: expect.any(Object),
+      sort: '00000007'
+    })
+
+    expect(poolPairs[1]).toStrictEqual({
+      commission: '0.00000000',
+      creationHeight: 121,
+      creationTx: expect.any(String),
+      customRewards: expect.any(Array),
+      id: '8-121',
+      name: 'B-Default Defi token',
+      ownerScript: expect.any(String),
+      pairSymbol: 'B-DFI',
+      poolPairId: '8',
+      status: true,
+      tokenA: {
+        id: 2,
+        symbol: 'B',
+        reserve: '0'
+      },
+      tokenB: {
+        id: 0,
+        symbol: 'DFI',
+        reserve: '0'
+      },
+      totalLiquidity: '0',
+      block: expect.any(Object),
+      sort: '00000008'
     })
   })
 })

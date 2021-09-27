@@ -31,7 +31,7 @@ export class PoolAddLiquidityIndexer extends DfTxIndexer<PoolAddLiquidity> {
         continue
       }
 
-      const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolpairId}`)
+      const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
       if (poolPair === undefined) {
         continue
       }
@@ -74,7 +74,7 @@ export class PoolAddLiquidityIndexer extends DfTxIndexer<PoolAddLiquidity> {
         continue
       }
 
-      const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolpairId}`)
+      const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
       if (poolPair !== undefined) {
         await this.poolPairMapper.delete(`${poolPair.poolPairId}-${block.height}`)
       }

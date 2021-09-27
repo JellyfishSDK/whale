@@ -28,7 +28,7 @@ beforeAll(async () => {
 
   await container.generate(1)
 
-  await container.call('updatepoolpair', [{ pool: 11, status: false, commission: 0.5 }])
+  await container.call('updatepoolpair', [{ pool: 8, status: false, commission: 0.5 }])
   await container.generate(1)
 })
 
@@ -47,23 +47,24 @@ describe('update poolpair', () => {
     const poolPairMapper = app.get(PoolPairMapper)
     const result = await poolPairTokenMapper.list(30)
     const poolPairs = await Promise.all(result.map(async x => {
-      return await poolPairMapper.getLatest(`${x.poolpairId}`)
+      return await poolPairMapper.getLatest(`${x.poolPairId}`)
     }))
 
     expect(poolPairs[1]).toStrictEqual({
       commission: '0.50000000',
-      creationHeight: 124,
+      creationHeight: 121,
       creationTx: expect.any(String),
       customRewards: expect.any(Array),
-      id: '11-124',
-      name: 'E-Default Defi token',
+      id: '8-121',
+      name: 'B-Default Defi token',
       ownerScript: expect.any(String),
-      pairSymbol: 'E-DFI',
-      poolPairId: '11',
+      pairSymbol: 'B-DFI',
+      poolPairId: '8',
       status: false,
+      sort: '00000008',
       tokenA: {
-        id: 5,
-        symbol: 'E',
+        id: 2,
+        symbol: 'B',
         reserve: '0'
       },
       tokenB: {

@@ -54,7 +54,7 @@ export class PoolPairService {
         return undefined
       }
 
-      const pair = await this.poolPairMapper.getLatest(`${poolPairToken.poolpairId}`)
+      const pair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
       if (pair !== undefined) {
         if (pair.tokenA.id === 0) {
           return (new BigNumber(pair.tokenB.reserve)).dividedBy(pair.tokenA.reserve)
@@ -107,7 +107,7 @@ export class PoolPairService {
     if (lpSplits === undefined) {
       return new BigNumber(0)
     }
-    const rewardPct = lpSplits[info.poolPairId]
+    const rewardPct = lpSplits[parseInt(info.poolPairId)]
     if (rewardPct === undefined) {
       return new BigNumber(0)
     }
@@ -129,7 +129,7 @@ export class PoolPairService {
   async getLPSplits (): Promise<Record<string, any> | undefined> {
     return await this.cache.get<Record<string, any>>('LP_SPLITS', async () => {
       const rpcResult = await this.rpcClient.masternode.getGov('LP_SPLITS')
-      return rpcResult
+      return rpcResult.LP_SPLITS
     }, {
       ttl: 3600 // 60 minutes
     })
@@ -141,16 +141,26 @@ export class PoolPairService {
     const totalLiquidityUSD = await this.getTotalLiquidityUsd(info)
 
     if (customUSD === undefined || pctUSD === undefined || totalLiquidityUSD === undefined) {
-      return undefined
+      return {
+        reward: 0,
+        total: 0
+      }
     }
 
     const yearlyUSD = customUSD.plus(pctUSD)
     // 1 == 100%, 0.1 = 10%
-    const apr = yearlyUSD.div(totalLiquidityUSD).toNumber()
+    const apr = yearlyUSD.div(totalLiquidityUSD)
+
+    if (apr.isNaN()) {
+      return {
+        reward: 0,
+        total: 0
+      }
+    }
 
     return {
-      reward: apr,
-      total: apr
+      reward: apr.toNumber(),
+      total: apr.toNumber()
     }
   }
 }
