@@ -78,7 +78,7 @@ describe('stats', () => {
           }
         ]
       },
-      blockChain: {
+      blockchain: {
         difficulty: expect.any(Number)
       }
     })

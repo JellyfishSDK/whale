@@ -38,7 +38,7 @@ export class StatsController {
       masternodes: {
         locked: masternodes.locked
       },
-      blockChain: {
+      blockchain: {
         difficulty: await this.cachedGet('difficulty', this.getDifficulty.bind(this), 300) ?? 0
       }
     }
