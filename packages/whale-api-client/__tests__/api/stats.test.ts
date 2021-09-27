@@ -3,7 +3,7 @@ import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
 import { WhaleApiClient } from '../../src'
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens } from '@defichain/testing'
-import { getBlockSubsidy } from '@src/module.api/stats.controller'
+import BigNumber from 'bignumber.js'
 
 describe('stats', () => {
   let container: MasterNodeRegTestContainer
@@ -65,6 +65,25 @@ describe('stats', () => {
   const consensusParams = {
     emissionReductionPeriod: 32690,
     eunosHeight: 10000000
+  }
+
+  function getBlockSubsidy (eunosHeight: number, nHeight: number = 0): number {
+    let blockSubsidy = 405.04
+    const emissionReductionPeriod = 32690 // Two weeks
+    const emissionReductionAmount = new BigNumber(0.01658) // 1.658%
+    const reductions = Math.floor((nHeight - eunosHeight) / emissionReductionPeriod)
+
+    if (nHeight >= eunosHeight) {
+      for (let i = reductions; i > 0; i--) {
+        const reductionAmount = emissionReductionAmount.times(blockSubsidy)
+        if (reductionAmount.lte(0.00001)) {
+          blockSubsidy = 0
+          break
+        }
+        blockSubsidy -= reductionAmount.toNumber()
+      }
+    }
+    return blockSubsidy
   }
 
   function calculateCoinbaseRewards (blockReward: number, percentage: number): number {
