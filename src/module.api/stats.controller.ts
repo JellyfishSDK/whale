@@ -26,6 +26,7 @@ export class StatsController {
     const height = requireValue(block?.height, 'count.blocks')
 
     const masternodes = await this.cachedGet('masternodes', this.getMasternodes.bind(this), 300)
+    const dailyRewards = await this.poolPairService.getDailyDFIReward()
 
     return {
       count: {
@@ -37,11 +38,14 @@ export class StatsController {
       price: await this.cachedGet('price', this.getPrice.bind(this), 300),
       masternodes: {
         locked: masternodes.locked
+      },
+      rewards: {
+        daily: dailyRewards !== undefined ? dailyRewards.toNumber() : -1
       }
     }
   }
 
-  private async cachedGet<T> (field: string, fetch: () => Promise<T>, ttl: number): Promise<T> {
+  private async cachedGet<T>(field: string, fetch: () => Promise<T>, ttl: number): Promise<T> {
     const object = await this.cache.get(`StatsController.${field}`, fetch, { ttl })
     return requireValue(object, field)
   }
