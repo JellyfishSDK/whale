@@ -132,20 +132,17 @@ export class StatsController {
 
     const blockSubsidy = getBlockSubsidy(eunosHeight, blockInfo?.blocks)
 
-    const communityRewards: Record<string, BigNumber> = {
-      masternode: new BigNumber(0.3333).times(blockSubsidy),
-      dex: new BigNumber(0.2445).times(blockSubsidy),
-      community: new BigNumber(0.0491).times(blockSubsidy),
-      anchor: new BigNumber(0.0002).times(blockSubsidy)
+    const communityRewards: Record<'masternode'| 'dex' | 'community' | 'anchor', number> = {
+      masternode: new BigNumber(0.3333).times(blockSubsidy).toNumber(),
+      dex: new BigNumber(0.2445).times(blockSubsidy).toNumber(),
+      community: new BigNumber(0.0491).times(blockSubsidy).toNumber(),
+      anchor: new BigNumber(0.0002).times(blockSubsidy).toNumber()
     }
 
     return {
+      burned,
       total: blockSubsidy,
-      anchor: communityRewards.anchor.toNumber(),
-      dex: communityRewards.dex.toNumber(),
-      community: communityRewards.community.toNumber(),
-      masternode: communityRewards.masternode.toNumber(),
-      burned
+      ...communityRewards
     }
   }
 
