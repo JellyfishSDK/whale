@@ -26,12 +26,6 @@ export class SetOracleDataIntervalIndexer extends DfTxIndexer<SetOracleData> {
   ) {
     super()
 
-    this.intervals = [
-      OracleIntervalSeconds.FIVE_MINUTES,
-      OracleIntervalSeconds.TEN_MINUTES,
-      OracleIntervalSeconds.ONE_HOUR,
-      OracleIntervalSeconds.ONE_DAY
-    ]
   }
 
   async index (block: RawBlock, txns: Array<DfTxTransaction<SetOracleData>>): Promise<void> {
