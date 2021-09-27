@@ -44,19 +44,29 @@ export class CreateTokenIndexer extends DfTxIndexer<TokenCreate> {
   }
 
   async getNextTokenID (isDAT: boolean): Promise<number> {
-    const latest = isDAT ? await this.tokenMapper.getLatestDAT()
-      : await this.tokenMapper.getLatestDST()
+    if (isDAT) {
+      const latest = await this.tokenMapper.getLatestDAT()
+      if (latest === undefined) {
+        // Default to 1 as 0 is reserved for DFI
+        return 1
+      }
 
-    if (latest === undefined) {
-      // Default to 1 as 0 is reserved for DFI
-      return isDAT ? 1 : DCT_ID_START
+      const latestId = new BigNumber(latest.id)
+      if (!latestId.lt(DCT_ID_START - 1)) {
+        const latestDST = await this.tokenMapper.getLatestDST()
+        return latestDST !== undefined ? latestId.plus(1).toNumber() : DCT_ID_START
+      }
+
+      return latestId.plus(1).toNumber()
+    } else {
+      const latest = await this.tokenMapper.getLatestDST()
+      if (latest === undefined) {
+        // Default to 1 as 0 is reserved for DFI
+        return DCT_ID_START
+      }
+
+      const latestId = new BigNumber(latest.id)
+      return latestId.plus(1).toNumber()
     }
-
-    if (isDAT && !(new BigNumber(latest.id).lt(DCT_ID_START - 1))) {
-      const latestDST = await this.tokenMapper.getLatestDST()
-      return latestDST !== undefined ? new BigNumber(latestDST.id).plus(1).toNumber() : DCT_ID_START
-    }
-
-    return new BigNumber(latest.id).plus(1).toNumber()
   }
 }
