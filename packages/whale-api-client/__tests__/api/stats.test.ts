@@ -111,12 +111,12 @@ describe('stats', () => {
         ]
       },
       emission: {
+        burned: 7017.88,
         total: 405.04,
         anchor: 0.081008,
         dex: 99.03228,
         community: 19.887464,
-        masternode: 134.999832,
-        burned: 7017.88
+        masternode: 134.999832
       }
     })
   })
