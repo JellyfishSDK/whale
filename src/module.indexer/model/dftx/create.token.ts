@@ -5,6 +5,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { DCT_ID_START, TokenMapper } from '@src/module.model/token'
 import BigNumber from 'bignumber.js'
+import { IndexerError } from '@src/module.indexer/error'
 
 @Injectable()
 export class CreateTokenIndexer extends DfTxIndexer<TokenCreate> {
@@ -47,8 +48,7 @@ export class CreateTokenIndexer extends DfTxIndexer<TokenCreate> {
     if (isDAT) {
       const latest = await this.tokenMapper.getLatestDAT()
       if (latest === undefined) {
-        // Default to 1 as 0 is reserved for DFI
-        return 1
+        throw new IndexerError('Latest DAT by ID not found')
       }
 
       const latestId = new BigNumber(latest.id)
@@ -61,7 +61,7 @@ export class CreateTokenIndexer extends DfTxIndexer<TokenCreate> {
     } else {
       const latest = await this.tokenMapper.getLatestDST()
       if (latest === undefined) {
-        // Default to 1 as 0 is reserved for DFI
+        // Default to DCT_ID_START if no existing DST
         return DCT_ID_START
       }
 
