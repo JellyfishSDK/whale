@@ -44,20 +44,6 @@ describe('create token', () => {
     const result = await tokenMapper.query(30)
     expect(result.length).toStrictEqual(3)
 
-    expect(result[1]).toStrictEqual({
-      id: '1',
-      symbol: 'DBTC',
-      name: 'DBTC',
-      decimal: 8,
-      limit: '0.00000000',
-      sort: '00000001',
-      mintable: true,
-      tradeable: true,
-      isDAT: true,
-      isLPS: false,
-      block: expect.any(Object)
-    })
-
     expect(result[0]).toStrictEqual({
       id: '128',
       symbol: 'MT',
@@ -68,6 +54,20 @@ describe('create token', () => {
       mintable: true,
       tradeable: true,
       isDAT: false,
+      isLPS: false,
+      block: expect.any(Object)
+    })
+
+    expect(result[1]).toStrictEqual({
+      id: '1',
+      symbol: 'DBTC',
+      name: 'DBTC',
+      decimal: 8,
+      limit: '0.00000000',
+      sort: '00000001',
+      mintable: true,
+      tradeable: true,
+      isDAT: true,
       isLPS: false,
       block: expect.any(Object)
     })
