@@ -96,7 +96,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
     for (const { dftx: { data } } of reversedTxn) {
       const tokenId = await this.tokenMapper.getNextTokenID(true)
       await this.poolPairMapper.delete(`${tokenId - 1}-${block.height}`)
-      await this.poolPairTokenMapper.delete(`${data.tokenA}-${data.tokenB}-${tokenId}`)
+      await this.poolPairTokenMapper.delete(`${data.tokenA}-${data.tokenB}-${tokenId - 1}`)
       await this.tokenMapper.delete(`${tokenId - 1}`)
     }
   }
