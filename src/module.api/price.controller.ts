@@ -6,7 +6,7 @@ import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { PriceTicker, PriceTickerMapper } from '@src/module.model/price.ticker'
 import { PriceOracle } from '@whale-api-client/api/prices'
 import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
-import { OraclePriceAggregatedIntervalMapper } from '@src/module.model/oracle.price.aggregated.interval'
+import { OraclePriceAggregatedInterval, OraclePriceAggregatedIntervalMapper } from '@src/module.model/oracle.price.aggregated.interval'
 
 @Controller('/prices')
 export class PriceController {
@@ -52,7 +52,7 @@ export class PriceController {
     @Param('key') key: string,
       @Param('interval', ParseIntPipe) interval: number,
       @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<OraclePriceAggregated>> {
+  ): Promise<ApiPagedResponse<OraclePriceAggregatedInterval>> {
     const priceKey = `${key}-${interval}`
     const items = await this.oraclePriceAggregatedIntervalMapper.query(priceKey, query.size, query.next)
     return ApiPagedResponse.of(items, query.size, item => {
