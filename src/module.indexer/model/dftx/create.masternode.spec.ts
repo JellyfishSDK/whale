@@ -107,7 +107,7 @@ describe('create masternode (pre eunos paya)', () => {
     expect(masternode?.ownerAddress).toStrictEqual(masternodeRPCInfo.ownerAuthAddress)
     expect(masternode?.creationHeight).toStrictEqual(masternodeRPCInfo.creationHeight)
     expect(masternode?.resignHeight).toStrictEqual(masternodeRPCInfo.resignHeight)
-    expect(masternode?.mintedBlocks).toStrictEqual(masternodeRPCInfo.mintedBlocks)
+    expect(masternode?.mintedBlocks).toBeGreaterThan(100)
   })
 })
 
