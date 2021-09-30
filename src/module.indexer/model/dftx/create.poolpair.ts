@@ -52,7 +52,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
           id: data.tokenB,
           symbol: tokenB.symbol
         },
-        block: { hash: block.hash, height: block.height },
+        block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
         status: data.status,
         commission: data.commission.toFixed(8)
       })
@@ -61,7 +61,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
         id: `${data.tokenA}-${data.tokenB}-${tokenId}`,
         key: `${data.tokenA}-${data.tokenB}`,
         poolpairId: tokenId,
-        block: { hash: block.hash, height: block.height }
+        block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
       })
 
       await this.tokenMapper.put({
@@ -84,7 +84,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
     for (const { dftx: { data } } of txns) {
       const tokenId = await this.tokenMapper.getNextTokenID(true)
       await this.poolPairMapper.delete(`${tokenId - 1}-${block.height}`)
-      await this.poolPairTokenMapper.delete(`${data.tokenA}-${data.tokenB}`)
+      await this.poolPairTokenMapper.delete(`${data.tokenA}-${data.tokenB}-${tokenId - 1}`)
       await this.tokenMapper.delete(`${tokenId - 1}`)
     }
   }
