@@ -117,21 +117,89 @@ afterAll(async () => {
 
 describe('list', () => {
   it('should list anchors', async () => {
-    const result = await client.anchors.list()
+    const result = await client.anchors.list(4)
     expect(result[0]).toStrictEqual({
       id: '1',
-      btcBlock: {
-        height: 4,
-        hash: '0000000000000001000000000000000100000000000000010000000000000001',
-        txHash: expect.any(String)
+      btc: {
+        block: {
+          height: 1,
+          hash: '0000000000000001000000000000000100000000000000010000000000000001'
+        },
+        txn: {
+          hash: expect.any(String)
+        },
+        confirmations: 6
       },
-      defiBlock: {
-        height: 30,
-        hash: expect.any(String)
+      dfi: {
+        block: {
+          height: 30,
+          hash: expect.any(String)
+        }
       },
       previousAnchor: '0000000000000000000000000000000000000000000000000000000000000000',
       rewardAddress: expect.any(String),
-      confirmations: 3,
+      signatures: 2,
+      active: true,
+      anchorCreationHeight: 75
+    })
+  })
+
+  it('should test pagination', async () => {
+    const first = await client.anchors.list(2)
+
+    expect(first.length).toStrictEqual(2)
+    expect(first.hasNext).toStrictEqual(true)
+    expect(first.nextToken).toStrictEqual('3')
+
+    expect(first[0]).toStrictEqual({
+      id: '1',
+      btc: {
+        block: {
+          height: 1,
+          hash: '0000000000000001000000000000000100000000000000010000000000000001'
+        },
+        txn: {
+          hash: expect.any(String)
+        },
+        confirmations: 6
+      },
+      dfi: {
+        block: {
+          height: 30,
+          hash: expect.any(String)
+        }
+      },
+      previousAnchor: '0000000000000000000000000000000000000000000000000000000000000000',
+      rewardAddress: expect.any(String),
+      signatures: 2,
+      active: true,
+      anchorCreationHeight: 75
+    })
+
+    const last = await client.anchors.list(3, first.nextToken)
+    expect(last.length).toStrictEqual(2)
+    expect(last.nextToken).toStrictEqual(undefined)
+
+    expect(last[0]).toStrictEqual({
+      id: '3',
+      btc: {
+        block: {
+          height: 3,
+          hash: '0000000000000001000000000000000100000000000000010000000000000001'
+        },
+        txn: {
+          hash: expect.any(String)
+        },
+        confirmations: 4
+      },
+      dfi: {
+        block: {
+          height: 30,
+          hash: expect.any(String)
+        }
+      },
+      previousAnchor: '0000000000000000000000000000000000000000000000000000000000000000',
+      rewardAddress: expect.any(String),
       signatures: 2,
       active: false,
       anchorCreationHeight: 75

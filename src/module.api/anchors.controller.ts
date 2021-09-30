@@ -15,35 +15,49 @@ export class AnchorsController {
   /**
    *  List anchors
    */
+
   @Get('')
   async list (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<AnchorData>> {
-    const result = await this.rpcClient.spv.listAnchors()
-    const anchors = result.map((anchor, index) => {
-      return mapAnchors(index + 1, anchor)
+    const result = await this.rpcClient.spv.listAnchors({
+      maxBtcHeight: query.next !== undefined ? Number(query.next) + query.size : query.size,
+      minBtcHeight: Number(query.next)
     })
-    return ApiPagedResponse.of(anchors, query.size, item => item.id)
+
+    const anchors = result
+      .map((anchor, index) => {
+        return mapAnchors(anchor)
+      })
+      .sort((a, b) => a.id.localeCompare(b.id))
+
+    return ApiPagedResponse.of(anchors, query.size, item => (Number(item.id) + 1).toString())
   }
 }
 
-function mapAnchors (id: number, anchors: ListAnchorsResult): AnchorData {
+function mapAnchors (anchor: ListAnchorsResult): AnchorData {
   return {
-    id: id.toString(),
-    btcBlock: {
-      height: anchors.btcBlockHeight,
-      hash: anchors.btcBlockHash,
-      txHash: anchors.btcTxHash
+    id: anchor.btcBlockHeight.toString(),
+    btc: {
+      block: {
+        height: anchor.btcBlockHeight,
+        hash: anchor.btcBlockHash
+      },
+      txn: {
+        hash: anchor.btcTxHash
+      },
+      confirmations: anchor.confirmations
     },
-    defiBlock: {
-      height: anchors.defiBlockHeight,
-      hash: anchors.defiBlockHash
+    dfi: {
+      block: {
+        height: anchor.defiBlockHeight,
+        hash: anchor.defiBlockHash
+      }
     },
-    previousAnchor: anchors.previousAnchor,
-    rewardAddress: anchors.rewardAddress,
-    confirmations: anchors.confirmations,
-    signatures: anchors.signatures,
-    active: anchors.active,
-    anchorCreationHeight: anchors.anchorCreationHeight
+    previousAnchor: anchor.previousAnchor,
+    rewardAddress: anchor.rewardAddress,
+    signatures: anchor.signatures,
+    active: anchor.active,
+    anchorCreationHeight: anchor.anchorCreationHeight
   }
 }

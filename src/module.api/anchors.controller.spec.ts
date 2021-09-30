@@ -126,24 +126,90 @@ async function createAnchor (): Promise<any> {
 
 describe('list', () => {
   it('should list anchors rewards = 4', async function () {
-    // TODO(siradji) Test Pagination
     const response = await controller.list({ size: 4 })
 
     expect(response.data.length).toStrictEqual(4)
     expect(response.data[0]).toStrictEqual({
       id: '1',
-      btcBlock: {
-        height: 4,
-        hash: '0000000000000001000000000000000100000000000000010000000000000001',
-        txHash: expect.any(String)
+      btc: {
+        block: {
+          height: 1,
+          hash: '0000000000000001000000000000000100000000000000010000000000000001'
+        },
+        txn: {
+          hash: expect.any(String)
+        },
+        confirmations: 6
       },
-      defiBlock: {
-        height: 30,
-        hash: expect.any(String)
+      dfi: {
+        block: {
+          height: 30,
+          hash: expect.any(String)
+        }
       },
       previousAnchor: '0000000000000000000000000000000000000000000000000000000000000000',
       rewardAddress: expect.any(String),
-      confirmations: 3,
+      signatures: 2,
+      active: true,
+      anchorCreationHeight: 75
+    })
+  })
+
+  it('should list anchors with pagination (maxBtcHeight)', async () => {
+    const first = await controller.list({ size: 2 })
+
+    expect(first.data.length).toStrictEqual(2)
+    expect(first.page?.next).toStrictEqual('3')
+
+    expect(first.data[0]).toStrictEqual({
+      id: '1',
+      btc: {
+        block: {
+          height: 1,
+          hash: '0000000000000001000000000000000100000000000000010000000000000001'
+        },
+        txn: {
+          hash: expect.any(String)
+        },
+        confirmations: 6
+      },
+      dfi: {
+        block: {
+          height: 30,
+          hash: expect.any(String)
+        }
+      },
+      previousAnchor: '0000000000000000000000000000000000000000000000000000000000000000',
+      rewardAddress: expect.any(String),
+      signatures: 2,
+      active: true,
+      anchorCreationHeight: 75
+    })
+
+    const last = await controller.list({ size: 3, next: first.page?.next })
+    expect(last.data.length).toStrictEqual(2)
+    expect(last.page?.next).toStrictEqual(undefined)
+
+    expect(last.data[0]).toStrictEqual({
+      id: '3',
+      btc: {
+        block: {
+          height: 3,
+          hash: '0000000000000001000000000000000100000000000000010000000000000001'
+        },
+        txn: {
+          hash: expect.any(String)
+        },
+        confirmations: 4
+      },
+      dfi: {
+        block: {
+          height: 30,
+          hash: expect.any(String)
+        }
+      },
+      previousAnchor: '0000000000000000000000000000000000000000000000000000000000000000',
+      rewardAddress: expect.any(String),
       signatures: 2,
       active: false,
       anchorCreationHeight: 75
