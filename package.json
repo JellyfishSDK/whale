@@ -32,6 +32,7 @@
     "@defichain/jellyfish-json": ">=0.45.1",
     "@defichain/jellyfish-network": ">=0.45.1",
     "@defichain/jellyfish-transaction": ">=0.45.1",
+    "@defichain/jellyfish-testing": ">=0.45.1",
     "@nestjs/common": "^8.0.8",
     "@nestjs/config": "^1.0.1",
     "@nestjs/core": "^8.0.8",
