@@ -55,7 +55,7 @@
     "@defichain/jellyfish-crypto": ">=0.45.1",
     "@defichain/testcontainers": ">=0.45.1",
     "@defichain/testing": ">=0.45.1",
-    "@nestjs/cli": "^8.1.1",
+    "@nestjs/cli": "^8.1.2",
     "@nestjs/schematics": "^8.0.3",
     "@nestjs/testing": "^8.0.8",
     "@types/cache-manager": "^3.4.2",
