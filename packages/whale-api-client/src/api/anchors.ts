@@ -21,7 +21,7 @@ export class Anchors {
 }
 
 export interface AnchorData {
-  id: string
+  id: string /* ------------  ID is height of the btc block */
   btc: {
     block: {
       height: number
