@@ -5,7 +5,7 @@ import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { GetLoanSchemeResult, LoanSchemeResult } from '@defichain/jellyfish-api-core/dist/category/loan'
 
 @Controller('/loan')
-export class LoanController {
+export class LoanSchemeController {
   constructor (private readonly client: JsonRpcClient) {
   }
 
@@ -20,12 +20,12 @@ export class LoanController {
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<LoanSchemeResult>> {
     const data = await this.client.loan.listLoanSchemes()
-    const result = await data.sort(a => Number.parseInt(a.id))
+    const result = data.sort((a, b) => a.id.localeCompare(b.id))
 
     let nextIndex = 0
 
-    if (query.next !== null) {
-      const findIndex = data.findIndex(data => data.id === query.next)
+    if (query.next !== undefined) {
+      const findIndex = result.findIndex(result => result.id === query.next)
       if (findIndex > 0) {
         nextIndex = findIndex + 1
       } else {

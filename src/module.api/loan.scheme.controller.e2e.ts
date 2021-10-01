@@ -1,14 +1,14 @@
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
+import { createTestingApp, stopTestingApp } from '@src/e2e.module'
 import BigNumber from 'bignumber.js'
 import { LoanMasterNodeRegTestContainer } from '@src/module.api/loan_container'
-import { LoanController } from '@src/module.api/loan.controller'
+import { LoanSchemeController } from '@src/module.api/loan.scheme.controller'
 import { NotFoundException } from '@nestjs/common'
 import { Testing } from '@defichain/jellyfish-testing'
 
 const container = new LoanMasterNodeRegTestContainer()
 let app: NestFastifyApplication
-let controller: LoanController
+let controller: LoanSchemeController
 
 beforeAll(async () => {
   await container.start()
@@ -16,10 +16,6 @@ beforeAll(async () => {
   await container.waitForWalletBalanceGTE(100)
 
   app = await createTestingApp(container)
-  controller = app.get(LoanController)
-
-  await waitForIndexedHeight(app, 100)
-
   const testing = Testing.create(container)
 
   // Default scheme
