@@ -18,6 +18,11 @@ export class Prices {
     return await this.client.requestData('GET', `prices/${key}`)
   }
 
+  async getActivePrice (token: string, currency: string): Promise<ActivePrice> {
+    const key = `${token}-${currency}`
+    return await this.client.requestData('GET', `prices/${key}/active`)
+  }
+
   async getFeed (token: string, currency: string, size: number = 30, next?: string): Promise<ApiPagedResponse<PriceFeed>> {
     const key = `${token}-${currency}`
     return await this.client.requestList('GET', `prices/${key}/feed`, size, next)
@@ -33,6 +38,15 @@ export interface PriceTicker {
   id: string
   sort: string
   price: PriceFeed
+  nextPrice: string
+  activePrice: string
+}
+
+export interface ActivePrice {
+  id: string
+  sort: string
+  nextPrice: string
+  activePrice: string
 }
 
 export interface PriceFeed {
