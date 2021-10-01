@@ -4,7 +4,7 @@ import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { GetLoanSchemeResult, LoanSchemeResult } from '@defichain/jellyfish-api-core/dist/category/loan'
 
-@Controller('/loan')
+@Controller('/loan/schemes')
 export class LoanSchemeController {
   constructor (private readonly client: JsonRpcClient) {
   }
@@ -15,7 +15,7 @@ export class LoanSchemeController {
    * @param {PaginationQuery} query
    * @return {Promise<ApiPagedResponse<LoanSchemeResult>>}
    */
-  @Get('/schemes')
+  @Get('')
   async list (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<LoanSchemeResult>> {
@@ -45,7 +45,7 @@ export class LoanSchemeController {
    * @param {string} id
    * @return {Promise<GetLoanSchemeResult>}
    */
-  @Get('/schemes/:id')
+  @Get('/:id')
   async get (@Param('id') id: string): Promise<GetLoanSchemeResult> {
     try {
       return await this.client.loan.getLoanScheme(id)

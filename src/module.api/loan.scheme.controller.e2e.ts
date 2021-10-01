@@ -17,6 +17,7 @@ beforeAll(async () => {
 
   app = await createTestingApp(container)
   const testing = Testing.create(container)
+  controller = app.get(LoanSchemeController)
 
   // Default scheme
   await testing.rpc.loan.createLoanScheme({

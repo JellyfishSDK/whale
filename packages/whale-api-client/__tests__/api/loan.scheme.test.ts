@@ -128,7 +128,9 @@ describe('list', () => {
 describe('get', () => {
   it('should get vault by vault id', async () => {
     const data = await client.loan.getScheme('scheme1')
-    console.log(data)
+    expect(data).toStrictEqual(
+      { id: 'scheme1', mincolratio: 150, interestrate: 5.5 }
+    )
   })
 
   it('should fail due to getting non-existent token', async () => {
