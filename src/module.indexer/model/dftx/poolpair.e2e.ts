@@ -117,7 +117,7 @@ describe('index poolswap', () => {
       creationHeight: 108,
       creationTx: expect.any(String),
       customRewards: expect.any(Array),
-      id: '3-116',
+      id: '3-115',
       name: 'A-Default Defi token',
       ownerScript: expect.any(String),
       pairSymbol: 'A-DFI',

@@ -55,7 +55,7 @@ export class PoolAddLiquidityIndexer extends DfTxIndexer<PoolAddLiquidity> {
       totalLiquidity = totalLiquidity.plus(liquidity)
 
       poolPair.id = `${poolPair.poolPairId}-${block.height}`
-      poolPair.block = { hash: block.hash, height: block.height }
+      poolPair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
       poolPair.tokenA.reserve = tokenA.balances[0].amount.plus(poolPair.tokenA.reserve).toFixed(8)
       poolPair.tokenB.reserve = tokenB.balances[0].amount.plus(poolPair.tokenB.reserve).toFixed(8)
       poolPair.totalLiquidity = totalLiquidity.toFixed(8)

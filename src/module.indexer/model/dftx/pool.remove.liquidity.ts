@@ -30,7 +30,7 @@ export class PoolRemoveLiquidityIndexer extends DfTxIndexer<PoolRemoveLiquidity>
       const reserveB = new BigNumber(poolPair.tokenB.reserve)
 
       poolPair.id = `${poolPair.poolPairId}-${block.height}`
-      poolPair.block = { hash: block.hash, height: block.height }
+      poolPair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
       poolPair.tokenA.reserve = reserveA
         .minus(liquidity.times(poolPair.tokenA.reserve).dividedBy(totalLiquidity)).toFixed(8)
       poolPair.tokenB.reserve = reserveB
