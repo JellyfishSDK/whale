@@ -126,41 +126,25 @@ describe('list', () => {
 })
 
 describe('get', () => {
-  it('should get vault by vault id', async () => {
+  it('should get scheme by scheme id', async () => {
     const data = await client.loan.getScheme('scheme1')
     expect(data).toStrictEqual(
       { id: 'scheme1', mincolratio: 150, interestrate: 5.5 }
     )
   })
 
-  it('should fail due to getting non-existent token', async () => {
+  it('should fail due to getting non-existent or malformed id', async () => {
     expect.assertions(2)
     try {
-      await client.tokens.get('999')
+      await client.loan.getScheme('999')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
         code: 404,
         type: 'NotFound',
         at: expect.any(Number),
-        message: 'Unable to find token',
-        url: '/v0.0/regtest/tokens/999'
-      })
-    }
-  })
-
-  it('should fail due to id is malformed', async () => {
-    expect.assertions(2)
-    try {
-      await client.tokens.get('$*@')
-    } catch (err) {
-      expect(err).toBeInstanceOf(WhaleApiException)
-      expect(err.error).toStrictEqual({
-        code: 400,
-        type: 'BadRequest',
-        at: expect.any(Number),
-        message: 'Validation failed (numeric string is expected)',
-        url: '/v0.0/regtest/tokens/$*@'
+        message: 'Unable to find scheme',
+        url: '/v0.0/regtest/loan/schemes/999'
       })
     }
   })
