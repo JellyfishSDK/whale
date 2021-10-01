@@ -1,6 +1,6 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
+import { createTestingApp, stopTestingApp, waitForIndexedHeight, invalidateFromHeight } from '@src/e2e.module'
 import { createPoolPair, createToken, mintTokens } from '@defichain/testing'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
@@ -8,7 +8,7 @@ import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
 
-beforeAll(async () => {
+beforeEach(async () => {
   await container.start()
   app = await createTestingApp(container)
   await container.waitForWalletCoinbaseMaturity()
@@ -32,7 +32,7 @@ beforeAll(async () => {
   await container.generate(1)
 })
 
-afterAll(async () => {
+afterEach(async () => {
   await stopTestingApp(container, app)
 })
 
@@ -60,6 +60,63 @@ describe('update poolpair', () => {
       ownerScript: expect.any(String),
       pairSymbol: 'B-DFI',
       poolPairId: '8',
+      status: false,
+      tokenA: {
+        id: 5,
+        symbol: 'E'
+      },
+      tokenB: {
+        id: 0,
+        symbol: 'DFI'
+      },
+      block: expect.any(Object)
+    })
+  })
+})
+
+describe('invalidate', () => {
+  it('should create, update poolpair and invalidate', async () => {
+    await container.generate(1)
+    const height = await container.call('getblockcount')
+    await container.generate(1)
+    await waitForIndexedHeight(app, height)
+
+    await container.call('updatepoolpair', [{ pool: 11, status: true, commission: 0.75 }])
+    await container.generate(1)
+    const heightUpdated = await container.call('getblockcount')
+
+    await container.generate(1)
+    await waitForIndexedHeight(app, heightUpdated)
+
+    const poolPairMapper = app.get(PoolPairMapper)
+    const poolPair = await poolPairMapper.getLatest('11')
+    expect(poolPair).toStrictEqual({
+      commission: '0.75000000',
+      id: '11-130',
+      pairSymbol: 'E-DFI',
+      poolPairId: '11',
+      status: true,
+      tokenA: {
+        id: 5,
+        symbol: 'E'
+      },
+      tokenB: {
+        id: 0,
+        symbol: 'DFI'
+      },
+      block: expect.any(Object)
+    })
+
+    await invalidateFromHeight(app, container, heightUpdated - 1)
+    await container.generate(2)
+    await waitForIndexedHeight(app, heightUpdated)
+
+    const poolPairInvalidated = await poolPairMapper.getLatest('11')
+    expect(poolPairInvalidated).toStrictEqual({
+      commission: '0.50000000',
+      id: '11-127',
+      pairSymbol: 'E-DFI',
+      poolPairId: '11',
       status: false,
       sort: '00000008',
       tokenA: {

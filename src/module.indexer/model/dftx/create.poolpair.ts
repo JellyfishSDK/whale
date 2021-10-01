@@ -56,7 +56,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
           symbol: tokenB.symbol,
           reserve: '0'
         },
-        block: { hash: block.hash, height: block.height },
+        block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
         status: data.status,
         commission: data.commission.toFixed(8),
         totalLiquidity: '0',
@@ -72,7 +72,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
         id: `${data.tokenA}-${data.tokenB}`,
         sort: HexEncoder.encodeHeight(tokenId),
         poolPairId: tokenId,
-        block: { hash: block.hash, height: block.height }
+        block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
       })
 
       await this.tokenMapper.put({

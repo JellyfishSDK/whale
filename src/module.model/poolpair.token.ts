@@ -63,5 +63,7 @@ export interface PoolPairToken extends Model {
   block: {
     hash: string
     height: number
+    time: number
+    medianTime: number
   }
 }

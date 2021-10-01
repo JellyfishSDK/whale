@@ -74,6 +74,8 @@ export interface PoolPair extends Model {
   block: {
     hash: string
     height: number
+    time: number
+    medianTime: number
   }
   status: boolean // ---------| active / not active
   commission: string // ------| bignumber
