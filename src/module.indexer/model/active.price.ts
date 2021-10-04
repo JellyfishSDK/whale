@@ -16,43 +16,38 @@ export class ActivePriceIndexer extends Indexer {
   }
 
   async index (block: RawBlock): Promise<void> {
-    // !TODO: Ok to query like this?
-    const tickers = await this.priceTickerMapper.query(1000)
-    for (const ticker of tickers) {
-      const aggregatedPrice = await this.aggregatedMapper.query(ticker.id, 1)
-      if (aggregatedPrice.length < 1) {
-        continue
-      }
+    if (block.height % 120 === 0) {
+      // !TODO: Ok to query like this?
+      const tickers = await this.priceTickerMapper.query(1000)
+      for (const ticker of tickers) {
+        const aggregatedPrice = await this.aggregatedMapper.query(ticker.id, 1)
+        if (aggregatedPrice.length < 1) {
+          continue
+        }
 
-      const aggregated = aggregatedPrice[0].aggregated
-      const aggregatedAmount = aggregated.amount
-      const key = ticker.id
-      const previous = await this.activePriceMapper.query(key, 1)
+        const aggregated = aggregatedPrice[0].aggregated
+        const aggregatedAmount = aggregated.amount
+        const key = ticker.id
+        const previous = await this.activePriceMapper.query(key, 1)
 
-      let activePrice = '0.00000000'
-      let nextPrice = '0.00000000'
-      if (block.height % 120 === 0) {
+        let activePrice = '0.00000000'
+        let nextPrice = '0.00000000'
         if (previous.length < 1) {
           nextPrice = aggregatedAmount
         } else {
           activePrice = previous[0].next
           nextPrice = aggregatedAmount
         }
-      } else {
-        if (previous.length > 0) {
-          activePrice = previous[0].active
-          nextPrice = previous[0].next
-        }
-      }
 
-      await this.activePriceMapper.put({
-        id: `${ticker.id}-${block.height}`,
-        key: ticker.id,
-        block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
-        active: activePrice,
-        next: nextPrice,
-        sort: HexEncoder.encodeHeight(block.mediantime) + HexEncoder.encodeHeight(block.height)
-      })
+        await this.activePriceMapper.put({
+          id: `${ticker.id}-${block.height}`,
+          key: ticker.id,
+          block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
+          active: activePrice,
+          next: nextPrice,
+          sort: HexEncoder.encodeHeight(block.mediantime) + HexEncoder.encodeHeight(block.height)
+        })
+      }
     }
   }
 
