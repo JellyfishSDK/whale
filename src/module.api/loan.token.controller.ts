@@ -54,8 +54,8 @@ export class LoanTokenController {
       }
     }
 
-    const schemes = result.slice(nextIndex, nextIndex + query.size)
-    return ApiPagedResponse.of(schemes, query.size, item => {
+    const loanTokens = result.slice(nextIndex, nextIndex + query.size)
+    return ApiPagedResponse.of(loanTokens, query.size, item => {
       return item.tokenId
     })
   }

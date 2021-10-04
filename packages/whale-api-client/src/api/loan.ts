@@ -12,7 +12,7 @@ export class Loan {
    *
    * @param {number} size of token to query
    * @param {string} next set of tokens
-   * @return {Promise<ApiPagedResponse<LoanSchemeResult>>}
+   * @return {Promise<ApiPagedResponse<LoanData>>}
    */
   async listLoanTokens (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanData>> {
     return await this.client.requestList('GET', 'loan/tokens', size, next)

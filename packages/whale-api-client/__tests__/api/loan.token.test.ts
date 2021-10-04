@@ -74,7 +74,7 @@ afterAll(async () => {
 })
 
 describe('list', () => {
-  it('should listLoanScheme', async () => {
+  it('should listLoanTokens', async () => {
     const result = await client.loan.listLoanTokens()
     expect(result.length).toStrictEqual(4)
     expect(result[0]).toStrictEqual({
@@ -115,7 +115,7 @@ describe('list', () => {
     expect(result[3].name).toStrictEqual('FACEBOOK')
   })
 
-  it('should listLoanSchemes with pagination', async () => {
+  it('should listLoanTokens with pagination', async () => {
     const first = await client.loan.listLoanTokens(2)
 
     expect(first.length).toStrictEqual(2)
