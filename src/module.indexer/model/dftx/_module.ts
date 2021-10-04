@@ -7,6 +7,8 @@ import { SetOracleDataIntervalIndexer } from '@src/module.indexer/model/dftx/set
 import { CreateMasternodeIndexer } from '@src/module.indexer/model/dftx/create.masternode'
 import { ResignMasternodeIndexer } from '@src/module.indexer/model/dftx/resign.masternode'
 import { CreateTokenIndexer } from '@src/module.indexer/model/dftx/create.token'
+import { CreatePoolPairIndexer } from '@src/module.indexer/model/dftx/create.poolpair'
+import { UpdatePoolPairIndexer } from '@src/module.indexer/model/dftx/update.poolpair'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { ConfigService } from '@nestjs/config'
 
@@ -18,7 +20,9 @@ const indexers = [
   CreateMasternodeIndexer,
   ResignMasternodeIndexer,
   SetOracleDataIntervalIndexer,
-  CreateTokenIndexer
+  CreateTokenIndexer,
+  CreatePoolPairIndexer,
+  UpdatePoolPairIndexer
 ]
 
 @Module({
