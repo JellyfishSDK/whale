@@ -183,11 +183,11 @@ export class WhaleApiClient {
 /**
  * Generic method for making http requests
  *
- * @param {Method} method - http method
- * @param {string} url - request url
- * @param {AbortController}: controller
- * @param {string} body - body of request
- * @returns {object}
+ * @param {Method} method for the endpoint
+ * @param {string} url to fetch
+ * @param {AbortController} controller for aborting request
+ * @param {string} body of the request
+ * @returns {Promise<ResponseAsString>}
  */
 async function _fetch (method: Method, url: string, controller: AbortController, body?: string): Promise<ResponseAsString> {
   const response = await fetch(url, {

@@ -12,8 +12,8 @@ export class Prices {
   /**
    * Get a list of PriceTicker
    *
-   * @param {number} size - number of records per page
-   * @param {string} [next] - offset for the next page
+   * @param {number} [size=30] for the number of records per page
+   * @param {string} [next] offset for the next page
    * @return {Promise<PriceTicker>}
    */
   async list (size: number = 30, next?: string): Promise<ApiPagedResponse<PriceTicker>> {
@@ -23,8 +23,8 @@ export class Prices {
   /**
    * Get a PriceTicker
    *
-   * @param {string} token - token symbol for the PriceTicker
-   * @param {string} currency - fiat currency for the PriceTicker
+   * @param {string} token symbol for the PriceTicker
+   * @param {string} currency fiat currency for the PriceTicker
    * @return {Promise<PriceTicker>}
    */
   async get (token: string, currency: string): Promise<PriceTicker> {
@@ -35,10 +35,10 @@ export class Prices {
   /**
    * Get a list of rice feed
    *
-   * @param {string} token - token symbol for the PriceTicker
-   * @param {string} currency - fiat currency for the PriceTicker
-   * @param {number} size - number of records per page
-   * @param {string} [next] - offset for the next page
+   * @param {string} token symbol for the PriceTicker
+   * @param {string} currency fiat for the PriceTicker
+   * @param {number} [size=30] for number of records per page
+   * @param {string} [next] offset for the next page
    * @return {Promise<ApiPagedResponse<PriceFeed>>}
    */
   async getFeed (token: string, currency: string, size: number = 30, next?: string): Promise<ApiPagedResponse<PriceFeed>> {
@@ -49,10 +49,10 @@ export class Prices {
   /**
    * Get a list of Oracles
    *
-   * @param {string} token - token symbol for the PriceOracle
-   * @param {string} currency - fiat currency for the PriceOracle
-   * @param {number} size - number of records per page
-   * @param {string} [next] - offset for the next page
+   * @param {string} token symbol for the PriceOracle
+   * @param {string} currency fiat currency for the PriceOracle
+   * @param {number} [size=30] for number of records per page
+   * @param {string} [next] offset for the next page
    * @return {Promise<ApiPagedResponse<PriceOracle>>}
    */
   async getOracles (token: string, currency: string, size: number = 30, next?: string): Promise<ApiPagedResponse<PriceOracle>> {

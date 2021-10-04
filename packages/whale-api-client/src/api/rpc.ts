@@ -8,9 +8,9 @@ export class Rpc {
   }
 
   /**
-   * @param {string} method - method the RPC method
-   * @param {any[]} params - to send upstream
-   * @param {Precision | PrecisionPath} precision - for JSON parsing
+   * @param {string} method of the RPC method
+   * @param {any[]} params to send upstream
+   * @param {Precision | PrecisionPath} precision for JSON parsing
    * @throws WhaleApiException instanceof for upstream errors
    * @throws WhaleClientException instanceof for local issues
    * @returns {Promise<T>}

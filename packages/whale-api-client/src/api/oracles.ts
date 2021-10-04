@@ -11,8 +11,8 @@ export class Oracles {
   /**
    * Get a list of Oracles
    *
-   * @param {number} size - number of records per page
-   * @param {string} [next] - offset for the next page
+   * @param {number} [size=30] for number of records per page
+   * @param {string} [next] offset for the next page
    * @return {Promise<Oracle>}
    */
   async list (size: number = 30, next?: string): Promise<ApiPagedResponse<Oracle>> {
@@ -22,11 +22,11 @@ export class Oracles {
   /**
    * Get price feed
    *
-   * @param {string} oracleId - identifier for an Oracle
-   * @param {string} token - token symbol as part of the price feed pair
-   * @param {string} currency - fiat currency part of the price feed pair
-   * @param {number} size - number of records per page
-   * @param {string} [next] - offset for the next page
+   * @param {string} oracleId identifier for an Oracle
+   * @param {string} token symbol as part of the price feed pair
+   * @param {string} currency fiat currency part of the price feed pair
+   * @param {number} [size=30] for number of records per page
+   * @param {string} [next] offset for the next page
    * @return {Promise<OraclePriceFeed>}
    */
   async getPriceFeed (oracleId: string, token: string, currency: string, size: number = 30, next?: string): Promise<ApiPagedResponse<OraclePriceFeed>> {
