@@ -33,8 +33,8 @@ export class OraclePriceActiveMapper {
     })
   }
 
-  async put (aggregated: OraclePriceActive): Promise<void> {
-    return await this.database.put(OraclePriceActiveMapping, aggregated)
+  async put (active: OraclePriceActive): Promise<void> {
+    return await this.database.put(OraclePriceActiveMapping, active)
   }
 
   async delete (id: string): Promise<void> {
