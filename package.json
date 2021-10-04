@@ -26,16 +26,17 @@
     "packages:publish:latest": "lerna exec --no-private -- npm publish --tag latest --access public"
   },
   "dependencies": {
-    "@defichain/jellyfish-address": ">=0.44.0",
-    "@defichain/jellyfish-api-core": ">=0.44.0",
-    "@defichain/jellyfish-api-jsonrpc": ">=0.44.0",
-    "@defichain/jellyfish-json": ">=0.44.0",
-    "@defichain/jellyfish-network": ">=0.44.0",
-    "@defichain/jellyfish-transaction": ">=0.44.0",
-    "@nestjs/common": "^8.0.7",
+    "@defichain/jellyfish-address": ">=0.45.1",
+    "@defichain/jellyfish-api-core": ">=0.45.1",
+    "@defichain/jellyfish-api-jsonrpc": ">=0.45.1",
+    "@defichain/jellyfish-json": ">=0.45.1",
+    "@defichain/jellyfish-network": ">=0.45.1",
+    "@defichain/jellyfish-testing": ">=0.45.1",
+    "@defichain/jellyfish-transaction": ">=0.45.1",
+    "@nestjs/common": "^8.0.9",
     "@nestjs/config": "^1.0.1",
-    "@nestjs/core": "^8.0.7",
-    "@nestjs/platform-fastify": "^8.0.7",
+    "@nestjs/core": "^8.0.9",
+    "@nestjs/platform-fastify": "^8.0.9",
     "@nestjs/schedule": "^1.0.1",
     "@nestjs/terminus": "^8.0.1",
     "async-mutex": "^0.3.1",
@@ -52,12 +53,12 @@
     "subleveldown": "^5.0.1"
   },
   "devDependencies": {
-    "@defichain/jellyfish-crypto": ">=0.44.0",
-    "@defichain/testcontainers": ">=0.44.0",
-    "@defichain/testing": ">=0.44.0",
-    "@nestjs/cli": "^8.1.1",
+    "@defichain/jellyfish-crypto": ">=0.45.1",
+    "@defichain/testcontainers": ">=0.45.1",
+    "@defichain/testing": ">=0.45.1",
+    "@nestjs/cli": "^8.1.2",
     "@nestjs/schematics": "^8.0.3",
-    "@nestjs/testing": "^8.0.7",
+    "@nestjs/testing": "^8.0.9",
     "@types/cache-manager": "^3.4.2",
     "@types/cron": "^1.7.3",
     "@types/jest": "^27.0.0",
@@ -76,7 +77,8 @@
     "ts-standard": "^10.0.0",
     "tsconfig-paths": "^3.10.1",
     "typescript": ">=4.2.0",
-    "wait-for-expect": "^3.0.2"
+    "wait-for-expect": "^3.0.2",
+    "@types/dockerode": "^3.2.7"
   },
   "lint-staged": {
     "*.{ts,js}": [
