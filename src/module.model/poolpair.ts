@@ -57,7 +57,7 @@ export class PoolPairMapper {
 
 export interface PoolPair extends Model {
   id: string // --------------| poolPairId-blockHeight
-  sort: string // ------------|  poolPairId (hex encoded)
+  sort: string // ------------| poolPairId (hex encoded)
   poolPairId: string // ------| poolPairId (decimal encoded integer as string)
   pairSymbol: string // ------| string
   name: string // ------------| string
