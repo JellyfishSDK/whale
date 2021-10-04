@@ -52,8 +52,6 @@ export interface OraclePriceAggregated extends Model {
 
   aggregated: {
     amount: string
-    active: string
-    next: string
     weightage: number
     oracles: {
       active: number

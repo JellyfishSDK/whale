@@ -13,6 +13,7 @@ import { IndexStatusMapper } from '@src/module.indexer/status'
 import { DfTxIndexerModule } from '@src/module.indexer/model/dftx/_module'
 import { MainDfTxIndexer } from '@src/module.indexer/model/dftx.indexer'
 import { BlockMintedIndexer } from '@src/module.indexer/model/block.minted'
+import { ActivePriceIndexer } from './model/active.price'
 
 @Module({
   providers: [
@@ -28,6 +29,7 @@ import { BlockMintedIndexer } from '@src/module.indexer/model/block.minted'
     TransactionVinIndexer,
     TransactionVoutIndexer,
     MainDfTxIndexer,
+    ActivePriceIndexer,
     BlockMintedIndexer
   ],
   imports: [

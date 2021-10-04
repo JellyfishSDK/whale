@@ -98,33 +98,10 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
       return undefined
     }
 
-    const aggregatedAmount = aggregated.total.dividedBy(aggregated.weightage).toFixed(8)
-    const key = `${token}-${currency}`
-    const previous = await this.aggregatedMapper.query(key, 1)
-
-    let activePrice = '0.00000000'
-    let nextPrice = '0.00000000'
-
-    if (block.height % 120 === 0) {
-      if (previous.length < 1) {
-        nextPrice = aggregatedAmount
-      } else {
-        activePrice = previous[0].aggregated.next
-        nextPrice = aggregatedAmount
-      }
-    } else {
-      if (previous.length > 0) {
-        activePrice = previous[0].aggregated.active
-        nextPrice = previous[0].aggregated.next
-      }
-    }
-
     return {
       block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
       aggregated: {
-        amount: aggregatedAmount,
-        active: activePrice,
-        next: nextPrice,
+        amount: aggregated.total.dividedBy(aggregated.weightage).toFixed(8),
         weightage: aggregated.weightage,
         oracles: {
           active: aggregated.count,
@@ -134,7 +111,7 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
       currency: currency,
       token: token,
       id: `${token}-${currency}-${block.height}`,
-      key: key,
+      key: `${token}-${currency}`,
       sort: HexEncoder.encodeHeight(block.mediantime) + HexEncoder.encodeHeight(block.height)
     }
   }
