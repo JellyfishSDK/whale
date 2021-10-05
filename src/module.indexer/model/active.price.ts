@@ -25,10 +25,8 @@ export class ActivePriceIndexer extends Indexer {
           continue
         }
 
-        const aggregatedAmount = aggregatedPrice[0].aggregated.amount
-        const previous = await this.activePriceMapper.query(ticker.id, 1)
-
         let activePrice = '0.00000000'
+        const previous = await this.activePriceMapper.query(ticker.id, 1)
         if (previous.length > 0) {
           if (previous[0].next === previous[0].active) {
             continue
@@ -42,7 +40,7 @@ export class ActivePriceIndexer extends Indexer {
           key: ticker.id,
           block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
           active: activePrice,
-          next: aggregatedAmount,
+          next: aggregatedPrice[0].aggregated.amount,
           sort: HexEncoder.encodeHeight(block.mediantime) + HexEncoder.encodeHeight(block.height)
         })
       }
