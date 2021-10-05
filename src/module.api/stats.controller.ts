@@ -39,7 +39,7 @@ export class StatsController {
       masternodes: {
         locked: masternodes.locked
       },
-      emission: await this.cachedGet('emission', this.getEmission.bind(this), 1000)
+      emission: await this.cachedGet('emission', this.getEmission.bind(this), 1800)
     }
   }
 
@@ -122,20 +122,7 @@ export class StatsController {
     const blockInfo = requireValue(await this.getBlockChainInfo(), 'emission')
     const eunosHeight = blockInfo.softforks.eunos.height ?? 0
 
-    const total = getBlockSubsidy(eunosHeight, blockInfo.blocks)
-    const masternode = new BigNumber(0.3333).times(total).toNumber()
-    const dex = new BigNumber(0.2445).times(total).toNumber()
-    const community = new BigNumber(0.0491).times(total).toNumber()
-    const anchor = new BigNumber(0.0002).times(total).toNumber()
-
-    return {
-      total: total,
-      masternode: masternode,
-      dex: dex,
-      community: community,
-      anchor: anchor,
-      burned: total - masternode - dex - community - anchor
-    }
+    return getEmission(eunosHeight, blockInfo.blocks)
   }
 
   private async getBlockChainInfo (): Promise<BlockchainInfo | undefined> {
@@ -145,8 +132,26 @@ export class StatsController {
   }
 }
 
-export function getBlockSubsidy (eunosHeight: number, height: number): number {
-  let blockSubsidy = 405.04
+export function getEmission (eunosHeight: number, height: number): StatsData['emission'] {
+  const total = getBlockSubsidy(eunosHeight, height)
+  const masternode = new BigNumber(new BigNumber(0.3333).times(total).toFixed(8))
+  const dex = new BigNumber(new BigNumber(0.2545).times(total).toFixed(8))
+  const community = new BigNumber(new BigNumber(0.0491).times(total).toFixed(8))
+  const anchor = new BigNumber(new BigNumber(0.0002).times(total).toFixed(8))
+  const burned = total.minus(masternode.plus(dex).plus(community).plus(anchor))
+
+  return {
+    masternode: masternode.toNumber(),
+    dex: dex.toNumber(),
+    community: community.toNumber(),
+    anchor: anchor.toNumber(),
+    burned: burned.toNumber(),
+    total: total.toNumber()
+  }
+}
+
+export function getBlockSubsidy (eunosHeight: number, height: number): BigNumber {
+  let blockSubsidy = new BigNumber(405.04)
 
   if (height >= eunosHeight) {
     const reductionAmount = new BigNumber(0.01658) // 1.658%
@@ -155,10 +160,10 @@ export function getBlockSubsidy (eunosHeight: number, height: number): number {
     for (let i = reductions; i > 0; i--) {
       const amount = reductionAmount.times(blockSubsidy)
       if (amount.lte(0.00001)) {
-        return 0
+        return new BigNumber(0)
       }
 
-      blockSubsidy -= amount.toNumber()
+      blockSubsidy = blockSubsidy.minus(amount)
     }
   }
 
