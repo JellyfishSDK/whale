@@ -324,3 +324,109 @@ describe('pricefeed with interval', () => {
     )
   })
 })
+
+describe('active price', () => {
+  let container: MasterNodeRegTestContainer
+  let service: StubService
+  let client: JsonRpcClient
+  let apiClient: WhaleApiClient
+
+  beforeAll(async () => {
+    container = new MasterNodeRegTestContainer()
+    service = new StubService(container)
+    apiClient = new StubWhaleApiClient(service)
+
+    await container.start()
+    await container.waitForReady()
+    await container.waitForWalletCoinbaseMaturity()
+    await service.start()
+
+    client = new JsonRpcClient(await container.getCachedRpcUrl())
+  })
+
+  afterAll(async () => {
+    try {
+      await service.stop()
+    } finally {
+      await container.stop()
+    }
+  })
+
+  it('should get active price', async () => {
+    const address = await container.getNewAddress()
+    const oracleId = await client.oracle.appointOracle(address, [
+      { token: 'S1', currency: 'USD' }
+    ], {
+      weightage: 1
+    })
+    await container.generate(1)
+
+    {
+      const height = await container.getBlockCount()
+      await container.generate(1)
+      await service.waitForIndexedHeight(height)
+    }
+
+    const beforeActivePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
+    expect(beforeActivePrice.length).toStrictEqual(0)
+
+    const oneMinute = 60
+    const timeNow = Math.floor(new Date().getTime() / 1000)
+    for (let i = 0; i <= 120; i++) {
+      const mockTime = timeNow + i * oneMinute
+      const price = i > 30 ? '12.0' : '10.0'
+      await client.oracle.setOracleData(oracleId, timeNow + 5 * 60 - 1, {
+        prices: [
+          { tokenAmount: `${price}@S1`, currency: 'USD' }
+        ]
+      })
+      await client.call('setmocktime', [mockTime], 'number')
+      await container.generate(1)
+    }
+
+    {
+      const height = await container.getBlockCount()
+      await container.generate(1)
+      await service.waitForIndexedHeight(height)
+    }
+
+    const activePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
+    expect(activePrice[0]).toStrictEqual({
+      active: '0.00000000',
+      block: {
+        hash: expect.any(String),
+        height: 120,
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      },
+      id: 'S1-USD-120',
+      key: 'S1-USD',
+      next: '10.00000000',
+      sort: expect.any(String),
+      valid: false
+    })
+
+    {
+      await container.generate(30)
+      const height = await container.getBlockCount()
+      await container.generate(1)
+      await service.waitForIndexedHeight(height)
+    }
+
+    const nextActivePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
+    expect(nextActivePrice[0]).toStrictEqual({
+      active: '10.00000000',
+      block: {
+        hash: expect.any(String),
+        height: 240,
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      },
+      id: 'S1-USD-240',
+      key: 'S1-USD',
+      next: '12.00000000',
+      sort: expect.any(String),
+      valid: true
+    })
+  })
+})

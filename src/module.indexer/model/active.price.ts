@@ -36,11 +36,10 @@ export class ActivePriceIndexer extends Indexer {
         }
 
         const nextPrice = aggregatedPrice[0].aggregated.amount
-        let activePrice = '0.00000000'
+        let activePrice = (0).toFixed(8)
         const previous = await this.activePriceMapper.query(ticker.id, 1)
         if (previous.length > 0) {
-          if (previous[0].next === previous[0].active &&
-              previous[0].next === nextPrice) {
+          if (previous[0].next === previous[0].active && previous[0].next === nextPrice) {
             continue
           }
 
@@ -61,8 +60,7 @@ export class ActivePriceIndexer extends Indexer {
   }
 
   isValid (active: BigNumber, next: BigNumber): boolean {
-    // gte is intentional on active price, to match C++ implementation
-    return active.gte(0) &&
+    return active.gt(0) &&
             next.gt(0) &&
             next.minus(active).abs().lt(active.times(DEVIATION_THRESHOLD))
   }
