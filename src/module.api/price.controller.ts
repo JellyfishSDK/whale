@@ -6,6 +6,7 @@ import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { PriceTicker, PriceTickerMapper } from '@src/module.model/price.ticker'
 import { PriceOracle } from '@whale-api-client/api/prices'
 import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
+import { OraclePriceActive, OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 
 @Controller('/prices')
 export class PriceController {
@@ -13,7 +14,8 @@ export class PriceController {
     protected readonly oraclePriceAggregatedMapper: OraclePriceAggregatedMapper,
     protected readonly oracleTokenCurrencyMapper: OracleTokenCurrencyMapper,
     protected readonly priceTickerMapper: PriceTickerMapper,
-    protected readonly priceFeedMapper: OraclePriceFeedMapper
+    protected readonly priceFeedMapper: OraclePriceFeedMapper,
+    protected readonly oraclePriceActiveMapper: OraclePriceActiveMapper
   ) {
   }
 
@@ -32,6 +34,17 @@ export class PriceController {
     @Param('key') key: string
   ): Promise<PriceTicker | undefined> {
     return await this.priceTickerMapper.get(key)
+  }
+
+  @Get('/:key/active')
+  async getActivePrice (
+    @Param('key') key: string,
+      @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<OraclePriceActive>> {
+    const items = await this.oraclePriceActiveMapper.query(key, query.size, query.next)
+    return ApiPagedResponse.of(items, query.size, item => {
+      return item.sort
+    })
   }
 
   @Get('/:key/feed')

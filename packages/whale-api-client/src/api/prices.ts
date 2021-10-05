@@ -18,6 +18,11 @@ export class Prices {
     return await this.client.requestData('GET', `prices/${key}`)
   }
 
+  async getActivePrice (token: string, currency: string, size: number = 30, next?: string): Promise<ApiPagedResponse<ActivePrice>> {
+    const key = `${token}-${currency}`
+    return await this.client.requestList('GET', `prices/${key}/active`, size, next)
+  }
+
   async getFeed (token: string, currency: string, size: number = 30, next?: string): Promise<ApiPagedResponse<PriceFeed>> {
     const key = `${token}-${currency}`
     return await this.client.requestList('GET', `prices/${key}/feed`, size, next)
@@ -73,6 +78,23 @@ export interface PriceOracle {
    * Optional as OraclePriceFeed might not be available e.g. newly initialized Oracle
    */
   feed?: OraclePriceFeed
+
+  block: {
+    hash: string
+    height: number
+    time: number
+    medianTime: number
+  }
+}
+
+export interface ActivePrice {
+  id: string
+  key: string
+  sort: string
+
+  active: string
+  next: string
+  valid: boolean
 
   block: {
     hash: string

@@ -2,8 +2,12 @@ import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
-import { PriceTickerMapper } from '@src/module.model/price.ticker'
+import { PriceTicker, PriceTickerMapper } from '@src/module.model/price.ticker'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
+import BigNumber from 'bignumber.js'
+
+const DEVIATION_THRESHOLD = 0.3
+const BLOCK_INTERVAL = 120
 
 @Injectable()
 export class ActivePriceIndexer extends Indexer {
@@ -16,9 +20,15 @@ export class ActivePriceIndexer extends Indexer {
   }
 
   async index (block: RawBlock): Promise<void> {
-    if (block.height % 120 === 0) {
-      // !TODO: Ok to query like this?
-      const tickers = await this.priceTickerMapper.query(1000)
+    if (block.height % BLOCK_INTERVAL === 0) {
+      const tickers: PriceTicker[] = []
+      let response = await this.priceTickerMapper.query(100)
+      tickers.push(...response)
+      while (response.length > 0) {
+        response = await this.priceTickerMapper.query(100, response[response.length - 1].sort)
+        tickers.push(...response)
+      }
+
       for (const ticker of tickers) {
         const aggregatedPrice = await this.aggregatedMapper.query(ticker.id, 1)
         if (aggregatedPrice.length < 1) {
@@ -35,16 +45,25 @@ export class ActivePriceIndexer extends Indexer {
           activePrice = previous[0].next
         }
 
+        const nextPrice = aggregatedPrice[0].aggregated.amount
         await this.activePriceMapper.put({
           id: `${ticker.id}-${block.height}`,
           key: ticker.id,
+          valid: this.isValid(new BigNumber(activePrice), new BigNumber(nextPrice)),
           block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
           active: activePrice,
-          next: aggregatedPrice[0].aggregated.amount,
+          next: nextPrice,
           sort: HexEncoder.encodeHeight(block.mediantime) + HexEncoder.encodeHeight(block.height)
         })
       }
     }
+  }
+
+  isValid (active: BigNumber, next: BigNumber): boolean {
+    // gte is intentional on active price, to match C++ implementation
+    return active.gte(0) &&
+            next.gt(0) &&
+            next.minus(active).abs().lt(active.times(DEVIATION_THRESHOLD))
   }
 
   async invalidate (block: RawBlock): Promise<void> {

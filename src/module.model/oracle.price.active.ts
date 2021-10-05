@@ -49,6 +49,7 @@ export interface OraclePriceActive extends Model {
 
   active: string
   next: string
+  valid: boolean
 
   block: {
     hash: string
