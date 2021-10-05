@@ -63,7 +63,7 @@ afterAll(async () => {
 
 describe('list', () => {
   it('should listLoanScheme', async () => {
-    const result = await client.loan.listSchemes()
+    const result = await client.loanScheme.list()
     expect(result.length).toStrictEqual(4)
     expect(result[0]).toStrictEqual(
       {
@@ -99,7 +99,7 @@ describe('list', () => {
   })
 
   it('should listLoanSchemes with pagination', async () => {
-    const first = await client.loan.listSchemes(2)
+    const first = await client.loanScheme.list(2)
 
     expect(first.length).toStrictEqual(2)
     expect(first.hasNext).toStrictEqual(true)
@@ -127,7 +127,7 @@ describe('list', () => {
 
 describe('get', () => {
   it('should get scheme by scheme id', async () => {
-    const data = await client.loan.getScheme('scheme1')
+    const data = await client.loanScheme.get('scheme1')
     expect(data).toStrictEqual(
       { id: 'scheme1', mincolratio: 150, interestrate: 5.5 }
     )
@@ -136,7 +136,7 @@ describe('get', () => {
   it('should fail due to getting non-existent or malformed id', async () => {
     expect.assertions(4)
     try {
-      await client.loan.getScheme('999')
+      await client.loanScheme.get('999')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
@@ -144,12 +144,12 @@ describe('get', () => {
         type: 'NotFound',
         at: expect.any(Number),
         message: 'Unable to find scheme',
-        url: '/v0.0/regtest/loan/schemes/999'
+        url: '/v0.0/regtest/loans/schemes/999'
       })
     }
 
     try {
-      await client.loan.getScheme('$*@')
+      await client.loanScheme.get('$*@')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
@@ -157,7 +157,7 @@ describe('get', () => {
         type: 'NotFound',
         at: expect.any(Number),
         message: 'Unable to find scheme',
-        url: '/v0.0/regtest/loan/schemes/$*@'
+        url: '/v0.0/regtest/loans/schemes/$*@'
       })
     }
   })

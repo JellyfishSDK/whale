@@ -13,8 +13,8 @@ export class LoanScheme {
    * @param {string} next set of schemes
    * @return {Promise<ApiPagedResponse<LoanSchemeResult>>}
    */
-  async listSchemes (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanSchemeResult>> {
-    return await this.client.requestList('GET', 'loan/schemes', size, next)
+  async list (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanSchemeResult>> {
+    return await this.client.requestList('GET', 'loans/schemes', size, next)
   }
 
   /**
@@ -23,7 +23,7 @@ export class LoanScheme {
    * @param {string} id scheme id to get
    * @return {Promise<LoanSchemeResult>}
    */
-  async getScheme (id: string): Promise<LoanSchemeResult> {
-    return await this.client.requestData('GET', `loan/schemes/${id}`)
+  async get (id: string): Promise<LoanSchemeResult> {
+    return await this.client.requestData('GET', `loans/schemes/${id}`)
   }
 }

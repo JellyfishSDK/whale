@@ -75,7 +75,7 @@ export class WhaleApiClient {
   public readonly stats = new Stats(this)
   public readonly rawtx = new Rawtx(this)
   public readonly fee = new Fee(this)
-  public readonly loan = new LoanScheme(this)
+  public readonly loanScheme = new LoanScheme(this)
 
   constructor (
     protected readonly options: WhaleApiClientOptions
