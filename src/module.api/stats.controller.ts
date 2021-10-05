@@ -134,10 +134,10 @@ export class StatsController {
 
 export function getEmission (eunosHeight: number, height: number): StatsData['emission'] {
   const total = getBlockSubsidy(eunosHeight, height)
-  const masternode = new BigNumber(new BigNumber(0.3333).times(total).toFixed(8))
-  const dex = new BigNumber(new BigNumber(0.2545).times(total).toFixed(8))
-  const community = new BigNumber(new BigNumber(0.0491).times(total).toFixed(8))
-  const anchor = new BigNumber(new BigNumber(0.0002).times(total).toFixed(8))
+  const masternode = new BigNumber(new BigNumber('0.3333').times(total).toFixed(8))
+  const dex = new BigNumber(new BigNumber('0.2545').times(total).toFixed(8))
+  const community = new BigNumber(new BigNumber('0.0491').times(total).toFixed(8))
+  const anchor = new BigNumber(new BigNumber('0.0002').times(total).toFixed(8))
   const burned = total.minus(masternode.plus(dex).plus(community).plus(anchor))
 
   return {

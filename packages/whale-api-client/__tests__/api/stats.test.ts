@@ -82,10 +82,10 @@ describe('stats', () => {
       emission: {
         total: 405.04,
         anchor: 0.081008,
-        dex: 99.03228,
+        dex: 103.08268,
         community: 19.887464,
         masternode: 134.999832,
-        burned: 151.039416
+        burned: 146.989016
       }
     })
   })
