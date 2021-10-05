@@ -3,7 +3,6 @@ import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
 import { WhaleApiClient } from '../../src'
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens } from '@defichain/testing'
-import BigNumber from 'bignumber.js'
 
 describe('stats', () => {
   let container: MasterNodeRegTestContainer
@@ -62,40 +61,10 @@ describe('stats', () => {
       await container.stop()
     }
   })
-  const consensusParams = {
-    emissionReductionPeriod: 32690,
-    eunosHeight: 10000000
-  }
-
-  function getBlockSubsidy (eunosHeight: number, nHeight: number = 0): number {
-    let blockSubsidy = 405.04
-    const emissionReductionPeriod = 32690 // Two weeks
-    const emissionReductionAmount = new BigNumber(0.01658) // 1.658%
-    const reductions = Math.floor((nHeight - eunosHeight) / emissionReductionPeriod)
-
-    if (nHeight >= eunosHeight) {
-      for (let i = reductions; i > 0; i--) {
-        const reductionAmount = emissionReductionAmount.times(blockSubsidy)
-        if (reductionAmount.lte(0.00001)) {
-          blockSubsidy = 0
-          break
-        }
-        blockSubsidy -= reductionAmount.toNumber()
-      }
-    }
-    return blockSubsidy
-  }
-
-  function calculateCoinbaseRewards (blockReward: number, percentage: number): number {
-    return (blockReward * percentage) / 10000
-  }
-
-  function calculateReductionHeight (reductions: number): number {
-    return consensusParams.eunosHeight + reductions * consensusParams.emissionReductionPeriod
-  }
 
   it('should get stat data', async () => {
     const data = await client.stats.get()
+
     expect(data).toStrictEqual({
       count: { blocks: 117, prices: 0, tokens: 7, masternodes: 8 },
       burned: { address: 0, emission: 7014.88, fee: 3, total: 7017.88 },
@@ -111,55 +80,13 @@ describe('stats', () => {
         ]
       },
       emission: {
-        burned: 7017.88,
         total: 405.04,
         anchor: 0.081008,
         dex: 99.03228,
         community: 19.887464,
-        masternode: 134.999832
+        masternode: 134.999832,
+        burned: 151.039416
       }
     })
-  })
-
-  it('should check emission with reduction 0', async () => {
-    const blockSubsidy = getBlockSubsidy(consensusParams.eunosHeight, calculateReductionHeight(0))
-    expect(blockSubsidy).toStrictEqual(405.04)
-
-    // masternode
-    expect(calculateCoinbaseRewards(blockSubsidy, 3333)
-      .toFixed(5)).toStrictEqual('134.99983')
-
-    // anchors
-    expect(calculateCoinbaseRewards(blockSubsidy, 2).toFixed(5))
-      .toStrictEqual('0.08101')
-
-    // dex
-    expect(calculateCoinbaseRewards(blockSubsidy, 2445)
-      .toFixed(5)).toStrictEqual('99.03228')
-
-    // community
-    expect(calculateCoinbaseRewards(blockSubsidy, 491)
-      .toFixed(5)).toStrictEqual('19.88746')
-  })
-
-  it('should check emission with reduction 1', async () => {
-    const blockSubsidy = getBlockSubsidy(consensusParams.eunosHeight, calculateReductionHeight(1))
-    expect(blockSubsidy).toStrictEqual(398.3244368)
-
-    // masternode
-    expect(calculateCoinbaseRewards(blockSubsidy, 3333)
-      .toFixed(5)).toStrictEqual('132.76153')
-
-    // anchors
-    expect(calculateCoinbaseRewards(blockSubsidy, 2).toFixed(5))
-      .toStrictEqual('0.07966')
-
-    // dex
-    expect(calculateCoinbaseRewards(blockSubsidy, 2445)
-      .toFixed(5)).toStrictEqual('97.39032')
-
-    // community
-    expect(calculateCoinbaseRewards(blockSubsidy, 491)
-      .toFixed(5)).toStrictEqual('19.55773')
   })
 })

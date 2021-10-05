@@ -7,7 +7,6 @@ import { PoolPairService } from '@src/module.api/poolpair.service'
 import BigNumber from 'bignumber.js'
 import { PriceTickerMapper } from '@src/module.model/price.ticker'
 import { MasternodeStats, MasternodeStatsMapper } from '@src/module.model/masternode.stats'
-import { BurnInfo } from '@defichain/jellyfish-api-core/dist/category/account'
 import { BlockchainInfo } from '@defichain/jellyfish-api-core/dist/category/blockchain'
 
 @Controller('/stats')
@@ -120,29 +119,22 @@ export class StatsController {
   }
 
   private async getEmission (): Promise<StatsData['emission']> {
-    const burnInfo = await this.getBurnInfo()
-    const blockInfo = await this.getBlockChainInfo()
+    const blockInfo = requireValue(await this.getBlockChainInfo(), 'emission')
+    const eunosHeight = blockInfo.softforks.eunos.height ?? 0
 
-    const eunosHeight = blockInfo?.softforks.eunos.height ?? 0
-    let burned = 0
-
-    if (burnInfo != null) {
-      burned = burnInfo.amount.plus(burnInfo.emissionburn).plus(burnInfo.feeburn).toNumber()
-    }
-
-    const blockSubsidy = getBlockSubsidy(eunosHeight, blockInfo?.blocks)
-
-    const communityRewards: Record<'masternode'| 'dex' | 'community' | 'anchor', number> = {
-      masternode: new BigNumber(0.3333).times(blockSubsidy).toNumber(),
-      dex: new BigNumber(0.2445).times(blockSubsidy).toNumber(),
-      community: new BigNumber(0.0491).times(blockSubsidy).toNumber(),
-      anchor: new BigNumber(0.0002).times(blockSubsidy).toNumber()
-    }
+    const total = getBlockSubsidy(eunosHeight, blockInfo.blocks)
+    const masternode = new BigNumber(0.3333).times(total).toNumber()
+    const dex = new BigNumber(0.2445).times(total).toNumber()
+    const community = new BigNumber(0.0491).times(total).toNumber()
+    const anchor = new BigNumber(0.0002).times(total).toNumber()
 
     return {
-      burned,
-      total: blockSubsidy,
-      ...communityRewards
+      total: total,
+      masternode: masternode,
+      dex: dex,
+      community: community,
+      anchor: anchor,
+      burned: total - masternode - dex - community - anchor
     }
   }
 
@@ -151,30 +143,25 @@ export class StatsController {
       return await this.rpcClient.blockchain.getBlockchainInfo()
     })
   }
-
-  private async getBurnInfo (): Promise<BurnInfo | undefined> {
-    return await this.cache.get<BurnInfo>('BURN_INFO', async () => {
-      return await this.rpcClient.account.getBurnInfo()
-    })
-  }
 }
 
-export function getBlockSubsidy (eunosHeight: number, nHeight: number = 0): number {
+export function getBlockSubsidy (eunosHeight: number, height: number): number {
   let blockSubsidy = 405.04
-  const emissionReductionPeriod = 32690 // Two weeks
-  const emissionReductionAmount = new BigNumber(0.01658) // 1.658%
-  const reductions = Math.floor((nHeight - eunosHeight) / emissionReductionPeriod)
 
-  if (nHeight >= eunosHeight) {
+  if (height >= eunosHeight) {
+    const reductionAmount = new BigNumber(0.01658) // 1.658%
+    const reductions = Math.floor((height - eunosHeight) / 32690) // Two weeks
+
     for (let i = reductions; i > 0; i--) {
-      const reductionAmount = emissionReductionAmount.times(blockSubsidy)
-      if (reductionAmount.lte(0.00001)) {
-        blockSubsidy = 0
-        break
+      const amount = reductionAmount.times(blockSubsidy)
+      if (amount.lte(0.00001)) {
+        return 0
       }
-      blockSubsidy -= reductionAmount.toNumber()
+
+      blockSubsidy -= amount.toNumber()
     }
   }
+
   return blockSubsidy
 }
 
