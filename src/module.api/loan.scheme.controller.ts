@@ -40,7 +40,7 @@ export class LoanSchemeController {
   }
 
   /**
-   * Get information about a scheme with id of the scheme.
+   * Get information about a scheme with given scheme id.
    *
    * @param {string} id
    * @return {Promise<GetLoanSchemeResult>}

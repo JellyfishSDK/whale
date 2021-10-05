@@ -134,7 +134,7 @@ describe('get', () => {
   })
 
   it('should fail due to getting non-existent or malformed id', async () => {
-    expect.assertions(2)
+    expect.assertions(4)
     try {
       await client.loan.getScheme('999')
     } catch (err) {
@@ -145,6 +145,19 @@ describe('get', () => {
         at: expect.any(Number),
         message: 'Unable to find scheme',
         url: '/v0.0/regtest/loan/schemes/999'
+      })
+    }
+
+    try {
+      await client.loan.getScheme('$*@')
+    } catch (err) {
+      expect(err).toBeInstanceOf(WhaleApiException)
+      expect(err.error).toStrictEqual({
+        code: 404,
+        type: 'NotFound',
+        at: expect.any(Number),
+        message: 'Unable to find scheme',
+        url: '/v0.0/regtest/loan/schemes/$*@'
       })
     }
   })

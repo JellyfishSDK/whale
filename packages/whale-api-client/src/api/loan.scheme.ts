@@ -2,10 +2,7 @@ import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
 import { LoanSchemeResult } from '@defichain/jellyfish-api-core/dist/category/loan'
 
-/**
- * DeFi whale endpoint for loan related services.
- */
-export class Loan {
+export class LoanScheme {
   constructor (private readonly client: WhaleApiClient) {
   }
 
