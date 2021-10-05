@@ -66,7 +66,13 @@ export class ActivePriceIndexer extends Indexer {
   }
 
   async invalidate (block: RawBlock): Promise<void> {
-    const tickers = await this.priceTickerMapper.query(1000)
+    const tickers: PriceTicker[] = []
+    let response = await this.priceTickerMapper.query(100)
+    tickers.push(...response)
+    while (response.length > 0) {
+      response = await this.priceTickerMapper.query(100, response[response.length - 1].sort)
+      tickers.push(...response)
+    }
     for (const ticker of tickers) {
       await this.activePriceMapper.delete(`${ticker.id}-${block.height}`)
     }
