@@ -35,17 +35,18 @@ export class ActivePriceIndexer extends Indexer {
           continue
         }
 
+        const nextPrice = aggregatedPrice[0].aggregated.amount
         let activePrice = '0.00000000'
         const previous = await this.activePriceMapper.query(ticker.id, 1)
         if (previous.length > 0) {
-          if (previous[0].next === previous[0].active) {
+          if (previous[0].next === previous[0].active &&
+              previous[0].next === nextPrice) {
             continue
           }
 
           activePrice = previous[0].next
         }
 
-        const nextPrice = aggregatedPrice[0].aggregated.amount
         await this.activePriceMapper.put({
           id: `${ticker.id}-${block.height}`,
           key: ticker.id,
