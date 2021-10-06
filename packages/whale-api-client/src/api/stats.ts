@@ -40,7 +40,7 @@ export interface StatsData {
   }
   masternodes: {
     locked: Array<{weeks: number, tvl: number, count: number}>
-  },
+  }
   emission: {
     total: number
     masternode: number
@@ -48,7 +48,7 @@ export interface StatsData {
     community: number
     anchor: number
     burned: number
-  },
+  }
   blockchain: {
     difficulty: number
   }
