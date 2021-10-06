@@ -2,14 +2,11 @@ import { Controller, Get, Query } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
-import {
-  ListLoanTokenResult
-} from '@defichain/jellyfish-api-core/dist/category/loan'
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import BigNumber from 'bignumber.js'
-import { LoanData } from '@whale-api-client/api/loan'
+import { LoanData } from '@whale-api-client/api/loan.token'
 
-@Controller('/loan/tokens')
+@Controller('/loans/tokens')
 export class LoanTokenController {
   constructor (private readonly client: JsonRpcClient) {
   }
@@ -24,8 +21,8 @@ export class LoanTokenController {
   async list (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<LoanData>> {
-    const data: ListLoanTokenResult = await this.client.call('listloantokens', [], 'bignumber')
-    const result: LoanData[] = Object.entries(data)
+    const data = await this.client.loan.listLoanTokens()
+    const result = Object.entries(data)
       .map(([id, value]) => {
         const token = value.token
         const newToken = Object.entries(token).map(([id1, value1]) => {
@@ -46,7 +43,7 @@ export class LoanTokenController {
     let nextIndex = 0
 
     if (query.next !== undefined) {
-      const findIndex = result.findIndex((result: { tokenId: string | undefined }) => result.tokenId === query.next)
+      const findIndex = result.findIndex((result) => result.tokenId === query.next)
       if (findIndex > 0) {
         nextIndex = findIndex + 1
       } else {

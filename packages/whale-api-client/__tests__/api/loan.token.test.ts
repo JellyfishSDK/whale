@@ -75,7 +75,7 @@ afterAll(async () => {
 
 describe('list', () => {
   it('should listLoanTokens', async () => {
-    const result = await client.loan.listLoanTokens()
+    const result = await client.loanToken.list()
     expect(result.length).toStrictEqual(4)
     expect(result[0]).toStrictEqual({
       collateralAddress: expect.any(String),
@@ -116,7 +116,7 @@ describe('list', () => {
   })
 
   it('should listLoanTokens with pagination', async () => {
-    const first = await client.loan.listLoanTokens(2)
+    const first = await client.loanToken.list(2)
 
     expect(first.length).toStrictEqual(2)
     expect(first.hasNext).toStrictEqual(true)
