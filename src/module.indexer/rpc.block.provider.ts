@@ -4,17 +4,20 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { MainIndexer } from '@src/module.indexer/model/_main'
 import { Block, BlockMapper } from '@src/module.model/block'
 import { IndexStatusMapper, Status } from '@src/module.indexer/status'
+import { TokenMapper } from '@src/module.model/token'
+import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 @Injectable()
-export class Indexer {
-  private readonly logger = new Logger(Indexer.name)
+export class RPCBlockProvider {
+  private readonly logger = new Logger(RPCBlockProvider.name)
   private indexing = false
 
   constructor (
     private readonly client: JsonRpcClient,
     private readonly blockMapper: BlockMapper,
     private readonly indexer: MainIndexer,
-    private readonly statusMapper: IndexStatusMapper
+    private readonly statusMapper: IndexStatusMapper,
+    private readonly tokenMapper: TokenMapper
   ) {
   }
 
@@ -77,11 +80,33 @@ export class Indexer {
     return hash === indexed.hash
   }
 
-  private async indexGenesis (): Promise<boolean> {
+  public async indexGenesis (): Promise<boolean> {
     const hash = await this.client.blockchain.getBlockHash(0)
     const block = await this.client.blockchain.getBlock(hash, 2)
     await this.indexer.index(block)
+
     // TODO(fuxingloh): to validate genesis hash across network
+
+    // Seed DFI token
+    await this.tokenMapper.put({
+      id: '0',
+      sort: HexEncoder.encodeHeight(0),
+      symbol: 'DFI',
+      name: 'DefiChain Token',
+      decimal: 8,
+      limit: '0.0',
+      isDAT: true,
+      isLPS: false,
+      tradeable: true,
+      mintable: false,
+      block: {
+        hash: block.hash,
+        height: 0,
+        time: block.time,
+        medianTime: block.mediantime
+      }
+    })
+
     return true
   }
 
