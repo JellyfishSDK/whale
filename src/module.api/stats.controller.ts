@@ -39,7 +39,10 @@ export class StatsController {
       masternodes: {
         locked: masternodes.locked
       },
-      emission: await this.cachedGet('emission', this.getEmission.bind(this), 1800)
+      emission: await this.cachedGet('emission', this.getEmission.bind(this), 1800),
+      blockchain: {
+        difficulty: block?.difficulty ?? 0
+      
     }
   }
 

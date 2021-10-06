@@ -86,6 +86,9 @@ describe('stats', () => {
         community: 19.887464,
         masternode: 134.999832,
         burned: 146.989016
+      },
+      blockchain: {
+        difficulty: expect.any(Number)
       }
     })
   })
