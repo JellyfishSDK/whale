@@ -23,15 +23,14 @@ export class StatsController {
 
   @Get()
   async get (): Promise<StatsData> {
-    const block = await this.blockMapper.getHighest()
-    const height = requireValue(block?.height, 'count.blocks')
+    const block = requireValue(await this.blockMapper.getHighest(), 'block')
 
     const masternodes = await this.cachedGet('masternodes', this.getMasternodes.bind(this), 300)
 
     return {
       count: {
         ...await this.cachedGet('count', this.getCount.bind(this), 1800),
-        blocks: height
+        blocks: block.height
       },
       burned: await this.cachedGet('burned', this.getBurned.bind(this), 1800),
       tvl: await this.cachedGet('tvl', this.getTVL.bind(this), 300),
@@ -41,8 +40,8 @@ export class StatsController {
       },
       emission: await this.cachedGet('emission', this.getEmission.bind(this), 1800),
       blockchain: {
-        difficulty: block?.difficulty ?? 0
-      
+        difficulty: block.difficulty
+      }
     }
   }
 
