@@ -50,7 +50,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.3.0",
-    "subleveldown": "^5.0.1"
+    "subleveldown": "^6.0.1"
   },
   "devDependencies": {
     "@defichain/jellyfish-crypto": ">=0.46.1",
