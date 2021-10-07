@@ -60,8 +60,8 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
 
         poolPair.id = `${poolPair.poolPairId}-${block.height}`
         poolPair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
-        poolPair.tokenA.reserve = (forward ? result.poolFrom : result.poolTo).toFixed(8)
-        poolPair.tokenB.reserve = (forward ? result.poolTo : result.poolFrom).toFixed(8)
+        poolPair.tokenA.reserve = (forward ? result.poolFrom : result.poolTo).toFixed(8, BigNumber.ROUND_DOWN)
+        poolPair.tokenB.reserve = (forward ? result.poolTo : result.poolFrom).toFixed(8, BigNumber.ROUND_DOWN)
 
         await this.poolPairMapper.put(poolPair)
       }

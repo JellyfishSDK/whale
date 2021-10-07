@@ -1,5 +1,5 @@
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
-import { CPoolAddLiquidity, PoolRemoveLiquidity } from '@defichain/jellyfish-transaction'
+import { CPoolRemoveLiquidity, PoolRemoveLiquidity } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Inject, Injectable } from '@nestjs/common'
 import { PoolPairMapper } from '@src/module.model/poolpair'
@@ -8,7 +8,7 @@ import BigNumber from 'bignumber.js'
 
 @Injectable()
 export class PoolRemoveLiquidityIndexer extends DfTxIndexer<PoolRemoveLiquidity> {
-  OP_CODE: number = CPoolAddLiquidity.OP_CODE
+  OP_CODE: number = CPoolRemoveLiquidity.OP_CODE
 
   constructor (
     private readonly poolPairMapper: PoolPairMapper,
@@ -32,10 +32,10 @@ export class PoolRemoveLiquidityIndexer extends DfTxIndexer<PoolRemoveLiquidity>
       poolPair.id = `${poolPair.poolPairId}-${block.height}`
       poolPair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
       poolPair.tokenA.reserve = reserveA
-        .minus(liquidity.times(poolPair.tokenA.reserve).dividedBy(totalLiquidity)).toFixed(8)
+        .minus(liquidity.times(poolPair.tokenA.reserve).dividedBy(totalLiquidity)).toFixed(8, BigNumber.ROUND_DOWN)
       poolPair.tokenB.reserve = reserveB
-        .minus(liquidity.times(poolPair.tokenB.reserve).dividedBy(totalLiquidity)).toFixed(8)
-      poolPair.totalLiquidity = totalLiquidity.minus(liquidity).toFixed(8)
+        .minus(liquidity.times(poolPair.tokenB.reserve).dividedBy(totalLiquidity)).toFixed(8, BigNumber.ROUND_DOWN)
+      poolPair.totalLiquidity = totalLiquidity.minus(liquidity).toFixed(8, BigNumber.ROUND_DOWN)
 
       await this.poolPairMapper.put(poolPair)
     }
