@@ -85,7 +85,7 @@ afterAll(async () => {
 
 describe('list', () => {
   it('should listCollateralTokens', async () => {
-    const result = await client.loan.listCollateralTokens()
+    const result = await client.loanCollateral.list()
     expect(result.length).toStrictEqual(4)
     expect(result[0]).toStrictEqual(
       {
@@ -129,7 +129,7 @@ describe('list', () => {
   })
 
   it('should listLoanSchemes with pagination', async () => {
-    const first = await client.loan.listCollateralTokens(2)
+    const first = await client.loanCollateral.list(2)
 
     expect(first.length).toStrictEqual(2)
     expect(first.hasNext).toStrictEqual(true)
@@ -157,7 +157,7 @@ describe('list', () => {
 
 describe('get', () => {
   it('should get scheme by scheme id', async () => {
-    const data = await client.loan.getCollateralToken('AAPL')
+    const data = await client.loanCollateral.get('AAPL')
     expect(data).toStrictEqual({
       [collateralTokenId1]: {
         token: 'AAPL',
@@ -169,9 +169,22 @@ describe('get', () => {
   })
 
   it('should fail due to getting non-existent or malformed id', async () => {
-    expect.assertions(2)
+    expect.assertions(4)
     try {
-      await client.loan.getCollateralToken('999')
+      await client.loanCollateral.get('999')
+    } catch (err) {
+      expect(err).toBeInstanceOf(WhaleApiException)
+      expect(err.error).toStrictEqual({
+        code: 404,
+        type: 'NotFound',
+        at: expect.any(Number),
+        message: 'Unable to find collateral token',
+        url: '/v0.0/regtest/loan/collaterals/999'
+      })
+    }
+
+    try {
+      await client.loanCollateral.get('$*@')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({

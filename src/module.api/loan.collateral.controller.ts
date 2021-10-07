@@ -7,7 +7,7 @@ import {
 } from '@defichain/jellyfish-api-core/dist/category/loan'
 import { CollateralData } from '@whale-api-client/api/loan.collateral'
 
-@Controller('/loan/collaterals')
+@Controller('/loans/collaterals')
 export class LoanCollateralController {
   constructor (private readonly client: JsonRpcClient) {
   }
@@ -39,14 +39,14 @@ export class LoanCollateralController {
       }
     }
 
-    const loanTokens = result.slice(nextIndex, nextIndex + query.size)
-    return ApiPagedResponse.of(loanTokens, query.size, item => {
+    const collateralTokens = result.slice(nextIndex, nextIndex + query.size)
+    return ApiPagedResponse.of(collateralTokens, query.size, item => {
       return item.token
     })
   }
 
   /**
-   * Get information about a scheme with id of the scheme.
+   * Get information about a collateral token with given collateral token.
    *
    * @param {string} id
    * @return {Promise<CollateralTokenDetails>}
@@ -54,7 +54,7 @@ export class LoanCollateralController {
   @Get('/:id')
   async get (@Param('id') id: string): Promise<CollateralTokenDetails> {
     try {
-      return await this.client.call('getcollateraltoken', [id], 'bignumber')
+      return await this.client.loan.getCollateralToken(id)
     } catch (err) {
       if (err?.payload?.message === `Token ${id} does not exist!`) {
         throw new NotFoundException('Unable to find collateral token')

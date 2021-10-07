@@ -2,9 +2,9 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp } from '@src/e2e.module'
 import BigNumber from 'bignumber.js'
 import { LoanMasterNodeRegTestContainer } from '@src/module.api/loan_container'
+import { LoanCollateralController } from '@src/module.api/loan.collateral.controller'
 import { NotFoundException } from '@nestjs/common'
 import { Testing } from '@defichain/jellyfish-testing'
-import { LoanCollateralController } from '@src/module.api/loan.collateral.controller'
 
 const container = new LoanMasterNodeRegTestContainer()
 let app: NestFastifyApplication

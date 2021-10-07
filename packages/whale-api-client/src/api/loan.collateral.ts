@@ -14,7 +14,7 @@ export class LoanCollateral {
    * @param {string} next set of collateral tokens
    * @return {Promise<ApiPagedResponse<LoanSchemeResult>>}
    */
-  async listCollateralTokens (size: number = 30, next?: string): Promise<ApiPagedResponse<CollateralTokenDetails>> {
+  async list (size: number = 30, next?: string): Promise<ApiPagedResponse<CollateralTokenDetails>> {
     return await this.client.requestList('GET', 'loan/collaterals', size, next)
   }
 
@@ -24,7 +24,7 @@ export class LoanCollateral {
    * @param {string} id collateralToken id to get
    * @return {Promise<CollateralTokenDetails>}
    */
-  async getCollateralToken (id: string): Promise<CollateralTokenDetails> {
+  async get (id: string): Promise<CollateralTokenDetails> {
     return await this.client.requestData('GET', `loan/collaterals/${id}`)
   }
 }
