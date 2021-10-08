@@ -13,6 +13,8 @@ import { IndexStatusMapper } from '@src/module.indexer/status'
 import { DfTxIndexerModule } from '@src/module.indexer/model/dftx/_module'
 import { MainDfTxIndexer } from '@src/module.indexer/model/dftx.indexer'
 import { BlockMintedIndexer } from '@src/module.indexer/model/block.minted'
+import { ScriptActivityV2Indexer } from './model/script.activity.v2'
+import { ScriptActivityV2IndexerModule } from './model/script.activity.v2/token.activity/_module'
 
 @Module({
   providers: [
@@ -28,10 +30,12 @@ import { BlockMintedIndexer } from '@src/module.indexer/model/block.minted'
     TransactionVinIndexer,
     TransactionVoutIndexer,
     MainDfTxIndexer,
-    BlockMintedIndexer
+    BlockMintedIndexer,
+    ScriptActivityV2Indexer
   ],
   imports: [
-    DfTxIndexerModule
+    DfTxIndexerModule,
+    ScriptActivityV2IndexerModule
   ]
 })
 export class IndexerModule {

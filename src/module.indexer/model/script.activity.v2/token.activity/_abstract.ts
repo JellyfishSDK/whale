@@ -44,11 +44,10 @@ export abstract class TokenActivityIndexer<T> {
   }
 
   async index (block: RawBlock, txns: Array<DfTxTransaction<T>>): Promise<void> {
-    let i = 0
     for (const txn of txns) {
       const activities = await this.extractTokenActivities(txn.dftx.data)
-      for (const activity of activities) {
-        const simpleScriptActivity = this.mapToScriptActivityV2(block, txn, activity, i++)
+      for (let i = 0; i < activities.length; i++) {
+        const simpleScriptActivity = this.mapToScriptActivityV2(block, txn, activities[i], i)
         await this.mapper.put(simpleScriptActivity)
       }
     }
@@ -67,6 +66,7 @@ export abstract class TokenActivityIndexer<T> {
   abstract extractTokenActivities (tx: T): Promise<ScriptTokenActivity[]>
 
   mapToScriptActivityV2 (block: RawBlock, dfTx: DfTxTransaction<any>, tokenSA: ScriptTokenActivity, activitySerialNumber: number): ScriptActivityV2 {
+    console.log('mapToScriptActivityV2')
     return {
       id: mapId(block, dfTx.txn.txid, 'dftx', activitySerialNumber),
       hid: HexEncoder.asSHA256(tokenSA.script.hex),
