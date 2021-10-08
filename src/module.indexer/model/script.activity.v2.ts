@@ -20,8 +20,8 @@ import { AddLiquidityIndexer } from './script.activity.v2/token.activity/dex/add
 import { RemoveLiquidityIndexer } from './script.activity.v2/token.activity/dex/remove.liquidity'
 
 @Injectable()
-export class MainScriptActivityIndexer extends Indexer {
-  private readonly logger = new Logger(MainScriptActivityIndexer.name)
+export class ScriptActivityV2Indexer extends Indexer {
+  private readonly logger = new Logger(ScriptActivityV2Indexer.name)
   private readonly indexers: Array<TokenActivityIndexer<any>>
 
   constructor (
@@ -86,7 +86,7 @@ export class MainScriptActivityIndexer extends Indexer {
           continue
         }
 
-        await this.mapper.delete(mapId(block, vin.txid, 'vin', vin.vout))
+        await this.mapper.delete(mapId(block, txn.txid, 'vin', vin.vout))
       }
 
       for (const vout of txn.vout) {
@@ -100,6 +100,7 @@ export class MainScriptActivityIndexer extends Indexer {
     // dftx
     const transactions = this.getDfTxTransactions(block)
     for (const indexer of this.indexers) {
+      console.log('invalidating', block.height)
       const filtered = transactions.filter(value => value.dftx.type === indexer.OP_CODE)
       await indexer.invalidate(block, filtered)
     }
@@ -107,7 +108,7 @@ export class MainScriptActivityIndexer extends Indexer {
 
   mapVin (block: RawBlock, txn: defid.Transaction, vin: defid.Vin, vout: TransactionVout): ScriptActivityV2 {
     return {
-      id: mapId(block, vin.txid, 'vin', vin.vout),
+      id: mapId(block, txn.txid, 'vin', vin.vout),
       hid: HexEncoder.asSHA256(vout.script.hex),
       txid: txn.txid,
       block: {
