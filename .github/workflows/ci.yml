@@ -101,6 +101,6 @@ jobs:
         run: .github/workflows/ci/wait-for http://localhost:3000/_actuator/probes/liveness -t 6
 
       - name: Sanity testing
-        uses: matt-ball/newman-action@0659e9b8d056c0d03d94e1dbfce380512088b566
+        uses: matt-ball/newman-action@573e42a0a75f676336800aa40d7b63b2acdc4ff3
         with:
           collection: .github/workflows/ci/postman_collection.json
