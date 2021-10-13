@@ -57,7 +57,7 @@ afterAll(async () => {
 
 describe('remove-liquidity', () => {
   it('should be indexed each spent token', async () => {
-    await mn.generate(2)
+    await mn.generate(1)
     await waitForIndexedHeight(app, await mn.getBlockCount() - 1, 100000)
     const scriptHex = new CScript((fromAddress(testAddress, 'regtest') as DecodedAddress).script).toHex()
 

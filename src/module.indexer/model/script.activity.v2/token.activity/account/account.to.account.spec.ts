@@ -44,6 +44,7 @@ beforeAll(async () => {
   activityV2Mapper = app.get(ScriptActivityV2Mapper)
 
   // before
+  await mn.generate(1)
   const senderScriptHex = new CScript((fromAddress(senderAddress, 'regtest') as DecodedAddress).script).toHex()
   await waitForIndexedHeight(app, await mn.getBlockCount() - 1, 100000)
   const hid = HexEncoder.asSHA256(senderScriptHex)
@@ -60,11 +61,11 @@ afterAll(async () => {
 
 describe('account-to-account', () => {
   it('should be indexed to both sender and receiver as two unique activityV2', async () => {
-    const lastBlock = await mn.getBlockCount()
     const senderRpc = new JsonRpcClient(await mn.getCachedRpcUrl())
     const txid: string = await senderRpc.call('accounttoaccount', [senderAddress, { [recipientAddress]: `1.23@${dTEST}` }], 'number')
     await mn.generate(2)
-    await waitForIndexedHeight(app, await mn.getBlockCount() - 1, 100000)
+    const height = await mn.getBlockCount() - 1
+    await waitForIndexedHeight(app, height, 100000)
 
     // after
     const senderScriptHex = new CScript((fromAddress(senderAddress, 'regtest') as DecodedAddress).script).toHex()
@@ -72,10 +73,10 @@ describe('account-to-account', () => {
     expect(senderActivities.length).toStrictEqual(2)
     const senderNewActivity = senderActivities.find(a => a.dftx?.type === 'spend-account-to-account')
     expect(senderNewActivity).toBeDefined()
-    const height = HexEncoder.encodeHeight(lastBlock + 1)
+    const encodedHeight = HexEncoder.encodeHeight(height)
     const senderActivityIndex = HexEncoder.encodeHeight(0)
     expect(senderNewActivity?.txid).toStrictEqual(txid)
-    expect(senderNewActivity?.id).toStrictEqual(`${height}${txid}ff${senderActivityIndex}`)
+    expect(senderNewActivity?.id).toStrictEqual(`${encodedHeight}${txid}ff${senderActivityIndex}`)
     expect(senderNewActivity?.category).toStrictEqual('dftx')
     expect(senderNewActivity?.tokenId).toStrictEqual(1)
     expect(senderNewActivity?.value).toStrictEqual('-1.23')
@@ -89,7 +90,7 @@ describe('account-to-account', () => {
     const receiverActivityIndex = HexEncoder.encodeHeight(1)
     expect(receiverActivity?.dftx?.type).toStrictEqual('account-to-account-gain')
     expect(receiverActivity?.txid).toStrictEqual(txid)
-    expect(receiverActivity?.id).toStrictEqual(`${height}${txid}ff${receiverActivityIndex}`)
+    expect(receiverActivity?.id).toStrictEqual(`${encodedHeight}${txid}ff${receiverActivityIndex}`)
     expect(receiverActivity?.category).toStrictEqual('dftx')
     expect(receiverActivity?.tokenId).toStrictEqual(1)
     expect(receiverActivity?.value).toStrictEqual('1.23')

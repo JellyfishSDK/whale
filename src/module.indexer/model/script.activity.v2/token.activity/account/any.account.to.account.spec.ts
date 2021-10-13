@@ -46,24 +46,23 @@ describe('any-account-to-account', () => {
     expect(senderActivitiesBefore.length).toStrictEqual(1)
     expect(senderActivitiesBefore[0].dftx?.type).toStrictEqual('utxos-to-account-gain') // prefunded DFI
 
-    const lastBlock = await mn.getBlockCount() // block height where new tx happen
-
     const txid = await rpc.account.sendTokensToAddress(
       { [from]: ['0.123@DFI'] },
       { [to]: ['0.123@DFI'] }
     )
     await mn.generate(2)
-    await waitForIndexedHeight(app, await mn.getBlockCount() - 1, 100000)
+    const height = await mn.getBlockCount() - 1
+    await waitForIndexedHeight(app, height, 100000)
 
     // after
     const senderActivities = await activityV2Mapper.query(HexEncoder.asSHA256(senderScriptHex), 100)
     expect(senderActivities.length).toStrictEqual(2) // 1 prefunded
     const newActivity = senderActivities.find(a => a.dftx?.type === 'spend-any-account-to-account')
     expect(newActivity).toBeDefined()
-    const height = HexEncoder.encodeHeight(lastBlock + 1)
+    const encodedHeight = HexEncoder.encodeHeight(height)
     const activityIndex = HexEncoder.encodeHeight(0)
     expect(newActivity?.txid).toStrictEqual(txid)
-    expect(newActivity?.id).toStrictEqual(`${height}${txid}ff${activityIndex}`)
+    expect(newActivity?.id).toStrictEqual(`${encodedHeight}${txid}ff${activityIndex}`)
     expect(newActivity?.category).toStrictEqual('dftx')
     expect(newActivity?.tokenId).toStrictEqual(0)
     expect(newActivity?.value).toStrictEqual('-0.123')
@@ -78,7 +77,7 @@ describe('any-account-to-account', () => {
     expect(receiverActivity.dftx?.type).toStrictEqual('any-account-to-account-gain')
     const secondActivityIndex = HexEncoder.encodeHeight(1) // of the txid
     expect(receiverActivity?.txid).toStrictEqual(txid)
-    expect(receiverActivity?.id).toStrictEqual(`${height}${txid}ff${secondActivityIndex}`)
+    expect(receiverActivity?.id).toStrictEqual(`${encodedHeight}${txid}ff${secondActivityIndex}`)
     expect(receiverActivity?.category).toStrictEqual('dftx')
     expect(receiverActivity?.tokenId).toStrictEqual(0)
     expect(receiverActivity?.value).toStrictEqual('0.123')

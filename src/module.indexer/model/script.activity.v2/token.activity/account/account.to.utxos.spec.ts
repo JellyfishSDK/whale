@@ -41,6 +41,7 @@ beforeAll(async () => {
   activityV2Mapper = app.get(ScriptActivityV2Mapper)
 
   // before
+  await mn.generate(1)
   const senderScriptHex = new CScript((fromAddress(testAddress, 'regtest') as DecodedAddress).script).toHex()
   await waitForIndexedHeight(app, await mn.getBlockCount() - 1, 100000)
   const hid = HexEncoder.asSHA256(senderScriptHex)
@@ -57,11 +58,11 @@ afterAll(async () => {
 
 describe('account-to-utxos', () => {
   it('should be indexed to both sender and receiver as two unique activityV2', async () => {
-    const lastBlock = await mn.getBlockCount()
     const senderRpc = new JsonRpcClient(await mn.getCachedRpcUrl())
     const txid = await senderRpc.account.accountToUtxos(testAddress, { [await mn.getNewAddress()]: '1.23@DFI' })
     await mn.generate(2)
-    await waitForIndexedHeight(app, await mn.getBlockCount() - 1, 100000)
+    const height = await mn.getBlockCount() - 1
+    await waitForIndexedHeight(app, height, 100000)
 
     // after
     const senderScriptHex = new CScript((fromAddress(testAddress, 'regtest') as DecodedAddress).script).toHex()
@@ -69,10 +70,10 @@ describe('account-to-utxos', () => {
     expect(senderActivities.length).toStrictEqual(2)
     const senderNewActivity = senderActivities.find(a => a.dftx?.type === 'spend-account-to-utxos')
     expect(senderNewActivity).toBeDefined()
-    const height = HexEncoder.encodeHeight(lastBlock + 1)
+    const encodedHeight = HexEncoder.encodeHeight(height)
     const senderActivityIndex = HexEncoder.encodeHeight(0)
     expect(senderNewActivity?.txid).toStrictEqual(txid)
-    expect(senderNewActivity?.id).toStrictEqual(`${height}${txid}ff${senderActivityIndex}`)
+    expect(senderNewActivity?.id).toStrictEqual(`${encodedHeight}${txid}ff${senderActivityIndex}`)
     expect(senderNewActivity?.category).toStrictEqual('dftx')
     expect(senderNewActivity?.tokenId).toStrictEqual(0)
     expect(senderNewActivity?.value).toStrictEqual('-1.23')

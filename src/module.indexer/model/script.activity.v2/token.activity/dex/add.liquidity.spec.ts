@@ -67,9 +67,8 @@ describe('add-liquidity', () => {
       [testAddress]: ['0.123@DFI', '0.123@BTC']
     }, testAddress)
     await mn.generate(2)
-    const height = await mn.getBlockCount()
-
-    await waitForIndexedHeight(app, height - 1, 100000)
+    const height = await mn.getBlockCount() - 1
+    await waitForIndexedHeight(app, height, 100000)
 
     {
       // after
