@@ -2,7 +2,7 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { ScriptActivityV2Mapper } from '@src/module.model/script.activity.v2'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp, waitForIndexedHeight } from '@src/e2e.module'
+import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { TestingToken } from '@defichain/jellyfish-testing'
 import { DecodedAddress, fromAddress } from '@defichain/jellyfish-address'
@@ -55,7 +55,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await app.close()
+  await stopTestingApp(mn, app)
 })
 
 describe('account-to-account', () => {
