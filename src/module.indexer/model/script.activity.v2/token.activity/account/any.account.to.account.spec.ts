@@ -68,6 +68,7 @@ describe('any-account-to-account', () => {
     expect(newActivity?.tokenId).toStrictEqual(0)
     expect(newActivity?.value).toStrictEqual('-0.123')
     expect(newActivity?.block).toBeDefined()
+    expect(newActivity?.dftx?.raw).toBeDefined()
 
     const receiverScriptHex = new CScript((fromAddress(to, 'regtest') as DecodedAddress).script).toHex()
     const receiverActivities = await activityV2Mapper.query(HexEncoder.asSHA256(receiverScriptHex), 100)
@@ -82,5 +83,6 @@ describe('any-account-to-account', () => {
     expect(receiverActivity?.tokenId).toStrictEqual(0)
     expect(receiverActivity?.value).toStrictEqual('0.123')
     expect(receiverActivity?.block).toBeDefined()
+    expect(receiverActivity?.dftx?.raw).toBeDefined()
   })
 })

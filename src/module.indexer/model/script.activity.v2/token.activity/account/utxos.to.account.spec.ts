@@ -62,6 +62,7 @@ describe('utxos-to-account', () => {
     expect(newActivity?.tokenId).toStrictEqual(0)
     expect(newActivity?.value).toStrictEqual('1.23')
     expect(newActivity?.block).toBeDefined()
+    expect(newActivity?.dftx?.raw).toBeDefined()
   })
 
   it('multiple output address address should be indexed as under different hid', async () => {
@@ -92,6 +93,7 @@ describe('utxos-to-account', () => {
     expect(dest1Activity?.tokenId).toStrictEqual(0)
     expect(dest1Activity?.value).toStrictEqual('0.1')
     expect(dest1Activity?.block).toBeDefined()
+    expect(dest1Activity?.dftx?.raw).toBeDefined()
 
     const scriptHex2 = new CScript((fromAddress(dest2, 'regtest') as DecodedAddress).script).toHex()
     const dest2Activities = await activityV2Mapper.query(HexEncoder.asSHA256(scriptHex2), 100)
@@ -105,5 +107,6 @@ describe('utxos-to-account', () => {
     expect(dest2Activity?.tokenId).toStrictEqual(0)
     expect(dest2Activity?.value).toStrictEqual('0.2')
     expect(dest2Activity?.block).toBeDefined()
+    expect(dest2Activity?.dftx?.raw).toBeDefined()
   })
 })

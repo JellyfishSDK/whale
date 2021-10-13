@@ -29,19 +29,20 @@ beforeAll(async () => {
   await tokenHelper.mint({ symbol: 'BTC', amount: 100 })
   await mn.generate(1)
 
+  testAddress = await mn.getNewAddress()
+  await tokenHelper.send({ amount: 10, symbol: 'BTC', address: testAddress })
+
   const poolPairHelper = new TestingPoolPair(mn, rpc)
   await poolPairHelper.create({ tokenA: 'DFI', tokenB: 'BTC', pairSymbol: 'DFI-BTC' })
   await mn.generate(1)
-
-  testAddress = await mn.getNewAddress()
   await poolPairHelper.add({
     a: {
       symbol: 'DFI',
-      amount: 100
+      amount: 80
     },
     b: {
       symbol: 'BTC',
-      amount: 100
+      amount: 20
     },
     address: testAddress
   })
@@ -55,19 +56,25 @@ afterAll(async () => {
   await app.close()
 })
 
-describe('remove-liquidity', () => {
+describe('poolswap', () => {
   it('should be indexed each spent token', async () => {
-    await mn.generate(2)
+    await mn.generate(1)
     await waitForIndexedHeight(app, await mn.getBlockCount() - 1, 100000)
     const scriptHex = new CScript((fromAddress(testAddress, 'regtest') as DecodedAddress).script).toHex()
 
     {
       // before
       const activities = await activityV2Mapper.query(HexEncoder.asSHA256(scriptHex), 100)
-      expect(activities.length).toStrictEqual(0)
+      expect(activities.length).toStrictEqual(1)
     }
 
-    const txid = await rpc.poolpair.removePoolLiquidity(testAddress, '1.234@DFI-BTC')
+    const txid = await rpc.poolpair.poolSwap({
+      to: await mn.getNewAddress(),
+      from: testAddress,
+      tokenFrom: 'BTC',
+      amountFrom: 1.2,
+      tokenTo: 'DFI'
+    })
     await mn.generate(2)
     const height = await mn.getBlockCount() - 1
     await waitForIndexedHeight(app, height, 100000)
@@ -75,18 +82,19 @@ describe('remove-liquidity', () => {
     {
       // after
       const activities = await activityV2Mapper.query(HexEncoder.asSHA256(scriptHex), 100)
-      expect(activities.length).toStrictEqual(1)
+      expect(activities.length).toStrictEqual(2)
 
-      const removeLiqActivity = activities[0]
-      expect(removeLiqActivity.dftx?.type).toStrictEqual('spend-remove-liquidity')
-      expect(removeLiqActivity.txid).toStrictEqual(txid)
-      expect(removeLiqActivity?.block).toBeDefined()
-      expect(removeLiqActivity?.category).toStrictEqual('dftx')
-      expect(removeLiqActivity?.value).toStrictEqual('-1.234')
-      expect(removeLiqActivity?.tokenId).toStrictEqual(2)
+      const poolswap = activities.find(a => a.dftx?.type === 'spend-poolswap')
+      expect(poolswap).toBeDefined()
+      expect(poolswap?.txid).toStrictEqual(txid)
+      expect(poolswap?.block).toBeDefined()
+      expect(poolswap?.category).toStrictEqual('dftx')
+      expect(poolswap?.value).toStrictEqual('-1.2')
+      expect(poolswap?.tokenId).toStrictEqual(1) // spent BTC
       const encodedHeight = HexEncoder.encodeHeight(height)
       const activityIndex = HexEncoder.encodeHeight(0)
-      expect(removeLiqActivity?.id).toStrictEqual(`${encodedHeight}${txid}ff${activityIndex}`)
+      expect(poolswap?.id).toStrictEqual(`${encodedHeight}${txid}ff${activityIndex}`)
+      expect(poolswap?.dftx?.raw).toBeDefined()
     }
   })
 })
