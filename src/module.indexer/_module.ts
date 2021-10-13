@@ -14,7 +14,6 @@ import { DfTxIndexerModule } from '@src/module.indexer/model/dftx/_module'
 import { MainDfTxIndexer } from '@src/module.indexer/model/dftx.indexer'
 import { BlockMintedIndexer } from '@src/module.indexer/model/block.minted'
 import { ScriptActivityV2Indexer } from './model/script.activity.v2'
-import { ScriptActivityV2IndexerModule } from './model/script.activity.v2/token.activity/_module'
 
 @Module({
   providers: [
@@ -34,8 +33,7 @@ import { ScriptActivityV2IndexerModule } from './model/script.activity.v2/token.
     ScriptActivityV2Indexer
   ],
   imports: [
-    DfTxIndexerModule,
-    ScriptActivityV2IndexerModule
+    DfTxIndexerModule
   ]
 })
 export class IndexerModule {

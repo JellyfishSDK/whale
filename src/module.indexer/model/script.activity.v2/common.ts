@@ -13,7 +13,7 @@ const categoryHexMap: { [key in Category]: string } = {
 }
 
 /**
- * Construct a standardized script.activity.v2 id across all activity types
+ * Construct a standardized script.activity.v2 id across all activity types for both utxo and dftx activity
  *
  * @param block
  * @param txid

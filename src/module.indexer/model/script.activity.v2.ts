@@ -26,24 +26,17 @@ export class ScriptActivityV2Indexer extends Indexer {
 
   constructor (
     private readonly mapper: ScriptActivityV2Mapper,
-    private readonly voutFinder: VoutFinder,
-    private readonly utxosToAccount: UtxosToAccountIndexer,
-    private readonly accountToUtxos: AccountToUtxosIndexer,
-    private readonly accountToAccount: AccountToAccountIndexer,
-    private readonly anyAccountToAccount: AnyAccountToAccountIndexer,
-    private readonly poolSwap: PoolSwapIndexer,
-    private readonly addLiquidity: AddLiquidityIndexer,
-    private readonly removeLiquidity: RemoveLiquidityIndexer
+    private readonly voutFinder: VoutFinder
   ) {
     super()
     this.indexers = [
-      utxosToAccount,
-      accountToUtxos,
-      accountToAccount,
-      anyAccountToAccount,
-      poolSwap,
-      addLiquidity,
-      removeLiquidity
+      new UtxosToAccountIndexer(mapper),
+      new AccountToUtxosIndexer(mapper),
+      new AccountToAccountIndexer(mapper),
+      new AnyAccountToAccountIndexer(mapper),
+      new PoolSwapIndexer(mapper),
+      new AddLiquidityIndexer(mapper),
+      new RemoveLiquidityIndexer(mapper)
     ]
   }
 
@@ -100,7 +93,6 @@ export class ScriptActivityV2Indexer extends Indexer {
     // dftx
     const transactions = this.getDfTxTransactions(block)
     for (const indexer of this.indexers) {
-      console.log('invalidating', block.height)
       const filtered = transactions.filter(value => value.dftx.type === indexer.OP_CODE)
       await indexer.invalidate(block, filtered)
     }

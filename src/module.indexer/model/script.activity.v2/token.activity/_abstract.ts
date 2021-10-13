@@ -66,7 +66,6 @@ export abstract class TokenActivityIndexer<T> {
   abstract extractTokenActivities (tx: T): Promise<ScriptTokenActivity[]>
 
   mapToScriptActivityV2 (block: RawBlock, dfTx: DfTxTransaction<any>, tokenSA: ScriptTokenActivity, activitySerialNumber: number): ScriptActivityV2 {
-    console.log('mapToScriptActivityV2')
     return {
       id: mapId(block, dfTx.txn.txid, 'dftx', activitySerialNumber),
       hid: HexEncoder.asSHA256(tokenSA.script.hex),
