@@ -17,8 +17,10 @@ export class RemoveLiquidityIndexer extends TokenActivityIndexer<PoolRemoveLiqui
       },
       type: 'spend-remove-liquidity',
       tokenId,
-      value: amount.toFixed()
+      value: amount.negated().toFixed()
     })
+
+    // TODO: compute remove liq result on the fly (required full DEX history indexing)
     return result
 
     // gained token from removed liquidity is not indexed

@@ -18,7 +18,7 @@ export class AccountToUtxosIndexer extends TokenActivityIndexer<AccountToUtxos> 
         },
         type: 'spend-account-to-utxos',
         tokenId: bal.token,
-        value: bal.amount.toFixed()
+        value: bal.amount.negated().toFixed()
       })
     }
     return result

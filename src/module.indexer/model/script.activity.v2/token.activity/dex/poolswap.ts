@@ -17,20 +17,10 @@ export class PoolSwapIndexer extends TokenActivityIndexer<PoolSwap> {
       },
       type: 'spend-poolswap',
       tokenId: poolswap.fromTokenId,
-      value: poolswap.fromAmount.toFixed() // FIME: get via rpc (block may yet existed)
+      value: poolswap.fromAmount.negated().toFixed() // FIME: get via rpc (block may yet existed)
     })
 
-    const receivedAt = new CScript(poolswap.toScript).toHex()
-    result.push({
-      script: {
-        type: 'scripthash',
-        hex: receivedAt
-      },
-      type: 'poolswap-gain',
-      tokenId: poolswap.toTokenId,
-      value: 'null' // FIME: get via rpc (block may yet existed) or estimate using maxprice
-    })
-
+    // TODO: compute poolswap result on the fly (required full DEX history indexing)
     return result
   }
 }

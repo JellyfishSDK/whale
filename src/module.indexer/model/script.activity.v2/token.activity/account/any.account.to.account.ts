@@ -19,7 +19,7 @@ export class AnyAccountToAccountIndexer extends TokenActivityIndexer<AnyAccountT
           },
           type: 'spend-any-account-to-account',
           tokenId: bal.token,
-          value: bal.amount.toFixed()
+          value: bal.amount.negated().toFixed()
         })
       }
     }

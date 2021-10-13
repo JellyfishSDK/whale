@@ -21,7 +21,7 @@ export class AccountToAccountIndexer extends TokenActivityIndexer<AccountToAccou
           },
           type: 'spend-account-to-account',
           tokenId: bal.token,
-          value: bal.amount.toFixed()
+          value: bal.amount.negated().toFixed()
         })
 
         result.push({

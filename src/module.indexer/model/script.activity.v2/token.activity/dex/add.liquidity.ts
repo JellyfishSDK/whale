@@ -7,6 +7,7 @@ export class AddLiquidityIndexer extends TokenActivityIndexer<PoolAddLiquidity> 
   OP_CODE: number = CPoolAddLiquidity.OP_CODE
 
   async extractTokenActivities (addLiquidity: PoolAddLiquidity): Promise<ScriptTokenActivity[]> {
+    console.log('extractTokenActivities', 'add liq')
     const result: ScriptTokenActivity[] = []
 
     for (const { script, balances } of addLiquidity.from) {
@@ -19,21 +20,12 @@ export class AddLiquidityIndexer extends TokenActivityIndexer<PoolAddLiquidity> 
           },
           type: 'spend-add-liquidity',
           tokenId: bal.token,
-          value: bal.amount.toFixed()
+          value: bal.amount.negated().toFixed()
         })
       }
     }
 
-    const receivedAt = new CScript(addLiquidity.shareAddress).toHex()
-    result.push({
-      script: {
-        type: 'scripthash',
-        hex: receivedAt
-      },
-      type: 'add-liquidity-gain',
-      tokenId: -1, // FIXME: get via rpc using spent tokens' symbol?
-      value: 'null' // FIME: get via rpc (block may yet existed)
-    })
+    // TODO: compute add liq result on the fly (required full DEX history indexing)
     return result
   }
 }
