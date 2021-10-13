@@ -85,7 +85,8 @@ describe('add-liquidity', () => {
       expect(addDfiToLiq?.value).toStrictEqual('-0.123')
       expect(addDfiToLiq?.block).toBeDefined()
       expect(addDfiToLiq?.txid).toStrictEqual(txid)
-      expect(addDfiToLiq?.id).toContain(`${height}${txid}ff`) // skipping last part check, it could be 0x00 or 0x01 (HexEncoder)
+      const encodedHeight = HexEncoder.encodeHeight(height)
+      expect(addDfiToLiq?.id).toContain(`${encodedHeight}${txid}ff`) // skipping last part check, it could be 0x00 or 0x01 (HexEncoder)
       expect(addDfiToLiq?.dftx?.raw).toBeDefined()
 
       const addBtcToLiq = addLiqActivitites.find(a => a.tokenId === 1)
@@ -94,7 +95,7 @@ describe('add-liquidity', () => {
       expect(addBtcToLiq?.value).toStrictEqual('-0.123')
       expect(addBtcToLiq?.block).toBeDefined()
       expect(addBtcToLiq?.txid).toStrictEqual(txid)
-      expect(addBtcToLiq?.id).toContain(`${height}${txid}ff`) // skipping last part check, it could be 0x00 or 0x01 (HexEncoder)
+      expect(addBtcToLiq?.id).toContain(`${encodedHeight}${txid}ff`) // skipping last part check, it could be 0x00 or 0x01 (HexEncoder)
       expect(addBtcToLiq?.dftx?.raw).toBeDefined()
     }
   })
