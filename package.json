@@ -36,7 +36,7 @@
     "@nestjs/common": "^8.0.11",
     "@nestjs/config": "^1.0.2",
     "@nestjs/core": "^8.0.11",
-    "@nestjs/platform-fastify": "^8.0.11",
+    "@nestjs/platform-fastify": "^8.1.0",
     "@nestjs/schedule": "^1.0.1",
     "@nestjs/terminus": "^8.0.1",
     "async-mutex": "^0.3.1",
