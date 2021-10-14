@@ -10,10 +10,6 @@ let service: StubService
 let client: WhaleApiClient
 
 let address1: string
-let address2: string
-let address3: string
-let address4: string
-
 let vaultId1: string
 
 beforeAll(async () => {
@@ -22,6 +18,7 @@ beforeAll(async () => {
   client = new StubWhaleApiClient(service)
 
   await container.start()
+  await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
   await service.start()
 
@@ -33,14 +30,9 @@ beforeAll(async () => {
     interestRate: new BigNumber(2.5),
     id: 'default'
   })
-
   await testing.generate(1)
 
   address1 = await testing.generateAddress()
-  address2 = await testing.generateAddress()
-  address3 = await testing.generateAddress()
-  address4 = await testing.generateAddress()
-
   vaultId1 = await testing.rpc.loan.createVault({
     ownerAddress: address1,
     loanSchemeId: 'default'
@@ -48,19 +40,19 @@ beforeAll(async () => {
   await testing.generate(1)
 
   await testing.rpc.loan.createVault({
-    ownerAddress: address2,
+    ownerAddress: await testing.generateAddress(),
     loanSchemeId: 'default'
   })
   await testing.generate(1)
 
   await testing.rpc.loan.createVault({
-    ownerAddress: address3,
+    ownerAddress: await testing.generateAddress(),
     loanSchemeId: 'default'
   })
   await testing.generate(1)
 
   await testing.rpc.loan.createVault({
-    ownerAddress: address4,
+    ownerAddress: await testing.generateAddress(),
     loanSchemeId: 'default'
   })
   await testing.generate(1)
@@ -76,48 +68,40 @@ afterAll(async () => {
 
 describe('list', () => {
   it('should listVaults', async () => {
-    const result = await client.loanVault.list()
-    console.log(result)
-    // expect(result.length).toStrictEqual(4)
+    const result = await client.loanVault.list(20)
+    expect(result.length).toStrictEqual(4)
   })
 
   it('should listTokens with pagination', async () => {
+    const list = await client.loanVault.list(20)
+    const vaultId0 = list[0].vaultId
+    const vaultId1 = list[1].vaultId
+    const vaultId2 = list[2].vaultId
+    const vaultId3 = list[3].vaultId
+
     const first = await client.loanVault.list(2)
-    console.log(first)
-    //
-    // const vaultId0 = list.data[0].vaultId
-    // const vaultId1 = list.data[1].vaultId
-    // const vaultId2 = list.data[2].vaultId
-    // const vaultId3 = list.data[3].vaultId
-    //
-    // const first = await controller.list(
-    //   container,
-    //   { size: 2 }
-    // )
-    //
-    // expect(first.length).toStrictEqual(2)
-    // expect(first.hasNext).toStrictEqual(true)
-    // expect(first.nextToken).toStrictEqual('1')
-    //
-    // expect(first[0]).toStrictEqual(vaultId0)
-    // expect(first[1]).toStrictEqual(vaultId1)
-    //
-    // const next = await client.paginate(first)
-    //
-    // expect(next.length).toStrictEqual(2)
-    // expect(next.hasNext).toStrictEqual(true)
-    // expect(next.nextToken).toStrictEqual('1')
-    //
-    // expect(next[0]).toStrictEqual(vaultId2)
-    // expect(next[1]).toStrictEqual(vaultId3)
-    //
-    // const last = await controller.list(container,{
-    //   size: 2,
-    //   next: next.page?.next
-    // })
-    //
-    // expect(last.data.length).toStrictEqual(0)
-    // expect(last.page).toBeUndefined()
+
+    expect(first.length).toStrictEqual(2)
+    expect(first.hasNext).toStrictEqual(true)
+    expect(first.nextToken).toStrictEqual(vaultId1)
+
+    expect(first[0].vaultId).toStrictEqual(vaultId0)
+    expect(first[1].vaultId).toStrictEqual(vaultId1)
+
+    const next = await client.paginate(first)
+
+    expect(next.length).toStrictEqual(2)
+    expect(next.hasNext).toStrictEqual(true)
+    expect(next.nextToken).toStrictEqual(vaultId3)
+
+    expect(next[0].vaultId).toStrictEqual(vaultId2)
+    expect(next[1].vaultId).toStrictEqual(vaultId3)
+
+    const last = await client.paginate(next)
+
+    expect(last.length).toStrictEqual(0)
+    expect(last.hasNext).toStrictEqual(false)
+    expect(last.nextToken).toBeUndefined()
   })
 })
 
@@ -125,6 +109,7 @@ describe('get', () => {
   it('should get vault by vault id', async () => {
     const data = await client.loanVault.get(vaultId1)
     expect(data).toStrictEqual({
+      vaultId: vaultId1,
       loanSchemeId: 'default',
       ownerAddress: address1,
       isUnderLiquidation: false,

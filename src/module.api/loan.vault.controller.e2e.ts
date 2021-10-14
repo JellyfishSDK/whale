@@ -11,10 +11,6 @@ let app: NestFastifyApplication
 let controller: LoanVaultController
 
 let address1: string
-let address2: string
-let address3: string
-let address4: string
-
 let vaultId1: string
 
 beforeAll(async () => {
@@ -34,14 +30,9 @@ beforeAll(async () => {
     interestRate: new BigNumber(2.5),
     id: 'default'
   })
-
   await testing.generate(1)
 
   address1 = await testing.generateAddress()
-  address2 = await testing.generateAddress()
-  address3 = await testing.generateAddress()
-  address4 = await testing.generateAddress()
-
   vaultId1 = await testing.rpc.loan.createVault({
     ownerAddress: address1,
     loanSchemeId: 'default'
@@ -49,19 +40,19 @@ beforeAll(async () => {
   await testing.generate(1)
 
   await testing.rpc.loan.createVault({
-    ownerAddress: address2,
+    ownerAddress: await testing.generateAddress(),
     loanSchemeId: 'default'
   })
   await testing.generate(1)
 
   await testing.rpc.loan.createVault({
-    ownerAddress: address3,
+    ownerAddress: await testing.generateAddress(),
     loanSchemeId: 'default'
   })
   await testing.generate(1)
 
   await testing.rpc.loan.createVault({
-    ownerAddress: address4,
+    ownerAddress: await testing.generateAddress(),
     loanSchemeId: 'default'
   })
   await testing.generate(1)
@@ -74,7 +65,6 @@ afterAll(async () => {
 describe('loan', () => {
   it('should listVaults', async () => {
     const result = await controller.list(
-      container,
       { size: 100 }
     )
     expect(result.data.length).toStrictEqual(4)
@@ -82,7 +72,6 @@ describe('loan', () => {
 
   it('should listVaults with pagination', async () => {
     const list = await controller.list(
-      container,
       { size: 4 }
     )
 
@@ -92,7 +81,6 @@ describe('loan', () => {
     const vaultId3 = list.data[3].vaultId
 
     const first = await controller.list(
-      container,
       { size: 2 }
     )
 
@@ -102,7 +90,7 @@ describe('loan', () => {
     expect(first.data[0].vaultId).toStrictEqual(vaultId0)
     expect(first.data[1].vaultId).toStrictEqual(vaultId1)
 
-    const next = await controller.list(container, {
+    const next = await controller.list({
       size: 2,
       next: first.page?.next
     })
@@ -113,7 +101,7 @@ describe('loan', () => {
     expect(next.data[0].vaultId).toStrictEqual(vaultId2)
     expect(next.data[1].vaultId).toStrictEqual(vaultId3)
 
-    const last = await controller.list(container, {
+    const last = await controller.list({
       size: 2,
       next: next.page?.next
     })
@@ -123,7 +111,7 @@ describe('loan', () => {
   })
 
   it('should listVaults with an empty object if size 100 next 49c32b29bf139bfc8cc7663911721f8b468dfba939a26a89d2b69e654e740bbc which is out of range', async () => {
-    const result = await controller.list(container, { size: 100, next: '49c32b29bf139bfc8cc7663911721f8b468dfba939a26a89d2b69e654e740bbc' })
+    const result = await controller.list({ size: 100, next: '49c32b29bf139bfc8cc7663911721f8b468dfba939a26a89d2b69e654e740bbc' })
     expect(result.data.length).toStrictEqual(0)
     expect(result.page).toBeUndefined()
   })

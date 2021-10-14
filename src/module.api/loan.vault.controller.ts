@@ -4,7 +4,6 @@ import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { VaultPagination } from '@defichain/jellyfish-api-core/dist/category/loan'
 import BigNumber from 'bignumber.js'
-import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 
 @Controller('/loans/vaults')
 export class LoanVaultController {
@@ -20,37 +19,19 @@ export class LoanVaultController {
    * @param isUnderLiquidation
    * @return {Promise<ApiPagedResponse<VaultDetails>>}
    */
-  // @Get('/vaults/:owneraddress/:loanschemeId/:isunderliquidation')
   @Get('')
   async list (
-    container: MasterNodeRegTestContainer,
     @Query() query: PaginationQuery
-    // @Param('owneraddress') ownerAddress?: string,
-    // @Param('loanschemeId') loanSchemeId?: string,
-    // @Param('isunderliquidation') isUnderLiquidation?: boolean
   ): Promise<ApiPagedResponse<VaultDetails>> {
-    // const options: ListVaultOptions = {
-    //   ownerAddress,
-    //   loanSchemeId,
-    //   isUnderLiquidation
-    // }
-
     const pagination: VaultPagination = {
       start: query.next !== undefined ? String(query.next) : undefined,
-      // including_start: query.next === undefined,
       limit: query.size
     }
 
-    const data: VaultDetails = await container.call('listvaults', [
-      // options,
-      {},
-      pagination
-    ])
-
-    const vaults: any[] = Object.entries(data)
-      .map(([id, value]): Vault => {
-        return value
-      })
+    const vaults = await this.client.loan.listVaults(
+      pagination,
+      {}
+    )
 
     return ApiPagedResponse.of(vaults, query.size, item => {
       return item.vaultId
