@@ -1,8 +1,10 @@
-import { BadRequestException, Controller, Get, NotFoundException, Param } from '@nestjs/common'
+import { BadRequestException, Controller, Get, NotFoundException, Param, Query } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
-// import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
-// import { PaginationQuery } from '@src/module.api/_core/api.query'
-import { VaultDetails } from '@defichain/jellyfish-api-core/dist/category/loan'
+import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
+import { PaginationQuery } from '@src/module.api/_core/api.query'
+import { ListVaultOptions, VaultPagination } from '@defichain/jellyfish-api-core/dist/category/loan'
+import BigNumber from 'bignumber.js'
+import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 
 @Controller('/loan')
 export class LoanController {
@@ -10,40 +12,47 @@ export class LoanController {
   }
 
   /**
-   * Paginate loan schemes.
+   * Paginate loan vaults.
    *
    * @param {PaginationQuery} query
-   * @return {Promise<ApiPagedResponse<LoanSchemeResult>>}
+   * @param ownerAddress
+   * @param loanSchemeId
+   * @param isUnderLiquidation
+   * @return {Promise<ApiPagedResponse<VaultDetails>>}
    */
-  // @Get('/vaults')
-  // async list (
-  //   @Query() query: PaginationQuery
-  // ): Promise<ApiPagedResponse<LoanSchemeResult>> {
-  // const data = await this.client.loan.listVaults()
-  // const result = await data.sort(a => Number.parseInt(a.id))
+  @Get('/vaults/:owneraddress/:loanschemeId/:isunderliquidation')
+  async list (
+    container: MasterNodeRegTestContainer,
+    @Query() query: PaginationQuery,
+    @Param('owneraddress') ownerAddress?: string,
+    @Param('loanschemeId') loanSchemeId?: string,
+    @Param('isunderliquidation') isUnderLiquidation?: boolean
+  ): Promise<any> {
+    const options: ListVaultOptions = {
+      ownerAddress,
+      loanSchemeId,
+      isUnderLiquidation
+    }
 
-  // const data:any = []
-  // const result = await data.sort((a: { id: string; }) => Number.parseInt(a.id))
-  //
-  // let nextIndex = 0
-  //
-  // if(query.next){
-  //   //const findIndex = data.findIndex(data => data.id === query.next)
-  //   const findIndex = data.findIndex((data: { id: string | undefined; }) => data.id === query.next)
-  //   if(findIndex > 0){
-  //     nextIndex = findIndex + 1
-  //   } else {
-  //     nextIndex = result.length
-  //   }
-  // }
-  //
-  // const schemes = result.slice(nextIndex, nextIndex + query.size)
-  // return ApiPagedResponse.of(schemes, query.size, item => {
-  //   return item.id
-  // })
+    const pagination: VaultPagination = {
+      start: query.next !== undefined ? String(query.next) : undefined,
+      including_start: query.next === undefined,
+      limit: query.size
+    }
 
-  //   return null
-  // }
+    const data: VaultDetails = await container.call('listvaults', [
+      options, pagination
+    ])
+
+    const vaults: any[] = Object.entries(data)
+      .map(([id, value]): Vault => {
+        return value
+      })
+      .sort((a, b) => a.ownerAddress.localeCompare(b.ownerAddress))
+    return ApiPagedResponse.of(vaults, query.size, item => {
+      return item.ownerAddress
+    })
+  }
 
   /**
    * Get information about a vault with vault id.
@@ -66,4 +75,42 @@ export class LoanController {
       }
     }
   }
+}
+
+// function mapVaultData (
+//   vault: Vault
+// ): any {
+//   return {
+//     vaultId: vault.vaultId,
+//     ownerAddress: vault.ownerAddress,
+//     loanSchemeId: vault.loanSchemeId,
+//     isUnderLiquidation: vault.isUnderLiquidation
+//   }
+// }
+
+export interface Vault {
+  id: string
+  vaultId: string
+  ownerAddress: string
+  loanSchemeId: string
+  isUnderLiquidation: boolean
+}
+
+export interface VaultDetails {
+  vaultId: string
+  loanSchemeId: string
+  ownerAddress: string
+  isUnderLiquidation: boolean
+  batches?: AuctionBatchDetails[]
+  collateralAmounts?: string[]
+  loanAmount?: string[]
+  collateralValue?: BigNumber
+  loanValue?: BigNumber
+  currentRatio?: BigNumber
+}
+
+export interface AuctionBatchDetails {
+  index: BigNumber
+  collaterals: string[]
+  loan: string
 }
