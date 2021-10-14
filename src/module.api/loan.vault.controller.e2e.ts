@@ -2,13 +2,13 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import BigNumber from 'bignumber.js'
 import { LoanMasterNodeRegTestContainer } from '@src/module.api/loan_container'
-import { LoanController, VaultDetails } from '@src/module.api/loan.controller'
+import { LoanVaultController } from '@src/module.api/loan.vault.controller'
 import { NotFoundException } from '@nestjs/common'
 import { Testing } from '@defichain/jellyfish-testing'
 
 const container = new LoanMasterNodeRegTestContainer()
 let app: NestFastifyApplication
-let controller: LoanController
+let controller: LoanVaultController
 
 let address1: string
 let address2: string
@@ -16,9 +16,6 @@ let address3: string
 let address4: string
 
 let vaultId1: string
-// let vaultId2: string
-// let vaultId3: string
-// let vaultId4: string
 
 beforeAll(async () => {
   await container.start()
@@ -26,7 +23,7 @@ beforeAll(async () => {
   await container.waitForWalletBalanceGTE(100)
 
   app = await createTestingApp(container)
-  controller = app.get(LoanController)
+  controller = app.get(LoanVaultController)
 
   await waitForIndexedHeight(app, 100)
   const testing = Testing.create(container)
@@ -45,28 +42,24 @@ beforeAll(async () => {
   address3 = await testing.generateAddress()
   address4 = await testing.generateAddress()
 
-  // vaultId1 =
-  await testing.rpc.loan.createVault({
+  vaultId1 = await testing.rpc.loan.createVault({
     ownerAddress: address1,
     loanSchemeId: 'default'
   })
   await testing.generate(1)
 
-  // vaultId2 =
   await testing.rpc.loan.createVault({
     ownerAddress: address2,
     loanSchemeId: 'default'
   })
   await testing.generate(1)
 
-  // vaultId3 =
   await testing.rpc.loan.createVault({
     ownerAddress: address3,
     loanSchemeId: 'default'
   })
   await testing.generate(1)
 
-  // vaultId4 =
   await testing.rpc.loan.createVault({
     ownerAddress: address4,
     loanSchemeId: 'default'
@@ -78,76 +71,59 @@ afterAll(async () => {
   await stopTestingApp(container, app)
 })
 
-// const result = await controller.list(
-//   container,
-//   {
-//     next: vaultId1,
-//     size: 100
-//   },
-//   undefined, //address1,
-//   undefined, //'default',
-//   false)
-
 describe('loan', () => {
   it('should listVaults', async () => {
-    const data: VaultDetails = await container.call('listvaults', [
-    ])
-
-    console.log(data)
-  //
-  //   const result = await controller.list(
-  //     container,
-  //     { size: 100 }
-  //   )
-  //
-  //   console.log(result)
-  // })
-  //
-  // it('should listVaults with pagination', async () => {
-  //   const list = await controller.list(
-  //     container,
-  //     { size: 4 }
-  //   )
-  //
-  //   const vaultId0 = list.data[0].vaultId
-  //   const vaultId1 = list.data[1].vaultId
-  //   const vaultId2 = list.data[2].vaultId
-  //   const vaultId3 = list.data[3].vaultId
-  //
-  //   const first = await controller.list(
-  //     container,
-  //     { size: 2 }
-  //   )
-  //
-  //   expect(first.data.length).toStrictEqual(2)
-  //   expect(first.page?.next).toStrictEqual(vaultId1)
-  //
-  //   expect(first.data[0].vaultId).toStrictEqual(vaultId0)
-  //   expect(first.data[1].vaultId).toStrictEqual(vaultId1)
-  //
-  //   const next = await controller.list(container,{
-  //     size: 2,
-  //     next: first.page?.next
-  //   })
-  //
-  //   expect(next.data.length).toStrictEqual(2)
-  //   expect(next.page?.next).toStrictEqual(vaultId3)
-  //
-  //   expect(next.data[0].vaultId).toStrictEqual(vaultId2)
-  //   expect(next.data[1].vaultId).toStrictEqual(vaultId3)
-  //
-  //   const last = await controller.list(container,{
-  //     size: 2,
-  //     next: next.page?.next
-  //   })
-  //
-  //   expect(last.data.length).toStrictEqual(0)
-  //   expect(last.page).toBeUndefined()
+    const result = await controller.list(
+      container,
+      { size: 100 }
+    )
+    expect(result.data.length).toStrictEqual(4)
   })
 
-  it('should listVaults with an empty object if size 100 next 300 which is out of range', async () => {
-    const result = await controller.list(container, { size: 100, next: '300' })
+  it('should listVaults with pagination', async () => {
+    const list = await controller.list(
+      container,
+      { size: 4 }
+    )
 
+    const vaultId0 = list.data[0].vaultId
+    const vaultId1 = list.data[1].vaultId
+    const vaultId2 = list.data[2].vaultId
+    const vaultId3 = list.data[3].vaultId
+
+    const first = await controller.list(
+      container,
+      { size: 2 }
+    )
+
+    expect(first.data.length).toStrictEqual(2)
+    expect(first.page?.next).toStrictEqual(vaultId1)
+
+    expect(first.data[0].vaultId).toStrictEqual(vaultId0)
+    expect(first.data[1].vaultId).toStrictEqual(vaultId1)
+
+    const next = await controller.list(container, {
+      size: 2,
+      next: first.page?.next
+    })
+
+    expect(next.data.length).toStrictEqual(2)
+    expect(next.page?.next).toStrictEqual(vaultId3)
+
+    expect(next.data[0].vaultId).toStrictEqual(vaultId2)
+    expect(next.data[1].vaultId).toStrictEqual(vaultId3)
+
+    const last = await controller.list(container, {
+      size: 2,
+      next: next.page?.next
+    })
+
+    expect(last.data.length).toStrictEqual(0)
+    expect(last.page).toBeUndefined()
+  })
+
+  it('should listVaults with an empty object if size 100 next 49c32b29bf139bfc8cc7663911721f8b468dfba939a26a89d2b69e654e740bbc which is out of range', async () => {
+    const result = await controller.list(container, { size: 100, next: '49c32b29bf139bfc8cc7663911721f8b468dfba939a26a89d2b69e654e740bbc' })
     expect(result.data.length).toStrictEqual(0)
     expect(result.page).toBeUndefined()
   })
