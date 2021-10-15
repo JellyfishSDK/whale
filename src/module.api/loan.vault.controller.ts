@@ -25,7 +25,7 @@ export class LoanVaultController {
   ): Promise<ApiPagedResponse<VaultDetails>> {
     const pagination: VaultPagination = {
       start: query.next !== undefined ? String(query.next) : undefined,
-      including_start: query.next === undefined,
+      // including_start: query.next === undefined,
       limit: query.size
     }
 
