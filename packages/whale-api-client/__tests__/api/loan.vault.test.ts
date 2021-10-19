@@ -67,19 +67,42 @@ afterAll(async () => {
 })
 
 describe('list', () => {
-  it('should listVaults', async () => {
-    const result = await client.loanVault.list(20)
+  it('should listVaults with size', async () => {
+    const result = await client.loanVault.list('', '', 'false', 20)
     expect(result.length).toStrictEqual(4)
   })
 
-  it('should listTokens with pagination', async () => {
-    const list = await client.loanVault.list(20)
+  it('should listVaults with size and ownerAddress', async () => {
+    const result = await client.loanVault.list(address1, '', 'false', 20)
+    expect(result.length).toStrictEqual(1)
+    expect(result[0].ownerAddress).toStrictEqual(address1)
+  })
+
+  it('should listVaults with size and loanSchemeId', async () => {
+    {
+      const result = await client.loanVault.list('', 'default', 'false', 20)
+      expect(result.length).toStrictEqual(4)
+    }
+
+    {
+      const result = await client.loanVault.list('', 'scheme', 'false', 20)
+      expect(result.length).toStrictEqual(0)
+    }
+  })
+
+  it('should listVaults with size and isUnderLiquidation parameter = true', async () => {
+    const result = await client.loanVault.list('', '', 'true', 20)
+    expect(result.length).toStrictEqual(0)
+  })
+
+  it('should listTokens with size and pagination', async () => {
+    const list = await client.loanVault.list('', '', 'false', 20)
     const vaultId0 = list[0].vaultId
     const vaultId1 = list[1].vaultId
     const vaultId2 = list[2].vaultId
     const vaultId3 = list[3].vaultId
 
-    const first = await client.loanVault.list(2)
+    const first = await client.loanVault.list('', '', 'false', 2)
 
     expect(first.length).toStrictEqual(2)
     expect(first.hasNext).toStrictEqual(true)

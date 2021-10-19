@@ -19,9 +19,12 @@ export class LoanVaultController {
    * @param isUnderLiquidation
    * @return {Promise<ApiPagedResponse<VaultDetails>>}
    */
-  @Get('')
+  @Get('/:owneraddress/:loanschemeid/:isunderliquidation')
   async list (
-    @Query() query: PaginationQuery
+    @Param('owneraddress') ownerAddress: string | undefined,
+      @Param('loanschemeid') loanSchemeId: string | undefined,
+      @Param('isunderliquidation') isUnderLiquidation: boolean,
+      @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<VaultDetails>> {
     const pagination: VaultPagination = {
       start: query.next !== undefined ? String(query.next) : undefined,
@@ -29,9 +32,12 @@ export class LoanVaultController {
       limit: query.size
     }
 
+    if (ownerAddress === '') ownerAddress = undefined
+    if (loanSchemeId === '') loanSchemeId = undefined
+
     const vaults = await this.client.loan.listVaults(
       pagination,
-      {}
+      { ownerAddress, loanSchemeId, isUnderLiquidation }
     )
 
     return ApiPagedResponse.of(vaults, query.size, item => {
@@ -59,25 +65,6 @@ export class LoanVaultController {
       }
     }
   }
-}
-
-// function mapVaultData (
-//   vault: Vault
-// ): any {
-//   return {
-//     vaultId: vault.vaultId,
-//     ownerAddress: vault.ownerAddress,
-//     loanSchemeId: vault.loanSchemeId,
-//     isUnderLiquidation: vault.isUnderLiquidation
-//   }
-// }
-
-export interface Vault {
-  id: string
-  vaultId: string
-  ownerAddress: string
-  loanSchemeId: string
-  isUnderLiquidation: boolean
 }
 
 export interface VaultDetails {

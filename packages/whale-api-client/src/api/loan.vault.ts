@@ -11,10 +11,13 @@ export class LoanVault {
    *
    * @param {number} size of vaults to query
    * @param {string} next set of vaults
+   * @param {string} ownerAddress
+   * @param {string} loanSchemeId
+   * @param {boolean} isUnderLiquidation
    * @return {Promise<ApiPagedResponse<VaultDetails>>}
    */
-  async list (size: number = 30, next?: string): Promise<ApiPagedResponse<VaultDetails>> {
-    return await this.client.requestList('GET', 'loans/vaults', size, next)
+  async list (ownerAddress: string, loanSchemeId: string, isUnderLiquidation: string, size: number = 30, next?: string): Promise<ApiPagedResponse<VaultDetails>> {
+    return await this.client.requestList('GET', `loans/vaults/${ownerAddress}/${loanSchemeId}/${isUnderLiquidation}`, size, next)
   }
 
   /**
