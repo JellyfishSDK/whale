@@ -55,7 +55,7 @@ export interface OraclePriceActive extends Model {
       total: number
     }
   }
-  next: {
+  next?: {
     amount: string
     weightage: number
     oracles: {

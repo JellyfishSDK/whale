@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
-import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
+import { OraclePriceActive, OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
 import { PriceTickerMapper } from '@src/module.model/price.ticker'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
@@ -8,6 +8,7 @@ import BigNumber from 'bignumber.js'
 
 const DEVIATION_THRESHOLD = 0.3
 const BLOCK_INTERVAL = 120
+const MINIMUM_LIVE_ORACLES = 2
 
 @Injectable()
 export class ActivePriceIndexer extends Indexer {
@@ -31,21 +32,21 @@ export class ActivePriceIndexer extends Indexer {
         continue
       }
 
-      const nextPrice = aggregatedPrice[0].aggregated
+      let nextPrice
+      if (this.isAggregateValid(aggregatedPrice[0].aggregated)) {
+        nextPrice = aggregatedPrice[0].aggregated
+      }
+
       let activePrice
       const previous = await this.activePriceMapper.query(ticker.id, 1)
-      if (previous.length > 0 && previous[0].next !== undefined) {
-        if (previous[0].next === previous[0].active && previous[0].next.amount === nextPrice.amount) {
-          continue
-        }
-
-        activePrice = previous[0].next
+      if (previous.length > 0) {
+        activePrice = previous[0].next !== undefined ? previous[0].next : previous[0].active
       }
 
       await this.activePriceMapper.put({
         id: `${ticker.id}-${block.height}`,
         key: ticker.id,
-        valid: activePrice !== undefined && this.isValid(new BigNumber(activePrice.amount), new BigNumber(nextPrice.amount)),
+        valid: this.isValid(activePrice, nextPrice),
         block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
         active: activePrice,
         next: nextPrice,
@@ -54,10 +55,23 @@ export class ActivePriceIndexer extends Indexer {
     }
   }
 
-  isValid (active: BigNumber, next: BigNumber): boolean {
-    return active.gt(0) &&
-            next.gt(0) &&
-            next.minus(active).abs().lt(active.times(DEVIATION_THRESHOLD))
+  isValid (active: OraclePriceActive['active'], next: OraclePriceActive['next']): boolean {
+    if (active === undefined || next === undefined) {
+      return false
+    }
+
+    const activePrice = new BigNumber(active.amount)
+    const nextPrice = new BigNumber(next.amount)
+
+    return activePrice.gt(0) &&
+            nextPrice.gt(0) &&
+            nextPrice.minus(activePrice).abs().lt(activePrice.times(DEVIATION_THRESHOLD))
+  }
+
+  isAggregateValid (aggregate: OraclePriceActive['next']): boolean {
+    return aggregate?.oracles !== undefined &&
+            aggregate?.oracles.active >= MINIMUM_LIVE_ORACLES &&
+            aggregate?.weightage > 0
   }
 
   async invalidate (block: RawBlock): Promise<void> {
