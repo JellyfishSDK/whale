@@ -47,8 +47,23 @@ export interface OraclePriceActive extends Model {
   key: string // --------| token-currency
   sort: string // -------| medianTime-height
 
-  active: string
-  next: string
+  active?: {
+    amount: string
+    weightage: number
+    oracles: {
+      active: number
+      total: number
+    }
+  }
+  next: {
+    amount: string
+    weightage: number
+    oracles: {
+      active: number
+      total: number
+    }
+  }
+
   valid: boolean
 
   block: {

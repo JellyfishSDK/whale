@@ -165,8 +165,22 @@ export interface ActivePrice {
   key: string
   sort: string
 
-  active: string
-  next: string
+  active?: {
+    amount: string
+    weightage: number
+    oracles: {
+      active: number
+      total: number
+    }
+  }
+  next: {
+    amount: string
+    weightage: number
+    oracles: {
+      active: number
+      total: number
+    }
+  }
   valid: boolean
 
   block: {

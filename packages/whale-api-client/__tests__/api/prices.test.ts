@@ -352,9 +352,14 @@ describe('active price', () => {
     }
   })
 
-  it('should get active price', async () => {
+  it('should get active price with 2 active oracles', async () => {
     const address = await container.getNewAddress()
     const oracleId = await client.oracle.appointOracle(address, [
+      { token: 'S1', currency: 'USD' }
+    ], {
+      weightage: 1
+    })
+    const oracleId2 = await client.oracle.appointOracle(address, [
       { token: 'S1', currency: 'USD' }
     ], {
       weightage: 1
@@ -380,6 +385,11 @@ describe('active price', () => {
           { tokenAmount: `${price}@S1`, currency: 'USD' }
         ]
       })
+      await client.oracle.setOracleData(oracleId2, timeNow + 5 * 60 - 1, {
+        prices: [
+          { tokenAmount: `${price}@S1`, currency: 'USD' }
+        ]
+      })
       await client.call('setmocktime', [mockTime], 'number')
       await container.generate(1)
     }
@@ -392,7 +402,6 @@ describe('active price', () => {
 
     const activePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
     expect(activePrice[0]).toStrictEqual({
-      active: '0.00000000',
       block: {
         hash: expect.any(String),
         height: 120,
@@ -401,7 +410,14 @@ describe('active price', () => {
       },
       id: 'S1-USD-120',
       key: 'S1-USD',
-      next: '10.00000000',
+      next: {
+        amount: '10.00000000',
+        oracles: {
+          active: 2,
+          total: 2
+        },
+        weightage: 2
+      },
       sort: expect.any(String),
       valid: false
     })
@@ -415,7 +431,14 @@ describe('active price', () => {
 
     const nextActivePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
     expect(nextActivePrice[0]).toStrictEqual({
-      active: '10.00000000',
+      active: {
+        amount: '10.00000000',
+        oracles: {
+          active: 2,
+          total: 2
+        },
+        weightage: 2
+      },
       block: {
         hash: expect.any(String),
         height: 240,
@@ -424,7 +447,14 @@ describe('active price', () => {
       },
       id: 'S1-USD-240',
       key: 'S1-USD',
-      next: '12.00000000',
+      next: {
+        amount: '12.00000000',
+        oracles: {
+          active: 2,
+          total: 2
+        },
+        weightage: 2
+      },
       sort: expect.any(String),
       valid: true
     })

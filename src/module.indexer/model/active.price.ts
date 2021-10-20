@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
-import { PriceTicker, PriceTickerMapper } from '@src/module.model/price.ticker'
+import { PriceTickerMapper } from '@src/module.model/price.ticker'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import BigNumber from 'bignumber.js'
 
@@ -20,42 +20,37 @@ export class ActivePriceIndexer extends Indexer {
   }
 
   async index (block: RawBlock): Promise<void> {
-    if (block.height % BLOCK_INTERVAL === 0) {
-      const tickers: PriceTicker[] = []
-      let response = await this.priceTickerMapper.query(100)
-      tickers.push(...response)
-      while (response.length > 0) {
-        response = await this.priceTickerMapper.query(100, response[response.length - 1].sort)
-        tickers.push(...response)
+    if (block.height % BLOCK_INTERVAL !== 0) {
+      return
+    }
+
+    const tickers = await this.priceTickerMapper.query(Number.MAX_SAFE_INTEGER)
+    for (const ticker of tickers) {
+      const aggregatedPrice = await this.aggregatedMapper.query(ticker.id, 1)
+      if (aggregatedPrice.length < 1) {
+        continue
       }
 
-      for (const ticker of tickers) {
-        const aggregatedPrice = await this.aggregatedMapper.query(ticker.id, 1)
-        if (aggregatedPrice.length < 1) {
+      const nextPrice = aggregatedPrice[0].aggregated
+      let activePrice
+      const previous = await this.activePriceMapper.query(ticker.id, 1)
+      if (previous.length > 0 && previous[0].next !== undefined) {
+        if (previous[0].next === previous[0].active && previous[0].next.amount === nextPrice.amount) {
           continue
         }
 
-        const nextPrice = aggregatedPrice[0].aggregated.amount
-        let activePrice = (0).toFixed(8)
-        const previous = await this.activePriceMapper.query(ticker.id, 1)
-        if (previous.length > 0) {
-          if (previous[0].next === previous[0].active && previous[0].next === nextPrice) {
-            continue
-          }
-
-          activePrice = previous[0].next
-        }
-
-        await this.activePriceMapper.put({
-          id: `${ticker.id}-${block.height}`,
-          key: ticker.id,
-          valid: this.isValid(new BigNumber(activePrice), new BigNumber(nextPrice)),
-          block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
-          active: activePrice,
-          next: nextPrice,
-          sort: HexEncoder.encodeHeight(block.mediantime) + HexEncoder.encodeHeight(block.height)
-        })
+        activePrice = previous[0].next
       }
+
+      await this.activePriceMapper.put({
+        id: `${ticker.id}-${block.height}`,
+        key: ticker.id,
+        valid: activePrice !== undefined && this.isValid(new BigNumber(activePrice.amount), new BigNumber(nextPrice.amount)),
+        block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
+        active: activePrice,
+        next: nextPrice,
+        sort: HexEncoder.encodeHeight(block.mediantime) + HexEncoder.encodeHeight(block.height)
+      })
     }
   }
 
@@ -66,13 +61,11 @@ export class ActivePriceIndexer extends Indexer {
   }
 
   async invalidate (block: RawBlock): Promise<void> {
-    const tickers: PriceTicker[] = []
-    let response = await this.priceTickerMapper.query(100)
-    tickers.push(...response)
-    while (response.length > 0) {
-      response = await this.priceTickerMapper.query(100, response[response.length - 1].sort)
-      tickers.push(...response)
+    if (block.height % BLOCK_INTERVAL !== 0) {
+      return
     }
+
+    const tickers = await this.priceTickerMapper.query(Number.MAX_SAFE_INTEGER)
     for (const ticker of tickers) {
       await this.activePriceMapper.delete(`${ticker.id}-${block.height}`)
     }
