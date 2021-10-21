@@ -68,7 +68,7 @@
     "@types/memdown": "^3.0.0",
     "@types/node": "^14.14.36",
     "@types/subleveldown": "^4.1.1",
-    "husky": "^7.0.1",
+    "husky": "^7.0.4",
     "jest": "^27.0.6",
     "lerna": "^4.0.0",
     "lint-staged": "^11.2.3",
