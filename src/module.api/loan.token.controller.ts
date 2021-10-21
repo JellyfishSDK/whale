@@ -1,10 +1,11 @@
-import { Controller, Get, Query } from '@nestjs/common'
+import { BadRequestException, Controller, Get, NotFoundException, Param, Query } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import BigNumber from 'bignumber.js'
 import { LoanData } from '@whale-api-client/api/loan.token'
+import { LoanMasterNodeRegTestContainer } from '@src/module.api/loan_container'
 
 @Controller('/loans/tokens')
 export class LoanTokenController {
@@ -20,7 +21,7 @@ export class LoanTokenController {
   @Get('')
   async list (
     @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<LoanData>> {
+  ): Promise<any> {
     const data = await this.client.loan.listLoanTokens()
     const result = Object.entries(data)
       .map(([id, value]) => {
@@ -33,7 +34,7 @@ export class LoanTokenController {
         })
         return mapTokenData(
           id,
-          value.priceFeedId,
+          value.fixedIntervalPriceId,
           value.interest,
           newToken[0].id,
           newToken[0].value
@@ -55,6 +56,25 @@ export class LoanTokenController {
     return ApiPagedResponse.of(loanTokens, query.size, item => {
       return item.tokenId
     })
+  }
+
+  /**
+   * Get information about a loan token with given loan token id.
+   *
+   * @param {string} id
+   * @return {Promise<LoanData>}
+   */
+  @Get('/:id')
+  async get (container: LoanMasterNodeRegTestContainer, @Param('id') id: string): Promise<any> {
+    try {
+      return await container.call('getloantoken', [id])
+    } catch (err) {
+      if (err === 'DeFiDRpcError: DeFiDRpcError: \'Token 999 does not exist!') {
+        throw new NotFoundException('Unable to find token')
+      } else {
+        throw new BadRequestException(err)
+      }
+    }
   }
 }
 
