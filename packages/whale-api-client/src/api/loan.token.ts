@@ -16,6 +16,16 @@ export class LoanToken {
   async list (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanData>> {
     return await this.client.requestList('GET', 'loans/tokens', size, next)
   }
+
+  /**
+   * Get information about a loan token with given loan token id.
+   *
+   * @param {string} id scheme id to get
+   * @return {Promise<any>}
+   */
+  async get (id: string): Promise<any> {
+    return await this.client.requestData('GET', `loans/tokens/${id}`)
+  }
 }
 
 /**
