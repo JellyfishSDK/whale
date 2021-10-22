@@ -47,7 +47,7 @@
     "cache-manager": "^3.4.4",
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
-    "defichain": "^0.0.1",
+    "defichain": "^0.48.1",
     "level": "^7.0.1",
     "lexicographic-integer-encoding": "^1.0.1",
     "memdown": "^6.1.1",
