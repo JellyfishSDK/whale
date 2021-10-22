@@ -2,7 +2,7 @@ import { BadRequestException, Controller, Get, NotFoundException, Param, Query }
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
-import { CollateralTokenDetails } from '@defichain/jellyfish-api-core/dist/category/loan'
+import { CollateralTokenDetail } from '@defichain/jellyfish-api-core/dist/category/loan'
 import { CollateralData } from '@whale-api-client/api/loan.collateral'
 
 @Controller('/loans/collaterals')
@@ -14,7 +14,7 @@ export class LoanCollateralController {
    * Paginate loan collaterals.
    *
    * @param {PaginationQuery} query
-   * @return {Promise<ApiPagedResponse<CollateralTokenDetails>>}
+   * @return {Promise<ApiPagedResponse<CollateralTokenDetail>>}
    */
   @Get('')
   async list (
@@ -47,10 +47,10 @@ export class LoanCollateralController {
    * Get information about a collateral token with given collateral token.
    *
    * @param {string} id
-   * @return {Promise<CollateralTokenDetails>}
+   * @return {Promise<CollateralTokenDetail>}
    */
   @Get('/:id')
-  async get (@Param('id') id: string): Promise<CollateralTokenDetails> {
+  async get (@Param('id') id: string): Promise<CollateralTokenDetail> {
     try {
       return await this.client.loan.getCollateralToken(id)
     } catch (err) {
@@ -63,7 +63,7 @@ export class LoanCollateralController {
   }
 }
 
-function mapCollateralData (id: string, collaterals: CollateralTokenDetails): CollateralData {
+function mapCollateralData (id: string, collaterals: CollateralTokenDetail): CollateralData {
   return {
     id: id,
     token: collaterals.token,
