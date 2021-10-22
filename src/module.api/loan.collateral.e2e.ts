@@ -81,7 +81,7 @@ afterAll(async () => {
   await stopTestingApp(container, app)
 })
 
-describe('loan', () => {
+describe('list', () => {
   it('should listCollateralTokens', async () => {
     const result = await controller.list({ size: 100 })
     expect(result.data.length).toStrictEqual(4)
@@ -157,16 +157,18 @@ describe('loan', () => {
 describe('get', () => {
   it('should get collateral token by symbol', async () => {
     const data = await controller.get('AAPL')
-    expect(data).toStrictEqual({
-      tokenId: collateralTokenId1,
-      token: 'AAPL',
-      factor: new BigNumber(0.1),
-      fixedIntervalPriceId: 'AAPL/USD',
-      activateAfterBlock: new BigNumber(108)
-    })
+    expect(data).toStrictEqual(
+      {
+        tokenId: collateralTokenId1,
+        token: 'AAPL',
+        factor: new BigNumber(0.1),
+        fixedIntervalPriceId: 'AAPL/USD',
+        activateAfterBlock: new BigNumber(108)
+      }
+    )
   })
 
-  it('should throw error while getting non-existent collateral token', async () => {
+  it('should throw error while getting non-existent collateral token id', async () => {
     expect.assertions(2)
     try {
       await controller.get('999')

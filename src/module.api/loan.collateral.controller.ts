@@ -2,9 +2,7 @@ import { BadRequestException, Controller, Get, NotFoundException, Param, Query }
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
-import {
-  CollateralTokenDetails
-} from '@defichain/jellyfish-api-core/dist/category/loan'
+import { CollateralTokenDetails } from '@defichain/jellyfish-api-core/dist/category/loan'
 import { CollateralData } from '@whale-api-client/api/loan.collateral'
 
 @Controller('/loans/collaterals')
@@ -23,8 +21,8 @@ export class LoanCollateralController {
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<CollateralData>> {
     const data = await this.client.loan.listCollateralTokens()
-    const result: CollateralData[] = Object.entries(data)
-      .map(([id, value]): CollateralData => {
+    const result = Object.entries(data)
+      .map(([id, value]) => {
         return mapCollateralData(id, value)
       }).sort((a, b) => a.token.localeCompare(b.token))
 

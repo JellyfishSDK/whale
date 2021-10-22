@@ -97,8 +97,7 @@ describe('list', () => {
         priceFeedId: 'AAPL/USD',
         factor: 0.1,
         activateAfterBlock: 108
-      }
-    )
+      })
 
     expect(result[1]).toStrictEqual(
       {
@@ -107,8 +106,7 @@ describe('list', () => {
         priceFeedId: 'FB/USD',
         factor: 0.4,
         activateAfterBlock: 111
-      }
-    )
+      })
 
     expect(result[2]).toStrictEqual(
       {
@@ -117,8 +115,7 @@ describe('list', () => {
         priceFeedId: 'MSFT/USD',
         factor: 0.3,
         activateAfterBlock: 110
-      }
-    )
+      })
 
     expect(result[3]).toStrictEqual(
       {
@@ -127,8 +124,7 @@ describe('list', () => {
         priceFeedId: 'TSLA/USD',
         factor: 0.2,
         activateAfterBlock: 109
-      }
-    )
+      })
   })
 
   it('should listLoanSchemes with pagination', async () => {
@@ -159,7 +155,7 @@ describe('list', () => {
 })
 
 describe('get', () => {
-  it('should get scheme by scheme id', async () => {
+  it('should get collateral token by symbol', async () => {
     const data = await client.loanCollateral.get('AAPL')
     expect(data).toStrictEqual({
       token: 'AAPL',
@@ -170,7 +166,7 @@ describe('get', () => {
     })
   })
 
-  it('should fail due to getting non-existent or malformed id', async () => {
+  it('should fail due to getting non-existent or malformed collateral token id', async () => {
     expect.assertions(4)
     try {
       await client.loanCollateral.get('999')
