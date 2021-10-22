@@ -18,7 +18,6 @@ beforeAll(async () => {
   client = new StubWhaleApiClient(service)
 
   await container.start()
-  await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
   await service.start()
 
@@ -67,7 +66,7 @@ afterAll(async () => {
 })
 
 describe('list', () => {
-  it('should listVaults with size', async () => {
+  it('should listVaults with size only', async () => {
     const result = await client.loanVault.list('', '', 'false', 20)
     expect(result.length).toStrictEqual(4)
   })
@@ -129,7 +128,7 @@ describe('list', () => {
 })
 
 describe('get', () => {
-  it('should get vault by vault id', async () => {
+  it('should get vault by vaultId', async () => {
     const data = await client.loanVault.get(vaultId1)
     expect(data).toStrictEqual({
       vaultId: vaultId1,
@@ -137,17 +136,17 @@ describe('get', () => {
       ownerAddress: address1,
       isUnderLiquidation: false,
       collateralAmounts: [],
+      loanAmounts: [],
       interestAmounts: [],
       interestValue: '',
       invalidPrice: false,
-      loanAmounts: [],
       collateralValue: expect.any(Number),
       loanValue: expect.any(Number),
       currentRatio: expect.any(Number)
     })
   })
 
-  it('should fail due to getting non-existent token', async () => {
+  it('should fail due to getting non-existent vault', async () => {
     expect.assertions(4)
     try {
       await client.loanVault.get('0530ab29a9f09416a014a4219f186f1d5d530e9a270a9f941275b3972b43ebb7')
