@@ -74,7 +74,7 @@ export interface VaultDetails {
   isUnderLiquidation: boolean
   batches?: AuctionBatchDetails[]
   collateralAmounts?: string[]
-  loanAmount?: string[]
+  loanAmounts?: string[]
   collateralValue?: BigNumber
   loanValue?: BigNumber
   currentRatio?: BigNumber

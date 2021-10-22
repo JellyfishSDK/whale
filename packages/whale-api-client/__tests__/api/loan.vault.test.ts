@@ -137,7 +137,10 @@ describe('get', () => {
       ownerAddress: address1,
       isUnderLiquidation: false,
       collateralAmounts: [],
-      loanAmount: [],
+      interestAmounts: [],
+      interestValue: '',
+      invalidPrice: false,
+      loanAmounts: [],
       collateralValue: expect.any(Number),
       loanValue: expect.any(Number),
       currentRatio: expect.any(Number)
