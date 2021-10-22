@@ -1,6 +1,6 @@
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
-import BigNumber from 'bignumber.js'
+import { createTestingApp, stopTestingApp } from '@src/e2e.module'
+
 import { LoanMasterNodeRegTestContainer } from '@src/module.api/loan_container'
 import { LoanVaultController } from '@src/module.api/loan.vault.controller'
 import { NotFoundException } from '@nestjs/common'
@@ -19,10 +19,8 @@ beforeAll(async () => {
   await container.waitForWalletBalanceGTE(100)
 
   app = await createTestingApp(container)
-  controller = app.get(LoanVaultController)
-
-  await waitForIndexedHeight(app, 100)
   const testing = Testing.create(container)
+  controller = app.get(LoanVaultController)
 
   // loan schemes
   await testing.rpc.loan.createLoanScheme({
@@ -178,7 +176,11 @@ describe('loan', () => {
   })
 
   // it('should listVaults with an empty object if size 100 next 49c32b29bf139bfc8cc7663911721f8b468dfba939a26a89d2b69e654e740bbc which is out of range', async () => {
-  //   const result = await controller.list({ size: 100, next: '49c32b29bf139bfc8cc7663911721f8b468dfba939a26a89d2b69e654e740bbc' })
+  //   const result = await controller.list(
+  //     undefined,
+  //     undefined,
+  //     false,
+  //     { size: 100, next: '49c32b29bf139bfc8cc7663911721f8b468dfba939a26a89d2b69e654e740bbc' })
   //   expect(result.data.length).toStrictEqual(0)
   //   expect(result.page).toBeUndefined()
   // })

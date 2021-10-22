@@ -2,8 +2,7 @@ import { BadRequestException, Controller, Get, NotFoundException, Param, Query }
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
-import { VaultPagination } from '@defichain/jellyfish-api-core/dist/category/loan'
-import BigNumber from 'bignumber.js'
+import { VaultDetails, VaultPagination } from '@defichain/jellyfish-api-core/dist/category/loan'
 
 @Controller('/loans/vaults')
 export class LoanVaultController {
@@ -46,7 +45,7 @@ export class LoanVaultController {
   }
 
   /**
-   * Get information about a vault with vault id.
+   * Get information about a vault with given vault id.
    *
    * @param {string} id
    * @return {Promise<VaultDetails>}
@@ -65,23 +64,4 @@ export class LoanVaultController {
       }
     }
   }
-}
-
-export interface VaultDetails {
-  vaultId: string
-  loanSchemeId: string
-  ownerAddress: string
-  isUnderLiquidation: boolean
-  batches?: AuctionBatchDetails[]
-  collateralAmounts?: string[]
-  loanAmounts?: string[]
-  collateralValue?: BigNumber
-  loanValue?: BigNumber
-  currentRatio?: BigNumber
-}
-
-export interface AuctionBatchDetails {
-  index: BigNumber
-  collaterals: string[]
-  loan: string
 }
