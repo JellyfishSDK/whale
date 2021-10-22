@@ -21,7 +21,7 @@ export class LoanCollateralController {
   @Get('')
   async list (
     @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<CollateralTokenDetails>> {
+  ): Promise<ApiPagedResponse<CollateralData>> {
     const data = await this.client.loan.listCollateralTokens()
     const result: CollateralData[] = Object.entries(data)
       .map(([id, value]): CollateralData => {
@@ -70,7 +70,7 @@ function mapCollateralData (id: string, collaterals: CollateralTokenDetails): Co
     id: id,
     token: collaterals.token,
     factor: collaterals.factor,
-    priceFeedId: collaterals.priceFeedId,
+    priceFeedId: collaterals.fixedIntervalPriceId,
     activateAfterBlock: collaterals.activateAfterBlock
   }
 }

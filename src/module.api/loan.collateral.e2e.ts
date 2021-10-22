@@ -11,9 +11,6 @@ let app: NestFastifyApplication
 let controller: LoanCollateralController
 
 let collateralTokenId1: string
-let collateralTokenId2: string
-let collateralTokenId3: string
-let collateralTokenId4: string
 
 beforeAll(async () => {
   await container.start()
@@ -36,7 +33,7 @@ beforeAll(async () => {
   await testing.token.create({ symbol: 'FB' })
   await testing.generate(1)
 
-  await testing.rpc.oracle.appointOracle(await container.getNewAddress(),
+  const oracleId = await testing.rpc.oracle.appointOracle(await container.getNewAddress(),
     [
       { token: 'AAPL', currency: 'USD' },
       { token: 'TSLA', currency: 'USD' },
@@ -45,31 +42,37 @@ beforeAll(async () => {
     ], { weightage: 1 })
   await testing.generate(1)
 
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '1.5@AAPL', currency: 'USD' }] })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '2.5@TSLA', currency: 'USD' }] })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '3.5@MSFT', currency: 'USD' }] })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '4.5@FB', currency: 'USD' }] })
+  await testing.generate(1)
+
   collateralTokenId1 = await testing.rpc.loan.setCollateralToken({
     token: 'AAPL',
     factor: new BigNumber(0.1),
-    priceFeedId: 'AAPL/USD'
+    fixedIntervalPriceId: 'AAPL/USD'
   })
   await testing.generate(1)
 
-  collateralTokenId2 = await testing.rpc.loan.setCollateralToken({
+  await testing.rpc.loan.setCollateralToken({
     token: 'TSLA',
     factor: new BigNumber(0.2),
-    priceFeedId: 'TSLA/USD'
+    fixedIntervalPriceId: 'TSLA/USD'
   })
   await testing.generate(1)
 
-  collateralTokenId3 = await testing.rpc.loan.setCollateralToken({
+  await testing.rpc.loan.setCollateralToken({
     token: 'MSFT',
     factor: new BigNumber(0.3),
-    priceFeedId: 'MSFT/USD'
+    fixedIntervalPriceId: 'MSFT/USD'
   })
   await testing.generate(1)
 
-  collateralTokenId4 = await testing.rpc.loan.setCollateralToken({
+  await testing.rpc.loan.setCollateralToken({
     token: 'FB',
     factor: new BigNumber(0.4),
-    priceFeedId: 'FB/USD'
+    fixedIntervalPriceId: 'FB/USD'
   })
   await testing.generate(1)
 })
@@ -84,32 +87,32 @@ describe('loan', () => {
     expect(result.data.length).toStrictEqual(4)
     expect(result.data).toStrictEqual([
       {
-        id: collateralTokenId1,
+        id: '0',
         token: 'AAPL',
         priceFeedId: 'AAPL/USD',
         factor: new BigNumber(0.1),
-        activateAfterBlock: new BigNumber(107)
+        activateAfterBlock: new BigNumber(108)
       },
       {
-        id: collateralTokenId4,
+        id: '3',
         token: 'FB',
         priceFeedId: 'FB/USD',
         factor: new BigNumber(0.4),
-        activateAfterBlock: new BigNumber(110)
+        activateAfterBlock: new BigNumber(111)
       },
       {
-        id: collateralTokenId3,
+        id: '2',
         token: 'MSFT',
         priceFeedId: 'MSFT/USD',
         factor: new BigNumber(0.3),
-        activateAfterBlock: new BigNumber(109)
+        activateAfterBlock: new BigNumber(110)
       },
       {
-        id: collateralTokenId2,
+        id: '1',
         token: 'TSLA',
         priceFeedId: 'TSLA/USD',
         factor: new BigNumber(0.2),
-        activateAfterBlock: new BigNumber(108)
+        activateAfterBlock: new BigNumber(109)
       }
     ])
   })
@@ -155,12 +158,11 @@ describe('get', () => {
   it('should get collateral token by symbol', async () => {
     const data = await controller.get('AAPL')
     expect(data).toStrictEqual({
-      [collateralTokenId1]: {
-        token: 'AAPL',
-        factor: new BigNumber(0.1),
-        priceFeedId: 'AAPL/USD',
-        activateAfterBlock: new BigNumber(107)
-      }
+      tokenId: collateralTokenId1,
+      token: 'AAPL',
+      factor: new BigNumber(0.1),
+      fixedIntervalPriceId: 'AAPL/USD',
+      activateAfterBlock: new BigNumber(108)
     })
   })
 

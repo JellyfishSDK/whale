@@ -1,6 +1,5 @@
 import { WhaleApiClient } from '../whale.api.client'
 import BigNumber from 'bignumber.js'
-import { CollateralTokenDetails } from '@defichain/jellyfish-api-core/dist/category/loan'
 import { ApiPagedResponse } from '../whale.api.response'
 
 export class LoanCollateral {
@@ -12,20 +11,20 @@ export class LoanCollateral {
    *
    * @param {number} size of collateral tokens to query
    * @param {string} next set of collateral tokens
-   * @return {Promise<ApiPagedResponse<LoanSchemeResult>>}
+   * @return {Promise<ApiPagedResponse<CollateralData>>}
    */
-  async list (size: number = 30, next?: string): Promise<ApiPagedResponse<CollateralTokenDetails>> {
-    return await this.client.requestList('GET', 'loan/collaterals', size, next)
+  async list (size: number = 30, next?: string): Promise<ApiPagedResponse<CollateralData>> {
+    return await this.client.requestList('GET', 'loans/collaterals', size, next)
   }
 
   /**
    * Get information about a collateral token with given collateralToken id.
    *
    * @param {string} id collateralToken id to get
-   * @return {Promise<CollateralTokenDetails>}
+   * @return {Promise<CollateralData>}
    */
-  async get (id: string): Promise<CollateralTokenDetails> {
-    return await this.client.requestData('GET', `loan/collaterals/${id}`)
+  async get (id: string): Promise<CollateralData> {
+    return await this.client.requestData('GET', `loans/collaterals/${id}`)
   }
 }
 

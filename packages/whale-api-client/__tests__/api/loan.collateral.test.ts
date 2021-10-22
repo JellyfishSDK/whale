@@ -10,9 +10,6 @@ let service: StubService
 let client: WhaleApiClient
 
 let collateralTokenId1: string
-let collateralTokenId2: string
-let collateralTokenId3: string
-let collateralTokenId4: string
 
 beforeAll(async () => {
   container = new LoanMasterNodeRegTestContainer()
@@ -37,7 +34,7 @@ beforeAll(async () => {
   await testing.token.create({ symbol: 'FB' })
   await testing.generate(1)
 
-  await testing.rpc.oracle.appointOracle(await container.getNewAddress(),
+  const oracleId = await testing.rpc.oracle.appointOracle(await container.getNewAddress(),
     [
       { token: 'AAPL', currency: 'USD' },
       { token: 'TSLA', currency: 'USD' },
@@ -46,31 +43,37 @@ beforeAll(async () => {
     ], { weightage: 1 })
   await testing.generate(1)
 
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '1.5@AAPL', currency: 'USD' }] })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '2.5@TSLA', currency: 'USD' }] })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '3.5@MSFT', currency: 'USD' }] })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '4.5@FB', currency: 'USD' }] })
+  await testing.generate(1)
+
   collateralTokenId1 = await testing.rpc.loan.setCollateralToken({
     token: 'AAPL',
     factor: new BigNumber(0.1),
-    priceFeedId: 'AAPL/USD'
+    fixedIntervalPriceId: 'AAPL/USD'
   })
   await testing.generate(1)
 
-  collateralTokenId2 = await testing.rpc.loan.setCollateralToken({
+  await testing.rpc.loan.setCollateralToken({
     token: 'TSLA',
     factor: new BigNumber(0.2),
-    priceFeedId: 'TSLA/USD'
+    fixedIntervalPriceId: 'TSLA/USD'
   })
   await testing.generate(1)
 
-  collateralTokenId3 = await testing.rpc.loan.setCollateralToken({
+  await testing.rpc.loan.setCollateralToken({
     token: 'MSFT',
     factor: new BigNumber(0.3),
-    priceFeedId: 'MSFT/USD'
+    fixedIntervalPriceId: 'MSFT/USD'
   })
   await testing.generate(1)
 
-  collateralTokenId4 = await testing.rpc.loan.setCollateralToken({
+  await testing.rpc.loan.setCollateralToken({
     token: 'FB',
     factor: new BigNumber(0.4),
-    priceFeedId: 'FB/USD'
+    fixedIntervalPriceId: 'FB/USD'
   })
   await testing.generate(1)
 })
@@ -89,41 +92,41 @@ describe('list', () => {
     expect(result.length).toStrictEqual(4)
     expect(result[0]).toStrictEqual(
       {
-        id: collateralTokenId1,
+        id: '0',
         token: 'AAPL',
         priceFeedId: 'AAPL/USD',
         factor: 0.1,
-        activateAfterBlock: 107
+        activateAfterBlock: 108
       }
     )
 
     expect(result[1]).toStrictEqual(
       {
-        id: collateralTokenId4,
+        id: '3',
         token: 'FB',
         priceFeedId: 'FB/USD',
         factor: 0.4,
-        activateAfterBlock: 110
+        activateAfterBlock: 111
       }
     )
 
     expect(result[2]).toStrictEqual(
       {
-        id: collateralTokenId3,
+        id: '2',
         token: 'MSFT',
         priceFeedId: 'MSFT/USD',
         factor: 0.3,
-        activateAfterBlock: 109
+        activateAfterBlock: 110
       }
     )
 
     expect(result[3]).toStrictEqual(
       {
-        id: collateralTokenId2,
+        id: '1',
         token: 'TSLA',
         priceFeedId: 'TSLA/USD',
         factor: 0.2,
-        activateAfterBlock: 108
+        activateAfterBlock: 109
       }
     )
   })
@@ -159,12 +162,11 @@ describe('get', () => {
   it('should get scheme by scheme id', async () => {
     const data = await client.loanCollateral.get('AAPL')
     expect(data).toStrictEqual({
-      [collateralTokenId1]: {
-        token: 'AAPL',
-        factor: 0.1,
-        priceFeedId: 'AAPL/USD',
-        activateAfterBlock: 107
-      }
+      token: 'AAPL',
+      factor: 0.1,
+      fixedIntervalPriceId: 'AAPL/USD',
+      activateAfterBlock: 108,
+      tokenId: collateralTokenId1
     })
   })
 
@@ -179,7 +181,7 @@ describe('get', () => {
         type: 'NotFound',
         at: expect.any(Number),
         message: 'Unable to find collateral token',
-        url: '/v0.0/regtest/loan/collaterals/999'
+        url: '/v0.0/regtest/loans/collaterals/999'
       })
     }
 
@@ -192,7 +194,7 @@ describe('get', () => {
         type: 'NotFound',
         at: expect.any(Number),
         message: 'Unable to find collateral token',
-        url: '/v0.0/regtest/loan/collaterals/999'
+        url: '/v0.0/regtest/loans/collaterals/$*@'
       })
     }
   })
