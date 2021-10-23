@@ -23,7 +23,7 @@ export class LoanTokenController {
     const data = await this.client.loan.listLoanTokens()
     const result = Object.entries(data)
       .map(([id, value]) => {
-        return mapTokenData(id, value)
+        return mapTokenData(Object.keys(value.token)[0], value)
       }).sort(a => Number.parseInt(a.id))
 
     let nextIndex = 0
@@ -37,8 +37,8 @@ export class LoanTokenController {
       }
     }
 
-    const collateralTokens = result.slice(nextIndex, nextIndex + query.size)
-    return ApiPagedResponse.of(collateralTokens, query.size, item => {
+    const loanTokens = result.slice(nextIndex, nextIndex + query.size)
+    return ApiPagedResponse.of(loanTokens, query.size, item => {
       return item.id
     })
   }
@@ -54,8 +54,8 @@ export class LoanTokenController {
     try {
       return await this.client.loan.getLoanToken(id)
     } catch (err) {
-      if (err === 'DeFiDRpcError: DeFiDRpcError: \'Token 999 does not exist!') {
-        throw new NotFoundException('Unable to find token')
+      if (err?.payload?.message === `Token ${id} does not exist!`) {
+        throw new NotFoundException('Unable to find loan token')
       } else {
         throw new BadRequestException(err)
       }
@@ -67,7 +67,7 @@ function mapTokenData (id: string, tokenResult: ListLoanTokenResult): LoanData {
   return {
     id: id,
     token: tokenResult.token,
-    factor: tokenResult.interest,
+    interest: tokenResult.interest,
     fixedIntervalPriceId: tokenResult.fixedIntervalPriceId
   }
 }

@@ -44,7 +44,7 @@ beforeAll(async () => {
 
   await testing.container.call('setloantoken', [{
     symbol: 'TSLA',
-    fixedIntervalPriceId: 'AAPL/USD',
+    fixedIntervalPriceId: 'TSLA/USD',
     mintable: false,
     interest: new BigNumber(0.02)
   }])
@@ -80,36 +80,35 @@ describe('list', () => {
     const result = await client.loanToken.list()
     expect(result.length).toStrictEqual(4)
     expect(result[0]).toStrictEqual({
-      collateralAddress: expect.any(String),
-      creation: {
-        height: expect.any(Number),
-        tx: expect.any(String)
+      id: '1',
+      token: {
+        1: {
+          symbol: 'AAPL',
+          symbolKey: 'AAPL',
+          name: '',
+          decimal: 8,
+          limit: 0,
+          mintable: false,
+          tradeable: true,
+          isDAT: true,
+          isLPS: false,
+          finalized: false,
+          isLoanToken: true,
+          minted: 0,
+          creationTx: expect.any(String),
+          creationHeight: 104,
+          destructionTx: expect.any(String),
+          destructionHeight: -1,
+          collateralAddress: expect.any(String)
+        }
       },
-      decimal: 8,
-      destruction: {
-        height: expect.any(Number),
-        tx: expect.any(String)
-      },
-      displaySymbol: 'dAAPL',
-      finalized: false,
-      id: expect.any(String),
       interest: 0.01,
-      isDAT: true,
-      isLPS: false,
-      limit: '0',
-      mintable: false,
-      minted: '0',
-      name: '',
-      priceFeedId: 'AAPL/USD',
-      symbol: 'AAPL',
-      symbolKey: 'AAPL',
-      tokenId: '1',
-      tradeable: true
+      fixedIntervalPriceId: 'AAPL/USD'
     })
 
-    expect(result[1].symbol).toStrictEqual('TSLA')
-    expect(result[2].symbol).toStrictEqual('MSFT')
-    expect(result[3].symbol).toStrictEqual('FB')
+    expect(result[1].id).toStrictEqual('2')
+    expect(result[2].id).toStrictEqual('3')
+    expect(result[3].id).toStrictEqual('4')
   })
 
   it('should listLoanTokens with pagination', async () => {
@@ -119,8 +118,8 @@ describe('list', () => {
     expect(first.hasNext).toStrictEqual(true)
     expect(first.nextToken).toStrictEqual('2')
 
-    expect(first[0].tokenId).toStrictEqual('1')
-    expect(first[1].tokenId).toStrictEqual('2')
+    expect(first[0].id).toStrictEqual('1')
+    expect(first[1].id).toStrictEqual('2')
 
     const next = await client.paginate(first)
 
@@ -128,8 +127,8 @@ describe('list', () => {
     expect(next.hasNext).toStrictEqual(true)
     expect(next.nextToken).toStrictEqual('4')
 
-    expect(next[0].tokenId).toStrictEqual('3')
-    expect(next[1].tokenId).toStrictEqual('4')
+    expect(next[0].id).toStrictEqual('3')
+    expect(next[1].id).toStrictEqual('4')
 
     const last = await client.paginate(next)
 
@@ -141,7 +140,26 @@ describe('list', () => {
   describe('get', () => {
     it('should get loan token by loan token id', async () => {
       const data = await client.loanToken.get('AAPL')
-      console.log(data)
+      expect(Object.keys(data.token)[0]).toStrictEqual('1')
+      expect(data.token[Object.keys(data.token)[0]]).toStrictEqual({
+        symbol: 'AAPL',
+        symbolKey: 'AAPL',
+        name: '',
+        decimal: 8,
+        limit: 0,
+        mintable: false,
+        tradeable: true,
+        isDAT: true,
+        isLPS: false,
+        finalized: false,
+        isLoanToken: true,
+        minted: 0,
+        creationTx: expect.any(String),
+        creationHeight: 104,
+        destructionTx: expect.any(String),
+        destructionHeight: -1,
+        collateralAddress: expect.any(String)
+      })
     })
 
     it('should fail due to getting non-existent or malformed id', async () => {
@@ -154,7 +172,7 @@ describe('list', () => {
           code: 404,
           type: 'NotFound',
           at: expect.any(Number),
-          message: 'Unable to find loan tokens',
+          message: 'Unable to find loan token',
           url: '/v0.0/regtest/loans/tokens/999'
         })
       }
@@ -167,7 +185,7 @@ describe('list', () => {
           code: 404,
           type: 'NotFound',
           at: expect.any(Number),
-          message: 'Unable to find loan tokens',
+          message: 'Unable to find loan token',
           url: '/v0.0/regtest/loans/tokens/$*@'
         })
       }

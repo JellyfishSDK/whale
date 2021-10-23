@@ -3,8 +3,8 @@ import { createTestingApp, stopTestingApp } from '@src/e2e.module'
 import BigNumber from 'bignumber.js'
 import { LoanMasterNodeRegTestContainer } from '@src/module.api/loan_container'
 import { LoanTokenController } from '@src/module.api/loan.token.controller'
-import { Testing } from '@defichain/jellyfish-testing'
 import { NotFoundException } from '@nestjs/common'
+import { Testing } from '@defichain/jellyfish-testing'
 
 const container = new LoanMasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -73,40 +73,37 @@ afterAll(async () => {
 describe('loan', () => {
   it('should listLoanTokens', async () => {
     const result = await controller.list({ size: 100 })
-    console.log(result)
     expect(result.data.length).toStrictEqual(4)
-    expect(result.data[0].symbol).toStrictEqual('AAPL')
     expect(result.data[0]).toStrictEqual({
-      collateralAddress: expect.any(String),
-      creation: {
-        height: expect.any(Number),
-        tx: expect.any(String)
+      id: '1',
+      token: {
+        1: {
+          symbol: 'AAPL',
+          symbolKey: 'AAPL',
+          name: '',
+          decimal: new BigNumber(8),
+          limit: new BigNumber(0),
+          mintable: false,
+          tradeable: true,
+          isDAT: true,
+          isLPS: false,
+          finalized: false,
+          isLoanToken: true,
+          minted: new BigNumber(0),
+          creationTx: expect.any(String),
+          creationHeight: new BigNumber(104),
+          destructionTx: expect.any(String),
+          destructionHeight: new BigNumber(-1),
+          collateralAddress: expect.any(String)
+        }
       },
-      decimal: 8,
-      destruction: {
-        height: expect.any(Number),
-        tx: expect.any(String)
-      },
-      displaySymbol: 'dAAPL',
-      finalized: false,
-      id: expect.any(String),
       interest: new BigNumber(0.01),
-      isDAT: true,
-      isLPS: false,
-      limit: '0',
-      mintable: false,
-      minted: '0',
-      name: '',
-      fixedIntervalPriceId: 'AAPL/USD',
-      symbol: 'AAPL',
-      symbolKey: 'AAPL',
-      tokenId: '1',
-      tradeable: true
+      fixedIntervalPriceId: 'AAPL/USD'
     })
 
-    expect(result.data[1].symbol).toStrictEqual('TSLA')
-    expect(result.data[2].symbol).toStrictEqual('MSFT')
-    expect(result.data[3].symbol).toStrictEqual('FB')
+    expect(result.data[1].id).toStrictEqual('2')
+    expect(result.data[2].id).toStrictEqual('3')
+    expect(result.data[3].id).toStrictEqual('4')
   })
 
   it('should listLoanTokens with pagination', async () => {
@@ -115,8 +112,8 @@ describe('loan', () => {
     expect(first.data.length).toStrictEqual(2)
     expect(first.page?.next).toStrictEqual('2')
 
-    expect(first.data[0].tokenId).toStrictEqual('1')
-    expect(first.data[1].tokenId).toStrictEqual('2')
+    expect(first.data[0].id).toStrictEqual('1')
+    expect(first.data[1].id).toStrictEqual('2')
 
     const next = await controller.list({
       size: 2,
@@ -126,8 +123,8 @@ describe('loan', () => {
     expect(next.data.length).toStrictEqual(2)
     expect(next.page?.next).toStrictEqual('4')
 
-    expect(next.data[0].tokenId).toStrictEqual('3')
-    expect(next.data[1].tokenId).toStrictEqual('4')
+    expect(next.data[0].id).toStrictEqual('3')
+    expect(next.data[1].id).toStrictEqual('4')
 
     const last = await controller.list({
       size: 2,
@@ -147,39 +144,31 @@ describe('loan', () => {
 })
 
 describe('get', () => {
-  it('should get scheme by symbol', async () => {
+  it('should get loan token by symbol', async () => {
     const data = await controller.get('AAPL')
-    expect(data.token[1].symbol).toStrictEqual('AAPL')
-    expect(data.token[1]).toStrictEqual({
-      collateralAddress: expect.any(String),
-      creation: {
-        height: expect.any(Number),
-        tx: expect.any(String)
-      },
-      decimal: 8,
-      destruction: {
-        height: expect.any(Number),
-        tx: expect.any(String)
-      },
-      displaySymbol: 'dAAPL',
-      finalized: false,
-      id: expect.any(String),
-      interest: new BigNumber(0.01),
-      isDAT: true,
-      isLPS: false,
-      limit: '0',
-      mintable: false,
-      minted: '0',
-      name: '',
-      priceFeedId: 'AAPL/USD',
+    expect(Object.keys(data.token)[0]).toStrictEqual('1')
+    expect(data.token[Object.keys(data.token)[0]]).toStrictEqual({
       symbol: 'AAPL',
       symbolKey: 'AAPL',
-      tokenId: '1',
-      tradeable: true
+      name: '',
+      decimal: new BigNumber(8),
+      limit: new BigNumber(0),
+      mintable: false,
+      tradeable: true,
+      isDAT: true,
+      isLPS: false,
+      finalized: false,
+      isLoanToken: true,
+      minted: new BigNumber(0),
+      creationTx: expect.any(String),
+      creationHeight: new BigNumber(104),
+      destructionTx: expect.any(String),
+      destructionHeight: new BigNumber(-1),
+      collateralAddress: expect.any(String)
     })
   })
 
-  it('should throw error while getting non-existent scheme', async () => {
+  it('should throw error while getting non-existent loan token', async () => {
     expect.assertions(2)
     try {
       await controller.get('999')
@@ -187,7 +176,7 @@ describe('get', () => {
       expect(err).toBeInstanceOf(NotFoundException)
       expect(err.response).toStrictEqual({
         statusCode: 404,
-        message: 'Unable to find scheme',
+        message: 'Unable to find loan token',
         error: 'Not Found'
       })
     }
