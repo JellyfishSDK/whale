@@ -19,7 +19,7 @@ export class LoanTokenController {
   @Get('')
   async list (
     @Query() query: PaginationQuery
-  ): Promise<any> {
+  ): Promise<ApiPagedResponse<LoanData>> {
     const data = await this.client.loan.listLoanTokens()
     const result: LoanData[] = Object.entries(data)
       .map(([id, value]) => {
