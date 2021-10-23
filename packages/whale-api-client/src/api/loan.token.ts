@@ -33,7 +33,6 @@ export class LoanToken {
  * Loan token data.
  */
 export interface LoanData {
-  id: string
   symbol: string
   token: LoanTokenDetails
   interest: BigNumber

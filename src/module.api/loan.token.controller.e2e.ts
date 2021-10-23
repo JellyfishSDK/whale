@@ -75,7 +75,6 @@ describe('loan', () => {
     const result = await controller.list({ size: 100 })
     expect(result.data.length).toStrictEqual(4)
     expect(result.data[0]).toStrictEqual({
-      id: '0',
       symbol: 'AAPL',
       token: {
         1: {

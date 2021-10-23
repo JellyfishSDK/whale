@@ -80,7 +80,6 @@ describe('list', () => {
     const result = await client.loanToken.list()
     expect(result.length).toStrictEqual(4)
     expect(result[0]).toStrictEqual({
-      id: '0',
       symbol: 'AAPL',
       token: {
         1: {
@@ -163,7 +162,7 @@ describe('list', () => {
       })
     })
 
-    it('should fail due to getting non-existent or malformed id', async () => {
+    it('should fail due to getting non-existent or malformed loan token id', async () => {
       expect.assertions(4)
       try {
         await client.loanToken.get('999')

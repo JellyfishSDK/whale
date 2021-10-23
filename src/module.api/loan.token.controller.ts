@@ -22,8 +22,8 @@ export class LoanTokenController {
   ): Promise<ApiPagedResponse<LoanData>> {
     const data = await this.client.loan.listLoanTokens()
     const result: LoanData[] = Object.entries(data)
-      .map(([id, value]) => {
-        return mapTokenData(id, value)
+      .map(([, value]) => {
+        return mapTokenData(value)
       }).sort((a, b) => a.symbol.localeCompare(b.symbol))
 
     let nextIndex = 0
@@ -63,9 +63,8 @@ export class LoanTokenController {
   }
 }
 
-function mapTokenData (id: string, tokenResult: ListLoanTokenResult): LoanData {
+function mapTokenData (tokenResult: ListLoanTokenResult): LoanData {
   return {
-    id: id,
     symbol: String(tokenResult.token[Object.keys(tokenResult.token)[0]].symbol),
     token: tokenResult.token,
     interest: tokenResult.interest,
