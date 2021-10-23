@@ -22,8 +22,8 @@ export class LoanCollateralController {
   ): Promise<ApiPagedResponse<CollateralData>> {
     const data = await this.client.loan.listCollateralTokens()
     const result = Object.entries(data)
-      .map(([id, value]) => {
-        return mapCollateralData(id, value)
+      .map(([, value]) => {
+        return mapCollateralData(value)
       }).sort((a, b) => a.token.localeCompare(b.token))
 
     let nextIndex = 0
@@ -63,9 +63,8 @@ export class LoanCollateralController {
   }
 }
 
-function mapCollateralData (id: string, collaterals: CollateralTokenDetail): CollateralData {
+function mapCollateralData (collaterals: CollateralTokenDetail): CollateralData {
   return {
-    id: id,
     token: collaterals.token,
     factor: collaterals.factor,
     priceFeedId: collaterals.fixedIntervalPriceId,

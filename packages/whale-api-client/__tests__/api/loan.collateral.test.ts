@@ -92,7 +92,6 @@ describe('list', () => {
     expect(result.length).toStrictEqual(4)
     expect(result[0]).toStrictEqual(
       {
-        id: '0',
         token: 'AAPL',
         priceFeedId: 'AAPL/USD',
         factor: 0.1,
@@ -101,7 +100,6 @@ describe('list', () => {
 
     expect(result[1]).toStrictEqual(
       {
-        id: '3',
         token: 'FB',
         priceFeedId: 'FB/USD',
         factor: 0.4,
@@ -110,7 +108,6 @@ describe('list', () => {
 
     expect(result[2]).toStrictEqual(
       {
-        id: '2',
         token: 'MSFT',
         priceFeedId: 'MSFT/USD',
         factor: 0.3,
@@ -119,7 +116,6 @@ describe('list', () => {
 
     expect(result[3]).toStrictEqual(
       {
-        id: '1',
         token: 'TSLA',
         priceFeedId: 'TSLA/USD',
         factor: 0.2,

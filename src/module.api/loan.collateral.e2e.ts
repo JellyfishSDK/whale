@@ -87,28 +87,24 @@ describe('list', () => {
     expect(result.data.length).toStrictEqual(4)
     expect(result.data).toStrictEqual([
       {
-        id: '0',
         token: 'AAPL',
         priceFeedId: 'AAPL/USD',
         factor: new BigNumber(0.1),
         activateAfterBlock: new BigNumber(108)
       },
       {
-        id: '3',
         token: 'FB',
         priceFeedId: 'FB/USD',
         factor: new BigNumber(0.4),
         activateAfterBlock: new BigNumber(111)
       },
       {
-        id: '2',
         token: 'MSFT',
         priceFeedId: 'MSFT/USD',
         factor: new BigNumber(0.3),
         activateAfterBlock: new BigNumber(110)
       },
       {
-        id: '1',
         token: 'TSLA',
         priceFeedId: 'TSLA/USD',
         factor: new BigNumber(0.2),

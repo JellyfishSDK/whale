@@ -32,7 +32,6 @@ export class LoanCollateral {
  * Collateral data.
  */
 export interface CollateralData {
-  id: string
   token: string
   factor: BigNumber
   priceFeedId: string
