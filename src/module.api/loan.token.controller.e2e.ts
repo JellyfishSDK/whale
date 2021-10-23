@@ -43,7 +43,7 @@ beforeAll(async () => {
 
   await testing.container.call('setloantoken', [{
     symbol: 'TSLA',
-    fixedIntervalPriceId: 'AAPL/USD',
+    fixedIntervalPriceId: 'TSLA/USD',
     mintable: false,
     interest: new BigNumber(0.02)
   }])
@@ -73,6 +73,7 @@ afterAll(async () => {
 describe('loan', () => {
   it('should listLoanTokens', async () => {
     const result = await controller.list({ size: 100 })
+    console.log(result)
     expect(result.data.length).toStrictEqual(4)
     expect(result.data[0].symbol).toStrictEqual('AAPL')
     expect(result.data[0]).toStrictEqual({
@@ -96,7 +97,7 @@ describe('loan', () => {
       mintable: false,
       minted: '0',
       name: '',
-      priceFeedId: 'AAPL/USD',
+      fixedIntervalPriceId: 'AAPL/USD',
       symbol: 'AAPL',
       symbolKey: 'AAPL',
       tokenId: '1',
@@ -147,7 +148,7 @@ describe('loan', () => {
 
 describe('get', () => {
   it('should get scheme by symbol', async () => {
-    const data = await controller.get(container, 'AAPL')
+    const data = await controller.get('AAPL')
     expect(data.token[1].symbol).toStrictEqual('AAPL')
     expect(data.token[1]).toStrictEqual({
       collateralAddress: expect.any(String),
@@ -181,7 +182,7 @@ describe('get', () => {
   it('should throw error while getting non-existent scheme', async () => {
     expect.assertions(2)
     try {
-      await controller.get(container, '999')
+      await controller.get('999')
     } catch (err) {
       expect(err).toBeInstanceOf(NotFoundException)
       expect(err.response).toStrictEqual({
