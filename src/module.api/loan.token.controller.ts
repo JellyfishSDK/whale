@@ -21,15 +21,15 @@ export class LoanTokenController {
     @Query() query: PaginationQuery
   ): Promise<any> {
     const data = await this.client.loan.listLoanTokens()
-    const result = Object.entries(data)
+    const result: LoanData[] = Object.entries(data)
       .map(([id, value]) => {
-        return mapTokenData(Object.keys(value.token)[0], value)
-      }).sort(a => Number.parseInt(a.id))
+        return mapTokenData(id, value)
+      }).sort((a, b) => a.symbol.localeCompare(b.symbol))
 
     let nextIndex = 0
 
     if (query.next !== undefined) {
-      const findIndex = result.findIndex(result => result.id === query.next)
+      const findIndex = result.findIndex(result => result.symbol === query.next)
       if (findIndex > 0) {
         nextIndex = findIndex + 1
       } else {
@@ -39,7 +39,7 @@ export class LoanTokenController {
 
     const loanTokens = result.slice(nextIndex, nextIndex + query.size)
     return ApiPagedResponse.of(loanTokens, query.size, item => {
-      return item.id
+      return item.symbol
     })
   }
 
@@ -66,6 +66,7 @@ export class LoanTokenController {
 function mapTokenData (id: string, tokenResult: ListLoanTokenResult): LoanData {
   return {
     id: id,
+    symbol: String(tokenResult.token[Object.keys(tokenResult.token)[0]].symbol),
     token: tokenResult.token,
     interest: tokenResult.interest,
     fixedIntervalPriceId: tokenResult.fixedIntervalPriceId

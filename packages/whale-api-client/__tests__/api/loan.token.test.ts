@@ -80,7 +80,8 @@ describe('list', () => {
     const result = await client.loanToken.list()
     expect(result.length).toStrictEqual(4)
     expect(result[0]).toStrictEqual({
-      id: '1',
+      id: '0',
+      symbol: 'AAPL',
       token: {
         1: {
           symbol: 'AAPL',
@@ -106,9 +107,9 @@ describe('list', () => {
       fixedIntervalPriceId: 'AAPL/USD'
     })
 
-    expect(result[1].id).toStrictEqual('2')
-    expect(result[2].id).toStrictEqual('3')
-    expect(result[3].id).toStrictEqual('4')
+    expect(result[1].symbol).toStrictEqual('FB')
+    expect(result[2].symbol).toStrictEqual('MSFT')
+    expect(result[3].symbol).toStrictEqual('TSLA')
   })
 
   it('should listLoanTokens with pagination', async () => {
@@ -116,19 +117,19 @@ describe('list', () => {
 
     expect(first.length).toStrictEqual(2)
     expect(first.hasNext).toStrictEqual(true)
-    expect(first.nextToken).toStrictEqual('2')
+    expect(first.nextToken).toStrictEqual('FB')
 
-    expect(first[0].id).toStrictEqual('1')
-    expect(first[1].id).toStrictEqual('2')
+    expect(first[0].symbol).toStrictEqual('AAPL')
+    expect(first[1].symbol).toStrictEqual('FB')
 
     const next = await client.paginate(first)
 
     expect(next.length).toStrictEqual(2)
     expect(next.hasNext).toStrictEqual(true)
-    expect(next.nextToken).toStrictEqual('4')
+    expect(next.nextToken).toStrictEqual('TSLA')
 
-    expect(next[0].id).toStrictEqual('3')
-    expect(next[1].id).toStrictEqual('4')
+    expect(next[0].symbol).toStrictEqual('MSFT')
+    expect(next[1].symbol).toStrictEqual('TSLA')
 
     const last = await client.paginate(next)
 

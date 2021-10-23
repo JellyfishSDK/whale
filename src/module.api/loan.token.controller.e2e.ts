@@ -75,7 +75,8 @@ describe('loan', () => {
     const result = await controller.list({ size: 100 })
     expect(result.data.length).toStrictEqual(4)
     expect(result.data[0]).toStrictEqual({
-      id: '1',
+      id: '0',
+      symbol: 'AAPL',
       token: {
         1: {
           symbol: 'AAPL',
@@ -101,19 +102,19 @@ describe('loan', () => {
       fixedIntervalPriceId: 'AAPL/USD'
     })
 
-    expect(result.data[1].id).toStrictEqual('2')
-    expect(result.data[2].id).toStrictEqual('3')
-    expect(result.data[3].id).toStrictEqual('4')
+    expect(result.data[1].symbol).toStrictEqual('FB')
+    expect(result.data[2].symbol).toStrictEqual('MSFT')
+    expect(result.data[3].symbol).toStrictEqual('TSLA')
   })
 
   it('should listLoanTokens with pagination', async () => {
     const first = await controller.list({ size: 2 })
 
     expect(first.data.length).toStrictEqual(2)
-    expect(first.page?.next).toStrictEqual('2')
+    expect(first.page?.next).toStrictEqual('FB')
 
-    expect(first.data[0].id).toStrictEqual('1')
-    expect(first.data[1].id).toStrictEqual('2')
+    expect(first.data[0].symbol).toStrictEqual('AAPL')
+    expect(first.data[1].symbol).toStrictEqual('FB')
 
     const next = await controller.list({
       size: 2,
@@ -121,10 +122,10 @@ describe('loan', () => {
     })
 
     expect(next.data.length).toStrictEqual(2)
-    expect(next.page?.next).toStrictEqual('4')
+    expect(next.page?.next).toStrictEqual('TSLA')
 
-    expect(next.data[0].id).toStrictEqual('3')
-    expect(next.data[1].id).toStrictEqual('4')
+    expect(next.data[0].symbol).toStrictEqual('MSFT')
+    expect(next.data[1].symbol).toStrictEqual('TSLA')
 
     const last = await controller.list({
       size: 2,

@@ -34,6 +34,7 @@ export class LoanToken {
  */
 export interface LoanData {
   id: string
+  symbol: string
   token: LoanTokenDetails
   interest: BigNumber
   fixedIntervalPriceId: string
