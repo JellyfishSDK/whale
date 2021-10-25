@@ -22,9 +22,9 @@ export class LoanToken {
    * Get information about a loan token with given loan token id.
    *
    * @param {string} id scheme id to get
-   * @return {Promise<any>}
+   * @return {Promise<LoanTokenDetails>}
    */
-  async get (id: string): Promise<any> {
+  async get (id: string): Promise<LoanTokenDetails> {
     return await this.client.requestData('GET', `loans/tokens/${id}`)
   }
 }
