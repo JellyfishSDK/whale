@@ -99,7 +99,7 @@ describe('list', () => {
       isLoanToken: true,
       minted: 0,
       creationTx: expect.any(String),
-      creationHeight: 105,
+      creationHeight: 104,
       destructionTx: expect.any(String),
       destructionHeight: -1,
       collateralAddress: expect.any(String)
