@@ -76,27 +76,24 @@ describe('list', () => {
     expect(result.data.length).toStrictEqual(4)
     expect(result.data[0]).toStrictEqual({
       tokenId: expect.any(String),
-      token: expect.any(Object),
       interest: expect.any(String),
-      fixedIntervalPriceId: expect.any(String)
-    })
-    expect(Object.values(result.data[0].token)[0]).toStrictEqual({
+      fixedIntervalPriceId: expect.any(String),
       symbol: expect.any(String),
       symbolKey: expect.any(String),
       name: expect.any(String),
-      decimal: new BigNumber(8),
-      limit: new BigNumber(0),
+      decimal: 8,
+      limit: 0,
       mintable: false,
       tradeable: true,
       isDAT: true,
       isLPS: false,
       finalized: false,
       isLoanToken: true,
-      minted: new BigNumber(0),
+      minted: 0,
       creationTx: expect.any(String),
-      creationHeight: expect.any(BigNumber),
+      creationHeight: expect.any(Number),
       destructionTx: expect.any(String),
-      destructionHeight: new BigNumber(-1),
+      destructionHeight: -1,
       collateralAddress: expect.any(String)
     })
 
@@ -139,24 +136,26 @@ describe('list', () => {
 describe('get', () => {
   it('should get loan token by symbol', async () => {
     const data = await controller.getLoanToken('AAPL')
-    expect(Object.keys(data.token)[0]).toStrictEqual('1')
-    expect(data.token[Object.keys(data.token)[0]]).toStrictEqual({
+    expect(data).toStrictEqual({
+      tokenId: expect.any(String),
+      fixedIntervalPriceId: 'AAPL/USD',
+      interest: '0.01',
       symbol: 'AAPL',
       symbolKey: 'AAPL',
       name: '',
-      decimal: new BigNumber(8),
-      limit: new BigNumber(0),
+      decimal: 8,
+      limit: 0,
       mintable: false,
       tradeable: true,
       isDAT: true,
       isLPS: false,
       finalized: false,
       isLoanToken: true,
-      minted: new BigNumber(0),
+      minted: 0,
       creationTx: expect.any(String),
-      creationHeight: expect.any(BigNumber),
+      creationHeight: expect.any(Number),
       destructionTx: expect.any(String),
-      destructionHeight: new BigNumber(-1),
+      destructionHeight: -1,
       collateralAddress: expect.any(String)
     })
   })

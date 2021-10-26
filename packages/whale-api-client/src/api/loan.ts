@@ -1,7 +1,5 @@
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
-import { LoanTokenResult } from '@defichain/jellyfish-api-core/dist/category/loan'
-import { TokenResult } from '@defichain/jellyfish-api-core/dist/category/token'
 
 export class Loan {
   constructor (private readonly client: WhaleApiClient) {
@@ -64,9 +62,9 @@ export class Loan {
    * Get information about a loan token with given loan token id.
    *
    * @param {string} id loanToken id to get
-   * @return {Promise<LoanTokenResult>}
+   * @return {Promise<LoanToken>}
    */
-  async getLoanToken (id: string): Promise<LoanTokenResult> {
+  async getLoanToken (id: string): Promise<LoanToken> {
     return await this.client.requestData('GET', `loans/tokens/${id}`)
   }
 }
@@ -87,7 +85,23 @@ export interface CollateralToken {
 
 export interface LoanToken {
   tokenId: string
-  token: TokenResult
   interest: string
   fixedIntervalPriceId: string
+  symbol: string
+  symbolKey: string
+  name: string
+  decimal: number
+  limit: number
+  mintable: boolean
+  tradeable: boolean
+  isDAT: boolean
+  isLPS: boolean
+  isLoanToken: boolean
+  finalized: boolean
+  minted: number
+  creationTx: string
+  creationHeight: number
+  destructionTx: string
+  destructionHeight: number
+  collateralAddress: string
 }

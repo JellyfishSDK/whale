@@ -81,11 +81,8 @@ describe('list', () => {
     expect(result.length).toStrictEqual(4)
     expect(result[0]).toStrictEqual({
       tokenId: expect.any(String),
-      token: expect.any(Object),
       interest: expect.any(String),
-      fixedIntervalPriceId: expect.any(String)
-    })
-    expect(Object.values(result[0].token)[0]).toStrictEqual({
+      fixedIntervalPriceId: expect.any(String),
       symbol: expect.any(String),
       symbolKey: expect.any(String),
       name: expect.any(String),
@@ -134,8 +131,10 @@ describe('list', () => {
 describe('get', () => {
   it('should get loan token by symbol', async () => {
     const data = await client.loan.getLoanToken('AAPL')
-    expect(Object.keys(data.token)[0]).toStrictEqual('1')
-    expect(data.token[Object.keys(data.token)[0]]).toStrictEqual({
+    expect(data).toStrictEqual({
+      tokenId: expect.any(String),
+      fixedIntervalPriceId: 'AAPL/USD',
+      interest: '0.01',
       symbol: 'AAPL',
       symbolKey: 'AAPL',
       name: '',

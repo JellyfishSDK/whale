@@ -163,10 +163,27 @@ function mapCollateralToken (detail: CollateralTokenDetail): CollateralToken {
 }
 
 function mapLoanToken (result: LoanTokenResult): LoanToken {
+  const data = result.token[Object.keys(result.token)[0]]
   return {
-    tokenId: String(result.token[Object.keys(result.token)[0]].creationTx),
-    token: result.token,
+    tokenId: data.creationTx,
     interest: result.interest.toFixed(),
-    fixedIntervalPriceId: result.fixedIntervalPriceId
+    fixedIntervalPriceId: result.fixedIntervalPriceId,
+    symbol: data.symbol,
+    symbolKey: data.symbolKey,
+    name: data.name,
+    decimal: data.decimal.toNumber(),
+    limit: data.limit.toNumber(),
+    mintable: data.mintable,
+    tradeable: data.tradeable,
+    isDAT: data.isDAT,
+    isLPS: data.isLPS,
+    isLoanToken: data.isLoanToken,
+    finalized: data.finalized,
+    minted: data.minted.toNumber(),
+    creationTx: data.creationTx,
+    creationHeight: data.creationHeight.toNumber(),
+    destructionTx: data.destructionTx,
+    destructionHeight: data.destructionHeight.toNumber(),
+    collateralAddress: data.collateralAddress
   }
 }
