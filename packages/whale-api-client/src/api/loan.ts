@@ -74,16 +74,16 @@ export class Loan {
 
 export interface LoanScheme {
   id: string
-  minColRatio: string
-  interestRate: string
+  minColRatio: BigNumber
+  interestRate: BigNumber
 }
 
 export interface CollateralToken {
   tokenId: string
   token: string
-  factor: string
+  factor: BigNumber
   priceFeedId: string
-  activateAfterBlock: number
+  activateAfterBlock: BigNumber
 }
 
 export interface LoanToken {

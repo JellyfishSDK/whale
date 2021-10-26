@@ -147,8 +147,8 @@ function mapLoanScheme (result: LoanSchemeResult | GetLoanSchemeResult): LoanSch
   // TODO: default not exposed because getLoanScheme vs listLoanSchemes don't return same data
   return {
     id: result.id,
-    minColRatio: result.mincolratio.toFixed(),
-    interestRate: result.interestrate.toFixed()
+    minColRatio: result.mincolratio,
+    interestRate: result.interestrate
   }
 }
 
@@ -156,9 +156,9 @@ function mapCollateralToken (detail: CollateralTokenDetail): CollateralToken {
   return {
     tokenId: detail.tokenId,
     token: detail.token,
-    factor: detail.factor.toFixed(),
+    factor: detail.factor,
     priceFeedId: detail.fixedIntervalPriceId,
-    activateAfterBlock: detail.activateAfterBlock.toNumber()
+    activateAfterBlock: detail.activateAfterBlock
   }
 }
 

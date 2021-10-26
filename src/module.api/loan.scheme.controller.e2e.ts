@@ -59,23 +59,23 @@ describe('loan', () => {
     expect(result.data).toStrictEqual([
       {
         id: 'default',
-        minColRatio: '100',
-        interestRate: '6.5'
+        minColRatio: new BigNumber(100),
+        interestRate: new BigNumber(6.5)
       },
       {
         id: 'scheme1',
-        minColRatio: '150',
-        interestRate: '5.5'
+        minColRatio: new BigNumber(150),
+        interestRate: new BigNumber(5.5)
       },
       {
         id: 'scheme2',
-        minColRatio: '200',
-        interestRate: '4.5'
+        minColRatio: new BigNumber(200),
+        interestRate: new BigNumber(4.5)
       },
       {
         id: 'scheme3',
-        minColRatio: '250',
-        interestRate: '3.5'
+        minColRatio: new BigNumber(250),
+        interestRate: new BigNumber(3.5)
       }
     ])
   })
@@ -123,8 +123,8 @@ describe('get', () => {
     expect(data).toStrictEqual(
       {
         id: 'default',
-        minColRatio: '100',
-        interestRate: '6.5'
+        minColRatio: new BigNumber(100),
+        interestRate: new BigNumber(6.5)
       }
     )
   })

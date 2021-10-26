@@ -110,29 +110,29 @@ describe('list', () => {
         token: expect.any(String),
         tokenId: expect.any(String),
         priceFeedId: expect.any(String),
-        factor: expect.any(String),
-        activateAfterBlock: expect.any(Number)
+        factor: expect.any(BigNumber),
+        activateAfterBlock: expect.any(BigNumber)
       },
       {
         token: expect.any(String),
         tokenId: expect.any(String),
         priceFeedId: expect.any(String),
-        factor: expect.any(String),
-        activateAfterBlock: expect.any(Number)
+        factor: expect.any(BigNumber),
+        activateAfterBlock: expect.any(BigNumber)
       },
       {
         token: expect.any(String),
         tokenId: expect.any(String),
         priceFeedId: expect.any(String),
-        factor: expect.any(String),
-        activateAfterBlock: expect.any(Number)
+        factor: expect.any(BigNumber),
+        activateAfterBlock: expect.any(BigNumber)
       },
       {
         token: expect.any(String),
         tokenId: expect.any(String),
         priceFeedId: expect.any(String),
-        factor: expect.any(String),
-        activateAfterBlock: expect.any(Number)
+        factor: expect.any(BigNumber),
+        activateAfterBlock: expect.any(BigNumber)
       }
     ])
   })
@@ -176,8 +176,8 @@ describe('get', () => {
         tokenId: collateralTokenId1,
         token: 'AAPL',
         priceFeedId: 'AAPL/USD',
-        factor: '0.1',
-        activateAfterBlock: 108
+        factor: new BigNumber(0.1),
+        activateAfterBlock: new BigNumber(108)
       }
     )
   })
