@@ -94,7 +94,7 @@ describe('list', () => {
       isLoanToken: true,
       minted: new BigNumber(0),
       creationTx: expect.any(String),
-      creationHeight: new BigNumber(104),
+      creationHeight: expect.any(BigNumber),
       destructionTx: expect.any(String),
       destructionHeight: new BigNumber(-1),
       collateralAddress: expect.any(String)
@@ -154,7 +154,7 @@ describe('get', () => {
       isLoanToken: true,
       minted: new BigNumber(0),
       creationTx: expect.any(String),
-      creationHeight: new BigNumber(104),
+      creationHeight: expect.any(BigNumber),
       destructionTx: expect.any(String),
       destructionHeight: new BigNumber(-1),
       collateralAddress: expect.any(String)

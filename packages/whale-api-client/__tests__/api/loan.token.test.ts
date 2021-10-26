@@ -99,7 +99,7 @@ describe('list', () => {
       isLoanToken: true,
       minted: 0,
       creationTx: expect.any(String),
-      creationHeight: 104,
+      creationHeight: expect.any(Number),
       destructionTx: expect.any(String),
       destructionHeight: -1,
       collateralAddress: expect.any(String)
@@ -149,7 +149,7 @@ describe('get', () => {
       isLoanToken: true,
       minted: 0,
       creationTx: expect.any(String),
-      creationHeight: 104,
+      creationHeight: expect.any(Number),
       destructionTx: expect.any(String),
       destructionHeight: -1,
       collateralAddress: expect.any(String)
