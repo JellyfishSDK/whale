@@ -65,23 +65,23 @@ describe('list', () => {
     expect([...list]).toStrictEqual([
       {
         id: 'default',
-        minColRatio: 100,
-        interestRate: 6.5
+        minColRatio: '100',
+        interestRate: '6.5'
       },
       {
         id: 'scheme1',
-        minColRatio: 150,
-        interestRate: 5.5
+        minColRatio: '150',
+        interestRate: '5.5'
       },
       {
         id: 'scheme2',
-        minColRatio: 200,
-        interestRate: 4.5
+        minColRatio: '200',
+        interestRate: '4.5'
       },
       {
         id: 'scheme3',
-        minColRatio: 250,
-        interestRate: 3.5
+        minColRatio: '250',
+        interestRate: '3.5'
       }
     ])
   })
@@ -118,8 +118,8 @@ describe('get', () => {
     const data = await client.loan.getScheme('scheme1')
     expect(data).toStrictEqual({
       id: 'scheme1',
-      minColRatio: 150,
-      interestRate: 5.5
+      minColRatio: '150',
+      interestRate: '5.5'
     })
   })
 

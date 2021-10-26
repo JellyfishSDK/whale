@@ -116,7 +116,7 @@ describe('list', () => {
       token: expect.any(String),
       tokenId: expect.any(String),
       priceFeedId: expect.any(String),
-      factor: expect.any(Number),
+      factor: expect.any(String),
       activateAfterBlock: expect.any(Number)
     })
   })
@@ -148,7 +148,7 @@ describe('get', () => {
     expect(data).toStrictEqual({
       token: 'AAPL',
       tokenId: collateralTokenId1,
-      factor: 0.1,
+      factor: '0.1',
       priceFeedId: 'AAPL/USD',
       activateAfterBlock: 108
     })
