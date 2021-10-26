@@ -121,7 +121,7 @@ describe('list', () => {
     })
   })
 
-  it('should listLoanSchemes with pagination', async () => {
+  it('should listCollateral with pagination', async () => {
     const first = await client.loan.listCollateral(2)
 
     expect(first.length).toStrictEqual(2)

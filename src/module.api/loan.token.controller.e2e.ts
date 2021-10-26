@@ -1,14 +1,14 @@
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp } from '@src/e2e.module'
 import BigNumber from 'bignumber.js'
-import { LoanMasterNodeRegTestContainer } from '@src/module.api/loan_container'
-import { LoanTokenController } from '@src/module.api/loan.token.controller'
+import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
+import { LoanController } from '@src/module.api/loan.controller'
 import { NotFoundException } from '@nestjs/common'
 import { Testing } from '@defichain/jellyfish-testing'
 
 const container = new LoanMasterNodeRegTestContainer()
 let app: NestFastifyApplication
-let controller: LoanTokenController
+let controller: LoanController
 
 beforeAll(async () => {
   await container.start()
@@ -17,7 +17,7 @@ beforeAll(async () => {
 
   app = await createTestingApp(container)
   const testing = Testing.create(container)
-  controller = app.get(LoanTokenController)
+  controller = app.get(LoanController)
 
   const oracleId = await testing.container.call('appointoracle', [await testing.generateAddress(), [
     { token: 'AAPL', currency: 'USD' },
@@ -70,63 +70,56 @@ afterAll(async () => {
   await stopTestingApp(container, app)
 })
 
-describe('loan', () => {
+describe('list', () => {
   it('should listLoanTokens', async () => {
-    const result = await controller.list({ size: 100 })
+    const result = await controller.listLoanToken({ size: 100 })
     expect(result.data.length).toStrictEqual(4)
     expect(result.data[0]).toStrictEqual({
-      symbol: 'AAPL',
-      token: {
-        1: {
-          symbol: 'AAPL',
-          symbolKey: 'AAPL',
-          name: '',
-          decimal: new BigNumber(8),
-          limit: new BigNumber(0),
-          mintable: false,
-          tradeable: true,
-          isDAT: true,
-          isLPS: false,
-          finalized: false,
-          isLoanToken: true,
-          minted: new BigNumber(0),
-          creationTx: expect.any(String),
-          creationHeight: new BigNumber(104),
-          destructionTx: expect.any(String),
-          destructionHeight: new BigNumber(-1),
-          collateralAddress: expect.any(String)
-        }
-      },
-      interest: new BigNumber(0.01),
-      fixedIntervalPriceId: 'AAPL/USD'
+      tokenId: expect.any(String),
+      token: expect.any(Object),
+      interest: expect.any(BigNumber),
+      fixedIntervalPriceId: expect.any(String)
+    })
+    expect(Object.values(result.data[0].token)[0]).toStrictEqual({
+      symbol: expect.any(String),
+      symbolKey: expect.any(String),
+      name: expect.any(String),
+      decimal: new BigNumber(8),
+      limit: new BigNumber(0),
+      mintable: false,
+      tradeable: true,
+      isDAT: true,
+      isLPS: false,
+      finalized: false,
+      isLoanToken: true,
+      minted: new BigNumber(0),
+      creationTx: expect.any(String),
+      creationHeight: new BigNumber(104),
+      destructionTx: expect.any(String),
+      destructionHeight: new BigNumber(-1),
+      collateralAddress: expect.any(String)
     })
 
-    expect(result.data[1].symbol).toStrictEqual('FB')
-    expect(result.data[2].symbol).toStrictEqual('MSFT')
-    expect(result.data[3].symbol).toStrictEqual('TSLA')
+    expect(result.data[1].tokenId.length).toStrictEqual(64)
+    expect(result.data[2].tokenId.length).toStrictEqual(64)
+    expect(result.data[3].tokenId.length).toStrictEqual(64)
   })
 
   it('should listLoanTokens with pagination', async () => {
-    const first = await controller.list({ size: 2 })
+    const first = await controller.listLoanToken({ size: 2 })
 
     expect(first.data.length).toStrictEqual(2)
-    expect(first.page?.next).toStrictEqual('FB')
+    expect(first.page?.next?.length).toStrictEqual(64)
 
-    expect(first.data[0].symbol).toStrictEqual('AAPL')
-    expect(first.data[1].symbol).toStrictEqual('FB')
-
-    const next = await controller.list({
+    const next = await controller.listLoanToken({
       size: 2,
       next: first.page?.next
     })
 
     expect(next.data.length).toStrictEqual(2)
-    expect(next.page?.next).toStrictEqual('TSLA')
+    expect(next.page?.next?.length).toStrictEqual(64)
 
-    expect(next.data[0].symbol).toStrictEqual('MSFT')
-    expect(next.data[1].symbol).toStrictEqual('TSLA')
-
-    const last = await controller.list({
+    const last = await controller.listLoanToken({
       size: 2,
       next: next.page?.next
     })
@@ -136,7 +129,7 @@ describe('loan', () => {
   })
 
   it('should listLoanTokens with an empty object if size 100 next 300 which is out of range', async () => {
-    const result = await controller.list({ size: 100, next: '300' })
+    const result = await controller.listLoanToken({ size: 100, next: '300' })
 
     expect(result.data.length).toStrictEqual(0)
     expect(result.page).toBeUndefined()
@@ -145,7 +138,7 @@ describe('loan', () => {
 
 describe('get', () => {
   it('should get loan token by symbol', async () => {
-    const data = await controller.get('AAPL')
+    const data = await controller.getLoanToken('AAPL')
     expect(Object.keys(data.token)[0]).toStrictEqual('1')
     expect(data.token[Object.keys(data.token)[0]]).toStrictEqual({
       symbol: 'AAPL',
@@ -168,10 +161,10 @@ describe('get', () => {
     })
   })
 
-  it('should throw error while getting non-existent loan token', async () => {
+  it('should throw error while getting non-existent loan token id', async () => {
     expect.assertions(2)
     try {
-      await controller.get('999')
+      await controller.getLoanToken('999')
     } catch (err) {
       expect(err).toBeInstanceOf(NotFoundException)
       expect(err.response).toStrictEqual({

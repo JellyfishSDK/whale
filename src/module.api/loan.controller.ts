@@ -3,11 +3,12 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import {
-  CollateralTokenDetail,
   GetLoanSchemeResult,
-  LoanSchemeResult
+  LoanSchemeResult,
+  CollateralTokenDetail,
+  LoanTokenResult
 } from '@defichain/jellyfish-api-core/dist/category/loan'
-import { CollateralToken, LoanScheme } from '@whale-api-client/api/loan'
+import { CollateralToken, LoanScheme, LoanToken } from '@whale-api-client/api/loan'
 
 @Controller('/loans')
 export class LoanController {
@@ -87,6 +88,44 @@ export class LoanController {
       }
     }
   }
+
+  /**
+   * Paginate loan tokens.
+   *
+   * @param {PaginationQuery} query
+   * @return {Promise<ApiPagedResponse<LoanToken>>}
+   */
+  @Get('/tokens')
+  async listLoanToken (
+    @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<LoanToken>> {
+    const result = Object.entries(await this.client.loan.listLoanTokens())
+      .map(([, value]) => {
+        return mapLoanToken(value)
+      }).sort((a, b) => a.tokenId.localeCompare(b.tokenId))
+
+    return createFakePagination(query, result, item => item.tokenId)
+  }
+
+  /**
+   * Get information about a loan token with given loan token.
+   *
+   * @param {string} id
+   * @return {Promise<LoanTokenResult>}
+   */
+  @Get('/tokens/:id')
+  async getLoanToken (@Param('id') id: string): Promise<LoanToken> {
+    try {
+      const data = await this.client.loan.getLoanToken(id)
+      return mapLoanToken(data)
+    } catch (err) {
+      if (err?.payload?.message === `Token ${id} does not exist!`) {
+        throw new NotFoundException('Unable to find loan token')
+      } else {
+        throw new BadRequestException(err)
+      }
+    }
+  }
 }
 
 function createFakePagination<T> (query: PaginationQuery, items: T[], mapId: (item: T) => string): ApiPagedResponse<T> {
@@ -115,10 +154,19 @@ function mapLoanScheme (result: LoanSchemeResult | GetLoanSchemeResult): LoanSch
 
 function mapCollateralToken (detail: CollateralTokenDetail): CollateralToken {
   return {
-    token: detail.token,
     tokenId: detail.tokenId,
+    token: detail.token,
     factor: detail.factor.toFixed(),
     priceFeedId: detail.fixedIntervalPriceId,
     activateAfterBlock: detail.activateAfterBlock.toNumber()
+  }
+}
+
+function mapLoanToken (result: LoanTokenResult): LoanToken {
+  return {
+    tokenId: String(result.token[Object.keys(result.token)[0]].creationTx),
+    token: result.token,
+    interest: result.interest,
+    fixedIntervalPriceId: result.fixedIntervalPriceId
   }
 }

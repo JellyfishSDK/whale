@@ -22,7 +22,7 @@ import { PriceController } from '@src/module.api/price.controller'
 import { StatsController } from '@src/module.api/stats.controller'
 import { FeeController } from '@src/module.api/fee.controller'
 import { RawtxController } from '@src/module.api/rawtx.controller'
-import { LoanTokenController } from '@src/module.api/loan.token.controller'
+import { LoanController } from '@src/module.api/loan.controller'
 
 /**
  * Exposed ApiModule for public interfacing
@@ -43,7 +43,7 @@ import { LoanTokenController } from '@src/module.api/loan.token.controller'
     StatsController,
     FeeController,
     RawtxController,
-    LoanTokenController
+    LoanController
   ],
   providers: [
     { provide: APP_PIPE, useClass: ApiValidationPipe },
