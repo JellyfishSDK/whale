@@ -82,7 +82,7 @@ describe('list', () => {
     expect(result[0]).toStrictEqual({
       tokenId: expect.any(String),
       token: expect.any(Object),
-      interest: expect.any(Number),
+      interest: expect.any(String),
       fixedIntervalPriceId: expect.any(String)
     })
     expect(Object.values(result[0].token)[0]).toStrictEqual({

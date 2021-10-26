@@ -1,7 +1,6 @@
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
 import { LoanTokenResult } from '@defichain/jellyfish-api-core/dist/category/loan'
-import BigNumber from 'bignumber.js'
 import { TokenResult } from '@defichain/jellyfish-api-core/dist/category/token'
 
 export class Loan {
@@ -89,6 +88,6 @@ export interface CollateralToken {
 export interface LoanToken {
   tokenId: string
   token: TokenResult
-  interest: BigNumber
+  interest: string
   fixedIntervalPriceId: string
 }

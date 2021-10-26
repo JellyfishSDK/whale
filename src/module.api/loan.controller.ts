@@ -166,7 +166,7 @@ function mapLoanToken (result: LoanTokenResult): LoanToken {
   return {
     tokenId: String(result.token[Object.keys(result.token)[0]].creationTx),
     token: result.token,
-    interest: result.interest,
+    interest: result.interest.toFixed(),
     fixedIntervalPriceId: result.fixedIntervalPriceId
   }
 }
