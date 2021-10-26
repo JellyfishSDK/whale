@@ -3,7 +3,7 @@ import { StubService } from '../stub.service'
 import { WhaleApiClient, WhaleApiException } from '../../src'
 import BigNumber from 'bignumber.js'
 import { Testing } from '@defichain/jellyfish-testing'
-import { LoanMasterNodeRegTestContainer } from './loan_container'
+import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
 
 let container: LoanMasterNodeRegTestContainer
 let service: StubService
@@ -67,41 +67,18 @@ afterAll(async () => {
 
 describe('list', () => {
   it('should listVaults with size only', async () => {
-    const result = await client.loanVault.list('', '', 'false', 20)
+    const result = await client.loan.listVault(20)
     expect(result.length).toStrictEqual(4)
   })
 
-  it('should listVaults with size and ownerAddress', async () => {
-    const result = await client.loanVault.list(address1, '', 'false', 20)
-    expect(result.length).toStrictEqual(1)
-    expect(result[0].ownerAddress).toStrictEqual(address1)
-  })
-
-  it('should listVaults with size and loanSchemeId', async () => {
-    {
-      const result = await client.loanVault.list('', 'default', 'false', 20)
-      expect(result.length).toStrictEqual(4)
-    }
-
-    {
-      const result = await client.loanVault.list('', 'scheme', 'false', 20)
-      expect(result.length).toStrictEqual(0)
-    }
-  })
-
-  it('should listVaults with size and isUnderLiquidation parameter = true', async () => {
-    const result = await client.loanVault.list('', '', 'true', 20)
-    expect(result.length).toStrictEqual(0)
-  })
-
   it('should listTokens with size and pagination', async () => {
-    const list = await client.loanVault.list('', '', 'false', 20)
+    const list = await client.loan.listVault(20)
     const vaultId0 = list[0].vaultId
     const vaultId1 = list[1].vaultId
     const vaultId2 = list[2].vaultId
     const vaultId3 = list[3].vaultId
 
-    const first = await client.loanVault.list('', '', 'false', 2)
+    const first = await client.loan.listVault(2)
 
     expect(first.length).toStrictEqual(2)
     expect(first.hasNext).toStrictEqual(true)
@@ -129,7 +106,7 @@ describe('list', () => {
 
 describe('get', () => {
   it('should get vault by vaultId', async () => {
-    const data = await client.loanVault.get(vaultId1)
+    const data = await client.loan.getVault(vaultId1)
     expect(data).toStrictEqual({
       vaultId: vaultId1,
       loanSchemeId: 'default',
@@ -149,7 +126,7 @@ describe('get', () => {
   it('should fail due to getting non-existent vault', async () => {
     expect.assertions(4)
     try {
-      await client.loanVault.get('0530ab29a9f09416a014a4219f186f1d5d530e9a270a9f941275b3972b43ebb7')
+      await client.loan.getVault('0530ab29a9f09416a014a4219f186f1d5d530e9a270a9f941275b3972b43ebb7')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
@@ -162,7 +139,7 @@ describe('get', () => {
     }
 
     try {
-      await client.loanVault.get('999')
+      await client.loan.getVault('999')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
@@ -178,7 +155,7 @@ describe('get', () => {
   it('should fail due to id is malformed', async () => {
     expect.assertions(2)
     try {
-      await client.loanVault.get('$*@')
+      await client.loan.getVault('$*@')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({

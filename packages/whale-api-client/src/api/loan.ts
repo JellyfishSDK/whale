@@ -46,6 +46,27 @@ export class Loan {
   async getCollateral (id: string): Promise<CollateralToken> {
     return await this.client.requestData('GET', `loans/collaterals/${id}`)
   }
+
+  /**
+   * Paginate query loan vaults.
+   *
+   * @param {number} size of vaults to query
+   * @param {string} next set of vaults
+   * @return {Promise<ApiPagedResponse<LoanVault>>}
+   */
+  async listVault (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanVault>> {
+    return await this.client.requestList('GET', 'loans/vaults', size, next)
+  }
+
+  /**
+   * Get information about a vault with given vault id.
+   *
+   * @param {string} id vault id to get
+   * @return {Promise<LoanVault>}
+   */
+  async getVault (id: string): Promise<LoanVault> {
+    return await this.client.requestData('GET', `loans/vaults/${id}`)
+  }
 }
 
 export interface LoanScheme {
@@ -60,4 +81,33 @@ export interface CollateralToken {
   factor: string
   priceFeedId: string
   activateAfterBlock: number
+}
+
+export interface LoanVault {
+  vaultId: string
+  loanSchemeId: string
+  ownerAddress: string
+
+  invalidPrice: boolean
+  isUnderLiquidation: boolean
+
+  collateralValue?: string
+  loanValue?: string
+  currentRatio?: string
+  interestValue?: string
+
+  collateralAmounts: LoanVaultTokenAmount[]
+  loanAmounts: LoanVaultTokenAmount[]
+  interestAmounts: LoanVaultTokenAmount[]
+
+  // TODO: auctions batch information not included for now
+}
+
+export interface LoanVaultTokenAmount {
+  id: string
+  amount: string
+  symbol: string
+  displaySymbol: string
+  symbolKey: string
+  name: string
 }

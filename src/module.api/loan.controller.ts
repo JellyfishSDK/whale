@@ -7,11 +7,15 @@ import {
   GetLoanSchemeResult,
   LoanSchemeResult
 } from '@defichain/jellyfish-api-core/dist/category/loan'
-import { CollateralToken, LoanScheme } from '@whale-api-client/api/loan'
+import { CollateralToken, LoanScheme, LoanVault } from '@whale-api-client/api/loan'
+import { LoanVaultService } from '@src/module.api/loan.vault.service'
 
 @Controller('/loans')
 export class LoanController {
-  constructor (private readonly client: JsonRpcClient) {
+  constructor (
+    private readonly client: JsonRpcClient,
+    private readonly vaultService: LoanVaultService
+  ) {
   }
 
   /**
@@ -86,6 +90,28 @@ export class LoanController {
         throw new BadRequestException(err)
       }
     }
+  }
+
+  /**
+   * Paginate loan vaults.
+   *
+   * @param {PaginationQuery} query
+   * @return {Promise<ApiPagedResponse<LoanVault>>}
+   */
+  @Get('/vaults')
+  async listVault (@Query() query: PaginationQuery): Promise<ApiPagedResponse<LoanVault>> {
+    return await this.vaultService.list(query)
+  }
+
+  /**
+   * Get information about a vault with given vault id.
+   *
+   * @param {string} id
+   * @return {Promise<LoanVault>}
+   */
+  @Get('/vaults/:id')
+  async getVault (@Param('id') id: string): Promise<LoanVault> {
+    return await this.vaultService.get(id)
   }
 }
 
