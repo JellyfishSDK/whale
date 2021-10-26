@@ -59,7 +59,7 @@ afterAll(async () => {
 })
 
 describe('list', () => {
-  it('should listloan', async () => {
+  it('should listScheme', async () => {
     const list = await client.loan.listScheme()
     expect(list.length).toStrictEqual(4)
     expect([...list]).toStrictEqual([
@@ -86,7 +86,7 @@ describe('list', () => {
     ])
   })
 
-  it('should listloans with pagination', async () => {
+  it('should listScheme with pagination', async () => {
     const first = await client.loan.listScheme(2)
 
     expect(first.length).toStrictEqual(2)
