@@ -1,14 +1,14 @@
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp } from '@src/e2e.module'
 import BigNumber from 'bignumber.js'
-import { LoanMasterNodeRegTestContainer } from '@src/module.api/loan_container'
-import { LoanCollateralController } from '@src/module.api/loan.collateral.controller'
+import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
+import { LoanController } from '@src/module.api/loan.controller'
 import { NotFoundException } from '@nestjs/common'
 import { Testing } from '@defichain/jellyfish-testing'
 
 const container = new LoanMasterNodeRegTestContainer()
 let app: NestFastifyApplication
-let controller: LoanCollateralController
+let controller: LoanController
 
 let collateralTokenId1: string
 
@@ -19,7 +19,7 @@ beforeAll(async () => {
 
   app = await createTestingApp(container)
   const testing = Testing.create(container)
-  controller = app.get(LoanCollateralController)
+  controller = app.get(LoanController)
 
   await testing.token.create({ symbol: 'AAPL' })
   await testing.generate(1)
@@ -42,10 +42,30 @@ beforeAll(async () => {
     ], { weightage: 1 })
   await testing.generate(1)
 
-  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '1.5@AAPL', currency: 'USD' }] })
-  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '2.5@TSLA', currency: 'USD' }] })
-  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '3.5@MSFT', currency: 'USD' }] })
-  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '4.5@FB', currency: 'USD' }] })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
+    prices: [{
+      tokenAmount: '1.5@AAPL',
+      currency: 'USD'
+    }]
+  })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
+    prices: [{
+      tokenAmount: '2.5@TSLA',
+      currency: 'USD'
+    }]
+  })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
+    prices: [{
+      tokenAmount: '3.5@MSFT',
+      currency: 'USD'
+    }]
+  })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
+    prices: [{
+      tokenAmount: '4.5@FB',
+      currency: 'USD'
+    }]
+  })
   await testing.generate(1)
 
   collateralTokenId1 = await testing.rpc.loan.setCollateralToken({
@@ -83,57 +103,55 @@ afterAll(async () => {
 
 describe('list', () => {
   it('should listCollateralTokens', async () => {
-    const result = await controller.list({ size: 100 })
+    const result = await controller.listCollateral({ size: 100 })
     expect(result.data.length).toStrictEqual(4)
     expect(result.data).toStrictEqual([
       {
-        token: 'AAPL',
-        priceFeedId: 'AAPL/USD',
-        factor: new BigNumber(0.1),
-        activateAfterBlock: new BigNumber(108)
+        token: expect.any(String),
+        tokenId: expect.any(String),
+        priceFeedId: expect.any(String),
+        factor: expect.any(String),
+        activateAfterBlock: expect.any(Number)
       },
       {
-        token: 'FB',
-        priceFeedId: 'FB/USD',
-        factor: new BigNumber(0.4),
-        activateAfterBlock: new BigNumber(111)
+        token: expect.any(String),
+        tokenId: expect.any(String),
+        priceFeedId: expect.any(String),
+        factor: expect.any(String),
+        activateAfterBlock: expect.any(Number)
       },
       {
-        token: 'MSFT',
-        priceFeedId: 'MSFT/USD',
-        factor: new BigNumber(0.3),
-        activateAfterBlock: new BigNumber(110)
+        token: expect.any(String),
+        tokenId: expect.any(String),
+        priceFeedId: expect.any(String),
+        factor: expect.any(String),
+        activateAfterBlock: expect.any(Number)
       },
       {
-        token: 'TSLA',
-        priceFeedId: 'TSLA/USD',
-        factor: new BigNumber(0.2),
-        activateAfterBlock: new BigNumber(109)
+        token: expect.any(String),
+        tokenId: expect.any(String),
+        priceFeedId: expect.any(String),
+        factor: expect.any(String),
+        activateAfterBlock: expect.any(Number)
       }
     ])
   })
 
   it('should listCollateralTokens with pagination', async () => {
-    const first = await controller.list({ size: 2 })
+    const first = await controller.listCollateral({ size: 2 })
 
     expect(first.data.length).toStrictEqual(2)
-    expect(first.page?.next).toStrictEqual('FB')
+    expect(first.page?.next?.length).toStrictEqual(64)
 
-    expect(first.data[0].token).toStrictEqual('AAPL')
-    expect(first.data[1].token).toStrictEqual('FB')
-
-    const next = await controller.list({
+    const next = await controller.listCollateral({
       size: 2,
       next: first.page?.next
     })
 
     expect(next.data.length).toStrictEqual(2)
-    expect(next.page?.next).toStrictEqual('TSLA')
+    expect(next.page?.next?.length).toStrictEqual(64)
 
-    expect(next.data[0].token).toStrictEqual('MSFT')
-    expect(next.data[1].token).toStrictEqual('TSLA')
-
-    const last = await controller.list({
+    const last = await controller.listCollateral({
       size: 2,
       next: next.page?.next
     })
@@ -143,7 +161,7 @@ describe('list', () => {
   })
 
   it('should listCollateralTokens with an empty object if size 100 next 300 which is out of range', async () => {
-    const result = await controller.list({ size: 100, next: '300' })
+    const result = await controller.listCollateral({ size: 100, next: '300' })
 
     expect(result.data.length).toStrictEqual(0)
     expect(result.page).toBeUndefined()
@@ -152,14 +170,14 @@ describe('list', () => {
 
 describe('get', () => {
   it('should get collateral token by symbol', async () => {
-    const data = await controller.get('AAPL')
+    const data = await controller.getCollateral('AAPL')
     expect(data).toStrictEqual(
       {
         tokenId: collateralTokenId1,
         token: 'AAPL',
-        factor: new BigNumber(0.1),
-        fixedIntervalPriceId: 'AAPL/USD',
-        activateAfterBlock: new BigNumber(108)
+        priceFeedId: 'AAPL/USD',
+        factor: '0.1',
+        activateAfterBlock: 108
       }
     )
   })
@@ -167,7 +185,7 @@ describe('get', () => {
   it('should throw error while getting non-existent collateral token id', async () => {
     expect.assertions(2)
     try {
-      await controller.get('999')
+      await controller.getCollateral('999')
     } catch (err) {
       expect(err).toBeInstanceOf(NotFoundException)
       expect(err.response).toStrictEqual({

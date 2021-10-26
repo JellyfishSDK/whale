@@ -16,7 +16,7 @@ import { Prices } from './api/prices'
 import { Stats } from './api/stats'
 import { Rawtx } from './api/rawtx'
 import { Fee } from './api/fee'
-import { LoanCollateral } from './api/loan.collateral'
+import { Loan } from './api/loan'
 
 /**
  * WhaleApiClient Options
@@ -75,7 +75,7 @@ export class WhaleApiClient {
   public readonly stats = new Stats(this)
   public readonly rawtx = new Rawtx(this)
   public readonly fee = new Fee(this)
-  public readonly loanCollateral = new LoanCollateral(this)
+  public readonly loan = new Loan(this)
 
   constructor (
     protected readonly options: WhaleApiClientOptions
