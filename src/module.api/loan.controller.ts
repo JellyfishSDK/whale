@@ -5,7 +5,7 @@ import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { GetLoanSchemeResult, LoanSchemeResult } from '@defichain/jellyfish-api-core/dist/category/loan'
 
 @Controller('/loans/schemes')
-export class LoanSchemeController {
+export class LoanController {
   constructor (private readonly client: JsonRpcClient) {
   }
 

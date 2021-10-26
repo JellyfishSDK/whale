@@ -2,13 +2,13 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp } from '@src/e2e.module'
 import BigNumber from 'bignumber.js'
 import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { LoanSchemeController } from '@src/module.api/loan.scheme.controller'
+import { LoanController } from '@src/module.api/loan.controller'
 import { NotFoundException } from '@nestjs/common'
 import { Testing } from '@defichain/jellyfish-testing'
 
 const container = new LoanMasterNodeRegTestContainer()
 let app: NestFastifyApplication
-let controller: LoanSchemeController
+let controller: LoanController
 
 beforeAll(async () => {
   await container.start()
@@ -17,7 +17,7 @@ beforeAll(async () => {
 
   app = await createTestingApp(container)
   const testing = Testing.create(container)
-  controller = app.get(LoanSchemeController)
+  controller = app.get(LoanController)
 
   // Default scheme
   await testing.rpc.loan.createLoanScheme({
