@@ -3,7 +3,7 @@ import { StubService } from '../stub.service'
 import { WhaleApiClient, WhaleApiException } from '../../src'
 import BigNumber from 'bignumber.js'
 import { Testing } from '@defichain/jellyfish-testing'
-import { LoanMasterNodeRegTestContainer } from './loan_container'
+import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
 
 let container: LoanMasterNodeRegTestContainer
 let service: StubService
