@@ -28,7 +28,6 @@ beforeAll(async () => {
   })
   await testing.generate(1)
 
-  // Scheme1
   await testing.rpc.loan.createLoanScheme({
     minColRatio: 150,
     interestRate: new BigNumber(5.5),
@@ -36,7 +35,6 @@ beforeAll(async () => {
   })
   await testing.generate(1)
 
-  // Scheme2
   await testing.rpc.loan.createLoanScheme({
     minColRatio: 200,
     interestRate: new BigNumber(4.5),
@@ -44,7 +42,6 @@ beforeAll(async () => {
   })
   await testing.generate(1)
 
-  // Scheme3
   await testing.rpc.loan.createLoanScheme({
     minColRatio: 250,
     interestRate: new BigNumber(3.5),
@@ -62,44 +59,35 @@ afterAll(async () => {
 })
 
 describe('list', () => {
-  it('should listLoanScheme', async () => {
-    const result = await client.loanScheme.list()
-    expect(result.length).toStrictEqual(4)
-    expect(result[0]).toStrictEqual(
+  it('should listloan', async () => {
+    const list = await client.loan.listScheme()
+    expect(list.length).toStrictEqual(4)
+    expect([...list]).toStrictEqual([
       {
         id: 'default',
-        mincolratio: 100,
-        interestrate: 6.5,
-        default: true
-      })
-
-    expect(result[1]).toStrictEqual(
+        minColRatio: '100',
+        interestRate: '6.5'
+      },
       {
         id: 'scheme1',
-        mincolratio: 150,
-        interestrate: 5.5,
-        default: false
-      })
-
-    expect(result[2]).toStrictEqual(
+        minColRatio: '150',
+        interestRate: '5.5'
+      },
       {
         id: 'scheme2',
-        mincolratio: 200,
-        interestrate: 4.5,
-        default: false
-      })
-
-    expect(result[3]).toStrictEqual(
+        minColRatio: '200',
+        interestRate: '4.5'
+      },
       {
         id: 'scheme3',
-        mincolratio: 250,
-        interestrate: 3.5,
-        default: false
-      })
+        minColRatio: '250',
+        interestRate: '3.5'
+      }
+    ])
   })
 
-  it('should listLoanSchemes with pagination', async () => {
-    const first = await client.loanScheme.list(2)
+  it('should listloans with pagination', async () => {
+    const first = await client.loan.listScheme(2)
 
     expect(first.length).toStrictEqual(2)
     expect(first.hasNext).toStrictEqual(true)
@@ -127,16 +115,18 @@ describe('list', () => {
 
 describe('get', () => {
   it('should get scheme by scheme id', async () => {
-    const data = await client.loanScheme.get('scheme1')
-    expect(data).toStrictEqual(
-      { id: 'scheme1', mincolratio: 150, interestrate: 5.5 }
-    )
+    const data = await client.loan.getScheme('scheme1')
+    expect(data).toStrictEqual({
+      id: 'scheme1',
+      minColRatio: '150',
+      interestRate: '5.5'
+    })
   })
 
   it('should fail due to getting non-existent or malformed id', async () => {
     expect.assertions(4)
     try {
-      await client.loanScheme.get('999')
+      await client.loan.getScheme('999')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
@@ -149,7 +139,7 @@ describe('get', () => {
     }
 
     try {
-      await client.loanScheme.get('$*@')
+      await client.loan.getScheme('$*@')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({

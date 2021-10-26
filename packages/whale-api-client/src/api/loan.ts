@@ -1,6 +1,5 @@
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
-import { LoanSchemeResult } from '@defichain/jellyfish-api-core/dist/category/loan'
 
 export class Loan {
   constructor (private readonly client: WhaleApiClient) {
@@ -11,9 +10,9 @@ export class Loan {
    *
    * @param {number} size of scheme to query
    * @param {string} next set of schemes
-   * @return {Promise<ApiPagedResponse<LoanSchemeResult>>}
+   * @return {Promise<ApiPagedResponse<LoanScheme>>}
    */
-  async list (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanSchemeResult>> {
+  async listScheme (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanScheme>> {
     return await this.client.requestList('GET', 'loans/schemes', size, next)
   }
 
@@ -21,9 +20,15 @@ export class Loan {
    * Get information about a scheme with given scheme id.
    *
    * @param {string} id scheme id to get
-   * @return {Promise<LoanSchemeResult>}
+   * @return {Promise<LoanScheme>}
    */
-  async get (id: string): Promise<LoanSchemeResult> {
+  async getScheme (id: string): Promise<LoanScheme> {
     return await this.client.requestData('GET', `loans/schemes/${id}`)
   }
+}
+
+export interface LoanScheme {
+  id: string
+  minColRatio: string
+  interestRate: string
 }
