@@ -78,23 +78,30 @@ describe('list', () => {
       tokenId: expect.any(String),
       interest: expect.any(String),
       fixedIntervalPriceId: expect.any(String),
-      symbol: expect.any(String),
-      symbolKey: expect.any(String),
-      name: expect.any(String),
-      decimal: 8,
-      limit: 0,
-      mintable: false,
-      tradeable: true,
-      isDAT: true,
-      isLPS: false,
-      finalized: false,
-      isLoanToken: true,
-      minted: 0,
-      creationTx: expect.any(String),
-      creationHeight: expect.any(Number),
-      destructionTx: expect.any(String),
-      destructionHeight: -1,
-      collateralAddress: expect.any(String)
+      token: {
+        collateralAddress: expect.any(String),
+        creation: {
+          height: expect.any(Number),
+          tx: expect.any(String)
+        },
+        decimal: 8,
+        destruction: {
+          height: -1,
+          tx: expect.any(String)
+        },
+        displaySymbol: expect.any(String),
+        finalized: false,
+        id: expect.any(String),
+        isDAT: true,
+        isLPS: false,
+        limit: '0',
+        mintable: false,
+        minted: '0',
+        name: '',
+        symbol: expect.any(String),
+        symbolKey: expect.any(String),
+        tradeable: true
+      }
     })
 
     expect(result.data[1].tokenId.length).toStrictEqual(64)
@@ -140,23 +147,30 @@ describe('get', () => {
       tokenId: expect.any(String),
       fixedIntervalPriceId: 'AAPL/USD',
       interest: '0.01',
-      symbol: 'AAPL',
-      symbolKey: 'AAPL',
-      name: '',
-      decimal: 8,
-      limit: 0,
-      mintable: false,
-      tradeable: true,
-      isDAT: true,
-      isLPS: false,
-      finalized: false,
-      isLoanToken: true,
-      minted: 0,
-      creationTx: expect.any(String),
-      creationHeight: expect.any(Number),
-      destructionTx: expect.any(String),
-      destructionHeight: -1,
-      collateralAddress: expect.any(String)
+      token: {
+        collateralAddress: expect.any(String),
+        creation: {
+          height: expect.any(Number),
+          tx: expect.any(String)
+        },
+        decimal: 8,
+        destruction: {
+          height: -1,
+          tx: expect.any(String)
+        },
+        displaySymbol: 'dAAPL',
+        finalized: false,
+        id: '1',
+        isDAT: true,
+        isLPS: false,
+        limit: '0',
+        mintable: false,
+        minted: '0',
+        name: '',
+        symbol: 'AAPL',
+        symbolKey: 'AAPL',
+        tradeable: true
+      }
     })
   })
 

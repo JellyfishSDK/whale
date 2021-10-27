@@ -108,21 +108,44 @@ afterAll(async () => {
 
 describe('list', () => {
   it('should listCollateralTokens', async () => {
-    const result = await client.loan.listCollateral()
+    const result = await client.loan.listCollateralToken()
     expect(result.length).toStrictEqual(4)
 
     // Not deterministic ordering due to use of id
     expect(result[0]).toStrictEqual({
-      token: expect.any(String),
       tokenId: expect.any(String),
       priceFeedId: expect.any(String),
       factor: expect.any(String),
-      activateAfterBlock: expect.any(Number)
+      activateAfterBlock: expect.any(Number),
+      token: {
+        collateralAddress: expect.any(String),
+        creation: {
+          height: expect.any(Number),
+          tx: expect.any(String)
+        },
+        decimal: 8,
+        destruction: {
+          height: -1,
+          tx: expect.any(String)
+        },
+        displaySymbol: expect.any(String),
+        finalized: false,
+        id: expect.any(String),
+        isDAT: true,
+        isLPS: false,
+        limit: '0',
+        mintable: true,
+        minted: '0',
+        name: expect.any(String),
+        symbol: expect.any(String),
+        symbolKey: expect.any(String),
+        tradeable: true
+      }
     })
   })
 
   it('should listCollateral with pagination', async () => {
-    const first = await client.loan.listCollateral(2)
+    const first = await client.loan.listCollateralToken(2)
 
     expect(first.length).toStrictEqual(2)
     expect(first.hasNext).toStrictEqual(true)
@@ -144,20 +167,43 @@ describe('list', () => {
 
 describe('get', () => {
   it('should get collateral token by symbol', async () => {
-    const data = await client.loan.getCollateral('AAPL')
+    const data = await client.loan.getCollateralToken('AAPL')
     expect(data).toStrictEqual({
-      token: 'AAPL',
       tokenId: collateralTokenId1,
       factor: '0.1',
       priceFeedId: 'AAPL/USD',
-      activateAfterBlock: 108
+      activateAfterBlock: 108,
+      token: {
+        collateralAddress: expect.any(String),
+        creation: {
+          height: expect.any(Number),
+          tx: expect.any(String)
+        },
+        decimal: 8,
+        destruction: {
+          height: -1,
+          tx: expect.any(String)
+        },
+        displaySymbol: 'dAAPL',
+        finalized: false,
+        id: expect.any(String),
+        isDAT: true,
+        isLPS: false,
+        limit: '0',
+        mintable: true,
+        minted: '0',
+        name: 'AAPL',
+        symbol: 'AAPL',
+        symbolKey: expect.any(String),
+        tradeable: true
+      }
     })
   })
 
   it('should fail due to getting non-existent or malformed collateral token id', async () => {
     expect.assertions(4)
     try {
-      await client.loan.getCollateral('999')
+      await client.loan.getCollateralToken('999')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
@@ -170,7 +216,7 @@ describe('get', () => {
     }
 
     try {
-      await client.loan.getCollateral('$*@')
+      await client.loan.getCollateralToken('$*@')
     } catch (err) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({

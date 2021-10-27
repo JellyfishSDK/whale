@@ -1,5 +1,6 @@
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
+import { TokenData } from './tokens'
 
 export class Loan {
   constructor (private readonly client: WhaleApiClient) {
@@ -33,7 +34,7 @@ export class Loan {
    * @param {string} next set of collateral tokens
    * @return {Promise<ApiPagedResponse<CollateralToken>>}
    */
-  async listCollateral (size: number = 30, next?: string): Promise<ApiPagedResponse<CollateralToken>> {
+  async listCollateralToken (size: number = 30, next?: string): Promise<ApiPagedResponse<CollateralToken>> {
     return await this.client.requestList('GET', 'loans/collaterals', size, next)
   }
 
@@ -43,7 +44,7 @@ export class Loan {
    * @param {string} id collateralToken id to get
    * @return {Promise<CollateralToken>}
    */
-  async getCollateral (id: string): Promise<CollateralToken> {
+  async getCollateralToken (id: string): Promise<CollateralToken> {
     return await this.client.requestData('GET', `loans/collaterals/${id}`)
   }
 
@@ -77,7 +78,7 @@ export interface LoanScheme {
 
 export interface CollateralToken {
   tokenId: string
-  token: string
+  token: TokenData
   factor: string
   priceFeedId: string
   activateAfterBlock: number
@@ -85,23 +86,7 @@ export interface CollateralToken {
 
 export interface LoanToken {
   tokenId: string
+  token: TokenData
   interest: string
   fixedIntervalPriceId: string
-  symbol: string
-  symbolKey: string
-  name: string
-  decimal: number
-  limit: number
-  mintable: boolean
-  tradeable: boolean
-  isDAT: boolean
-  isLPS: boolean
-  isLoanToken: boolean
-  finalized: boolean
-  minted: number
-  creationTx: string
-  creationHeight: number
-  destructionTx: string
-  destructionHeight: number
-  collateralAddress: string
 }

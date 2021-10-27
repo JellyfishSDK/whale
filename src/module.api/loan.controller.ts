@@ -1,18 +1,31 @@
-import { BadRequestException, Controller, Get, NotFoundException, Param, Query } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Query
+} from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import {
+  CollateralTokenDetail,
   GetLoanSchemeResult,
   LoanSchemeResult,
-  CollateralTokenDetail,
   LoanTokenResult
 } from '@defichain/jellyfish-api-core/dist/category/loan'
 import { CollateralToken, LoanScheme, LoanToken } from '@whale-api-client/api/loan'
+import { mapTokenData } from '@src/module.api/token.controller'
+import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 
 @Controller('/loans')
 export class LoanController {
-  constructor (private readonly client: JsonRpcClient) {
+  constructor (
+    private readonly client: JsonRpcClient,
+    private readonly deFiDCache: DeFiDCache
+  ) {
   }
 
   /**
@@ -64,9 +77,10 @@ export class LoanController {
   ): Promise<ApiPagedResponse<CollateralToken>> {
     const result = (await this.client.loan.listCollateralTokens())
       .sort((a, b) => a.tokenId.localeCompare(b.tokenId))
-      .map(value => mapCollateralToken(value))
+      .map(async value => await this.mapCollateralToken(value))
+    const items = await Promise.all(result)
 
-    return createFakePagination(query, result, item => item.tokenId)
+    return createFakePagination(query, items, item => item.tokenId)
   }
 
   /**
@@ -79,7 +93,7 @@ export class LoanController {
   async getCollateral (@Param('id') id: string): Promise<CollateralToken> {
     try {
       const data = await this.client.loan.getCollateralToken(id)
-      return mapCollateralToken(data)
+      return await this.mapCollateralToken(data)
     } catch (err) {
       if (err?.payload?.message === `Token ${id} does not exist!`) {
         throw new NotFoundException('Unable to find collateral token')
@@ -126,6 +140,24 @@ export class LoanController {
       }
     }
   }
+
+  async mapCollateralToken (detail: CollateralTokenDetail): Promise<CollateralToken> {
+    const result = await this.deFiDCache.getTokenInfoBySymbol(detail.token)
+    if (result === undefined) {
+      throw new ConflictException('unable to find token')
+    }
+
+    const id = Object.keys(result)[0]
+    const tokenInfo = result[id]
+
+    return {
+      tokenId: detail.tokenId,
+      token: mapTokenData(id, tokenInfo),
+      factor: detail.factor.toFixed(),
+      priceFeedId: detail.fixedIntervalPriceId,
+      activateAfterBlock: detail.activateAfterBlock.toNumber()
+    }
+  }
 }
 
 function createFakePagination<T> (query: PaginationQuery, items: T[], mapId: (item: T) => string): ApiPagedResponse<T> {
@@ -152,38 +184,13 @@ function mapLoanScheme (result: LoanSchemeResult | GetLoanSchemeResult): LoanSch
   }
 }
 
-function mapCollateralToken (detail: CollateralTokenDetail): CollateralToken {
-  return {
-    tokenId: detail.tokenId,
-    token: detail.token,
-    factor: detail.factor.toFixed(),
-    priceFeedId: detail.fixedIntervalPriceId,
-    activateAfterBlock: detail.activateAfterBlock.toNumber()
-  }
-}
-
 function mapLoanToken (result: LoanTokenResult): LoanToken {
-  const data = result.token[Object.keys(result.token)[0]]
+  const id = Object.keys(result.token)[0]
+  const tokenInfo = result.token[id]
   return {
-    tokenId: data.creationTx,
+    tokenId: tokenInfo.creationTx,
+    token: mapTokenData(id, tokenInfo),
     interest: result.interest.toFixed(),
-    fixedIntervalPriceId: result.fixedIntervalPriceId,
-    symbol: data.symbol,
-    symbolKey: data.symbolKey,
-    name: data.name,
-    decimal: data.decimal.toNumber(),
-    limit: data.limit.toNumber(),
-    mintable: data.mintable,
-    tradeable: data.tradeable,
-    isDAT: data.isDAT,
-    isLPS: data.isLPS,
-    isLoanToken: data.isLoanToken,
-    finalized: data.finalized,
-    minted: data.minted.toNumber(),
-    creationTx: data.creationTx,
-    creationHeight: data.creationHeight.toNumber(),
-    destructionTx: data.destructionTx,
-    destructionHeight: data.destructionHeight.toNumber(),
-    collateralAddress: data.collateralAddress
+    fixedIntervalPriceId: result.fixedIntervalPriceId
   }
 }

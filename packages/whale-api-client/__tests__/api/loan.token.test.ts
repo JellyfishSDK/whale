@@ -28,10 +28,30 @@ beforeAll(async () => {
   ], 1])
   await testing.generate(1)
 
-  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '1.5@AAPL', currency: 'USD' }] })
-  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '2.5@TSLA', currency: 'USD' }] })
-  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '3.5@MSFT', currency: 'USD' }] })
-  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), { prices: [{ tokenAmount: '4.5@FB', currency: 'USD' }] })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
+    prices: [{
+      tokenAmount: '1.5@AAPL',
+      currency: 'USD'
+    }]
+  })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
+    prices: [{
+      tokenAmount: '2.5@TSLA',
+      currency: 'USD'
+    }]
+  })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
+    prices: [{
+      tokenAmount: '3.5@MSFT',
+      currency: 'USD'
+    }]
+  })
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
+    prices: [{
+      tokenAmount: '4.5@FB',
+      currency: 'USD'
+    }]
+  })
   await testing.generate(1)
 
   await testing.container.call('setloantoken', [{
@@ -83,23 +103,30 @@ describe('list', () => {
       tokenId: expect.any(String),
       interest: expect.any(String),
       fixedIntervalPriceId: expect.any(String),
-      symbol: expect.any(String),
-      symbolKey: expect.any(String),
-      name: expect.any(String),
-      decimal: 8,
-      limit: 0,
-      mintable: false,
-      tradeable: true,
-      isDAT: true,
-      isLPS: false,
-      finalized: false,
-      isLoanToken: true,
-      minted: 0,
-      creationTx: expect.any(String),
-      creationHeight: expect.any(Number),
-      destructionTx: expect.any(String),
-      destructionHeight: -1,
-      collateralAddress: expect.any(String)
+      token: {
+        collateralAddress: expect.any(String),
+        creation: {
+          height: expect.any(Number),
+          tx: expect.any(String)
+        },
+        decimal: 8,
+        destruction: {
+          height: -1,
+          tx: expect.any(String)
+        },
+        displaySymbol: expect.any(String),
+        finalized: false,
+        id: expect.any(String),
+        isDAT: true,
+        isLPS: false,
+        limit: '0',
+        mintable: false,
+        minted: '0',
+        name: '',
+        symbol: expect.any(String),
+        symbolKey: expect.any(String),
+        tradeable: true
+      }
     })
 
     expect(result[1].tokenId.length).toStrictEqual(64)
@@ -135,23 +162,30 @@ describe('get', () => {
       tokenId: expect.any(String),
       fixedIntervalPriceId: 'AAPL/USD',
       interest: '0.01',
-      symbol: 'AAPL',
-      symbolKey: 'AAPL',
-      name: '',
-      decimal: 8,
-      limit: 0,
-      mintable: false,
-      tradeable: true,
-      isDAT: true,
-      isLPS: false,
-      finalized: false,
-      isLoanToken: true,
-      minted: 0,
-      creationTx: expect.any(String),
-      creationHeight: expect.any(Number),
-      destructionTx: expect.any(String),
-      destructionHeight: -1,
-      collateralAddress: expect.any(String)
+      token: {
+        collateralAddress: expect.any(String),
+        creation: {
+          height: expect.any(Number),
+          tx: expect.any(String)
+        },
+        decimal: 8,
+        destruction: {
+          height: -1,
+          tx: expect.any(String)
+        },
+        displaySymbol: 'dAAPL',
+        finalized: false,
+        id: '1',
+        isDAT: true,
+        isLPS: false,
+        limit: '0',
+        mintable: false,
+        minted: '0',
+        name: '',
+        symbol: 'AAPL',
+        symbolKey: 'AAPL',
+        tradeable: true
+      }
     })
   })
 
