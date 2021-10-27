@@ -16,7 +16,7 @@ import {
   LoanSchemeResult,
   LoanTokenResult
 } from '@defichain/jellyfish-api-core/dist/category/loan'
-import { CollateralToken, LoanScheme, LoanToken } from '@whale-api-client/api/loan'
+import { CollateralToken, LoanScheme, LoanToken, LoanVault } from '@whale-api-client/api/loan'
 import { mapTokenData } from '@src/module.api/token.controller'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { LoanVaultService } from '@src/module.api/loan.vault.service'
