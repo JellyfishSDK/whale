@@ -40,6 +40,10 @@ export class DeFiDCache extends GlobalCache {
     return await this.batch<TokenResult>(CachePrefix.TOKEN_INFO_SYMBOL, symbols, this.fetchTokenInfoBySymbol.bind(this))
   }
 
+  async getTokenInfoBySymbol (symbol: string): Promise<TokenResult | undefined> {
+    return await this.get<TokenResult>(CachePrefix.TOKEN_INFO_SYMBOL, symbol, this.fetchTokenInfoBySymbol.bind(this))
+  }
+
   private async fetchTokenInfoBySymbol (symbol: string): Promise<TokenResult | undefined> {
     return await this.rpcClient.token.getToken(symbol)
   }
