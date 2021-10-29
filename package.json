@@ -33,7 +33,7 @@
     "@defichain/jellyfish-json": "^0.49.1",
     "@defichain/jellyfish-network": "^0.49.1",
     "@defichain/jellyfish-testing": "^0.49.1",
-    "@defichain/jellyfish-transaction": "^0.49.1",
+    "@defichain/jellyfish-transaction": "^0.49.2",
     "@defichain/testcontainers": "^0.49.1",
     "@defichain/testing": "^0.49.1",
     "@nestjs/common": "^8.1.2",
