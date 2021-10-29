@@ -37,7 +37,7 @@
     "@defichain/testcontainers": "^0.49.1",
     "@defichain/testing": "^0.49.1",
     "@nestjs/common": "^8.1.2",
-    "@nestjs/config": "^1.0.2",
+    "@nestjs/config": "^1.0.3",
     "@nestjs/core": "^8.1.2",
     "@nestjs/platform-fastify": "^8.1.2",
     "@nestjs/schedule": "^1.0.1",
