@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { OraclePriceActive, OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
-import { OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
+import { OraclePriceAggregated, OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
 import { PriceTickerMapper } from '@src/module.model/price.ticker'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
+import { PriceTicker } from '@whale-api-client/api/prices'
 import BigNumber from 'bignumber.js'
 
 const DEVIATION_THRESHOLD = 0.3
@@ -25,33 +26,31 @@ export class ActivePriceIndexer extends Indexer {
       return
     }
 
-    const tickers = await this.priceTickerMapper.query(Number.MAX_SAFE_INTEGER)
+    const tickers: PriceTicker[] = await this.priceTickerMapper.query(Number.MAX_SAFE_INTEGER)
     for (const ticker of tickers) {
       const aggregatedPrice = await this.aggregatedMapper.query(ticker.id, 1)
       if (aggregatedPrice.length < 1) {
         continue
       }
 
-      let nextPrice
-      if (this.isAggregateValid(aggregatedPrice[0].aggregated)) {
-        nextPrice = aggregatedPrice[0].aggregated
-      }
+      const previous = (await this.activePriceMapper.query(ticker.id, 1))[0]
+      await this.activePriceMapper.put(this.mapActivePrice(block, ticker, aggregatedPrice, previous))
+    }
+  }
 
-      let activePrice
-      const previous = await this.activePriceMapper.query(ticker.id, 1)
-      if (previous.length > 0) {
-        activePrice = previous[0].next !== undefined ? previous[0].next : previous[0].active
-      }
+  private mapActivePrice (block: RawBlock, ticker: PriceTicker, aggregatedPrice: OraclePriceAggregated[],
+    previous: OraclePriceActive): OraclePriceActive {
+    const nextPrice = this.isAggregateValid(aggregatedPrice[0].aggregated) ? aggregatedPrice[0].aggregated : undefined
+    const activePrice = previous?.next !== undefined ? previous.next : previous?.active
 
-      await this.activePriceMapper.put({
-        id: `${ticker.id}-${block.height}`,
-        key: ticker.id,
-        valid: this.isLive(activePrice, nextPrice),
-        block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
-        active: activePrice,
-        next: nextPrice,
-        sort: HexEncoder.encodeHeight(block.mediantime) + HexEncoder.encodeHeight(block.height)
-      })
+    return {
+      id: `${ticker.id}-${block.height}`,
+      key: ticker.id,
+      valid: this.isLive(activePrice, nextPrice),
+      block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
+      active: activePrice,
+      next: nextPrice,
+      sort: HexEncoder.encodeHeight(block.mediantime) + HexEncoder.encodeHeight(block.height)
     }
   }
 
