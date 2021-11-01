@@ -46,7 +46,7 @@ export class ActivePriceIndexer extends Indexer {
       await this.activePriceMapper.put({
         id: `${ticker.id}-${block.height}`,
         key: ticker.id,
-        valid: this.isValid(activePrice, nextPrice),
+        valid: this.isLive(activePrice, nextPrice),
         block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
         active: activePrice,
         next: nextPrice,
@@ -55,7 +55,7 @@ export class ActivePriceIndexer extends Indexer {
     }
   }
 
-  isValid (active: OraclePriceActive['active'], next: OraclePriceActive['next']): boolean {
+  private isLive (active: OraclePriceActive['active'], next: OraclePriceActive['next']): boolean {
     if (active === undefined || next === undefined) {
       return false
     }
@@ -68,7 +68,7 @@ export class ActivePriceIndexer extends Indexer {
             nextPrice.minus(activePrice).abs().lt(activePrice.times(DEVIATION_THRESHOLD))
   }
 
-  isAggregateValid (aggregate: OraclePriceActive['next']): boolean {
+  private isAggregateValid (aggregate: OraclePriceActive['next']): boolean {
     return aggregate?.oracles !== undefined &&
             aggregate?.oracles.active >= MINIMUM_LIVE_ORACLES &&
             aggregate?.weightage > 0
