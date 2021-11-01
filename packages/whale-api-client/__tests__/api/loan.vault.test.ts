@@ -83,8 +83,7 @@ describe('list', () => {
         collateralAmounts: [],
         loanAmounts: [],
         interestAmounts: []
-      }
-      )
+      })
     )
   })
 

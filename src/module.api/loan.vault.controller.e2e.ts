@@ -88,8 +88,7 @@ describe('loan', () => {
         collateralAmounts: [],
         loanAmounts: [],
         interestAmounts: []
-      }
-      )
+      })
     )
   })
 })
