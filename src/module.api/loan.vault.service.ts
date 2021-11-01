@@ -1,5 +1,8 @@
 import { PaginationQuery } from '@src/module.api/_core/api.query'
-import { VaultDetails, VaultPagination } from '@defichain/jellyfish-api-core/dist/category/loan'
+import {
+  VaultDetails,
+  VaultPagination
+} from '@defichain/jellyfish-api-core/dist/category/loan'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { LoanVault, LoanVaultTokenAmount } from '@whale-api-client/api/loan'
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common'
@@ -22,8 +25,11 @@ export class LoanVaultService {
       limit: query.size
     }
 
-    const vaults = (await this.client.loan.listVaults(pagination, { ownerAddress: address }))
-      .map(async value => await this.mapLoanVault(value))
+    const vaults = (await Promise.all(
+      (await this.client.loan.listVaults(pagination, { ownerAddress: address }))
+        .map(async i => await this.client.loan.getVault(i.vaultId))))
+      .map(async j => await this.mapLoanVault(j))
+
     const items = await Promise.all(vaults)
     return ApiPagedResponse.of(items, query.size, item => {
       return item.vaultId
@@ -49,12 +55,13 @@ export class LoanVaultService {
       vaultId: details.vaultId,
       loanSchemeId: details.loanSchemeId,
       ownerAddress: details.ownerAddress,
-      invalidPrice: details.invalidPrice,
-      isUnderLiquidation: details.isUnderLiquidation,
+      state: details.state,
+
+      informativeRatio: details.informativeRatio?.toFixed(),
+      collateralRatio: details.collateralRatio?.toFixed(),
 
       collateralValue: details.collateralValue?.toFixed(),
       loanValue: details.loanValue?.toFixed(),
-      currentRatio: details.currentRatio?.toFixed(),
       interestValue: details.interestValue?.toFixed(),
 
       collateralAmounts: await this.mapTokenAmount(details.collateralAmounts),

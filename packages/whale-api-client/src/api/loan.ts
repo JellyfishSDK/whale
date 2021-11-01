@@ -112,17 +112,25 @@ export interface LoanToken {
   fixedIntervalPriceId: string
 }
 
+enum VaultState {
+  UNKNOWN = 'unknown',
+  ACTIVE = 'active',
+  IN_LIQUIDATION = 'inLiquidation',
+  FROZEN = 'frozen',
+  MAY_LIQUIDATE = 'mayLiquidate'
+}
+
 export interface LoanVault {
   vaultId: string
   loanSchemeId: string
   ownerAddress: string
+  state: VaultState
 
-  invalidPrice: boolean
-  isUnderLiquidation: boolean
+  informativeRatio?: string
+  collateralRatio?: string
 
   collateralValue?: string
   loanValue?: string
-  currentRatio?: string
   interestValue?: string
 
   collateralAmounts: LoanVaultTokenAmount[]

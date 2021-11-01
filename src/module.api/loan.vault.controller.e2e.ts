@@ -74,6 +74,23 @@ describe('loan', () => {
       size: 100
     })
     expect(result.data.length).toStrictEqual(4)
+    result.data.forEach(e =>
+      expect(e).toStrictEqual({
+        vaultId: expect.any(String),
+        loanSchemeId: 'default',
+        ownerAddress: expect.any(String),
+        state: 'active',
+        informativeRatio: '-1',
+        collateralRatio: '-1',
+        collateralValue: '0',
+        loanValue: '0',
+        interestValue: '0',
+        collateralAmounts: [],
+        loanAmounts: [],
+        interestAmounts: []
+      }
+      )
+    )
   })
 })
 
@@ -84,15 +101,15 @@ describe('get', () => {
       vaultId: vaultId1,
       loanSchemeId: 'default',
       ownerAddress: address1,
-      isUnderLiquidation: false,
+      state: 'active',
+      informativeRatio: '-1',
+      collateralRatio: '-1',
+      collateralValue: '0',
+      loanValue: '0',
+      interestValue: '0',
       collateralAmounts: [],
       loanAmounts: [],
-      interestAmounts: [],
-      interestValue: '',
-      invalidPrice: false,
-      collateralValue: expect.any(BigNumber),
-      loanValue: expect.any(BigNumber),
-      currentRatio: expect.any(BigNumber)
+      interestAmounts: []
     })
   })
 
