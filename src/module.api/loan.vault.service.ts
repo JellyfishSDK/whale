@@ -1,8 +1,5 @@
 import { PaginationQuery } from '@src/module.api/_core/api.query'
-import {
-  VaultDetails,
-  VaultPagination
-} from '@defichain/jellyfish-api-core/dist/category/loan'
+import { VaultDetails, VaultPagination } from '@defichain/jellyfish-api-core/dist/category/loan'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { LoanVault, LoanVaultTokenAmount } from '@whale-api-client/api/loan'
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common'
@@ -22,13 +19,14 @@ export class LoanVaultService {
     const pagination: VaultPagination = {
       start: query.next !== undefined ? String(query.next) : undefined,
       // including_start: query.next === undefined,
-      limit: query.size
+      limit: query.size > 10 ? 10 : query.size // limit size to 10 for vault querying
     }
 
-    const vaults = (await Promise.all(
-      (await this.client.loan.listVaults(pagination, { ownerAddress: address }))
-        .map(async i => await this.client.loan.getVault(i.vaultId))))
-      .map(async j => await this.mapLoanVault(j))
+    const list = await this.client.loan.listVaults(pagination, { ownerAddress: address })
+    const vaults = list.map(async ({ vaultId }) => {
+      const vault = await this.client.loan.getVault(vaultId)
+      return await this.mapLoanVault(vault)
+    })
 
     const items = await Promise.all(vaults)
     return ApiPagedResponse.of(items, query.size, item => {

@@ -51,7 +51,7 @@ export class Address {
    * @return {Promise<ApiPagedResponse<LoanVault>>}
    */
   async listVault (address: string, size: number = 30, next?: string): Promise<ApiPagedResponse<LoanVault>> {
-    return await this.client.requestList('GET', `address/${address}/tokens`, size, next)
+    return await this.client.requestList('GET', `address/${address}/vaults`, size, next)
   }
 
   /**

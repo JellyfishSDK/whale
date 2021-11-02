@@ -74,7 +74,6 @@ export class AddressController {
     })
   }
 
-  // TODO(fuxingloh): list Vaults
   @Get('/vaults')
   async listVaults (
     @Param('address') address: string,
