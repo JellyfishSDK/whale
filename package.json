@@ -31,7 +31,7 @@
     "@defichain/jellyfish-api-jsonrpc": "^0.49.4",
     "@defichain/jellyfish-crypto": "^0.49.4",
     "@defichain/jellyfish-json": "^0.49.4",
-    "@defichain/jellyfish-network": "^0.49.4",
+    "@defichain/jellyfish-network": "^0.49.5",
     "@defichain/jellyfish-testing": "^0.49.4",
     "@defichain/jellyfish-transaction": "^0.49.4",
     "@defichain/jellyfish-transaction-builder": "^0.49.4",
