@@ -1,7 +1,7 @@
 import { PaginationQuery } from '@src/module.api/_core/api.query'
-import { VaultDetails, VaultPagination } from '@defichain/jellyfish-api-core/dist/category/loan'
+import { VaultDetails, VaultPagination, VaultState } from '@defichain/jellyfish-api-core/dist/category/loan'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
-import { LoanVault, LoanVaultTokenAmount } from '@whale-api-client/api/loan'
+import { LoanVault, LoanVaultState, LoanVaultTokenAmount } from '@whale-api-client/api/loan'
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
@@ -53,7 +53,7 @@ export class LoanVaultService {
       vaultId: details.vaultId,
       loanSchemeId: details.loanSchemeId,
       ownerAddress: details.ownerAddress,
-      state: details.state,
+      state: mapLoanVaultState(details.state),
 
       informativeRatio: details.informativeRatio?.toFixed(),
       collateralRatio: details.collateralRatio?.toFixed(),
@@ -100,5 +100,20 @@ function mapLoanVaultTokenAmount (id: string, tokenInfo: TokenInfo, amount: stri
     symbolKey: tokenInfo.symbolKey,
     name: tokenInfo.name,
     displaySymbol: tokenInfo.isDAT && tokenInfo.symbol !== 'DFI' && !tokenInfo.isLPS ? `d${tokenInfo.symbol}` : tokenInfo.symbol
+  }
+}
+
+function mapLoanVaultState (state: VaultState): LoanVaultState {
+  switch (state) {
+    case VaultState.UNKNOWN:
+      return LoanVaultState.UNKNOWN
+    case VaultState.ACTIVE:
+      return LoanVaultState.ACTIVE
+    case VaultState.FROZEN:
+      return LoanVaultState.FROZEN
+    case VaultState.IN_LIQUIDATION:
+      return LoanVaultState.IN_LIQUIDATION
+    case VaultState.MAY_LIQUIDATE:
+      return LoanVaultState.MAY_LIQUIDATE
   }
 }
