@@ -2,11 +2,18 @@ import { PaginationQuery } from '@src/module.api/_core/api.query'
 import {
   VaultActive,
   VaultLiquidation,
+  VaultLiquidationBatch,
   VaultPagination,
   VaultState
 } from '@defichain/jellyfish-api-core/dist/category/loan'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
-import { LoanVaultActive, LoanVaultLiquidated, LoanVaultState, LoanVaultTokenAmount } from '@whale-api-client/api/loan'
+import {
+  LoanVaultActive,
+  LoanVaultLiquidated,
+  LoanVaultLiquidationBatch,
+  LoanVaultState,
+  LoanVaultTokenAmount
+} from '@whale-api-client/api/loan'
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
@@ -60,10 +67,11 @@ export class LoanVaultService {
         vaultId: data.vaultId,
         loanSchemeId: data.loanSchemeId,
         ownerAddress: data.ownerAddress,
-        state: mapLoanVaultState(data.state),
+        state: LoanVaultState.IN_LIQUIDATION,
         batchCount: data.batchCount,
         liquidationHeight: data.liquidationHeight,
-        liquidationPenalty: data.liquidationPenalty
+        liquidationPenalty: data.liquidationPenalty,
+        batches: await this.mapLiquidationBatches(data.batches)
       }
     }
 
@@ -72,7 +80,7 @@ export class LoanVaultService {
       vaultId: data.vaultId,
       loanSchemeId: data.loanSchemeId,
       ownerAddress: data.ownerAddress,
-      state: mapLoanVaultState(data.state),
+      state: mapLoanVaultState(data.state) as any,
 
       informativeRatio: data.informativeRatio.toFixed(),
       collateralRatio: data.collateralRatio.toFixed(),
@@ -80,13 +88,13 @@ export class LoanVaultService {
       loanValue: data.loanValue.toFixed(),
       interestValue: data.interestValue.toFixed(),
 
-      collateralAmounts: await this.mapTokenAmount(data.collateralAmounts),
-      loanAmounts: await this.mapTokenAmount(data.loanAmounts),
-      interestAmounts: await this.mapTokenAmount(data.interestAmounts)
+      collateralAmounts: await this.mapTokenAmounts(data.collateralAmounts),
+      loanAmounts: await this.mapTokenAmounts(data.loanAmounts),
+      interestAmounts: await this.mapTokenAmounts(data.interestAmounts)
     }
   }
 
-  private async mapTokenAmount (items?: string[]): Promise<LoanVaultTokenAmount[]> {
+  private async mapTokenAmounts (items?: string[]): Promise<LoanVaultTokenAmount[]> {
     if (items === undefined || items.length === 0) {
       return []
     }
@@ -107,6 +115,22 @@ export class LoanVaultService {
 
         return mapLoanVaultTokenAmount(id, info, amount)
       }).sort(a => Number.parseInt(a.id))
+  }
+
+  private async mapLiquidationBatches (batches: VaultLiquidationBatch[]): Promise<LoanVaultLiquidationBatch[]> {
+    if (batches.length === 0) {
+      return []
+    }
+
+    const items = batches.map(async batch => {
+      return {
+        index: batch.index.toNumber(),
+        collaterals: await this.mapTokenAmounts(batch.collaterals),
+        loan: (await this.mapTokenAmounts([batch.loan]))[0]
+      }
+    })
+
+    return await Promise.all(items)
   }
 }
 

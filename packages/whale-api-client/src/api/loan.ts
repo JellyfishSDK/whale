@@ -116,7 +116,7 @@ export interface LoanVaultActive {
   vaultId: string
   loanSchemeId: string
   ownerAddress: string
-  state: LoanVaultState
+  state: LoanVaultState.ACTIVE | LoanVaultState.FROZEN | LoanVaultState.MAY_LIQUIDATE | LoanVaultState.UNKNOWN
 
   informativeRatio: string
   collateralRatio: string
@@ -133,21 +133,19 @@ export interface LoanVaultLiquidated {
   vaultId: string
   loanSchemeId: string
   ownerAddress: string
-  state: LoanVaultState
+  state: LoanVaultState.IN_LIQUIDATION
 
   liquidationHeight: number
   liquidationPenalty: number
   batchCount: number
-
-  // TODO: enable after auctions tests are merged in jellyfish
-  // batches: VaultLiquidationBatch[]
+  batches: LoanVaultLiquidationBatch[]
 }
 
-// export interface VaultLiquidationBatch {
-//   index: number
-//   collaterals: string[]
-//   loan: string
-// }
+export interface LoanVaultLiquidationBatch {
+  index: number
+  collaterals: LoanVaultTokenAmount[]
+  loan: LoanVaultTokenAmount
+}
 
 export enum LoanVaultState {
   UNKNOWN = 'UNKNOWN',
