@@ -1,7 +1,12 @@
 import { PaginationQuery } from '@src/module.api/_core/api.query'
-import { VaultDetails, VaultPagination, VaultState } from '@defichain/jellyfish-api-core/dist/category/loan'
+import {
+  VaultActive,
+  VaultLiquidation,
+  VaultPagination,
+  VaultState
+} from '@defichain/jellyfish-api-core/dist/category/loan'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
-import { LoanVault, LoanVaultState, LoanVaultTokenAmount } from '@whale-api-client/api/loan'
+import { LoanVaultActive, LoanVaultLiquidated, LoanVaultState, LoanVaultTokenAmount } from '@whale-api-client/api/loan'
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
@@ -15,14 +20,14 @@ export class LoanVaultService {
   ) {
   }
 
-  async list (query: PaginationQuery, address?: string): Promise<ApiPagedResponse<LoanVault>> {
+  async list (query: PaginationQuery, address?: string): Promise<ApiPagedResponse<LoanVaultActive | LoanVaultLiquidated>> {
     const pagination: VaultPagination = {
       start: query.next !== undefined ? String(query.next) : undefined,
       // including_start: query.next === undefined,
       limit: query.size > 10 ? 10 : query.size // limit size to 10 for vault querying
     }
 
-    const list = await this.client.loan.listVaults(pagination, { ownerAddress: address })
+    const list = await this.client.loan.listVaults(pagination, { ownerAddress: address, verbose: true })
     const vaults = list.map(async ({ vaultId }) => {
       const vault = await this.client.loan.getVault(vaultId)
       return await this.mapLoanVault(vault)
@@ -34,7 +39,7 @@ export class LoanVaultService {
     })
   }
 
-  async get (id: string): Promise<LoanVault> {
+  async get (id: string): Promise<LoanVaultActive | LoanVaultLiquidated> {
     try {
       const vault = await this.client.loan.getVault(id)
       return await this.mapLoanVault(vault)
@@ -48,23 +53,36 @@ export class LoanVaultService {
     }
   }
 
-  private async mapLoanVault (details: VaultDetails): Promise<LoanVault> {
+  private async mapLoanVault (details: VaultActive | VaultLiquidation): Promise<LoanVaultActive | LoanVaultLiquidated> {
+    if (details.state === VaultState.IN_LIQUIDATION) {
+      const data = details as VaultLiquidation
+      return {
+        vaultId: data.vaultId,
+        loanSchemeId: data.loanSchemeId,
+        ownerAddress: data.ownerAddress,
+        state: mapLoanVaultState(data.state),
+        batchCount: data.batchCount,
+        liquidationHeight: data.liquidationHeight,
+        liquidationPenalty: data.liquidationPenalty
+      }
+    }
+
+    const data = details as VaultActive
     return {
-      vaultId: details.vaultId,
-      loanSchemeId: details.loanSchemeId,
-      ownerAddress: details.ownerAddress,
-      state: mapLoanVaultState(details.state),
+      vaultId: data.vaultId,
+      loanSchemeId: data.loanSchemeId,
+      ownerAddress: data.ownerAddress,
+      state: mapLoanVaultState(data.state),
 
-      informativeRatio: details.informativeRatio?.toFixed(),
-      collateralRatio: details.collateralRatio?.toFixed(),
+      informativeRatio: data.informativeRatio.toFixed(),
+      collateralRatio: data.collateralRatio.toFixed(),
+      collateralValue: data.collateralValue.toFixed(),
+      loanValue: data.loanValue.toFixed(),
+      interestValue: data.interestValue.toFixed(),
 
-      collateralValue: details.collateralValue?.toFixed(),
-      loanValue: details.loanValue?.toFixed(),
-      interestValue: details.interestValue?.toFixed(),
-
-      collateralAmounts: await this.mapTokenAmount(details.collateralAmounts),
-      loanAmounts: await this.mapTokenAmount(details.loanAmounts),
-      interestAmounts: await this.mapTokenAmount(details.interestAmounts)
+      collateralAmounts: await this.mapTokenAmount(data.collateralAmounts),
+      loanAmounts: await this.mapTokenAmount(data.loanAmounts),
+      interestAmounts: await this.mapTokenAmount(data.interestAmounts)
     }
   }
 

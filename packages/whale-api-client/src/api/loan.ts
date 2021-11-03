@@ -74,9 +74,9 @@ export class Loan {
    *
    * @param {number} size of vaults to query
    * @param {string} next set of vaults
-   * @return {Promise<ApiPagedResponse<LoanVault>>}
+   * @return {Promise<ApiPagedResponse<LoanVaultActive | LoanVaultLiquidated>>}
    */
-  async listVault (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanVault>> {
+  async listVault (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanVaultActive | LoanVaultLiquidated>> {
     return await this.client.requestList('GET', 'loans/vaults', size, next)
   }
 
@@ -84,9 +84,9 @@ export class Loan {
    * Get information about a vault with given vault id.
    *
    * @param {string} id vault id to get
-   * @return {Promise<LoanVault>}
+   * @return {Promise<LoanVaultActive | LoanVaultLiquidated>}
    */
-  async getVault (id: string): Promise<LoanVault> {
+  async getVault (id: string): Promise<LoanVaultActive | LoanVaultLiquidated> {
     return await this.client.requestData('GET', `loans/vaults/${id}`)
   }
 }
@@ -112,25 +112,42 @@ export interface LoanToken {
   fixedIntervalPriceId: string
 }
 
-export interface LoanVault {
+export interface LoanVaultActive {
   vaultId: string
   loanSchemeId: string
   ownerAddress: string
   state: LoanVaultState
 
-  informativeRatio?: string
-  collateralRatio?: string
-
-  collateralValue?: string
-  loanValue?: string
-  interestValue?: string
+  informativeRatio: string
+  collateralRatio: string
+  collateralValue: string
+  loanValue: string
+  interestValue: string
 
   collateralAmounts: LoanVaultTokenAmount[]
   loanAmounts: LoanVaultTokenAmount[]
   interestAmounts: LoanVaultTokenAmount[]
-
-  // TODO: auctions batch information not included for now
 }
+
+export interface LoanVaultLiquidated {
+  vaultId: string
+  loanSchemeId: string
+  ownerAddress: string
+  state: LoanVaultState
+
+  liquidationHeight: number
+  liquidationPenalty: number
+  batchCount: number
+
+  // TODO: enable after auctions tests are merged in jellyfish
+  // batches: VaultLiquidationBatch[]
+}
+
+// export interface VaultLiquidationBatch {
+//   index: number
+//   collaterals: string[]
+//   loan: string
+// }
 
 export enum LoanVaultState {
   UNKNOWN = 'UNKNOWN',
