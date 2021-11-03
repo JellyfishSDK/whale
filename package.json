@@ -50,7 +50,7 @@
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
     "defichain": "^0.51.0",
-    "level": "7.0.0",
+    "level": "7.0.1",
     "level-js": "6.0.0",
     "level-packager": "6.0.0",
     "leveldown": "6.0.0",
