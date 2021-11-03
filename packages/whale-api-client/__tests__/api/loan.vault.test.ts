@@ -185,12 +185,12 @@ describe('list', () => {
     const result = await client.loan.listVault(20)
     expect(result.length).toStrictEqual(4)
     result.forEach(e =>
-      expect(e).toContainEqual({
+      expect(e).toStrictEqual(expect.objectContaining({
         vaultId: expect.any(String),
-        loanSchemeId: 'default',
+        loanSchemeId: expect.any(String),
         ownerAddress: expect.any(String),
         state: expect.any(String)
-      })
+      }))
     )
   })
 
