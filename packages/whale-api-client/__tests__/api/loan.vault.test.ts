@@ -1,60 +1,171 @@
 import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
-import { WhaleApiClient, WhaleApiException } from '../../src'
+import { WhaleApiException } from '../../src'
 import BigNumber from 'bignumber.js'
 import { Testing } from '@defichain/jellyfish-testing'
 import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
+import { LoanVaultState } from '../../src/api/loan'
+import { VaultState } from '@defichain/jellyfish-api-core/dist/category/loan'
 
-let container: LoanMasterNodeRegTestContainer
-let service: StubService
-let client: WhaleApiClient
+const container = new LoanMasterNodeRegTestContainer()
+const service = new StubService(container)
+const client = new StubWhaleApiClient(service)
+const testing = Testing.create(container)
 
-let address1: string
-let vaultId1: string
+/* eslint-disable no-lone-blocks */
 
 beforeAll(async () => {
-  container = new LoanMasterNodeRegTestContainer()
-  service = new StubService(container)
-  client = new StubWhaleApiClient(service)
-
   await container.start()
   await container.waitForWalletCoinbaseMaturity()
   await service.start()
 
-  const testing = Testing.create(container)
+  { // DFI setup
+    await testing.token.dfi({
+      address: await testing.address('DFI'),
+      amount: 40000
+    })
+  }
 
-  // loan scheme
-  await testing.rpc.loan.createLoanScheme({
-    minColRatio: 100,
-    interestRate: new BigNumber(2.5),
-    id: 'default'
-  })
-  await testing.generate(1)
+  { // Loan Scheme
+    await testing.rpc.loan.createLoanScheme({
+      id: 'default',
+      minColRatio: 100,
+      interestRate: new BigNumber(1)
+    })
+    await testing.generate(1)
 
-  address1 = await testing.generateAddress()
-  vaultId1 = await testing.rpc.loan.createVault({
-    ownerAddress: address1,
-    loanSchemeId: 'default'
-  })
-  await testing.generate(1)
+    await testing.rpc.loan.createLoanScheme({
+      id: 'scheme',
+      minColRatio: 110,
+      interestRate: new BigNumber(1)
+    })
+    await testing.generate(1)
+  }
 
-  await testing.rpc.loan.createVault({
-    ownerAddress: await testing.generateAddress(),
-    loanSchemeId: 'default'
-  })
-  await testing.generate(1)
+  let oracleId: string
+  { // Oracle
+    const oracleAddress = await testing.generateAddress()
+    const priceFeeds = [
+      { token: 'DFI', currency: 'USD' },
+      { token: 'TSLA', currency: 'USD' },
+      { token: 'AAPL', currency: 'USD' },
+      { token: 'GOOGL', currency: 'USD' }
+    ]
+    oracleId = await testing.rpc.oracle.appointOracle(oracleAddress, priceFeeds, { weightage: 1 })
+    await testing.generate(1)
 
-  await testing.rpc.loan.createVault({
-    ownerAddress: await testing.generateAddress(),
-    loanSchemeId: 'default'
-  })
-  await testing.generate(1)
+    const timestamp = Math.floor(new Date().getTime() / 1000)
+    await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
+      prices: [{ tokenAmount: '1@DFI', currency: 'USD' }]
+    })
+    await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
+      prices: [{ tokenAmount: '2@TSLA', currency: 'USD' }]
+    })
+    await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
+      prices: [{ tokenAmount: '2@AAPL', currency: 'USD' }]
+    })
+    await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
+      prices: [{ tokenAmount: '4@GOOGL', currency: 'USD' }]
+    })
+    await testing.generate(1)
+  }
 
-  await testing.rpc.loan.createVault({
-    ownerAddress: await testing.generateAddress(),
-    loanSchemeId: 'default'
-  })
-  await testing.generate(1)
+  { // Collateral Tokens
+    await testing.rpc.loan.setCollateralToken({
+      token: 'DFI',
+      factor: new BigNumber(1),
+      fixedIntervalPriceId: 'DFI/USD'
+    })
+  }
+
+  { // Loan Tokens
+    await testing.rpc.loan.setLoanToken({
+      symbol: 'TSLA',
+      fixedIntervalPriceId: 'TSLA/USD'
+    })
+    await testing.generate(1)
+
+    await testing.rpc.loan.setLoanToken({
+      symbol: 'AAPL',
+      fixedIntervalPriceId: 'AAPL/USD'
+    })
+    await testing.generate(1)
+
+    await testing.rpc.loan.setLoanToken({
+      symbol: 'GOOGL',
+      fixedIntervalPriceId: 'GOOGL/USD'
+    })
+    await testing.generate(1)
+  }
+
+  { // Vault Empty (John)
+    await testing.rpc.loan.createVault({
+      ownerAddress: await testing.address('John'),
+      loanSchemeId: 'default'
+    })
+    await testing.generate(1)
+  }
+
+  { // Vault Deposit Collateral (Bob)
+    const vaultId2 = await testing.rpc.loan.createVault({
+      ownerAddress: await testing.address('Bob'),
+      loanSchemeId: 'default'
+    })
+    await testing.generate(1)
+    await testing.rpc.loan.depositToVault({
+      vaultId: vaultId2,
+      from: await testing.address('DFI'),
+      amount: '10000@DFI'
+    })
+    await testing.generate(1)
+  }
+
+  { // Vault Deposited & Loaned (John)
+    const vaultId3 = await testing.rpc.loan.createVault({
+      ownerAddress: await testing.address('John'),
+      loanSchemeId: 'scheme'
+    })
+    await testing.generate(1)
+    await testing.rpc.loan.depositToVault({
+      vaultId: vaultId3,
+      from: await testing.address('DFI'),
+      amount: '10000@DFI'
+    })
+    await testing.generate(1)
+    await testing.rpc.loan.takeLoan({
+      vaultId: vaultId3,
+      amounts: '30@TSLA'
+    })
+    await testing.generate(1)
+  }
+
+  { // Vault Deposited, Loaned, Liquidated  (Adam)
+    const vaultId4 = await testing.rpc.loan.createVault({
+      ownerAddress: await testing.address('Adam'),
+      loanSchemeId: 'default'
+    })
+    await testing.generate(1)
+    await testing.rpc.loan.depositToVault({
+      vaultId: vaultId4,
+      from: await testing.address('DFI'),
+      amount: '10000@DFI'
+    })
+    await testing.generate(1)
+    await testing.rpc.loan.takeLoan({
+      vaultId: vaultId4,
+      amounts: '30@AAPL'
+    })
+    await testing.generate(1)
+
+    // Make vault enter under liquidation state by a price hike of the loan token
+    const timestamp2 = Math.floor(new Date().getTime() / 1000)
+    await testing.rpc.oracle.setOracleData(oracleId, timestamp2, {
+      prices: [{ tokenAmount: '1000@AAPL', currency: 'USD' }]
+    })
+
+    // Wait for 12 blocks which are equivalent to 2 hours (1 block = 10 minutes in regtest) in order to liquidate the vault
+    await testing.generate(12)
+  }
 })
 
 afterAll(async () => {
@@ -66,7 +177,9 @@ afterAll(async () => {
 })
 
 describe('list', () => {
-  it('should listVaults with size only', async () => {
+  it('should listVault with size only', async () => {
+    // TODO(help-me): make this test more accurate to present the correct structure explicitly
+
     const result = await client.loan.listVault(20)
     expect(result.length).toStrictEqual(4)
     result.forEach(e =>
@@ -74,7 +187,7 @@ describe('list', () => {
         vaultId: expect.any(String),
         loanSchemeId: 'default',
         ownerAddress: expect.any(String),
-        state: 'active',
+        state: expect.any(String),
         informativeRatio: '-1',
         collateralRatio: '-1',
         collateralValue: '0',
@@ -87,30 +200,27 @@ describe('list', () => {
     )
   })
 
-  it('should listTokens with size and pagination', async () => {
-    const list = await client.loan.listVault(20)
-    const vaultId0 = list[0].vaultId
-    const vaultId1 = list[1].vaultId
-    const vaultId2 = list[2].vaultId
-    const vaultId3 = list[3].vaultId
+  it('should listVault with size and pagination', async () => {
+    const vaultIds = (await client.loan.listVault())
+      .map(value => value.vaultId)
 
     const first = await client.loan.listVault(2)
 
     expect(first.length).toStrictEqual(2)
     expect(first.hasNext).toStrictEqual(true)
-    expect(first.nextToken).toStrictEqual(vaultId1)
+    expect(first.nextToken).toStrictEqual(vaultIds[1])
 
-    expect(first[0].vaultId).toStrictEqual(vaultId0)
-    expect(first[1].vaultId).toStrictEqual(vaultId1)
+    expect(first[0].vaultId).toStrictEqual(vaultIds[0])
+    expect(first[1].vaultId).toStrictEqual(vaultIds[1])
 
     const next = await client.paginate(first)
 
     expect(next.length).toStrictEqual(2)
     expect(next.hasNext).toStrictEqual(true)
-    expect(next.nextToken).toStrictEqual(vaultId3)
+    expect(next.nextToken).toStrictEqual(vaultIds[3])
 
-    expect(next[0].vaultId).toStrictEqual(vaultId2)
-    expect(next[1].vaultId).toStrictEqual(vaultId3)
+    expect(next[0].vaultId).toStrictEqual(vaultIds[2])
+    expect(next[1].vaultId).toStrictEqual(vaultIds[3])
 
     const last = await client.paginate(next)
 
@@ -121,19 +231,37 @@ describe('list', () => {
 })
 
 describe('get', () => {
-  it('should get vault by vaultId', async () => {
-    const data = await client.loan.getVault(vaultId1)
+  it('should get active vault by vaultId (Bob)', async () => {
+    const bob = await testing.rpc.loan.listVaults().then(async vaults => {
+      const address = await testing.address('Bob')
+      const filtered = vaults
+        .filter(value => value.state === VaultState.ACTIVE)
+        .filter(value => value.ownerAddress === address)
+
+      return filtered[0]
+    })
+
+    const data = await client.loan.getVault(bob.vaultId)
     expect(data).toStrictEqual({
-      vaultId: vaultId1,
+      vaultId: bob.vaultId,
       loanSchemeId: 'default',
-      ownerAddress: address1,
-      state: 'active',
+      ownerAddress: bob.ownerAddress,
+      state: LoanVaultState.ACTIVE,
       informativeRatio: '-1',
       collateralRatio: '-1',
-      collateralValue: '0',
+      collateralValue: '10000',
       loanValue: '0',
       interestValue: '0',
-      collateralAmounts: [],
+      collateralAmounts: [
+        {
+          amount: '10000.00000000',
+          displaySymbol: 'DFI',
+          id: '0',
+          name: 'Default Defi token',
+          symbol: 'DFI',
+          symbolKey: 'DFI'
+        }
+      ],
       loanAmounts: [],
       interestAmounts: []
     })

@@ -5,6 +5,7 @@ import { LoanController } from '@src/module.api/loan.controller'
 import { NotFoundException } from '@nestjs/common'
 import { Testing } from '@defichain/jellyfish-testing'
 import BigNumber from 'bignumber.js'
+import { LoanVaultState } from '@whale-api-client/api/loan'
 
 const container = new LoanMasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -79,7 +80,7 @@ describe('loan', () => {
         vaultId: expect.any(String),
         loanSchemeId: 'default',
         ownerAddress: expect.any(String),
-        state: 'active',
+        state: expect.any(String),
         informativeRatio: '-1',
         collateralRatio: '-1',
         collateralValue: '0',
@@ -100,7 +101,7 @@ describe('get', () => {
       vaultId: vaultId1,
       loanSchemeId: 'default',
       ownerAddress: address1,
-      state: 'active',
+      state: LoanVaultState.ACTIVE,
       informativeRatio: '-1',
       collateralRatio: '-1',
       collateralValue: '0',

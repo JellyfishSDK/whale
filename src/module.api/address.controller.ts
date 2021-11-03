@@ -13,7 +13,7 @@ import { DeFiAddress } from '@defichain/jellyfish-address'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { toBuffer } from '@defichain/jellyfish-transaction/dist/script/_buffer'
-import { LoanVault } from '@whale-api-client/api/loan'
+import { LoanVaultActive, LoanVaultLiquidated } from '@whale-api-client/api/loan'
 import { LoanVaultService } from '@src/module.api/loan.vault.service'
 
 @Controller('/address/:address')
@@ -78,7 +78,7 @@ export class AddressController {
   async listVaults (
     @Param('address') address: string,
       @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<LoanVault>> {
+  ): Promise<ApiPagedResponse<LoanVaultActive | LoanVaultLiquidated>> {
     return await this.vaultService.list(query, address)
   }
 

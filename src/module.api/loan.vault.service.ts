@@ -34,9 +34,9 @@ export class LoanVaultService {
       limit: query.size > 10 ? 10 : query.size // limit size to 10 for vault querying
     }
 
-    const list = await this.client.loan.listVaults(pagination, { ownerAddress: address, verbose: true })
-    const vaults = list.map(async ({ vaultId }) => {
-      const vault = await this.client.loan.getVault(vaultId)
+    const list: Array<VaultActive | VaultLiquidation> = await this.client.loan
+      .listVaults(pagination, { ownerAddress: address, verbose: true }) as any
+    const vaults = list.map(async (vault: VaultActive | VaultLiquidation) => {
       return await this.mapLoanVault(vault)
     })
 
@@ -124,7 +124,7 @@ export class LoanVaultService {
 
     const items = batches.map(async batch => {
       return {
-        index: batch.index.toNumber(),
+        index: batch.index as any, // fixed in https://github.com/DeFiCh/jellyfish/pull/805
         collaterals: await this.mapTokenAmounts(batch.collaterals),
         loan: (await this.mapTokenAmounts([batch.loan]))[0]
       }
