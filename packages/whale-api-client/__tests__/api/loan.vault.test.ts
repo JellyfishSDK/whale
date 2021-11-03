@@ -5,12 +5,16 @@ import BigNumber from 'bignumber.js'
 import { Testing } from '@defichain/jellyfish-testing'
 import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { LoanVaultState } from '../../src/api/loan'
-import { VaultState } from '@defichain/jellyfish-api-core/dist/category/loan'
 
 const container = new LoanMasterNodeRegTestContainer()
 const service = new StubService(container)
 const client = new StubWhaleApiClient(service)
 const testing = Testing.create(container)
+
+let johnEmptyVaultId: string
+let bobDepositedVaultId: string
+let johnLoanedVaultId: string
+let adamLiquidatedVaultId: string
 
 /* eslint-disable no-lone-blocks */
 
@@ -99,7 +103,7 @@ beforeAll(async () => {
   }
 
   { // Vault Empty (John)
-    await testing.rpc.loan.createVault({
+    johnEmptyVaultId = await testing.rpc.loan.createVault({
       ownerAddress: await testing.address('John'),
       loanSchemeId: 'default'
     })
@@ -107,13 +111,13 @@ beforeAll(async () => {
   }
 
   { // Vault Deposit Collateral (Bob)
-    const vaultId2 = await testing.rpc.loan.createVault({
+    bobDepositedVaultId = await testing.rpc.loan.createVault({
       ownerAddress: await testing.address('Bob'),
       loanSchemeId: 'default'
     })
     await testing.generate(1)
     await testing.rpc.loan.depositToVault({
-      vaultId: vaultId2,
+      vaultId: bobDepositedVaultId,
       from: await testing.address('DFI'),
       amount: '10000@DFI'
     })
@@ -121,38 +125,38 @@ beforeAll(async () => {
   }
 
   { // Vault Deposited & Loaned (John)
-    const vaultId3 = await testing.rpc.loan.createVault({
+    johnLoanedVaultId = await testing.rpc.loan.createVault({
       ownerAddress: await testing.address('John'),
       loanSchemeId: 'scheme'
     })
     await testing.generate(1)
     await testing.rpc.loan.depositToVault({
-      vaultId: vaultId3,
+      vaultId: johnLoanedVaultId,
       from: await testing.address('DFI'),
       amount: '10000@DFI'
     })
     await testing.generate(1)
     await testing.rpc.loan.takeLoan({
-      vaultId: vaultId3,
+      vaultId: johnLoanedVaultId,
       amounts: '30@TSLA'
     })
     await testing.generate(1)
   }
 
   { // Vault Deposited, Loaned, Liquidated  (Adam)
-    const vaultId4 = await testing.rpc.loan.createVault({
+    adamLiquidatedVaultId = await testing.rpc.loan.createVault({
       ownerAddress: await testing.address('Adam'),
       loanSchemeId: 'default'
     })
     await testing.generate(1)
     await testing.rpc.loan.depositToVault({
-      vaultId: vaultId4,
+      vaultId: adamLiquidatedVaultId,
       from: await testing.address('DFI'),
       amount: '10000@DFI'
     })
     await testing.generate(1)
     await testing.rpc.loan.takeLoan({
-      vaultId: vaultId4,
+      vaultId: adamLiquidatedVaultId,
       amounts: '30@AAPL'
     })
     await testing.generate(1)
@@ -178,24 +182,14 @@ afterAll(async () => {
 
 describe('list', () => {
   it('should listVault with size only', async () => {
-    // TODO(help-me): make this test more accurate to present the correct structure explicitly
-
     const result = await client.loan.listVault(20)
     expect(result.length).toStrictEqual(4)
     result.forEach(e =>
-      expect(e).toStrictEqual({
+      expect(e).toContainEqual({
         vaultId: expect.any(String),
         loanSchemeId: 'default',
         ownerAddress: expect.any(String),
-        state: expect.any(String),
-        informativeRatio: '-1',
-        collateralRatio: '-1',
-        collateralValue: '0',
-        loanValue: '0',
-        interestValue: '0',
-        collateralAmounts: [],
-        loanAmounts: [],
-        interestAmounts: []
+        state: expect.any(String)
       })
     )
   })
@@ -231,21 +225,30 @@ describe('list', () => {
 })
 
 describe('get', () => {
-  it('should get active vault by vaultId (Bob)', async () => {
-    const bob = await testing.rpc.loan.listVaults().then(async vaults => {
-      const address = await testing.address('Bob')
-      const filtered = vaults
-        .filter(value => value.state === VaultState.ACTIVE)
-        .filter(value => value.ownerAddress === address)
-
-      return filtered[0]
-    })
-
-    const data = await client.loan.getVault(bob.vaultId)
-    expect(data).toStrictEqual({
-      vaultId: bob.vaultId,
+  it('should get johnEmptyVaultId', async () => {
+    const vault = await client.loan.getVault(johnEmptyVaultId)
+    expect(vault).toStrictEqual({
+      vaultId: johnEmptyVaultId,
       loanSchemeId: 'default',
-      ownerAddress: bob.ownerAddress,
+      ownerAddress: expect.any(String),
+      state: LoanVaultState.ACTIVE,
+      informativeRatio: '-1',
+      collateralRatio: '-1',
+      collateralValue: '0',
+      loanValue: '0',
+      interestValue: '0',
+      collateralAmounts: [],
+      loanAmounts: [],
+      interestAmounts: []
+    })
+  })
+
+  it('should get bobDepositedVaultId', async () => {
+    const vault = await client.loan.getVault(bobDepositedVaultId)
+    expect(vault).toStrictEqual({
+      vaultId: bobDepositedVaultId,
+      loanSchemeId: 'default',
+      ownerAddress: expect.any(String),
       state: LoanVaultState.ACTIVE,
       informativeRatio: '-1',
       collateralRatio: '-1',
@@ -264,6 +267,87 @@ describe('get', () => {
       ],
       loanAmounts: [],
       interestAmounts: []
+    })
+  })
+
+  it('should get johnLoanedVaultId', async () => {
+    const vault = await client.loan.getVault(johnLoanedVaultId)
+    expect(vault).toStrictEqual({
+      vaultId: johnLoanedVaultId,
+      loanSchemeId: 'scheme',
+      ownerAddress: expect.any(String),
+      state: LoanVaultState.ACTIVE,
+      collateralRatio: '16667',
+      collateralValue: '10000',
+      informativeRatio: '16666.61600015',
+      loanValue: '60.0001824',
+      interestValue: '0.0001824',
+      collateralAmounts: [
+        {
+          amount: '10000.00000000',
+          displaySymbol: 'DFI',
+          id: '0',
+          name: 'Default Defi token',
+          symbol: 'DFI',
+          symbolKey: 'DFI'
+        }
+      ],
+      loanAmounts: [
+        {
+          amount: '30.00009120',
+          displaySymbol: 'dTSLA',
+          id: '1',
+          name: '',
+          symbol: 'TSLA',
+          symbolKey: 'TSLA'
+        }
+      ],
+      interestAmounts: [
+        {
+          amount: '0.00009120',
+          displaySymbol: 'dTSLA',
+          id: '1',
+          name: '',
+          symbol: 'TSLA',
+          symbolKey: 'TSLA'
+        }
+      ]
+    })
+  })
+
+  it('should get adamLiquidatedVaultId', async () => {
+    const vault = await client.loan.getVault(adamLiquidatedVaultId)
+    expect(vault).toStrictEqual({
+      vaultId: adamLiquidatedVaultId,
+      loanSchemeId: 'default',
+      ownerAddress: expect.any(String),
+      state: LoanVaultState.IN_LIQUIDATION,
+      batchCount: 1,
+      liquidationHeight: 162,
+      liquidationPenalty: 5,
+      batches: [
+        {
+          index: 0,
+          collaterals: [
+            {
+              amount: '10000.00000000',
+              displaySymbol: 'DFI',
+              id: '0',
+              name: 'Default Defi token',
+              symbol: 'DFI',
+              symbolKey: 'DFI'
+            }
+          ],
+          loan: {
+            amount: '30.00005130',
+            displaySymbol: 'dAAPL',
+            id: '2',
+            name: '',
+            symbol: 'AAPL',
+            symbolKey: 'AAPL'
+          }
+        }
+      ]
     })
   })
 
