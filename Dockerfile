@@ -1,4 +1,4 @@
-FROM node:14-alpine3.13
+FROM node:16-alpine3.13
 
 # add curl for docker healthcheck capability
 RUN apk --no-cache add curl
