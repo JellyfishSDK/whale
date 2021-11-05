@@ -19,6 +19,7 @@ import {
 import { CollateralToken, LoanScheme, LoanToken } from '@whale-api-client/api/loan'
 import { mapTokenData } from '@src/module.api/token.controller'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
+import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
 
 @Controller('/loans')
 export class LoanController {
@@ -139,6 +140,12 @@ export class LoanController {
         throw new BadRequestException(err)
       }
     }
+  }
+
+  @Get('/auctions')
+  async listAuction (container: LoanMasterNodeRegTestContainer): Promise<any> {
+    const data = await container.call('listauctions', [])
+    console.log(data)
   }
 
   async mapCollateralToken (detail: CollateralTokenDetail): Promise<CollateralToken> {
