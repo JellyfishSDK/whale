@@ -1,26 +1,18 @@
-import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp, stopTestingApp } from '@src/e2e.module'
-import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { LoanController } from '@src/module.api/loan.controller'
-import { Testing } from '@defichain/jellyfish-testing'
+import { StubWhaleApiClient } from '../stub.client'
+import { StubService } from '../stub.service'
 import BigNumber from 'bignumber.js'
+import { Testing } from '@defichain/jellyfish-testing'
+import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
 
 const container = new LoanMasterNodeRegTestContainer()
-let app: NestFastifyApplication
-let controller: LoanController
-let testing: Testing
+const service = new StubService(container)
+const client = new StubWhaleApiClient(service)
+const testing = Testing.create(container)
 
 beforeAll(async () => {
   await container.start()
   await container.waitForWalletCoinbaseMaturity()
-  await container.waitForWalletBalanceGTE(100)
-
-  app = await createTestingApp(container)
-  testing = Testing.create(container)
-  controller = app.get(LoanController)
-
-  await testing.container.start()
-  await testing.container.waitForWalletCoinbaseMaturity()
+  await service.start()
 
   const collateralAddress = await testing.generateAddress()
   await testing.token.dfi({
@@ -175,12 +167,16 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await stopTestingApp(container, app)
+  try {
+    await service.stop()
+  } finally {
+    await container.stop()
+  }
 })
 
-describe('loan', () => {
-  it('should listAuctions', async () => {
-    const result = await controller.listAuction(container)
+describe('list', () => {
+  it('should listVault with size only', async () => {
+    const result = await client.loan.listAuction(20)
     expect(result.length).toStrictEqual(4)
     result.forEach((e: any) =>
       expect(e).toStrictEqual({

@@ -16,7 +16,11 @@ import {
   LoanSchemeResult,
   LoanTokenResult
 } from '@defichain/jellyfish-api-core/dist/category/loan'
-import { CollateralToken, LoanScheme, LoanToken } from '@whale-api-client/api/loan'
+import {
+  CollateralToken,
+  LoanScheme,
+  LoanToken
+} from '@whale-api-client/api/loan'
 import { mapTokenData } from '@src/module.api/token.controller'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
@@ -143,9 +147,9 @@ export class LoanController {
   }
 
   @Get('/auctions')
-  async listAuction (container: LoanMasterNodeRegTestContainer): Promise<any> {
+  async listAuction (@Query() query: PaginationQuery, container: LoanMasterNodeRegTestContainer): Promise<any> {
     const data = await container.call('listauctions', [])
-    console.log(data)
+    return data
   }
 
   async mapCollateralToken (detail: CollateralTokenDetail): Promise<CollateralToken> {
