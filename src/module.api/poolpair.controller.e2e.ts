@@ -77,11 +77,6 @@ async function setup (): Promise<void> {
 
   await container.call('setgov', [{ LP_SPLITS: { 8: 1.0 } }])
   await container.generate(1)
-
-  const height = await container.getBlockCount()
-  await container.generate(1)
-  await waitForIndexedHeight(app, height)
-  await container.generate(1)
 }
 
 describe('list', () => {
@@ -95,39 +90,40 @@ describe('list', () => {
 
     expect(response.data[1]).toStrictEqual({
       id: '8',
-      sort: '00000008',
       symbol: 'B-DFI',
       name: 'B-Default Defi token',
       status: true,
       tokenA: {
         id: '2',
         symbol: 'B',
-        reserve: '50.00000000',
+        reserve: '50',
+        blockCommission: '0',
         displaySymbol: 'dB'
       },
       tokenB: {
         id: '0',
         symbol: 'DFI',
-        reserve: '300.00000000',
+        reserve: '300',
+        blockCommission: '0',
         displaySymbol: 'DFI'
       },
       apr: {
         reward: 2229.42,
         total: 2229.42
       },
-      commission: '0.00000000',
+      commission: '0',
       totalLiquidity: {
-        token: '122.47448714',
-        usd: '1390.45675763'
+        token: '122.47448713',
+        usd: '1390.456752'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
-        ab: '0.16666667',
-        ba: '6.00000000'
+        ab: '0.16666666',
+        ba: '6'
       },
       rewardPct: '1',
-      customRewards: expect.any(Array),
+      customRewards: undefined,
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
@@ -140,7 +136,7 @@ describe('list', () => {
       size: 2
     })
     expect(first.data.length).toStrictEqual(2)
-    expect(first.page?.next).toStrictEqual('00000008')
+    expect(first.page?.next).toStrictEqual('8')
     expect(first.data[0].symbol).toStrictEqual('A-DFI')
     expect(first.data[1].symbol).toStrictEqual('B-DFI')
 
@@ -164,7 +160,7 @@ describe('list', () => {
     })
 
     expect(first.data.length).toStrictEqual(2)
-    expect(first.page?.next).toStrictEqual('00000008')
+    expect(first.page?.next).toStrictEqual('8')
   })
 })
 
@@ -174,39 +170,40 @@ describe('get', () => {
 
     expect(response).toStrictEqual({
       id: '7',
-      sort: '00000007',
       symbol: 'A-DFI',
       name: 'A-Default Defi token',
       status: true,
       tokenA: {
         id: expect.any(String),
         symbol: 'A',
-        reserve: '100.00000000',
+        reserve: '100',
+        blockCommission: '0',
         displaySymbol: 'dA'
       },
       tokenB: {
         id: '0',
         symbol: 'DFI',
-        reserve: '200.00000000',
+        reserve: '200',
+        blockCommission: '0',
         displaySymbol: 'DFI'
       },
       apr: {
         reward: 0,
         total: 0
       },
-      commission: '0.00000000',
+      commission: '0',
       totalLiquidity: {
-        token: '141.42135624',
-        usd: '926.97117175'
+        token: '141.42135623',
+        usd: '926.971168'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
-        ab: '0.50000000',
-        ba: '2.00000000'
+        ab: '0.5',
+        ba: '2'
       },
       rewardPct: '0',
-      customRewards: expect.any(Array),
+      customRewards: undefined,
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)

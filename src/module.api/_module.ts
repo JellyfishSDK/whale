@@ -24,6 +24,8 @@ import { FeeController } from '@src/module.api/fee.controller'
 import { RawtxController } from '@src/module.api/rawtx.controller'
 import { LoanController } from '@src/module.api/loan.controller'
 import { LoanVaultService } from '@src/module.api/loan.vault.service'
+import { PoolPairIndexedController } from './poolpair.indexed.controller'
+import { PoolPairIndexedService } from './poolpair.indexed.service'
 
 /**
  * Exposed ApiModule for public interfacing
@@ -37,6 +39,7 @@ import { LoanVaultService } from '@src/module.api/loan.vault.service'
     TransactionController,
     TokenController,
     PoolPairController,
+    PoolPairIndexedController,
     MasternodeController,
     BlockController,
     OracleController,
@@ -61,6 +64,7 @@ import { LoanVaultService } from '@src/module.api/loan.vault.service'
     DeFiDCache,
     SemaphoreCache,
     PoolPairService,
+    PoolPairIndexedService,
     MasternodeService,
     LoanVaultService
   ]

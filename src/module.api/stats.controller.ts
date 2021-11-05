@@ -7,8 +7,6 @@ import { PoolPairService } from '@src/module.api/poolpair.service'
 import BigNumber from 'bignumber.js'
 import { PriceTickerMapper } from '@src/module.model/price.ticker'
 import { MasternodeStats, MasternodeStatsMapper } from '@src/module.model/masternode.stats'
-import { PoolPairMapper } from '@src/module.model/poolpair'
-import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { BlockchainInfo } from '@defichain/jellyfish-api-core/dist/category/blockchain'
 
 @Controller('/stats')
@@ -19,9 +17,7 @@ export class StatsController {
     protected readonly masternodeStatsMapper: MasternodeStatsMapper,
     protected readonly poolPairService: PoolPairService,
     protected readonly rpcClient: JsonRpcClient,
-    protected readonly cache: SemaphoreCache,
-    private readonly poolPairMapper: PoolPairMapper,
-    private readonly poolPairTokenMapper: PoolPairTokenMapper
+    protected readonly cache: SemaphoreCache
   ) {
   }
 
@@ -69,16 +65,10 @@ export class StatsController {
 
   private async getTVL (): Promise<StatsData['tvl']> {
     let dex = new BigNumber(0)
-    const poolPairTokens = await this.poolPairTokenMapper.list(1000)
-
-    for (const { poolPairId } of poolPairTokens) {
-      const pair = await this.poolPairMapper.getLatest(`${poolPairId}`)
-      if (pair === undefined) {
-        continue
-      }
-
+    const pairs = await this.rpcClient.poolpair.listPoolPairs({ including_start: true, start: 0, limit: 1000 }, true)
+    for (const pair of Object.values(pairs)) {
       const liq = await this.poolPairService.getTotalLiquidityUsd(pair)
-      dex = dex.plus(requireValue(liq, `tvl.dex.${pair.pairSymbol}`))
+      dex = dex.plus(requireValue(liq, `tvl.dex.${pair.symbol}`))
     }
 
     const optionalUsdt = await this.poolPairService.getUSDT_PER_DFI()

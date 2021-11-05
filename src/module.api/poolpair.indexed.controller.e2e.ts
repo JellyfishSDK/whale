@@ -1,36 +1,33 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { StubWhaleApiClient } from '../stub.client'
-import { StubService } from '../stub.service'
-import { ApiPagedResponse, WhaleApiClient, WhaleApiException } from '../../src'
+import { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens } from '@defichain/testing'
-import { PoolPairData } from '../../src/api/poolpairs'
+import { NotFoundException } from '@nestjs/common'
+import { PoolPairIndexedController } from './poolpair.indexed.controller'
 
-let container: MasterNodeRegTestContainer
-let service: StubService
-let client: WhaleApiClient
+const container = new MasterNodeRegTestContainer()
+let app: NestFastifyApplication
+let controller: PoolPairIndexedController
 
 beforeAll(async () => {
-  container = new MasterNodeRegTestContainer()
-  service = new StubService(container)
-  client = new StubWhaleApiClient(service)
-
   await container.start()
   await container.waitForWalletCoinbaseMaturity()
-  await service.start()
+  await container.waitForWalletBalanceGTE(100)
+
+  app = await createTestingApp(container)
+  controller = app.get(PoolPairIndexedController)
+
+  await waitForIndexedHeight(app, 100)
 
   await setup()
 })
 
 afterAll(async () => {
-  try {
-    await service.stop()
-  } finally {
-    await container.stop()
-  }
+  await stopTestingApp(container, app)
 })
 
 async function setup (): Promise<void> {
-  const tokens = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+  const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
 
   for (const token of tokens) {
     await container.waitForWalletBalanceGTE(110)
@@ -43,8 +40,6 @@ async function setup (): Promise<void> {
   await createPoolPair(container, 'D', 'DFI')
   await createPoolPair(container, 'E', 'DFI')
   await createPoolPair(container, 'F', 'DFI')
-  await createPoolPair(container, 'G', 'DFI')
-  await createPoolPair(container, 'H', 'DFI')
 
   await addPoolLiquidity(container, {
     tokenA: 'A',
@@ -79,50 +74,60 @@ async function setup (): Promise<void> {
     amountB: 431.51288,
     shareAddress: await getNewAddress(container)
   })
+
+  await container.call('setgov', [{ LP_SPLITS: { 8: 1.0 } }])
+  await container.generate(1)
+
+  const height = await container.getBlockCount()
+  await container.generate(1)
+  await waitForIndexedHeight(app, height)
+  await container.generate(1)
 }
 
 describe('list', () => {
   it('should list', async () => {
-    const response: ApiPagedResponse<PoolPairData> = await client.poolpairs.list(30)
+    const response = await controller.list({
+      size: 30
+    })
 
-    expect(response.length).toStrictEqual(9)
-    expect(response.hasNext).toStrictEqual(false)
+    expect(response.data.length).toStrictEqual(7)
+    expect(response.page).toBeUndefined()
 
-    expect(response[1]).toStrictEqual({
-      id: '10',
+    expect(response.data[1]).toStrictEqual({
+      id: '8',
+      sort: '00000008',
       symbol: 'B-DFI',
       name: 'B-Default Defi token',
       status: true,
       tokenA: {
         id: '2',
         symbol: 'B',
-        reserve: '50',
-        blockCommission: '0',
+        reserve: '50.00000000',
         displaySymbol: 'dB'
       },
       tokenB: {
         id: '0',
         symbol: 'DFI',
-        reserve: '300',
-        blockCommission: '0',
+        reserve: '300.00000000',
         displaySymbol: 'DFI'
       },
       apr: {
-        reward: 0,
-        total: 0
+        reward: 2229.42,
+        total: 2229.42
       },
-      commission: '0',
+      commission: '0.00000000',
       totalLiquidity: {
         token: '122.47448713',
-        usd: '1390.456752'
+        usd: '1390.45675763'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
-        ab: '0.16666666',
-        ba: '6'
+        ab: '0.16666667',
+        ba: '6.00000000'
       },
-      rewardPct: '0',
+      rewardPct: '1',
+      customRewards: expect.any(Array),
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
@@ -131,74 +136,77 @@ describe('list', () => {
   })
 
   it('should list with pagination', async () => {
-    const first = await client.poolpairs.list(4)
-    expect(first.length).toStrictEqual(4)
-    expect(first.hasNext).toStrictEqual(true)
-    expect(first.nextToken).toStrictEqual('12')
+    const first = await controller.list({
+      size: 2
+    })
+    expect(first.data.length).toStrictEqual(2)
+    expect(first.page?.next).toStrictEqual('00000008')
+    expect(first.data[0].symbol).toStrictEqual('A-DFI')
+    expect(first.data[1].symbol).toStrictEqual('B-DFI')
 
-    expect(first[0].symbol).toStrictEqual('A-DFI')
-    expect(first[1].symbol).toStrictEqual('B-DFI')
-    expect(first[2].symbol).toStrictEqual('C-DFI')
-    expect(first[3].symbol).toStrictEqual('D-DFI')
+    const next = await controller.list({
+      size: 10,
+      next: first.page?.next
+    })
 
-    const next = await client.paginate(first)
-    expect(next.length).toStrictEqual(4)
-    expect(next.hasNext).toStrictEqual(true)
-    expect(next.nextToken).toStrictEqual('16')
+    expect(next.data.length).toStrictEqual(5)
+    expect(next.page?.next).toBeUndefined()
+    expect(next.data[0].symbol).toStrictEqual('C-DFI')
+    expect(next.data[1].symbol).toStrictEqual('D-DFI')
+    expect(next.data[2].symbol).toStrictEqual('E-DFI')
+    expect(next.data[3].symbol).toStrictEqual('F-DFI')
+  })
 
-    expect(next[0].symbol).toStrictEqual('E-DFI')
-    expect(next[1].symbol).toStrictEqual('F-DFI')
-    expect(next[2].symbol).toStrictEqual('G-DFI')
-    expect(next[3].symbol).toStrictEqual('H-DFI')
+  it('should list with undefined next pagination', async () => {
+    const first = await controller.list({
+      size: 2,
+      next: undefined
+    })
 
-    const last = await client.paginate(next)
-    expect(last.length).toStrictEqual(1)
-    expect(last.hasNext).toStrictEqual(false)
-    expect(last.nextToken).toBeUndefined()
-
-    expect(last[0].symbol).toStrictEqual('USDT-DFI')
+    expect(first.data.length).toStrictEqual(2)
+    expect(first.page?.next).toStrictEqual('00000008')
   })
 })
 
 describe('get', () => {
   it('should get', async () => {
-    const response: PoolPairData = await client.poolpairs.get('9')
+    const response = await controller.get('7')
 
     expect(response).toStrictEqual({
-      id: '9',
+      id: '7',
+      sort: '00000007',
       symbol: 'A-DFI',
       name: 'A-Default Defi token',
       status: true,
       tokenA: {
         id: expect.any(String),
         symbol: 'A',
-        reserve: '100',
-        blockCommission: '0',
+        reserve: '100.00000000',
         displaySymbol: 'dA'
       },
       tokenB: {
         id: '0',
         symbol: 'DFI',
-        reserve: '200',
-        blockCommission: '0',
+        reserve: '200.00000000',
         displaySymbol: 'DFI'
       },
       apr: {
         reward: 0,
         total: 0
       },
-      commission: '0',
+      commission: '0.00000000',
       totalLiquidity: {
         token: '141.42135623',
-        usd: '926.971168'
+        usd: '926.97117175'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
-        ab: '0.5',
-        ba: '2'
+        ab: '0.50000000',
+        ba: '2.00000000'
       },
       rewardPct: '0',
+      customRewards: expect.any(Array),
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
@@ -206,34 +214,16 @@ describe('get', () => {
     })
   })
 
-  it('should throw error as numeric string is expected', async () => {
-    expect.assertions(2)
-    try {
-      await client.poolpairs.get('A-DFI')
-    } catch (err) {
-      expect(err).toBeInstanceOf(WhaleApiException)
-      expect(err.error).toStrictEqual({
-        code: 400,
-        type: 'BadRequest',
-        at: expect.any(Number),
-        message: 'Validation failed (numeric string is expected)',
-        url: '/v0.0/regtest/poolpairs/A-DFI'
-      })
-    }
-  })
-
   it('should throw error while getting non-existent poolpair', async () => {
     expect.assertions(2)
     try {
-      await client.poolpairs.get('999')
+      await controller.get('999')
     } catch (err) {
-      expect(err).toBeInstanceOf(WhaleApiException)
-      expect(err.error).toStrictEqual({
-        code: 404,
-        type: 'NotFound',
-        at: expect.any(Number),
+      expect(err).toBeInstanceOf(NotFoundException)
+      expect(err.response).toStrictEqual({
+        statusCode: 404,
         message: 'Unable to find poolpair',
-        url: '/v0.0/regtest/poolpairs/999'
+        error: 'Not Found'
       })
     }
   })

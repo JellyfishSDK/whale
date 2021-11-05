@@ -1,43 +1,21 @@
 import { Injectable } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import BigNumber from 'bignumber.js'
-import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 import { PoolPairData } from '@whale-api-client/api/poolpairs'
+import { PoolPair, PoolPairMapper } from '@src/module.model/poolpair'
+import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
+import { TokenMapper } from '@src/module.model/token'
 
 @Injectable()
-export class PoolPairService {
+export class PoolPairIndexedService {
   constructor (
     protected readonly rpcClient: JsonRpcClient,
-    protected readonly cache: SemaphoreCache
+    protected readonly cache: SemaphoreCache,
+    private readonly poolPairMapper: PoolPairMapper,
+    private readonly poolPairTokenMapper: PoolPairTokenMapper,
+    private readonly tokenMapper: TokenMapper
   ) {
-  }
-
-  /**
-   * Get PoolPair where the order of token doesn't matter
-   */
-  private async getPoolPair (a: string, b: string): Promise<PoolPairInfo | undefined> {
-    try {
-      const result = await this.rpcClient.poolpair.getPoolPair(`${a}-${b}`, true)
-      if (Object.values(result).length > 0) {
-        return Object.values(result)[0]
-      }
-    } catch (err) {
-      if (err?.payload?.message !== 'Pool not found') {
-        throw err
-      }
-    }
-
-    try {
-      const result = await this.rpcClient.poolpair.getPoolPair(`${b}-${a}`, true)
-      if (Object.values(result).length > 0) {
-        return Object.values(result)[0]
-      }
-    } catch (err) {
-      if (err?.payload?.message !== 'Pool not found') {
-        throw err
-      }
-    }
   }
 
   /**
@@ -45,30 +23,43 @@ export class PoolPairService {
    * Currently implemented with fix pair derivation
    * Ideally should use vertex directed graph where we can always find total liquidity if it can be resolved.
    */
-  async getTotalLiquidityUsd (info: PoolPairInfo): Promise<BigNumber | undefined> {
+  async getTotalLiquidityUsd (info: PoolPair): Promise<BigNumber | undefined> {
     const USDT_PER_DFI = await this.getUSDT_PER_DFI()
     if (USDT_PER_DFI === undefined) {
       return
     }
 
-    const [a, b] = info.symbol.split('-')
+    const [a, b] = [info.tokenA.symbol, info.tokenB.symbol]
     if (a === 'DFI') {
-      return info.reserveA.multipliedBy(2).multipliedBy(USDT_PER_DFI)
+      return (new BigNumber(info.tokenA.reserve)).multipliedBy(2).multipliedBy(USDT_PER_DFI)
     }
 
     if (b === 'DFI') {
-      return info.reserveB.multipliedBy(2).multipliedBy(USDT_PER_DFI)
+      return (new BigNumber(info.tokenB.reserve)).multipliedBy(2).multipliedBy(USDT_PER_DFI)
     }
   }
 
   async getUSDT_PER_DFI (): Promise<BigNumber | undefined> {
     return await this.cache.get<BigNumber>('USDT_PER_DFI', async () => {
-      const pair = await this.getPoolPair('DFI', 'USDT')
+      // TODO: Improve this, in practical use there's no performance hit as
+      // USDT is the 7th or 8th token in the list
+      const tokenList = await this.tokenMapper.queryAsc(128)
+      const usdtToken = tokenList.find(x => x.symbol === 'USDT')
+      if (usdtToken === undefined) {
+        return undefined
+      }
+
+      const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(0, parseInt(usdtToken.id))
+      if (poolPairToken === undefined) {
+        return undefined
+      }
+
+      const pair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
       if (pair !== undefined) {
-        if (pair.idTokenA === '0') {
-          return new BigNumber(pair['reserveB/reserveA'])
-        } else if (pair.idTokenB === '0') {
-          return new BigNumber(pair['reserveA/reserveB'])
+        if (pair.tokenA.id === 0) {
+          return (new BigNumber(pair.tokenB.reserve)).dividedBy(pair.tokenA.reserve)
+        } else if (pair.tokenB.id === 0) {
+          return (new BigNumber(pair.tokenA.reserve)).dividedBy(pair.tokenB.reserve)
         }
       }
     }, {
@@ -85,7 +76,7 @@ export class PoolPairService {
     })
   }
 
-  private async getYearlyCustomRewardUSD (info: PoolPairInfo): Promise<BigNumber | undefined> {
+  private async getYearlyCustomRewardUSD (info: PoolPair): Promise<BigNumber | undefined> {
     if (info.customRewards === undefined) {
       return new BigNumber(0)
     }
@@ -111,8 +102,13 @@ export class PoolPairService {
     }, new BigNumber(0))
   }
 
-  private async getYearlyRewardPCTUSD (info: PoolPairInfo): Promise<BigNumber | undefined> {
-    if (info.rewardPct === undefined) {
+  private async getYearlyRewardPCTUSD (info: PoolPair): Promise<BigNumber | undefined> {
+    const lpSplits = await this.getLPSplits()
+    if (lpSplits === undefined) {
+      return new BigNumber(0)
+    }
+    const rewardPct = lpSplits[parseInt(info.poolPairId)]
+    if (rewardPct === undefined) {
       return new BigNumber(0)
     }
 
@@ -123,28 +119,48 @@ export class PoolPairService {
       return undefined
     }
 
-    return info.rewardPct
+    const rewardPctBigNum = new BigNumber(rewardPct)
+    return rewardPctBigNum
       .times(dailyDfiReward)
       .times(365)
       .times(dfiPriceUsdt)
   }
 
-  async getAPR (info: PoolPairInfo): Promise<PoolPairData['apr'] | undefined> {
+  async getLPSplits (): Promise<Record<string, any> | undefined> {
+    return await this.cache.get<Record<string, any>>('LP_SPLITS', async () => {
+      const rpcResult = await this.rpcClient.masternode.getGov('LP_SPLITS')
+      return rpcResult.LP_SPLITS
+    }, {
+      ttl: 3600 // 60 minutes
+    })
+  }
+
+  async getAPR (info: PoolPair): Promise<PoolPairData['apr'] | undefined> {
     const customUSD = await this.getYearlyCustomRewardUSD(info)
     const pctUSD = await this.getYearlyRewardPCTUSD(info)
     const totalLiquidityUSD = await this.getTotalLiquidityUsd(info)
 
     if (customUSD === undefined || pctUSD === undefined || totalLiquidityUSD === undefined) {
-      return undefined
+      return {
+        reward: 0,
+        total: 0
+      }
     }
 
     const yearlyUSD = customUSD.plus(pctUSD)
     // 1 == 100%, 0.1 = 10%
-    const apr = yearlyUSD.div(totalLiquidityUSD).toNumber()
+    const apr = yearlyUSD.div(totalLiquidityUSD)
+
+    if (apr.isNaN()) {
+      return {
+        reward: 0,
+        total: 0
+      }
+    }
 
     return {
-      reward: apr,
-      total: apr
+      reward: apr.toNumber(),
+      total: apr.toNumber()
     }
   }
 }

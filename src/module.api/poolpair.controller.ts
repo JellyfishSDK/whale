@@ -1,25 +1,19 @@
-import { Controller, Get, Inject, NotFoundException, Param, ParseIntPipe, Query } from '@nestjs/common'
+import { Controller, Get, NotFoundException, Param, ParseIntPipe, Query } from '@nestjs/common'
+import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { PoolPairData } from '@whale-api-client/api/poolpairs'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { PoolPairService } from './poolpair.service'
 import BigNumber from 'bignumber.js'
-import { PoolPair, PoolPairMapper } from '@src/module.model/poolpair'
-import { fromScript } from '@defichain/jellyfish-address'
-import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
-import { SmartBuffer } from 'smart-buffer'
-import { toOPCodes } from '@defichain/jellyfish-transaction/dist'
-import { NetworkName } from '@defichain/jellyfish-network'
+import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 
 @Controller('/poolpairs')
 export class PoolPairController {
   constructor (
+    protected readonly rpcClient: JsonRpcClient,
     protected readonly deFiDCache: DeFiDCache,
-    private readonly poolPairService: PoolPairService,
-    private readonly poolPairMapper: PoolPairMapper,
-    private readonly poolPairTokenMapper: PoolPairTokenMapper,
-    @Inject('NETWORK') protected readonly network: NetworkName
+    private readonly poolPairService: PoolPairService
   ) {
   }
 
@@ -33,23 +27,21 @@ export class PoolPairController {
   async list (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<PoolPairData>> {
-    const result = await this.poolPairTokenMapper.list(query.size, query.next)
+    const result = await this.rpcClient.poolpair.listPoolPairs({
+      start: query.next !== undefined ? Number(query.next) : 0,
+      including_start: query.next === undefined, // TODO(fuxingloh): open issue at DeFiCh/ain, rpc_accounts.cpp#388
+      limit: query.size
+    }, true)
 
     const items: PoolPairData[] = []
-    for (const { poolPairId } of result) {
-      const info = await this.poolPairMapper.getLatest(`${poolPairId}`)
-      if (info === undefined) {
-        continue
-      }
-
+    for (const [id, info] of Object.entries(result)) {
       const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
       const apr = await this.poolPairService.getAPR(info)
-      const lpSplits = await this.poolPairService.getLPSplits()
-      items.push(this.mapPoolPair(`${poolPairId}`, info, totalLiquidityUsd, apr, lpSplits))
+      items.push(mapPoolPair(id, info, totalLiquidityUsd, apr))
     }
 
     return ApiPagedResponse.of(items, query.size, item => {
-      return item.sort
+      return item.id
     })
   }
 
@@ -59,58 +51,55 @@ export class PoolPairController {
    */
   @Get('/:id')
   async get (@Param('id', ParseIntPipe) id: string): Promise<PoolPairData> {
-    const poolPair = await this.poolPairMapper.getLatest(id)
-    if (poolPair === undefined) {
+    const info = await this.deFiDCache.getPoolPairInfo(id)
+    if (info === undefined) {
       throw new NotFoundException('Unable to find poolpair')
     }
 
-    const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(poolPair)
-    const apr = await this.poolPairService.getAPR(poolPair)
-    const lpSplits = await this.poolPairService.getLPSplits()
-    return this.mapPoolPair(String(id), poolPair, totalLiquidityUsd, apr, lpSplits)
+    const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
+    const apr = await this.poolPairService.getAPR(info)
+    return mapPoolPair(String(id), info, totalLiquidityUsd, apr)
   }
+}
 
-  mapPoolPair (id: string, info: PoolPair, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr'],
-    lpSplits?: Record<string, any>): PoolPairData {
-    const ownerScriptBuffer = SmartBuffer.fromBuffer(Buffer.from(info.ownerScript, 'hex'))
-    const ownerStack = toOPCodes(ownerScriptBuffer)
-    const ownerAddress = fromScript({ stack: ownerStack }, this.network)
-    return {
-      id: id,
-      symbol: info.pairSymbol,
-      name: info.name,
-      status: info.status,
-      sort: info.sort,
-      tokenA: {
-        symbol: info.tokenA.symbol,
-        displaySymbol: info.tokenA.id === 0 ? info.tokenA.symbol : `d${info.tokenA.symbol}`,
-        id: `${info.tokenA.id}`,
-        reserve: info.tokenA.reserve
-      },
-      tokenB: {
-        symbol: info.tokenB.symbol,
-        displaySymbol: info.tokenB.id === 0 ? info.tokenB.symbol : `d${info.tokenB.symbol}`,
-        id: `${info.tokenB.id}`,
-        reserve: info.tokenB.reserve
-      },
-      priceRatio: {
-        ab: (new BigNumber(info.tokenA.reserve)).dividedBy(info.tokenB.reserve).toFixed(8),
-        ba: (new BigNumber(info.tokenB.reserve)).dividedBy(info.tokenA.reserve).toFixed(8)
-      },
-      commission: info.commission,
-      totalLiquidity: {
-        token: info.totalLiquidity,
-        usd: totalLiquidityUsd?.toFixed(8)
-      },
-      tradeEnabled: (new BigNumber(info.tokenA.reserve)).gte(0.00001) && (new BigNumber(info.tokenB.reserve)).gte(0.00001),
-      ownerAddress: ownerAddress?.address ?? '',
-      rewardPct: lpSplits?.[info.poolPairId] !== undefined ? `${lpSplits?.[info.poolPairId] as number}` : '0',
-      customRewards: info.customRewards,
-      creation: {
-        tx: info.creationTx,
-        height: info.creationHeight
-      },
-      apr
-    }
+function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr']): PoolPairData {
+  const [symbolA, symbolB] = info.symbol.split('-')
+  return {
+    id: id,
+    symbol: info.symbol,
+    name: info.name,
+    status: info.status,
+    tokenA: {
+      symbol: symbolA,
+      displaySymbol: info.idTokenA === '0' ? symbolA : `d${symbolA}`,
+      id: info.idTokenA,
+      reserve: info.reserveA.toFixed(),
+      blockCommission: info.blockCommissionA.toFixed()
+    },
+    tokenB: {
+      symbol: symbolB,
+      displaySymbol: info.idTokenB === '0' ? symbolB : `d${symbolB}`,
+      id: info.idTokenB,
+      reserve: info.reserveB.toFixed(),
+      blockCommission: info.blockCommissionB.toFixed()
+    },
+    priceRatio: {
+      ab: info['reserveA/reserveB'] instanceof BigNumber ? info['reserveA/reserveB'].toFixed() : info['reserveA/reserveB'],
+      ba: info['reserveB/reserveA'] instanceof BigNumber ? info['reserveB/reserveA'].toFixed() : info['reserveB/reserveA']
+    },
+    commission: info.commission.toFixed(),
+    totalLiquidity: {
+      token: info.totalLiquidity.toFixed(),
+      usd: totalLiquidityUsd?.toFixed()
+    },
+    tradeEnabled: info.tradeEnabled,
+    ownerAddress: info.ownerAddress,
+    rewardPct: info.rewardPct.toFixed(),
+    customRewards: info.customRewards,
+    creation: {
+      tx: info.creationTx,
+      height: info.creationHeight.toNumber()
+    },
+    apr
   }
 }

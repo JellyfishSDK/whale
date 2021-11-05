@@ -5,11 +5,9 @@ import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintToken
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import BigNumber from 'bignumber.js'
-import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
-let client: JsonRpcClient
 
 beforeEach(async () => {
   await container.start()
@@ -17,7 +15,6 @@ beforeEach(async () => {
   await container.waitForWalletCoinbaseMaturity()
 
   app = await createTestingApp(container)
-  client = new JsonRpcClient(await container.getCachedRpcUrl())
 })
 
 afterEach(async () => {
@@ -241,10 +238,5 @@ describe('add liquidity and remove liquidity', () => {
       block: expect.any(Object),
       sort: '00000003'
     })
-
-    const poolPair = await client.poolpair.getPoolPair('3')
-    expect(resultPostRemove?.tokenA.reserve).toStrictEqual(poolPair['3'].reserveA.toFixed(8, BigNumber.ROUND_DOWN))
-    expect(resultPostRemove?.tokenB.reserve).toStrictEqual(poolPair['3'].reserveB.toFixed(8, BigNumber.ROUND_DOWN))
-    expect(resultPostRemove?.totalLiquidity).toStrictEqual(poolPair['3'].totalLiquidity.toFixed(8, BigNumber.ROUND_DOWN))
   })
 })

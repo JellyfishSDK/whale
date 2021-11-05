@@ -4,7 +4,7 @@ import { ApiPagedResponse } from '../whale.api.response'
 /**
  * DeFi whale endpoint for poolpair related services.
  */
-export class PoolPairs {
+export class PoolPairsIndexed {
   constructor (private readonly client: WhaleApiClient) {
   }
 
@@ -16,7 +16,7 @@ export class PoolPairs {
    * @return {Promise<ApiPagedResponse<PoolPairData>>}
    */
   async list (size: number = 30, next?: string): Promise<ApiPagedResponse<PoolPairData>> {
-    return await this.client.requestList('GET', 'poolpairs', size, next)
+    return await this.client.requestList('GET', 'poolpairsindexed', size, next)
   }
 
   /**
@@ -26,7 +26,7 @@ export class PoolPairs {
    * @return {Promise<PoolPairData>}
    */
   async get (id: string): Promise<PoolPairData> {
-    return await this.client.requestData('GET', `poolpairs/${id}`)
+    return await this.client.requestData('GET', `poolpairsindexed/${id}`)
   }
 }
 
@@ -34,20 +34,19 @@ export interface PoolPairData {
   id: string
   symbol: string
   name: string
-  status: string
+  sort: string
+  status: boolean
   tokenA: {
     id: string
     symbol: string
     displaySymbol: string
     reserve: string // BigNumber
-    blockCommission: string // BigNumber
   }
   tokenB: {
     id: string
     symbol: string
     displaySymbol: string
     reserve: string // BigNumber
-    blockCommission: string // BigNumber
   }
   priceRatio: {
     ab: string // BigNumber

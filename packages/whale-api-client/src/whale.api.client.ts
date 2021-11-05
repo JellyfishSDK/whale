@@ -17,6 +17,7 @@ import { Stats } from './api/stats'
 import { Rawtx } from './api/rawtx'
 import { Fee } from './api/fee'
 import { Loan } from './api/loan'
+import { PoolPairsIndexed } from './api/poolpairs.indexed'
 
 /**
  * WhaleApiClient Options
@@ -66,6 +67,7 @@ export class WhaleApiClient {
   public readonly rpc = new Rpc(this)
   public readonly address = new Address(this)
   public readonly poolpairs = new PoolPairs(this)
+  public readonly poolpairsIndexed = new PoolPairsIndexed(this)
   public readonly transactions = new Transactions(this)
   public readonly tokens = new Tokens(this)
   public readonly masternodes = new Masternodes(this)
