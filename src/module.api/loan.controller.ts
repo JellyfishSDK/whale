@@ -19,6 +19,7 @@ import {
 import { CollateralToken, LoanScheme, LoanToken } from '@whale-api-client/api/loan'
 import { mapTokenData } from '@src/module.api/token.controller'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
+import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
 
 @Controller('/loans')
 export class LoanController {
@@ -122,7 +123,7 @@ export class LoanController {
   }
 
   /**
-   * Get information about a loan token with given loan token.
+   *  Paginate loan tokens.
    *
    * @param {string} id
    * @return {Promise<LoanTokenResult>}
@@ -139,6 +140,19 @@ export class LoanController {
         throw new BadRequestException(err)
       }
     }
+  }
+
+  /**
+   *  Paginate auction history.
+   *
+   * @return {Promise<LoanTokenResult>}
+   * @param query
+   * @param container
+   */
+  @Get('/auctionhistory')
+  async listAuctionHistory (@Query() query: PaginationQuery, container: LoanMasterNodeRegTestContainer): Promise<any> {
+    const data = await container.call('listauctionhistory', [])
+    return data
   }
 
   async mapCollateralToken (detail: CollateralTokenDetail): Promise<CollateralToken> {
