@@ -171,6 +171,23 @@ beforeAll(async () => {
       currency: 'USD'
     }]
   })
+  await testing.generate(12)
+
+  await testing.rpc.account.sendTokensToAddress({}, { [collateralAddress]: ['100000@TSLA'] })
+  await testing.generate(1)
+
+  await container.call('placeauctionbid', [vaultId1, 0, collateralAddress, '2400@TSLA'])
+  await testing.generate(1)
+
+  await container.call('placeauctionbid', [vaultId2, 0, collateralAddress, '2400@TSLA'])
+  await testing.generate(1)
+
+  await container.call('placeauctionbid', [vaultId3, 0, collateralAddress, '2400@TSLA'])
+  await testing.generate(1)
+
+  await container.call('placeauctionbid', [vaultId4, 0, collateralAddress, '780@TSLA'])
+  await testing.generate(1)
+
   await testing.generate(40)
 })
 
@@ -181,6 +198,7 @@ afterAll(async () => {
 describe('loan', () => {
   it('should listAuctions', async () => {
     const result = await controller.listAuctionHistory({ size: 0 }, container)
+    console.log(JSON.stringify(result))
     expect(result.length).toStrictEqual(4)
     result.forEach((e: any) =>
       expect(e).toStrictEqual({
