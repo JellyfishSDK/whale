@@ -102,19 +102,23 @@ beforeAll(async () => {
   })
   await testing.generate(1)
 
+  // mint loan token TSLA
+  await testing.token.mint({ symbol: 'TSLA', amount: 30000 })
+  await testing.generate(1)
+
   // Vault 1
   const ownerAddressVault1 = await testing.generateAddress()
   const vaultId1 = await testing.rpc.container.call('createvault', [ownerAddressVault1, 'default'])
   await testing.generate(1)
 
-  await testing.container.call('deposittovault', [vaultId1, collateralAddress, '10000@DFI'])
+  await testing.container.call('deposittovault', [vaultId1, collateralAddress, '1000@DFI'])
   await testing.generate(1)
-  await testing.container.call('deposittovault', [vaultId1, collateralAddress, '0.5@BTC'])
+  await testing.container.call('deposittovault', [vaultId1, collateralAddress, '0.05@BTC'])
   await testing.generate(1)
 
   await testing.container.call('takeloan', [{
     vaultId: vaultId1,
-    amounts: '7500@TSLA'
+    amounts: '750@TSLA'
   }])
   await testing.generate(1)
 
@@ -122,14 +126,14 @@ beforeAll(async () => {
   const vaultId2 = await testing.rpc.container.call('createvault', [await testing.generateAddress(), 'default'])
   await testing.generate(1)
 
-  await testing.container.call('deposittovault', [vaultId2, collateralAddress, '20000@0DFI'])
+  await testing.container.call('deposittovault', [vaultId2, collateralAddress, '2000@0DFI'])
   await testing.generate(1)
-  await testing.container.call('deposittovault', [vaultId2, collateralAddress, '1@BTC'])
+  await testing.container.call('deposittovault', [vaultId2, collateralAddress, '0.1@BTC'])
   await testing.generate(1)
 
   await testing.container.call('takeloan', [{
     vaultId: vaultId2,
-    amounts: '15000@TSLA'
+    amounts: '1500@TSLA'
   }])
   await testing.generate(1)
 
@@ -137,14 +141,14 @@ beforeAll(async () => {
   const vaultId3 = await testing.rpc.container.call('createvault', [await testing.generateAddress(), 'default'])
   await testing.generate(1)
 
-  await testing.container.call('deposittovault', [vaultId3, collateralAddress, '30000@DFI'])
+  await testing.container.call('deposittovault', [vaultId3, collateralAddress, '3000@DFI'])
   await testing.generate(1)
-  await testing.container.call('deposittovault', [vaultId3, collateralAddress, '1.5@BTC'])
+  await testing.container.call('deposittovault', [vaultId3, collateralAddress, '0.15@BTC'])
   await testing.generate(1)
 
   await testing.container.call('takeloan', [{
     vaultId: vaultId3,
-    amounts: '22500@TSLA'
+    amounts: '2250@TSLA'
   }])
   await testing.generate(1)
 
@@ -153,14 +157,14 @@ beforeAll(async () => {
   const vaultId4 = await testing.rpc.container.call('createvault', [ownerAddress, 'default'])
   await testing.generate(1)
 
-  await testing.container.call('deposittovault', [vaultId4, collateralAddress, '40000@DFI'])
+  await testing.container.call('deposittovault', [vaultId4, collateralAddress, '4000@DFI'])
   await testing.generate(1)
-  await testing.container.call('deposittovault', [vaultId4, collateralAddress, '2@BTC'])
+  await testing.container.call('deposittovault', [vaultId4, collateralAddress, '0.2@BTC'])
   await testing.generate(1)
 
   await testing.container.call('takeloan', [{
     vaultId: vaultId4,
-    amounts: '30000@TSLA'
+    amounts: '3000@TSLA'
   }])
   await testing.generate(1)
 
@@ -173,19 +177,19 @@ beforeAll(async () => {
   })
   await testing.generate(12)
 
-  await testing.rpc.account.sendTokensToAddress({}, { [collateralAddress]: ['100000@TSLA'] })
+  await testing.rpc.account.sendTokensToAddress({}, { [collateralAddress]: ['10000@TSLA'] })
   await testing.generate(1)
 
-  await container.call('placeauctionbid', [vaultId1, 0, collateralAddress, '2400@TSLA'])
+  await container.call('placeauctionbid', [vaultId1, 0, collateralAddress, '790@TSLA'])
   await testing.generate(1)
 
-  await container.call('placeauctionbid', [vaultId2, 0, collateralAddress, '2400@TSLA'])
+  await container.call('placeauctionbid', [vaultId2, 0, collateralAddress, '1600@TSLA'])
   await testing.generate(1)
 
   await container.call('placeauctionbid', [vaultId3, 0, collateralAddress, '2400@TSLA'])
   await testing.generate(1)
 
-  await container.call('placeauctionbid', [vaultId4, 0, collateralAddress, '780@TSLA'])
+  await container.call('placeauctionbid', [vaultId4, 0, collateralAddress, '3200@TSLA'])
   await testing.generate(1)
 
   await testing.generate(40)
@@ -202,14 +206,14 @@ describe('loan', () => {
     expect(result.length).toStrictEqual(4)
     result.forEach((e: any) =>
       expect(e).toStrictEqual({
-        batchCount: expect.any(Number),
-        liquidationHeight: expect.any(Number),
-        liquidationPenalty: 5,
-        loanSchemeId: 'default',
-        ownerAddress: expect.any(String),
-        state: 'inLiquidation',
-        vaultId: expect.any(String),
-        batches: expect.any(Object)
+        auctionBid: expect.any(String),
+        auctionWon: expect.any(Object),
+        batchIndex: expect.any(Number),
+        blockHash: expect.any(String),
+        blockHeight: expect.any(Number),
+        blockTime: expect.any(Number),
+        winner: expect.any(String),
+        vaultId: expect.any(String)
       })
     )
   })
