@@ -2,12 +2,12 @@ import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_ab
 import { PoolSwap, CPoolSwap } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Inject, Injectable } from '@nestjs/common'
-import { PoolPairMapper } from '@src/module.model/poolpair'
+import { PoolPairMapper, PoolPair } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { NetworkName } from '@defichain/jellyfish-network'
 import BigNumber from 'bignumber.js'
 
-const PoolswapConsensusParams = {
+export const PoolswapConsensusParams = {
   mainnet: {
     BayFrontGardensHeight: 488300
   },
@@ -44,31 +44,36 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
       const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
 
       if (poolPair !== undefined) {
-        const forward = data.fromTokenId === poolPair.tokenA.id
-        const reserveF = new BigNumber(forward ? poolPair.tokenA.reserve : poolPair.tokenB.reserve)
-        const reserveT = new BigNumber(forward ? poolPair.tokenB.reserve : poolPair.tokenA.reserve)
-
         const BayFrontGardensHeight = PoolswapConsensusParams[this.network].BayFrontGardensHeight
-
-        let fromAmount = data.fromAmount
-        const commission = new BigNumber(poolPair.commission)
-        if (commission.gt(0)) {
-          fromAmount = fromAmount.minus(fromAmount.times(commission))
-        }
-
-        const result = this.slopeSwap(fromAmount, reserveF, reserveT, block.height > BayFrontGardensHeight)
-
-        poolPair.id = `${poolPair.poolPairId}-${block.height}`
-        poolPair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
-        poolPair.tokenA.reserve = (forward ? result.poolFrom : result.poolTo).toFixed(8, BigNumber.ROUND_DOWN)
-        poolPair.tokenB.reserve = (forward ? result.poolTo : result.poolFrom).toFixed(8, BigNumber.ROUND_DOWN)
-
-        await this.poolPairMapper.put(poolPair)
+        const swappedPoolpair = PoolSwapIndexer.executeSwap(poolPair, data.fromTokenId, data.fromAmount,
+          block.height > BayFrontGardensHeight).poolPair
+        swappedPoolpair.id = `${poolPair.poolPairId}-${block.height}`
+        swappedPoolpair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
+        await this.poolPairMapper.put(swappedPoolpair)
       }
     }
   }
 
-  slopeSwap (unswapped: BigNumber, poolFrom: BigNumber, poolTo: BigNumber, postBayFrontGardens: boolean): Record<string, BigNumber> {
+  static executeSwap (poolPair: PoolPair, fromTokenId: number, fromAmount: BigNumber, postBayFrontGardens: boolean):
+  { poolPair: PoolPair, result: Record<string, BigNumber>, tokenOut: number } {
+    const forward = fromTokenId === poolPair.tokenA.id
+    const reserveF = new BigNumber(forward ? poolPair.tokenA.reserve : poolPair.tokenB.reserve)
+    const reserveT = new BigNumber(forward ? poolPair.tokenB.reserve : poolPair.tokenA.reserve)
+
+    const commission = new BigNumber(poolPair.commission)
+    if (commission.gt(0)) {
+      fromAmount = fromAmount.minus(fromAmount.times(commission))
+    }
+
+    const result = PoolSwapIndexer.slopeSwap(fromAmount, reserveF, reserveT, postBayFrontGardens)
+
+    poolPair.tokenA.reserve = (forward ? result.poolFrom : result.poolTo).toFixed(8, BigNumber.ROUND_DOWN)
+    poolPair.tokenB.reserve = (forward ? result.poolTo : result.poolFrom).toFixed(8, BigNumber.ROUND_DOWN)
+
+    return { poolPair, result, tokenOut: forward ? poolPair.tokenB.id : poolPair.tokenA.id }
+  }
+
+  static slopeSwap (unswapped: BigNumber, poolFrom: BigNumber, poolTo: BigNumber, postBayFrontGardens: boolean): Record<string, BigNumber> {
     BigNumber.set({ ROUNDING_MODE: BigNumber.ROUND_DOWN })
     BigNumber.set({ DECIMAL_PLACES: 8 })
 
