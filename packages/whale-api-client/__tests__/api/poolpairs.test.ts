@@ -163,11 +163,12 @@ describe('list', () => {
     expect(next[3].symbol).toStrictEqual('H-DFI')
 
     const last = await client.paginate(next)
-    expect(last.length).toStrictEqual(1)
+    expect(last.length).toStrictEqual(2)
     expect(last.hasNext).toStrictEqual(false)
     expect(last.nextToken).toBeUndefined()
 
     expect(last[0].symbol).toStrictEqual('USDT-DFI')
+    expect(last[1].symbol).toStrictEqual('USDC-H')
   })
 })
 
