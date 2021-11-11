@@ -1,20 +1,18 @@
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp, stopTestingApp, waitForIndexedHeightLatest } from '@src/e2e.module'
+import { createTestingApp, invalidateFromHeight, stopTestingApp, waitForIndexedHeight, waitForIndexedHeightLatest } from '@src/e2e.module'
 import { Testing } from '@defichain/jellyfish-testing'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
-import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 
 const container = new MasterNodeRegTestContainer()
-const testing = Testing.create(container)
+let testing: Testing
 let app: NestFastifyApplication
-let client: JsonRpcClient
 
 beforeEach(async () => {
   await container.start()
   app = await createTestingApp(container)
-  client = new JsonRpcClient(await container.getCachedRpcUrl())
+  testing = Testing.create(container)
   await container.waitForWalletCoinbaseMaturity()
   await container.waitForWalletBalanceGTE(101) // token creation fee
 
@@ -84,7 +82,7 @@ describe('composite swap', () => {
       ownerScript: expect.any(String)
     })
 
-    await client.poolpair.compositeSwap({
+    await testing.rpc.poolpair.compositeSwap({
       from: await testing.address('my'),
       tokenFrom: 'B',
       tokenTo: 'C',
@@ -159,5 +157,109 @@ describe('composite swap', () => {
       customRewards: [],
       ownerScript: expect.any(String)
     })
+  })
+})
+
+describe('invalidate', () => {
+  it('should composite swap and invalidate', async () => {
+    await waitForIndexedHeightLatest(app, container)
+
+    const poolPairTokenMapper = app.get(PoolPairTokenMapper)
+    const poolPairMapper = app.get(PoolPairMapper)
+    const result = await poolPairTokenMapper.list(30)
+    expect(result.length).toStrictEqual(3)
+
+    const poolPairs = await Promise.all(result.map(async x => {
+      return await poolPairMapper.getLatest(`${x.poolPairId}`)
+    }))
+
+    const preSwapPool = {
+      id: '2-104',
+      sort: '00000002',
+      pairSymbol: 'B-DFI',
+      name: 'B-Default Defi token',
+      poolPairId: '2',
+      tokenA: {
+        id: 1,
+        symbol: 'B',
+        reserve: '100.00000000'
+      },
+      tokenB: {
+        id: 0,
+        symbol: 'DFI',
+        reserve: '200.00000000'
+      },
+      block: {
+        hash: expect.any(String),
+        height: 104,
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      },
+      status: true,
+      commission: '0.00000000',
+      totalLiquidity: '141.42135623',
+      creationHeight: 103,
+      creationTx: expect.any(String),
+      customRewards: [],
+      ownerScript: expect.any(String)
+    }
+
+    expect(poolPairs[0]).toStrictEqual(preSwapPool)
+
+    const height = await container.call('getblockcount')
+    await testing.rpc.poolpair.compositeSwap({
+      from: await testing.address('my'),
+      tokenFrom: 'B',
+      tokenTo: 'C',
+      amountFrom: 10,
+      to: await testing.address('my')
+    })
+
+    await waitForIndexedHeightLatest(app, container)
+
+    const poolPairsAfterSwap = await Promise.all(result.map(async x => {
+      return await poolPairMapper.getLatest(`${x.poolPairId}`)
+    }))
+
+    expect(poolPairsAfterSwap[0]).toStrictEqual({
+      id: '2-111',
+      sort: '00000002',
+      pairSymbol: 'B-DFI',
+      name: 'B-Default Defi token',
+      poolPairId: '2',
+      tokenA: {
+        id: 1,
+        symbol: 'B',
+        reserve: '110.00000000'
+      },
+      tokenB: {
+        id: 0,
+        symbol: 'DFI',
+        reserve: '181.81818181'
+      },
+      block: {
+        hash: expect.any(String),
+        height: 111,
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      },
+      status: true,
+      commission: '0.00000000',
+      totalLiquidity: '141.42135623',
+      creationHeight: 103,
+      creationTx: expect.any(String),
+      customRewards: [],
+      ownerScript: expect.any(String)
+    })
+
+    await invalidateFromHeight(app, container, height - 1)
+    await container.generate(2)
+    await waitForIndexedHeight(app, height)
+
+    const poolPairsAfterInvalidate = await Promise.all(result.map(async x => {
+      return await poolPairMapper.getLatest(`${x.poolPairId}`)
+    }))
+
+    expect(poolPairsAfterInvalidate[0]).toStrictEqual(preSwapPool)
   })
 })
