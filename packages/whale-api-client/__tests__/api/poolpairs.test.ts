@@ -79,13 +79,24 @@ async function setup (): Promise<void> {
     amountB: 431.51288,
     shareAddress: await getNewAddress(container)
   })
+
+  await createToken(container, 'USDC')
+  await createPoolPair(container, 'USDC', 'H')
+  await mintTokens(container, 'USDC')
+  await addPoolLiquidity(container, {
+    tokenA: 'USDC',
+    amountA: 500,
+    tokenB: 'H',
+    amountB: 31.51288,
+    shareAddress: await getNewAddress(container)
+  })
 }
 
 describe('list', () => {
   it('should list', async () => {
     const response: ApiPagedResponse<PoolPairData> = await client.poolpairs.list(30)
 
-    expect(response.length).toStrictEqual(9)
+    expect(response.length).toStrictEqual(10)
     expect(response.hasNext).toStrictEqual(false)
 
     expect(response[1]).toStrictEqual({
@@ -114,7 +125,7 @@ describe('list', () => {
       commission: '0',
       totalLiquidity: {
         token: '122.47448713',
-        usd: '1390.456752'
+        usd: '1390.4567576291117892'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
@@ -161,7 +172,7 @@ describe('list', () => {
 })
 
 describe('get', () => {
-  it('should get', async () => {
+  it('should get 9', async () => {
     const response: PoolPairData = await client.poolpairs.get('9')
 
     expect(response).toStrictEqual({
@@ -190,13 +201,58 @@ describe('get', () => {
       commission: '0',
       totalLiquidity: {
         token: '141.42135623',
-        usd: '926.971168'
+        usd: '926.9711717527411928'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
         ab: '0.5',
         ba: '2'
+      },
+      rewardPct: '0',
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(Number)
+      }
+    })
+  })
+
+  it('should get 20', async () => {
+    const response: PoolPairData = await client.poolpairs.get('20')
+
+    expect(response).toStrictEqual({
+      id: '20',
+      symbol: 'USDC-H',
+      name: 'USDC-H',
+      status: true,
+      tokenA: {
+        id: expect.any(String),
+        symbol: 'USDC',
+        reserve: '500',
+        blockCommission: '0',
+        displaySymbol: 'dUSDC'
+      },
+      tokenB: {
+        id: '8',
+        symbol: 'H',
+        reserve: '31.51288',
+        blockCommission: '0',
+        displaySymbol: 'dH'
+      },
+      apr: {
+        reward: 0,
+        total: 0
+      },
+      commission: '0',
+      totalLiquidity: {
+        token: '125.52465893',
+        usd: '1000'
+      },
+      tradeEnabled: true,
+      ownerAddress: expect.any(String),
+      priceRatio: {
+        ab: '15.86652822',
+        ba: '0.06302576'
       },
       rewardPct: '0',
       creation: {
