@@ -56,7 +56,7 @@ export class CompositeSwapIndexer extends DfTxIndexer<CompositeSwap> {
           swappedPoolpair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
           await this.poolPairMapper.put(swappedPoolpair)
 
-          previousAmount = { fromAmount: swappedPoolResults.result.poolTo, fromTokenId: swappedPoolResults.tokenOut }
+          previousAmount = { fromAmount: swappedPoolResults.result.swapped, fromTokenId: swappedPoolResults.tokenOut }
         }
       }
     }

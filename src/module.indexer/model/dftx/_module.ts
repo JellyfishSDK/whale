@@ -14,6 +14,7 @@ import { ConfigService } from '@nestjs/config'
 import { PoolAddLiquidityIndexer } from './pool.add.liquidity'
 import { PoolRemoveLiquidityIndexer } from './pool.remove.liquidity'
 import { PoolSwapIndexer } from './poolswap'
+import { CompositeSwapIndexer } from './compositeswap'
 
 const indexers = [
   AppointOracleIndexer,
@@ -28,7 +29,8 @@ const indexers = [
   UpdatePoolPairIndexer,
   PoolAddLiquidityIndexer,
   PoolRemoveLiquidityIndexer,
-  PoolSwapIndexer
+  PoolSwapIndexer,
+  CompositeSwapIndexer
 ]
 
 @Module({
