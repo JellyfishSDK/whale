@@ -9,14 +9,8 @@ import { SetOracleDataIndexer } from '@src/module.indexer/model/dftx/set.oracle.
 import { SetOracleDataIntervalIndexer } from '@src/module.indexer/model/dftx/set.oracle.data.interval'
 import { CreateMasternodeIndexer } from '@src/module.indexer/model/dftx/create.masternode'
 import { ResignMasternodeIndexer } from '@src/module.indexer/model/dftx/resign.masternode'
-import { CreateTokenIndexer } from '@src/module.indexer/model/dftx/create.token'
-import { CreatePoolPairIndexer } from '@src/module.indexer/model/dftx/create.poolpair'
-import { UpdatePoolPairIndexer } from '@src/module.indexer/model/dftx/update.poolpair'
 import { Injectable, Logger } from '@nestjs/common'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
-import { PoolAddLiquidityIndexer } from './dftx/pool.add.liquidity'
-import { PoolRemoveLiquidityIndexer } from './dftx/pool.remove.liquidity'
-import { PoolSwapIndexer } from './dftx/poolswap'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
@@ -30,13 +24,13 @@ export class MainDfTxIndexer extends Indexer {
     setOracleData: SetOracleDataIndexer,
     setOracleDataInterval: SetOracleDataIntervalIndexer,
     createMasternode: CreateMasternodeIndexer,
-    resignMasternode: ResignMasternodeIndexer,
-    createToken: CreateTokenIndexer,
-    createPoolPair: CreatePoolPairIndexer,
-    updatePoolPair: UpdatePoolPairIndexer,
-    poolAddLiquidityIndexer: PoolAddLiquidityIndexer,
-    poolRemoveLiquidityIndexer: PoolRemoveLiquidityIndexer,
-    poolSwapIndexer: PoolSwapIndexer
+    resignMasternode: ResignMasternodeIndexer
+    // createToken: CreateTokenIndexer,
+    // createPoolPair: CreatePoolPairIndexer,
+    // updatePoolPair: UpdatePoolPairIndexer,
+    // poolAddLiquidityIndexer: PoolAddLiquidityIndexer,
+    // poolRemoveLiquidityIndexer: PoolRemoveLiquidityIndexer,
+    // poolSwapIndexer: PoolSwapIndexer
   ) {
     super()
     this.indexers = [
@@ -46,13 +40,13 @@ export class MainDfTxIndexer extends Indexer {
       setOracleData,
       createMasternode,
       resignMasternode,
-      setOracleDataInterval,
-      createToken,
-      createPoolPair,
-      updatePoolPair,
-      poolAddLiquidityIndexer,
-      poolRemoveLiquidityIndexer,
-      poolSwapIndexer
+      setOracleDataInterval
+      // createToken,
+      // createPoolPair,
+      // updatePoolPair,
+      // poolAddLiquidityIndexer,
+      // poolRemoveLiquidityIndexer,
+      // poolSwapIndexer
     ]
   }
 
