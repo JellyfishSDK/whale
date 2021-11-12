@@ -80,16 +80,16 @@ export function mapTokenData (id: string, tokenInfo: TokenInfo): TokenData {
 }
 
 export function parseDisplaySymbol (tokenInfo: TokenInfo): string {
+  if (tokenInfo.isLPS) {
+    return tokenInfo.symbol
+  }
+
   if (tokenInfo.isDAT) {
     if (['DUSD', 'DFI'].includes(tokenInfo.symbol)) {
       return tokenInfo.symbol
     }
 
     return `d${tokenInfo.symbol}`
-  }
-
-  if (tokenInfo.isLPS) {
-    return tokenInfo.symbol
   }
 
   return tokenInfo.symbol
