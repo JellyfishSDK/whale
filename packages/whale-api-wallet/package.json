@@ -27,6 +27,6 @@
     "@defichain/jellyfish-transaction-builder": "^2.1.1",
     "@defichain/jellyfish-wallet": "^2.1.1",
     "@defichain/whale-api-client": "0.0.0",
-    "defichain": "^2.1.1"
+    "defichain": "^2.3.0"
   }
 }
