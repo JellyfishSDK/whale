@@ -22,6 +22,8 @@ import { MasternodeStatsMapper } from '@src/module.model/masternode.stats'
 import { TokenMapper } from '@src/module.model/token'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
+import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
+import { LoanSchemeHistoryMapper } from '@src/module.model/loan.scheme.history'
 
 @Global()
 @Module({
@@ -46,7 +48,9 @@ import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
     MasternodeStatsMapper,
     TokenMapper,
     PoolPairMapper,
-    PoolPairTokenMapper
+    PoolPairTokenMapper,
+    LoanSchemeMapper,
+    LoanSchemeHistoryMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -69,7 +73,9 @@ import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
     MasternodeStatsMapper,
     TokenMapper,
     PoolPairMapper,
-    PoolPairTokenMapper
+    PoolPairTokenMapper,
+    LoanSchemeMapper,
+    LoanSchemeHistoryMapper
   ]
 })
 export class ModelModule {
