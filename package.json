@@ -46,7 +46,7 @@
     "@nestjs/terminus": "^8.0.1",
     "async-mutex": "^0.3.1",
     "bignumber.js": "^9.0.1",
-    "cache-manager": "^3.4.4",
+    "cache-manager": "^3.5.0",
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
     "defichain": "^2.1.1",
