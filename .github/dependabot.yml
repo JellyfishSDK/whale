@@ -7,8 +7,6 @@ updates:
       day: 'thursday'
     labels:
       - "kind/dependencies"
-    ignore:
-      - dependency-name: "@defichain/whale-*"
     versioning-strategy: 'increase'
 
   - package-ecosystem: "github-actions"

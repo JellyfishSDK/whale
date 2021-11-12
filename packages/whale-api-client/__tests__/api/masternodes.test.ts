@@ -13,13 +13,13 @@ beforeAll(async () => {
   client = new StubWhaleApiClient(service)
 
   await container.start()
-  await container.waitForReady()
   await service.start()
 
   await container.generate(1)
   const height: number = (await client.rpc.call('getblockcount', [], 'number'))
   await container.generate(1)
   await service.waitForIndexedHeight(height)
+  await new Promise((resolve) => setTimeout(resolve, 3000))
 })
 
 afterAll(async () => {
@@ -78,7 +78,7 @@ describe('get', () => {
       id: masternode.id,
       sort: expect.any(String),
       state: masternode.state,
-      mintedBlocks: masternode.mintedBlocks,
+      mintedBlocks: expect.any(Number),
       owner: { address: masternode.owner.address },
       operator: { address: masternode.operator.address },
       creation: { height: masternode.creation.height },

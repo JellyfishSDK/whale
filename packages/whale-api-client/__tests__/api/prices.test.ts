@@ -238,18 +238,13 @@ describe('oracles', () => {
 })
 
 describe('pricefeed with interval', () => {
-  let container: MasterNodeRegTestContainer
-  let service: StubService
+  const container = new MasterNodeRegTestContainer()
+  const service = new StubService(container)
+  const apiClient = new StubWhaleApiClient(service)
   let client: JsonRpcClient
-  let apiClient: WhaleApiClient
 
   beforeAll(async () => {
-    container = new MasterNodeRegTestContainer()
-    service = new StubService(container)
-    apiClient = new StubWhaleApiClient(service)
-
     await container.start()
-    await container.waitForReady()
     await container.waitForWalletCoinbaseMaturity()
     await service.start()
 
@@ -298,28 +293,29 @@ describe('pricefeed with interval', () => {
     expect(interval5Minutes.length).toStrictEqual(10)
     expect(interval5Minutes.map(x => x.aggregated.amount)).toStrictEqual(
       [
-        '60.00000000',
-        '56.50000000',
-        '50.50000000',
-        '44.50000000',
-        '38.50000000',
-        '32.50000000',
-        '26.50000000',
-        '20.50000000',
-        '14.50000000',
-        '6.00000000'
+        '58.50000000',
+        '53.50000000',
+        '47.50000000',
+        '41.50000000',
+        '35.50000000',
+        '29.50000000',
+        '23.50000000',
+        '17.50000000',
+        '11.50000000',
+        '4.50000000'
       ]
     )
 
     const interval10Minutes = await apiClient.prices.getFeedWithInterval('S1', 'USD', PriceFeedTimeInterval.TEN_MINUTES, 60)
-    expect(interval10Minutes.length).toStrictEqual(5)
+    expect(interval10Minutes.length).toStrictEqual(6)
     expect(interval10Minutes.map(x => x.aggregated.amount)).toStrictEqual(
       [
-        '55.00000000',
-        '44.00000000',
-        '33.00000000',
-        '22.00000000',
-        '8.50000000'
+        '59.00000000',
+        '52.00000000',
+        '41.00000000',
+        '30.00000000',
+        '19.00000000',
+        '7.00000000'
       ]
     )
   })

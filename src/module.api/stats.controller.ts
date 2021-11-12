@@ -41,7 +41,8 @@ export class StatsController {
       emission: await this.cachedGet('emission', this.getEmission.bind(this), 1800),
       blockchain: {
         difficulty: block.difficulty
-      }
+      },
+      net: await this.cachedGet('net', this.getNet.bind(this), 1800)
     }
   }
 
@@ -68,14 +69,16 @@ export class StatsController {
     const pairs = await this.rpcClient.poolpair.listPoolPairs({ including_start: true, start: 0, limit: 1000 }, true)
     for (const pair of Object.values(pairs)) {
       const liq = await this.poolPairService.getTotalLiquidityUsd(pair)
-      dex = dex.plus(requireValue(liq, `tvl.dex.${pair.symbol}`))
+      if (liq !== undefined) {
+        dex = dex.plus(liq)
+      }
     }
 
-    const optionalUsdt = await this.poolPairService.getUSDT_PER_DFI()
-    const usdt = requireValue(optionalUsdt, 'price.usdt')
+    const optionalUsd = await this.poolPairService.getUSD_PER_DFI()
+    const usd = requireValue(optionalUsd, 'price.usd')
     const masternodes = await this.masternodeStatsMapper.getLatest()
     const masternodeTvl = requireValue(masternodes?.stats?.tvl, 'masternodes.stats.tvl')
-    const masternodeTvlUSD = new BigNumber(masternodeTvl).times(usdt).toNumber()
+    const masternodeTvlUSD = new BigNumber(masternodeTvl).times(usd).toNumber()
 
     return {
       dex: dex.toNumber(),
@@ -95,9 +98,10 @@ export class StatsController {
   }
 
   private async getPrice (): Promise<StatsData['price']> {
-    const usdt = await this.poolPairService.getUSDT_PER_DFI()
+    const usd = await this.poolPairService.getUSD_PER_DFI()
     return {
-      usdt: requireValue(usdt, 'price.usdt').toNumber()
+      usd: requireValue(usd, 'price.usd').toNumber(),
+      usdt: requireValue(usd, 'price.usd').toNumber()
     }
   }
 
@@ -108,13 +112,13 @@ export class StatsController {
   }
 
   private async mapMasternodeStats (masternodeStats: MasternodeStats): Promise<StatsData['masternodes']> {
-    const optionalUsdt = await this.poolPairService.getUSDT_PER_DFI()
-    const usdt = requireValue(optionalUsdt, 'price.usdt')
+    const optionalUsd = await this.poolPairService.getUSD_PER_DFI()
+    const usd = requireValue(optionalUsd, 'price.usd')
     return {
       locked: masternodeStats.stats.locked.map(x => {
         return {
           ...x,
-          tvl: new BigNumber(x.tvl).times(usdt).toNumber()
+          tvl: new BigNumber(x.tvl).times(usd).toNumber()
         }
       })
     }
@@ -131,6 +135,16 @@ export class StatsController {
     return await this.cache.get<BlockchainInfo>('BLOCK_INFO', async () => {
       return await this.rpcClient.blockchain.getBlockchainInfo()
     })
+  }
+
+  private async getNet (): Promise<StatsData['net']> {
+    const { version, subversion, protocolversion } = await this.rpcClient.net.getNetworkInfo()
+
+    return {
+      version: version,
+      subversion: subversion,
+      protocolversion: protocolversion
+    }
   }
 }
 

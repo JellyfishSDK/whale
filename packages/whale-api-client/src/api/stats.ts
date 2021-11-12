@@ -36,10 +36,14 @@ export interface StatsData {
     address: number
   }
   price: {
+    usd: number
+    /**
+     * @deprecated use USD instead of aggregation over multiple pairs
+     */
     usdt: number
   }
   masternodes: {
-    locked: Array<{weeks: number, tvl: number, count: number}>
+    locked: Array<{ weeks: number, tvl: number, count: number }>
   }
   emission: {
     total: number
@@ -51,5 +55,10 @@ export interface StatsData {
   }
   blockchain: {
     difficulty: number
+  }
+  net: {
+    version: number
+    subversion: string
+    protocolversion: number
   }
 }
