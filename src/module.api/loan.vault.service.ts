@@ -19,6 +19,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
+import { parseDisplaySymbol } from '@src/module.api/token.controller'
 
 @Injectable()
 export class LoanVaultService {
@@ -29,10 +30,12 @@ export class LoanVaultService {
   }
 
   async list (query: PaginationQuery, address?: string): Promise<ApiPagedResponse<LoanVaultActive | LoanVaultLiquidated>> {
+    const next = query.next !== undefined ? String(query.next) : undefined
+    const size = query.size > 30 ? 30 : query.size
     const pagination: VaultPagination = {
-      start: query.next !== undefined ? String(query.next) : undefined,
+      start: next,
       // including_start: query.next === undefined,
-      limit: query.size > 10 ? 10 : query.size // limit size to 10 for vault querying
+      limit: size
     }
 
     const list: Array<VaultActive | VaultLiquidation> = await this.client.loan
@@ -42,7 +45,7 @@ export class LoanVaultService {
     })
 
     const items = await Promise.all(vaults)
-    return ApiPagedResponse.of(items, query.size, item => {
+    return ApiPagedResponse.of(items, size, item => {
       return item.vaultId
     })
   }
@@ -154,7 +157,7 @@ function mapLoanVaultTokenAmount (id: string, tokenInfo: TokenInfo, amount: stri
     symbol: tokenInfo.symbol,
     symbolKey: tokenInfo.symbolKey,
     name: tokenInfo.name,
-    displaySymbol: tokenInfo.isDAT && tokenInfo.symbol !== 'DFI' && !tokenInfo.isLPS ? `d${tokenInfo.symbol}` : tokenInfo.symbol
+    displaySymbol: parseDisplaySymbol(tokenInfo)
   }
 }
 
