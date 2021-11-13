@@ -173,7 +173,7 @@ export interface ActivePrice {
       total: number
     }
   }
-  next: {
+  next?: {
     amount: string
     weightage: number
     oracles: {

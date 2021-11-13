@@ -57,7 +57,7 @@ export class ActivePriceIndexer extends Indexer {
       block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
       active: activePrice,
       next: nextPrice,
-      sort: HexEncoder.encodeHeight(block.mediantime) + HexEncoder.encodeHeight(block.height)
+      sort: HexEncoder.encodeHeight(block.height)
     }
   }
 

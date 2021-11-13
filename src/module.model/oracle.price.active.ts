@@ -45,7 +45,7 @@ export class OraclePriceActiveMapper {
 export interface OraclePriceActive extends Model {
   id: string // ---------| token-currency-height
   key: string // --------| token-currency
-  sort: string // -------| medianTime-height
+  sort: string // -------| height
 
   active?: {
     amount: string
