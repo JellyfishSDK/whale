@@ -32,6 +32,7 @@ describe('oracles', () => {
       await container.stop()
     }
   })
+
   interface OracleSetup {
     id: string
     address: string
@@ -279,7 +280,7 @@ describe('pricefeed with interval', () => {
           { tokenAmount: `${price}@S1`, currency: 'USD' }
         ]
       })
-      await client.call('setmocktime', [mockTime], 'number')
+      await client.misc.setMockTime(mockTime)
       await container.generate(1)
     }
 
@@ -391,7 +392,7 @@ describe('active price', () => {
     const timeNow = Math.floor(Date.now() / 1000)
     for (let i = 0; i <= 6; i++) {
       const mockTime = timeNow + i * oneMinute
-      await client.call('setmocktime', [mockTime], 'number')
+      await client.misc.setMockTime(mockTime)
       const price = i > 3 ? '12.0' : '10.0'
       for (const oracle of oracles) {
         await client.oracle.setOracleData(oracle, mockTime, {
@@ -517,7 +518,7 @@ describe('active price', () => {
     const timeNow = Math.floor(Date.now() / 1000)
     for (let i = 0; i <= 6; i++) {
       const mockTime = timeNow + i * oneMinute
-      await client.call('setmocktime', [mockTime], 'number')
+      await client.misc.setMockTime(mockTime)
       const price = i > 3 ? '12.0' : '10.0'
       for (const oracle of oracles) {
         await client.oracle.setOracleData(oracle, mockTime, {
@@ -534,8 +535,9 @@ describe('active price', () => {
       const height = await container.getBlockCount()
       await container.generate(1)
       await service.waitForIndexedHeight(height)
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
-      const fixedIntervalPrice = await testing.container.call('getfixedintervalprice', ['S1/USD'])
+      const fixedIntervalPrice = await testing.rpc.oracle.getFixedIntervalPrice('S1/USD')
       const activePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)
       expect(activePrice[0]).toStrictEqual({
         active: {
