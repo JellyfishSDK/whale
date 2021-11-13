@@ -181,7 +181,7 @@ export interface ActivePrice {
       total: number
     }
   }
-  valid: boolean
+  isLive: boolean
 
   block: {
     hash: string

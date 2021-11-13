@@ -64,7 +64,7 @@ export interface OraclePriceActive extends Model {
     }
   }
 
-  valid: boolean
+  isLive: boolean
 
   block: {
     hash: string

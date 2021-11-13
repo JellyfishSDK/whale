@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common'
+import { NetworkName } from '@defichain/jellyfish-network'
+import { Inject, Injectable } from '@nestjs/common'
 import { Indexer, RawBlock } from '@src/module.indexer/model/_abstract'
 import { OraclePriceActive, OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { OraclePriceAggregated, OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
@@ -8,21 +9,27 @@ import { PriceTicker } from '@whale-api-client/api/prices'
 import BigNumber from 'bignumber.js'
 
 const DEVIATION_THRESHOLD = 0.3
-const BLOCK_INTERVAL = 120
 const MINIMUM_LIVE_ORACLES = 2
 
 @Injectable()
 export class ActivePriceIndexer extends Indexer {
+  BLOCK_INTERVAL: number = 120 // mainnet + testnet
+
   constructor (
     private readonly aggregatedMapper: OraclePriceAggregatedMapper,
     private readonly activePriceMapper: OraclePriceActiveMapper,
-    private readonly priceTickerMapper: PriceTickerMapper
+    private readonly priceTickerMapper: PriceTickerMapper,
+    @Inject('NETWORK') protected readonly network: NetworkName
   ) {
     super()
+
+    if (network === 'regtest') {
+      this.BLOCK_INTERVAL = 6
+    }
   }
 
   async index (block: RawBlock): Promise<void> {
-    if (block.height % BLOCK_INTERVAL !== 0) {
+    if (block.height % this.BLOCK_INTERVAL !== 0) {
       return
     }
 
@@ -46,7 +53,7 @@ export class ActivePriceIndexer extends Indexer {
     return {
       id: `${ticker.id}-${block.height}`,
       key: ticker.id,
-      valid: this.isLive(activePrice, nextPrice),
+      isLive: this.isLive(activePrice, nextPrice),
       block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
       active: activePrice,
       next: nextPrice,
@@ -74,7 +81,7 @@ export class ActivePriceIndexer extends Indexer {
   }
 
   async invalidate (block: RawBlock): Promise<void> {
-    if (block.height % BLOCK_INTERVAL !== 0) {
+    if (block.height % this.BLOCK_INTERVAL !== 0) {
       return
     }
 

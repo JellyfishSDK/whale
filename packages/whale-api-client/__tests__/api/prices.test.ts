@@ -4,6 +4,7 @@ import { WhaleApiClient } from '../../src'
 import { StubWhaleApiClient } from '../stub.client'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { PriceFeedTimeInterval } from '@whale-api-client/api/prices'
+import { Testing } from '@defichain/jellyfish-testing'
 
 describe('oracles', () => {
   let container: MasterNodeRegTestContainer
@@ -323,12 +324,14 @@ describe('pricefeed with interval', () => {
 
 describe('active price', () => {
   let container: MasterNodeRegTestContainer
+  let testing: Testing
   let service: StubService
   let client: JsonRpcClient
   let apiClient: WhaleApiClient
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     container = new MasterNodeRegTestContainer()
+    testing = Testing.create(container)
     service = new StubService(container)
     apiClient = new StubWhaleApiClient(service)
 
@@ -340,7 +343,7 @@ describe('active price', () => {
     client = new JsonRpcClient(await container.getCachedRpcUrl())
   })
 
-  afterAll(async () => {
+  afterEach(async () => {
     try {
       await service.stop()
     } finally {
@@ -348,19 +351,17 @@ describe('active price', () => {
     }
   })
 
-  it('should get active price with 2 active oracles', async () => {
+  it('should get active price with 2 active oracles (exact values)', async () => {
     const address = await container.getNewAddress()
-    const oracleId = await client.oracle.appointOracle(address, [
-      { token: 'S1', currency: 'USD' }
-    ], {
-      weightage: 1
-    })
-    const oracleId2 = await client.oracle.appointOracle(address, [
-      { token: 'S1', currency: 'USD' }
-    ], {
-      weightage: 1
-    })
-    await container.generate(1)
+    const oracles = []
+    for (let i = 0; i < 2; i++) {
+      oracles.push(await client.oracle.appointOracle(address, [
+        { token: 'S1', currency: 'USD' }
+      ], {
+        weightage: 1
+      }))
+      await container.generate(1)
+    }
 
     {
       const height = await container.getBlockCount()
@@ -371,22 +372,34 @@ describe('active price', () => {
     const beforeActivePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
     expect(beforeActivePrice.length).toStrictEqual(0)
 
+    for (const oracle of oracles) {
+      await client.oracle.setOracleData(oracle, Math.floor(Date.now() / 1000), {
+        prices: [
+          { tokenAmount: '10.0@S1', currency: 'USD' }
+        ]
+      })
+    }
+    await testing.generate(1)
+
+    await testing.rpc.loan.setLoanToken({
+      symbol: 'S1',
+      fixedIntervalPriceId: 'S1/USD'
+    })
+    await testing.generate(1)
+
     const oneMinute = 60
-    const timeNow = Math.floor(new Date().getTime() / 1000)
-    for (let i = 0; i <= 120; i++) {
+    const timeNow = Math.floor(Date.now() / 1000)
+    for (let i = 0; i <= 6; i++) {
       const mockTime = timeNow + i * oneMinute
-      const price = i > 30 ? '12.0' : '10.0'
-      await client.oracle.setOracleData(oracleId, timeNow + 5 * 60 - 1, {
-        prices: [
-          { tokenAmount: `${price}@S1`, currency: 'USD' }
-        ]
-      })
-      await client.oracle.setOracleData(oracleId2, timeNow + 5 * 60 - 1, {
-        prices: [
-          { tokenAmount: `${price}@S1`, currency: 'USD' }
-        ]
-      })
       await client.call('setmocktime', [mockTime], 'number')
+      const price = i > 3 ? '12.0' : '10.0'
+      for (const oracle of oracles) {
+        await client.oracle.setOracleData(oracle, mockTime, {
+          prices: [
+            { tokenAmount: `${price}@S1`, currency: 'USD' }
+          ]
+        })
+      }
       await container.generate(1)
     }
 
@@ -398,35 +411,6 @@ describe('active price', () => {
 
     const activePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
     expect(activePrice[0]).toStrictEqual({
-      block: {
-        hash: expect.any(String),
-        height: 120,
-        medianTime: expect.any(Number),
-        time: expect.any(Number)
-      },
-      id: 'S1-USD-120',
-      key: 'S1-USD',
-      next: {
-        amount: '10.00000000',
-        oracles: {
-          active: 2,
-          total: 2
-        },
-        weightage: 2
-      },
-      sort: expect.any(String),
-      valid: false
-    })
-
-    {
-      await container.generate(30)
-      const height = await container.getBlockCount()
-      await container.generate(1)
-      await service.waitForIndexedHeight(height)
-    }
-
-    const nextActivePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
-    expect(nextActivePrice[0]).toStrictEqual({
       active: {
         amount: '10.00000000',
         oracles: {
@@ -437,11 +421,11 @@ describe('active price', () => {
       },
       block: {
         hash: expect.any(String),
-        height: 240,
+        height: expect.any(Number),
         medianTime: expect.any(Number),
         time: expect.any(Number)
       },
-      id: 'S1-USD-240',
+      id: expect.any(String),
       key: 'S1-USD',
       next: {
         amount: '12.00000000',
@@ -452,7 +436,135 @@ describe('active price', () => {
         weightage: 2
       },
       sort: expect.any(String),
-      valid: true
+      isLive: true
     })
+
+    {
+      await container.generate(6)
+      const height = await container.getBlockCount()
+      await container.generate(1)
+      await service.waitForIndexedHeight(height)
+    }
+
+    const nextActivePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
+    expect(nextActivePrice[0]).toStrictEqual({
+      active: {
+        amount: '12.00000000',
+        oracles: {
+          active: 2,
+          total: 2
+        },
+        weightage: 2
+      },
+      block: {
+        hash: expect.any(String),
+        height: expect.any(Number),
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      },
+      id: expect.any(String),
+      key: 'S1-USD',
+      next: {
+        amount: '12.00000000',
+        oracles: {
+          active: 2,
+          total: 2
+        },
+        weightage: 2
+      },
+      sort: expect.any(String),
+      isLive: true
+    })
+  })
+
+  it('should get active price with 2 active oracles (vs rpc)', async () => {
+    const address = await container.getNewAddress()
+    const oracles = []
+    for (let i = 0; i < 2; i++) {
+      oracles.push(await client.oracle.appointOracle(address, [
+        { token: 'S1', currency: 'USD' }
+      ], {
+        weightage: 1
+      }))
+      await container.generate(1)
+    }
+
+    {
+      const height = await container.getBlockCount()
+      await container.generate(1)
+      await service.waitForIndexedHeight(height)
+    }
+
+    const beforeActivePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
+    expect(beforeActivePrice.length).toStrictEqual(0)
+
+    for (const oracle of oracles) {
+      await client.oracle.setOracleData(oracle, Math.floor(Date.now() / 1000), {
+        prices: [
+          { tokenAmount: '10.0@S1', currency: 'USD' }
+        ]
+      })
+    }
+
+    await testing.generate(1)
+    await testing.rpc.loan.setLoanToken({
+      symbol: 'S1',
+      fixedIntervalPriceId: 'S1/USD'
+    })
+    await testing.generate(1)
+
+    const oneMinute = 60
+    const timeNow = Math.floor(Date.now() / 1000)
+    for (let i = 0; i <= 6; i++) {
+      const mockTime = timeNow + i * oneMinute
+      await client.call('setmocktime', [mockTime], 'number')
+      const price = i > 3 ? '12.0' : '10.0'
+      for (const oracle of oracles) {
+        await client.oracle.setOracleData(oracle, mockTime, {
+          prices: [
+            { tokenAmount: `${price}@S1`, currency: 'USD' }
+          ]
+        })
+      }
+      await container.generate(1)
+    }
+
+    // Active price ticks over in this loop, this is to ensure the values align
+    for (let i = 0; i <= 6; i++) {
+      const height = await container.getBlockCount()
+      await container.generate(1)
+      await service.waitForIndexedHeight(height)
+
+      const fixedIntervalPrice = await testing.container.call('getfixedintervalprice', ['S1/USD'])
+      const activePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
+      expect(activePrice[0]).toStrictEqual({
+        active: {
+          amount: fixedIntervalPrice.activePrice.toFixed(8),
+          oracles: {
+            active: 2,
+            total: 2
+          },
+          weightage: 2
+        },
+        block: {
+          hash: expect.any(String),
+          height: fixedIntervalPrice.activePriceBlock,
+          medianTime: expect.any(Number),
+          time: expect.any(Number)
+        },
+        id: expect.any(String),
+        key: 'S1-USD',
+        next: {
+          amount: fixedIntervalPrice.nextPrice.toFixed(8),
+          oracles: {
+            active: 2,
+            total: 2
+          },
+          weightage: 2
+        },
+        sort: expect.any(String),
+        isLive: fixedIntervalPrice.isLive
+      })
+    }
   })
 })

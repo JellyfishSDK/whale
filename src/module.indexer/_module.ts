@@ -14,6 +14,8 @@ import { DfTxIndexerModule } from '@src/module.indexer/model/dftx/_module'
 import { MainDfTxIndexer } from '@src/module.indexer/model/dftx.indexer'
 import { BlockMintedIndexer } from '@src/module.indexer/model/block.minted'
 import { ActivePriceIndexer } from './model/active.price'
+import { ConfigService } from '@nestjs/config'
+import { NetworkName } from '@defichain/jellyfish-network'
 
 @Module({
   providers: [
@@ -30,7 +32,14 @@ import { ActivePriceIndexer } from './model/active.price'
     TransactionVoutIndexer,
     MainDfTxIndexer,
     ActivePriceIndexer,
-    BlockMintedIndexer
+    BlockMintedIndexer,
+    {
+      provide: 'NETWORK',
+      useFactory: (configService: ConfigService): NetworkName => {
+        return configService.get<string>('network') as NetworkName
+      },
+      inject: [ConfigService]
+    }
   ],
   imports: [
     DfTxIndexerModule
