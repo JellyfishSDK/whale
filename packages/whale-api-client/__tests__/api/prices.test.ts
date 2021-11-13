@@ -369,7 +369,7 @@ describe('active price', () => {
       await service.waitForIndexedHeight(height)
     }
 
-    const beforeActivePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
+    const beforeActivePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)
     expect(beforeActivePrice.length).toStrictEqual(0)
 
     for (const oracle of oracles) {
@@ -409,7 +409,7 @@ describe('active price', () => {
       await service.waitForIndexedHeight(height)
     }
 
-    const activePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
+    const activePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)
     expect(activePrice[0]).toStrictEqual({
       active: {
         amount: '10.00000000',
@@ -446,7 +446,7 @@ describe('active price', () => {
       await service.waitForIndexedHeight(height)
     }
 
-    const nextActivePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
+    const nextActivePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)
     expect(nextActivePrice[0]).toStrictEqual({
       active: {
         amount: '12.00000000',
@@ -495,7 +495,7 @@ describe('active price', () => {
       await service.waitForIndexedHeight(height)
     }
 
-    const beforeActivePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
+    const beforeActivePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)
     expect(beforeActivePrice.length).toStrictEqual(0)
 
     for (const oracle of oracles) {
@@ -536,7 +536,7 @@ describe('active price', () => {
       await service.waitForIndexedHeight(height)
 
       const fixedIntervalPrice = await testing.container.call('getfixedintervalprice', ['S1/USD'])
-      const activePrice = await apiClient.prices.getActivePrice('S1', 'USD', 1)
+      const activePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)
       expect(activePrice[0]).toStrictEqual({
         active: {
           amount: fixedIntervalPrice.activePrice.toFixed(8),

@@ -8,12 +8,11 @@ import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { PriceTicker } from '@whale-api-client/api/prices'
 import BigNumber from 'bignumber.js'
 
-const DEVIATION_THRESHOLD = 0.3
-const MINIMUM_LIVE_ORACLES = 2
-
 @Injectable()
 export class ActivePriceIndexer extends Indexer {
-  BLOCK_INTERVAL: number = 120 // mainnet + testnet
+  BLOCK_INTERVAL: number
+  DEVIATION_THRESHOLD: number = 0.3
+  MINIMUM_LIVE_ORACLES: number = 2
 
   constructor (
     private readonly aggregatedMapper: OraclePriceAggregatedMapper,
@@ -22,10 +21,7 @@ export class ActivePriceIndexer extends Indexer {
     @Inject('NETWORK') protected readonly network: NetworkName
   ) {
     super()
-
-    if (network === 'regtest') {
-      this.BLOCK_INTERVAL = 6
-    }
+    this.BLOCK_INTERVAL = network === 'regtest' ? 6 : 120
   }
 
   async index (block: RawBlock): Promise<void> {
@@ -35,20 +31,24 @@ export class ActivePriceIndexer extends Indexer {
 
     const tickers: PriceTicker[] = await this.priceTickerMapper.query(Number.MAX_SAFE_INTEGER)
     for (const ticker of tickers) {
-      const aggregatedPrice = await this.aggregatedMapper.query(ticker.id, 1)
-      if (aggregatedPrice.length < 1) {
+      const aggregatedPrices = await this.aggregatedMapper.query(ticker.id, 1)
+      if (aggregatedPrices.length < 1) {
         continue
       }
 
-      const previous = (await this.activePriceMapper.query(ticker.id, 1))[0]
-      await this.activePriceMapper.put(this.mapActivePrice(block, ticker, aggregatedPrice, previous))
+      const previousPrices = await this.activePriceMapper.query(ticker.id, 1)
+      await this.activePriceMapper.put(this.mapActivePrice(block, ticker, aggregatedPrices[0], previousPrices[0]))
     }
   }
 
-  private mapActivePrice (block: RawBlock, ticker: PriceTicker, aggregatedPrice: OraclePriceAggregated[],
-    previous: OraclePriceActive): OraclePriceActive {
-    const nextPrice = this.isAggregateValid(aggregatedPrice[0].aggregated) ? aggregatedPrice[0].aggregated : undefined
-    const activePrice = previous?.next !== undefined ? previous.next : previous?.active
+  private mapActivePrice (
+    block: RawBlock,
+    ticker: PriceTicker,
+    aggregatedPrice: OraclePriceAggregated,
+    previousActive?: OraclePriceActive
+  ): OraclePriceActive {
+    const nextPrice = this.isAggregateValid(aggregatedPrice.aggregated) ? aggregatedPrice.aggregated : undefined
+    const activePrice = previousActive?.next !== undefined ? previousActive.next : previousActive?.active
 
     return {
       id: `${ticker.id}-${block.height}`,
@@ -69,15 +69,34 @@ export class ActivePriceIndexer extends Indexer {
     const activePrice = new BigNumber(active.amount)
     const nextPrice = new BigNumber(next.amount)
 
-    return activePrice.gt(0) &&
-            nextPrice.gt(0) &&
-            nextPrice.minus(activePrice).abs().lt(activePrice.times(DEVIATION_THRESHOLD))
+    if (!activePrice.gt(0)) {
+      return false
+    }
+
+    if (!nextPrice.gt(0)) {
+      return false
+    }
+
+    if (!nextPrice.minus(activePrice).abs().lt(activePrice.times(this.DEVIATION_THRESHOLD))) {
+      return false
+    }
+
+    return true
   }
 
   private isAggregateValid (aggregate: OraclePriceActive['next']): boolean {
-    return aggregate?.oracles !== undefined &&
-            aggregate?.oracles.active >= MINIMUM_LIVE_ORACLES &&
-            aggregate?.weightage > 0
+    if (aggregate?.oracles === undefined) {
+      return false
+    }
+
+    if (aggregate?.oracles.active < this.MINIMUM_LIVE_ORACLES) {
+      return false
+    }
+
+    if (aggregate?.weightage <= 0) {
+      return false
+    }
+    return true
   }
 
   async invalidate (block: RawBlock): Promise<void> {

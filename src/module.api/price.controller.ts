@@ -7,7 +7,10 @@ import { PriceTicker, PriceTickerMapper } from '@src/module.model/price.ticker'
 import { PriceOracle } from '@whale-api-client/api/prices'
 import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 import { OraclePriceActive, OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
-import { OraclePriceAggregatedInterval, OraclePriceAggregatedIntervalMapper } from '@src/module.model/oracle.price.aggregated.interval'
+import {
+  OraclePriceAggregatedInterval,
+  OraclePriceAggregatedIntervalMapper
+} from '@src/module.model/oracle.price.aggregated.interval'
 
 @Controller('/prices')
 export class PriceController {
@@ -38,23 +41,23 @@ export class PriceController {
     return await this.priceTickerMapper.get(key)
   }
 
-  @Get('/:key/active')
-  async getActivePrice (
-    @Param('key') key: string,
-      @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<OraclePriceActive>> {
-    const items = await this.oraclePriceActiveMapper.query(key, query.size, query.next)
-    return ApiPagedResponse.of(items, query.size, item => {
-      return item.sort
-    })
-  }
-
   @Get('/:key/feed')
   async getFeed (
     @Param('key') key: string,
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<OraclePriceAggregated>> {
     const items = await this.oraclePriceAggregatedMapper.query(key, query.size, query.next)
+    return ApiPagedResponse.of(items, query.size, item => {
+      return item.sort
+    })
+  }
+
+  @Get('/:key/feed/active')
+  async getFeedActive (
+    @Param('key') key: string,
+      @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<OraclePriceActive>> {
+    const items = await this.oraclePriceActiveMapper.query(key, query.size, query.next)
     return ApiPagedResponse.of(items, query.size, item => {
       return item.sort
     })

@@ -42,9 +42,9 @@ export class Prices {
     return await this.client.requestData('GET', `prices/${key}`)
   }
 
-  async getActivePrice (token: string, currency: string, size: number = 30, next?: string): Promise<ApiPagedResponse<ActivePrice>> {
+  async getFeedActive (token: string, currency: string, size: number = 30, next?: string): Promise<ApiPagedResponse<ActivePrice>> {
     const key = `${token}-${currency}`
-    return await this.client.requestList('GET', `prices/${key}/active`, size, next)
+    return await this.client.requestList('GET', `prices/${key}/feed/active`, size, next)
   }
 
   /**
