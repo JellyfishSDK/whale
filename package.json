@@ -11,6 +11,7 @@
   "scripts": {
     "prepare": "husky install",
     "standard": "ts-standard --fix",
+    "lint": "ts-standard --fix",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "start": "nest start",
