@@ -125,7 +125,7 @@ beforeAll(async () => {
   }
 
   {
-    await testing.generate(6)
+    await testing.generate(12)
     const height = await container.getBlockCount()
     await container.generate(1)
     await service.waitForIndexedHeight(height)
