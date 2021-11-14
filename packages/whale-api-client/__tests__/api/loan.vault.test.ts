@@ -196,6 +196,11 @@ beforeAll(async () => {
     // Wait for 12 blocks which are equivalent to 2 hours (1 block = 10 minutes in regtest) in order to liquidate the vault
     await testing.generate(12)
   }
+
+  {
+    const height = await container.getBlockCount()
+    await service.waitForIndexedHeight(height - 1)
+  }
 })
 
 afterAll(async () => {
