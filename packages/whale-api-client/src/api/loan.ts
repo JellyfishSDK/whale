@@ -1,6 +1,7 @@
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
 import { TokenData } from './tokens'
+import { ActivePrice } from './prices'
 
 export class Loan {
   constructor (private readonly client: WhaleApiClient) {
@@ -162,4 +163,5 @@ export interface LoanVaultTokenAmount {
   displaySymbol: string
   symbolKey: string
   name: string
+  activePrice?: ActivePrice
 }
