@@ -359,16 +359,9 @@ describe('active price', () => {
       ], {
         weightage: 1
       }))
-      await container.generate(1)
     }
 
-    {
-      const height = await container.getBlockCount()
-      await container.generate(1)
-      await service.waitForIndexedHeight(height)
-      await new Promise((resolve) => setTimeout(resolve, 500))
-    }
-
+    await testing.generate(1)
     const beforeActivePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)
     expect(beforeActivePrice.length).toStrictEqual(0)
 
@@ -400,26 +393,18 @@ describe('active price', () => {
           ]
         })
       }
-      await container.generate(1)
+      await testing.generate(1)
     }
 
     {
       const height = await container.getBlockCount()
-      await container.generate(1)
+      await testing.generate(1)
       await service.waitForIndexedHeight(height)
       await new Promise((resolve) => setTimeout(resolve, 500))
     }
 
     const activePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)
     expect(activePrice[0]).toStrictEqual({
-      active: {
-        amount: '10.00000000',
-        oracles: {
-          active: 2,
-          total: 2
-        },
-        weightage: 2
-      },
       block: {
         hash: expect.any(String),
         height: expect.any(Number),
@@ -429,7 +414,7 @@ describe('active price', () => {
       id: expect.any(String),
       key: 'S1-USD',
       next: {
-        amount: '12.00000000',
+        amount: '10.00000000',
         oracles: {
           active: 2,
           total: 2
@@ -437,13 +422,13 @@ describe('active price', () => {
         weightage: 2
       },
       sort: expect.any(String),
-      isLive: true
+      isLive: false
     })
 
     {
-      await container.generate(6)
+      await testing.generate(1)
       const height = await container.getBlockCount()
-      await container.generate(1)
+      await testing.generate(1)
       await service.waitForIndexedHeight(height)
       await new Promise((resolve) => setTimeout(resolve, 500))
     }
@@ -451,7 +436,7 @@ describe('active price', () => {
     const nextActivePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)
     expect(nextActivePrice[0]).toStrictEqual({
       active: {
-        amount: '12.00000000',
+        amount: '10.00000000',
         oracles: {
           active: 2,
           total: 2
@@ -493,7 +478,6 @@ describe('active price', () => {
       const height = await container.getBlockCount()
       await container.generate(1)
       await service.waitForIndexedHeight(height)
-      await new Promise((resolve) => setTimeout(resolve, 500))
     }
 
     const beforeActivePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)
@@ -531,7 +515,7 @@ describe('active price', () => {
     }
 
     // Active price ticks over in this loop, this is to ensure the values align
-    for (let i = 0; i <= 6; i++) {
+    for (let i = 0; i <= 5; i++) {
       {
         const height = await container.getBlockCount()
         await container.generate(1)
