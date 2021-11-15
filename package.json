@@ -30,7 +30,7 @@
     "@defichain/jellyfish-address": "^2.4.0",
     "@defichain/jellyfish-api-core": "^2.4.0",
     "@defichain/jellyfish-api-jsonrpc": "^2.4.0",
-    "@defichain/jellyfish-crypto": "^2.4.0",
+    "@defichain/jellyfish-crypto": "^2.4.1",
     "@defichain/jellyfish-json": "^2.4.0",
     "@defichain/jellyfish-network": "^2.4.0",
     "@defichain/jellyfish-testing": "^2.4.0",
