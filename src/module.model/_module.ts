@@ -22,6 +22,7 @@ import { MasternodeStatsMapper } from '@src/module.model/masternode.stats'
 import { TokenMapper } from '@src/module.model/token'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
+import { OraclePriceActiveMapper } from './oracle.price.active'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 import { LoanSchemeHistoryMapper } from '@src/module.model/loan.scheme.history'
 
@@ -43,6 +44,7 @@ import { LoanSchemeHistoryMapper } from '@src/module.model/loan.scheme.history'
     OraclePriceFeedMapper,
     OracleTokenCurrencyMapper,
     OracleMapper,
+    OraclePriceActiveMapper,
     PriceTickerMapper,
     MasternodeMapper,
     MasternodeStatsMapper,
@@ -68,6 +70,7 @@ import { LoanSchemeHistoryMapper } from '@src/module.model/loan.scheme.history'
     OraclePriceFeedMapper,
     OracleTokenCurrencyMapper,
     OracleMapper,
+    OraclePriceActiveMapper,
     PriceTickerMapper,
     MasternodeMapper,
     MasternodeStatsMapper,
