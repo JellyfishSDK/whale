@@ -30,8 +30,8 @@ async function createLoanScheme (nameAsId: string, minColRatio: number, interest
   return loanSchemeId
 }
 
-describe('createLoanScheme', () => {
-  it('should index createLoanScheme', async () => {
+describe('setLoanScheme', () => {
+  it('should index setLoanScheme', async () => {
     await createLoanScheme('s150', 150, new BigNumber(3))
     await createLoanScheme('s200', 200, new BigNumber(2.8))
     await createLoanScheme('s250', 250, new BigNumber(2.5))
