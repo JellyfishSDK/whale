@@ -22,6 +22,7 @@ import { MasternodeStatsMapper } from '@src/module.model/masternode.stats'
 import { TokenMapper } from '@src/module.model/token'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
+import { CollateralTokenMapper } from '@src/module.model/collateral.token'
 
 @Global()
 @Module({
@@ -46,7 +47,8 @@ import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
     MasternodeStatsMapper,
     TokenMapper,
     PoolPairMapper,
-    PoolPairTokenMapper
+    PoolPairTokenMapper,
+    CollateralTokenMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -69,7 +71,8 @@ import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
     MasternodeStatsMapper,
     TokenMapper,
     PoolPairMapper,
-    PoolPairTokenMapper
+    PoolPairTokenMapper,
+    CollateralTokenMapper
   ]
 })
 export class ModelModule {

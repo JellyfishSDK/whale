@@ -5,8 +5,15 @@ import { Database, SortOrder } from '@src/module.database/database'
 const CollateralTokenMapping: ModelMapping<CollateralToken> = {
   type: 'collateral_token',
   index: {
-    keySort: {
-      name: 'collateral_token_key_sort',
+    id: {
+      name: 'collateral_token_all',
+      partition: {
+        type: 'string',
+        key: (t: CollateralToken) => t.id // <token id>-<height>
+      }
+    },
+    tokenIdHeight: {
+      name: 'collateral_token_id_height',
       partition: {
         type: 'number',
         key: (t: CollateralToken) => t.token.id
@@ -46,16 +53,16 @@ export class CollateralTokenMapper {
   }
 
   async getCollateralTokenHistory (tokenId: number, limit: number = 100, lt?: number): Promise<CollateralToken[]> {
-    return await this.database.query(CollateralTokenMapping.index.sort, {
-      limit: limit,
+    return await this.database.query(CollateralTokenMapping.index.tokenIdHeight, {
       partitionKey: tokenId,
+      limit: limit,
       order: SortOrder.DESC,
       lt: lt
     })
   }
 
   async query (limit: number, lt?: string): Promise<CollateralToken[]> {
-    return await this.database.query(CollateralTokenMapping.index.sort, {
+    return await this.database.query(CollateralTokenMapping.index.id, {
       limit: limit,
       order: SortOrder.DESC,
       lt: lt
