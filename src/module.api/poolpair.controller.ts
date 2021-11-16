@@ -65,13 +65,6 @@ export class PoolPairController {
 function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr']): PoolPairData {
   const [symbolA, symbolB] = info.symbol.split('-')
 
-  function parseDisplaySymbol (symbol: string): string {
-    if (['DFI', 'DUSD'].includes(symbol)) {
-      return symbol
-    }
-    return `d${symbolA}`
-  }
-
   return {
     id: id,
     symbol: info.symbol,
@@ -110,4 +103,11 @@ function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNum
     },
     apr
   }
+}
+
+function parseDisplaySymbol (symbol: string): string {
+  if (['DFI', 'DUSD'].includes(symbol)) {
+    return symbol
+  }
+  return `d${symbol}`
 }
