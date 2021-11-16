@@ -1,5 +1,7 @@
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import {
+  AuctionDetail,
+  AuctionPagination,
   VaultActive,
   VaultLiquidation,
   VaultLiquidationBatch,
@@ -67,6 +69,30 @@ export class LoanVaultService {
     }
   }
 
+  async listAuction (query: PaginationQuery): Promise<ApiPagedResponse<LoanVaultLiquidated>> {
+    const next = query.next !== undefined ? String(query.next) : undefined
+    const size = query.size > 30 ? 30 : query.size
+    let pagination: AuctionPagination
+
+    if (next !== undefined) {
+      const [vaultId, height] = next.split('|')
+      pagination = {
+        start: { vaultId, height: height !== undefined ? parseInt(height) : 0 },
+        limit: size
+      }
+    } else {
+      pagination = { limit: size }
+    }
+
+    const list = (await this.client.loan.listAuctions(pagination))
+      .map(async value => await this.mapLoanAuction(value))
+    const items = await Promise.all(list)
+
+    return ApiPagedResponse.of(items, size, item => {
+      return `${item.vaultId}|${item.liquidationHeight}`
+    })
+  }
+
   private async mapLoanVault (details: VaultActive | VaultLiquidation): Promise<LoanVaultActive | LoanVaultLiquidated> {
     if (details.state === VaultState.IN_LIQUIDATION) {
       const data = details as VaultLiquidation
@@ -98,6 +124,20 @@ export class LoanVaultService {
       collateralAmounts: await this.mapTokenAmounts(data.collateralAmounts),
       loanAmounts: await this.mapTokenAmounts(data.loanAmounts),
       interestAmounts: await this.mapTokenAmounts(data.interestAmounts)
+    }
+  }
+
+  private async mapLoanAuction (details: AuctionDetail): Promise<LoanVaultLiquidated> {
+    const data = details as VaultLiquidation
+    return {
+      vaultId: data.vaultId,
+      loanScheme: await this.mapLoanScheme(data.loanSchemeId),
+      ownerAddress: data.ownerAddress,
+      state: LoanVaultState.IN_LIQUIDATION,
+      batchCount: data.batchCount,
+      liquidationHeight: data.liquidationHeight,
+      liquidationPenalty: data.liquidationPenalty,
+      batches: await this.mapLiquidationBatches(data.batches)
     }
   }
 
