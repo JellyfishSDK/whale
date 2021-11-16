@@ -4,10 +4,10 @@ import { Database, SortOrder } from '@src/module.database/database'
 import BigNumber from 'bignumber.js'
 
 const LoanSchemePendingMapping: ModelMapping<LoanSchemePending> = {
-  type: 'loan_scheme_activate',
+  type: 'loan_scheme_pending',
   index: {
-    loan_scheme_inactive_id: {
-      name: 'loan_scheme_activate_id',
+    loan_scheme_pending_id: {
+      name: 'loan_scheme_pending_id',
       partition: {
         type: 'string',
         key: (ls: LoanSchemePending) => ls.id
@@ -22,7 +22,7 @@ export class LoanSchemePendingMapper {
   }
 
   async query (limit: number, lt?: string): Promise<LoanSchemePending[]> {
-    return await this.database.query(LoanSchemePendingMapping.index.loan_scheme_id, {
+    return await this.database.query(LoanSchemePendingMapping.index.loan_scheme_pending_id, {
       limit: limit,
       order: SortOrder.DESC,
       lt: lt

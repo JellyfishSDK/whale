@@ -14,7 +14,7 @@ import { DfTxIndexerModule } from '@src/module.indexer/model/dftx/_module'
 import { MainDfTxIndexer } from '@src/module.indexer/model/dftx.indexer'
 import { BlockMintedIndexer } from '@src/module.indexer/model/block.minted'
 import { ActivePriceIndexer } from './model/active.price'
-import { LoanSchemePendingIndexer } from './model/loan.scheme.pending'
+import { Daemon } from './model/daemon'
 import { ConfigService } from '@nestjs/config'
 import { NetworkName } from '@defichain/jellyfish-network'
 
@@ -34,7 +34,7 @@ import { NetworkName } from '@defichain/jellyfish-network'
     MainDfTxIndexer,
     ActivePriceIndexer,
     BlockMintedIndexer,
-    LoanSchemePendingIndexer,
+    Daemon,
     {
       provide: 'NETWORK',
       useFactory: (configService: ConfigService): NetworkName => {

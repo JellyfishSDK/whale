@@ -6,6 +6,7 @@ import { Block, BlockMapper } from '@src/module.model/block'
 import { IndexStatusMapper, Status } from '@src/module.indexer/status'
 import { TokenMapper } from '@src/module.model/token'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
+import { Daemon } from './model/daemon'
 
 @Injectable()
 export class RPCBlockProvider {
@@ -17,7 +18,8 @@ export class RPCBlockProvider {
     private readonly blockMapper: BlockMapper,
     private readonly indexer: MainIndexer,
     private readonly statusMapper: IndexStatusMapper,
-    private readonly tokenMapper: TokenMapper
+    private readonly tokenMapper: TokenMapper,
+    private readonly daemon: Daemon
   ) {
   }
 
@@ -136,6 +138,7 @@ export class RPCBlockProvider {
     try {
       await this.indexer.index(block)
       await this.statusMapper.put(hash, height, Status.INDEXED)
+      await this.daemon.process(block)
     } catch (err) {
       await this.statusMapper.put(hash, height, Status.ERROR)
       throw err
