@@ -37,7 +37,11 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
           time: block.time
         }
       }
-      if (data.update.eq(0) || data.update.gte(new BigNumber(block.height))) {
+
+      if (
+        data.update.eq(0) ||
+        data.update.eq(new BigNumber('0xffffffffffffffff')) || // Max value is ignored as block height
+        new BigNumber(block.height).gte(data.update)) {
         await this.loanSchemeMapper.put(loanScheme)
       } else {
         await this.loanSchemePendingMapper.put(loanScheme)

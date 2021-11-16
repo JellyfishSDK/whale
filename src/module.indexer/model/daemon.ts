@@ -14,10 +14,10 @@ export class Daemon {
 
   async process (block: defid.Block<defid.Transaction>): Promise<void> {
     const list = await this.loanSchemePendingMapper.query(100)
-    for (const inactiveLoanScheme of list) {
-      if (new BigNumber(block.height).gte(inactiveLoanScheme.activateAfterBlock)) {
-        await this.loanSchemeMapper.put(inactiveLoanScheme)
-        await this.loanSchemePendingMapper.delete(inactiveLoanScheme.id)
+    for (const pendingLoanScheme of list) {
+      if (new BigNumber(block.height).gte(pendingLoanScheme.activateAfterBlock)) {
+        await this.loanSchemeMapper.put(pendingLoanScheme)
+        await this.loanSchemePendingMapper.delete(pendingLoanScheme.id)
       }
     }
   }

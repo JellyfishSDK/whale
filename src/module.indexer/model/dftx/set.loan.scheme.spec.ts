@@ -4,7 +4,7 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent } from '@src/module.model/loan.scheme.history'
-// import { LoanSchemePendingMapper } from '@src/module.model/loan.scheme.pending'
+import { LoanSchemePendingMapper } from '@src/module.model/loan.scheme.pending'
 import BigNumber from 'bignumber.js'
 
 let app: NestFastifyApplication
@@ -59,7 +59,6 @@ describe('setLoanScheme', () => {
 
     const loanSchemeMapper = app.get(LoanSchemeMapper)
     const loanSchemeHistoryMapper = app.get(LoanSchemeHistoryMapper)
-    // const loanSchemePendingMapper = app.get(LoanSchemePendingMapper)
 
     // loanSchemeMapper
     {
@@ -277,5 +276,105 @@ describe('setLoanScheme', () => {
         }
       })
     }
+  })
+
+  it('test update loanScheme with activateAfterBlock', async () => {
+    await createLoanScheme('s150', 150, new BigNumber(3))
+    await updateLoanScheme('s150', 155, new BigNumber(3.05), 110)
+
+    {
+      const height = await testing.container.call('getblockcount')
+      await testing.container.generate(1)
+      await waitForIndexedHeight(app, height)
+    }
+
+    const loanSchemeMapper = app.get(LoanSchemeMapper)
+    const loanSchemeHistoryMapper = app.get(LoanSchemeHistoryMapper)
+    const loanSchemePendingMapper = app.get(LoanSchemePendingMapper)
+
+    const s150Before = await loanSchemeMapper.get('s150')
+    expect(s150Before).toStrictEqual({
+      id: 's150',
+      ratio: 150,
+      rate: '3',
+      activateAfterBlock: '0',
+      block: {
+        hash: expect.any(String),
+        height: expect.any(Number),
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      }
+    })
+
+    const s150PendingBefore = await loanSchemePendingMapper.get('s150')
+    expect(s150PendingBefore).toStrictEqual({
+      id: 's150',
+      ratio: 155,
+      rate: '3.05',
+      activateAfterBlock: '110',
+      block: {
+        hash: expect.any(String),
+        height: expect.any(Number),
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      }
+    })
+
+    const listBefore = await loanSchemeHistoryMapper.query('s150', 100)
+    expect(listBefore).toStrictEqual([
+      {
+        id: 's150-103',
+        loanSchemeId: 's150',
+        sort: '00000067',
+        ratio: 155,
+        rate: '3.05',
+        activateAfterBlock: '110',
+        event: 'update',
+        block: {
+          hash: expect.any(String),
+          height: expect.any(Number),
+          medianTime: expect.any(Number),
+          time: expect.any(Number)
+        }
+      },
+      {
+        id: 's150-102',
+        loanSchemeId: 's150',
+        sort: '00000066',
+        ratio: 150,
+        rate: '3',
+        activateAfterBlock: '0',
+        event: 'create',
+        block: {
+          hash: expect.any(String),
+          height: expect.any(Number),
+          medianTime: expect.any(Number),
+          time: expect.any(Number)
+        }
+      }
+    ])
+
+    await testing.container.waitForBlockHeight(110)
+    await waitForIndexedHeight(app, 110)
+
+    const s150After = await loanSchemeMapper.get('s150')
+    expect(s150After).toStrictEqual({
+      id: 's150',
+      ratio: 155,
+      rate: '3.05',
+      activateAfterBlock: '110',
+      block: {
+        hash: expect.any(String),
+        height: expect.any(Number),
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      }
+    })
+
+    const s150PendingAfter = await loanSchemePendingMapper.get('s150')
+    expect(s150PendingAfter).toStrictEqual(undefined) // cleared
+
+    const listAfter = await loanSchemeHistoryMapper.query('s150', 100)
+    expect(listAfter).toStrictEqual(listBefore)
   })
 })
