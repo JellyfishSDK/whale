@@ -70,7 +70,7 @@ export interface LoanSchemeHistory extends Model {
   sort: string // height
   ratio: number
   rate: BigNumber
-  activationHeight: number
+  activateAfterBlock: BigNumber
   event: LoanSchemeHistoryEvent
 
   block: {

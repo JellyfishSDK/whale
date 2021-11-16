@@ -46,7 +46,7 @@ export interface LoanScheme extends Model {
   id: string // loanSchemeId
   ratio: number
   rate: BigNumber
-  activationHeight: number
+  activateAfterBlock: BigNumber
 
   block: {
     hash: string

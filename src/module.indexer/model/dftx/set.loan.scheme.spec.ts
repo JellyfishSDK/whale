@@ -52,7 +52,7 @@ describe('createLoanScheme', () => {
         id: 's200',
         ratio: 200,
         rate: '2.8',
-        activationHeight: 0,
+        activateAfterBlock: '0',
         block: {
           hash: expect.any(String),
           height: expect.any(Number),
@@ -68,7 +68,7 @@ describe('createLoanScheme', () => {
           id: 's250',
           ratio: 250,
           rate: '2.5',
-          activationHeight: 0,
+          activateAfterBlock: '0',
           block: {
             hash: expect.any(String),
             height: expect.any(Number),
@@ -80,7 +80,7 @@ describe('createLoanScheme', () => {
           id: 's200',
           ratio: 200,
           rate: '2.8',
-          activationHeight: 0,
+          activateAfterBlock: '0',
           block: {
             hash: expect.any(String),
             height: expect.any(Number),
@@ -92,7 +92,7 @@ describe('createLoanScheme', () => {
           id: 's150',
           ratio: 150,
           rate: '3',
-          activationHeight: 0,
+          activateAfterBlock: '0',
           block: {
             hash: expect.any(String),
             height: expect.any(Number),
@@ -118,7 +118,7 @@ describe('createLoanScheme', () => {
           sort: '00000066',
           ratio: 150,
           rate: '3',
-          activationHeight: 0,
+          activateAfterBlock: '0',
           event: LoanSchemeHistoryEvent.CREATE,
           block: {
             hash: expect.any(String),
