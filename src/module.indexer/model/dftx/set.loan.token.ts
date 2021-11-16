@@ -24,7 +24,7 @@ export class SetLoanTokenIndexer extends DfTxIndexer<SetLoanToken> {
         id: `${tokenId}`,
         sort: HexEncoder.encodeHeight(tokenId),
         symbol: data.symbol.trim().substr(0, MAX_TOKEN_SYMBOL_LENGTH),
-        name: data?.name?.trim().substr(0, MAX_TOKEN_NAME_LENGTH) ?? data.symbol,
+        name: data?.name?.trim().substr(0, MAX_TOKEN_NAME_LENGTH) ?? data.symbol.trim().substr(0, MAX_TOKEN_NAME_LENGTH),
         isDAT: true,
         isLPS: false,
         limit: new BigNumber(0).toFixed(8),
