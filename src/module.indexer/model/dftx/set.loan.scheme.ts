@@ -24,34 +24,23 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
 
   async index (block: RawBlock, txns: Array<DfTxTransaction<LoanScheme>>): Promise<void> {
     for (const { dftx: { data } } of txns) {
+      const loanScheme = {
+        id: data.identifier,
+        ratio: data.ratio,
+        rate: new BigNumber(data.rate),
+        activateAfterBlock: data.update,
+
+        block: {
+          hash: block.hash,
+          height: block.height,
+          medianTime: block.mediantime,
+          time: block.time
+        }
+      }
       if (data.update.eq(0) || data.update.gte(new BigNumber(block.height))) {
-        await this.loanSchemeMapper.put({
-          id: data.identifier,
-          ratio: data.ratio,
-          rate: new BigNumber(data.rate),
-          activateAfterBlock: data.update,
-
-          block: {
-            hash: block.hash,
-            height: block.height,
-            medianTime: block.mediantime,
-            time: block.time
-          }
-        })
+        await this.loanSchemeMapper.put(loanScheme)
       } else {
-        await this.loanSchemePendingMapper.put({
-          id: data.identifier,
-          ratio: data.ratio,
-          rate: new BigNumber(data.rate),
-          activateAfterBlock: data.update,
-
-          block: {
-            hash: block.hash,
-            height: block.height,
-            medianTime: block.mediantime,
-            time: block.time
-          }
-        })
+        await this.loanSchemePendingMapper.put(loanScheme)
       }
 
       await this.loanSchemeHistoryMapper.put({
