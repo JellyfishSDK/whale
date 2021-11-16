@@ -4,6 +4,7 @@ import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent } from '@src/module.model/loan.scheme.history'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
+import { HexEncoder } from '@src/module.model/_hex.encoder'
 import BigNumber from 'bignumber.js'
 
 @Injectable()
@@ -37,6 +38,7 @@ export class CreateLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
       await this.loanSchemeHistoryMapper.put({
         id: `${data.identifier}-${block.height}`,
         loanSchemeId: data.identifier,
+        sort: HexEncoder.encodeHeight(block.height),
         ratio: data.ratio,
         rate: new BigNumber(data.rate),
         activationHeight: 0,

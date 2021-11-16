@@ -115,6 +115,7 @@ describe('createLoanScheme', () => {
         {
           id: 's150-102',
           loanSchemeId: 's150',
+          sort: '00000066',
           ratio: 150,
           rate: '3',
           activationHeight: 0,

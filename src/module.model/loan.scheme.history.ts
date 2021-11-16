@@ -13,8 +13,8 @@ const LoanSchemeHistoryMapping: ModelMapping<LoanSchemeHistory> = {
         key: (ls: LoanSchemeHistory) => ls.loanSchemeId
       },
       sort: {
-        type: 'number',
-        key: (ls: LoanSchemeHistory) => ls.block.height
+        type: 'string',
+        key: (ls: LoanSchemeHistory) => ls.sort
       }
     }
   }
@@ -67,6 +67,7 @@ export class LoanSchemeHistoryMapper {
 export interface LoanSchemeHistory extends Model {
   id: string // loanSchemeId-height
   loanSchemeId: string // key
+  sort: string // height
   ratio: number
   rate: BigNumber
   activationHeight: number
