@@ -17,6 +17,7 @@ import { PoolAddLiquidityIndexer } from './dftx/pool.add.liquidity'
 import { PoolRemoveLiquidityIndexer } from './dftx/pool.remove.liquidity'
 import { PoolSwapIndexer } from './dftx/poolswap'
 import { SetLoanTokenIndexer } from './dftx/set.loan.token'
+import { UpdatePoolPairIndexer } from './dftx/update.poolpair'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
