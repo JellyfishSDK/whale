@@ -15,8 +15,8 @@
 /src/module.database/provider.memory            @fuxingloh
 /src/module.defid/                              @fuxingloh
 /src/module.health/                             @fuxingloh
-/src/module.indexer/                            @fuxingloh
-/src/module.model/                              @fuxingloh
+/src/module.indexer/                            @fuxingloh @monstrobishi @canonbrother @jingyi2811 @ivan-zynesis
+/src/module.model/                              @fuxingloh @monstrobishi @canonbrother @jingyi2811 @ivan-zynesis
 
 lerna.json                                      @fuxingloh @canonbrother
 tsconfig.json                                   @fuxingloh @canonbrother
