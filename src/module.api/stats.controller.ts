@@ -42,7 +42,8 @@ export class StatsController {
       blockchain: {
         difficulty: block.difficulty
       },
-      net: await this.cachedGet('net', this.getNet.bind(this), 1800)
+      net: await this.cachedGet('net', this.getNet.bind(this), 1800),
+      supply: await this.cachedGet('supply', this.getSupply.bind(this), 1800)
     }
   }
 
@@ -144,6 +145,19 @@ export class StatsController {
       version: version,
       subversion: subversion,
       protocolversion: protocolversion
+    }
+  }
+
+  private async getSupply (): Promise<StatsData['supply']> {
+    const total = 12000000000
+    const burned = await this.getBurned()
+    const emission = 0
+
+    return {
+      total: total,
+      circulating: total - burned.total - emission,
+      emission: emission,
+      burned: burned.total
     }
   }
 }

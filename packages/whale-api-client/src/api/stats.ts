@@ -61,4 +61,10 @@ export interface StatsData {
     subversion: string
     protocolversion: number
   }
+  'supply': {
+    'total': number
+    'circulating': number
+    'emission': number
+    'burned': number
+  }
 }

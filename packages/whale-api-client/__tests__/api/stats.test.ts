@@ -121,6 +121,12 @@ describe('stats', () => {
         protocolversion: expect.any(Number),
         subversion: expect.any(String),
         version: expect.any(Number)
+      },
+      supply: {
+        total: 12000000000,
+        circulating: expect.any(Number),
+        emission: expect.any(Number),
+        burned: 7327.58
       }
     })
   })
