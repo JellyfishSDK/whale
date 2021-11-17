@@ -566,12 +566,6 @@ describe('active price', () => {
       await container.generate(1)
     }
 
-    {
-      const height = await container.getBlockCount()
-      await container.generate(1)
-      await service.waitForIndexedHeight(height)
-    }
-
     const beforeActivePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)
     expect(beforeActivePrice.length).toStrictEqual(0)
 
@@ -603,7 +597,6 @@ describe('active price', () => {
           ]
         })
       }
-      await container.generate(1)
     }
 
     {
@@ -627,7 +620,7 @@ describe('active price', () => {
           hash: expect.any(String),
           height: fixedIntervalPrice.activePriceBlock,
           medianTime: expect.any(Number),
-          time: expect.any(Number)
+          time: fixedIntervalPrice.timestamp
         },
         id: expect.any(String),
         key: 'S1-USD',
@@ -648,6 +641,12 @@ describe('active price', () => {
 
     {
       const height = await container.getBlockCount()
+
+      // Set mock time in the future
+      const timeNow = Math.floor(new Date().getTime() / 1000)
+      const mockTime = timeNow + 61 * oneMinute
+      await client.misc.setMockTime(mockTime)
+
       await container.generate(6)
       await service.waitForIndexedHeight(height)
       await new Promise((resolve) => setTimeout(resolve, 500))
@@ -683,7 +682,7 @@ describe('active price', () => {
         isLive: fixedIntervalPrice.isLive
       })
 
-      expect(activePrice[0].isLive).toStrictEqual(true)
+      expect(activePrice[0].isLive).toStrictEqual(false)
     }
   })
 })

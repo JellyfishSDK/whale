@@ -47,13 +47,13 @@ export class ActivePriceIndexer extends Indexer {
     aggregatedPrice: OraclePriceAggregated,
     previousActive?: OraclePriceActive
   ): OraclePriceActive {
-    const nextPrice = this.isAggregateValid(aggregatedPrice.aggregated) ? aggregatedPrice.aggregated : undefined
+    const nextPrice = this.isAggregateValid(aggregatedPrice, block) ? aggregatedPrice.aggregated : undefined
     const activePrice = previousActive?.next !== undefined ? previousActive.next : previousActive?.active
 
     return {
       id: `${ticker.id}-${block.height}`,
       key: ticker.id,
-      isLive: this.isLive(activePrice, nextPrice, aggregatedPrice.block, block),
+      isLive: this.isLive(activePrice, nextPrice),
       block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
       active: activePrice,
       next: nextPrice,
@@ -62,21 +62,13 @@ export class ActivePriceIndexer extends Indexer {
   }
 
   private isLive (active: OraclePriceActive['active'],
-    next: OraclePriceActive['next'],
-    aggregatedBlock: OraclePriceAggregated['block'],
-    block: RawBlock): boolean {
+    next: OraclePriceActive['next']): boolean {
     if (active === undefined || next === undefined) {
       return false
     }
 
     const activePrice = new BigNumber(active.amount)
     const nextPrice = new BigNumber(next.amount)
-
-    // The last aggregated price (i.e. setOracleData), was more than an hour ago,
-    // therefore it's invalid
-    if (Math.abs(aggregatedBlock.time - block.time) >= 3600) {
-      return false
-    }
 
     if (!activePrice.gt(0)) {
       return false
@@ -93,16 +85,22 @@ export class ActivePriceIndexer extends Indexer {
     return true
   }
 
-  private isAggregateValid (aggregate: OraclePriceActive['next']): boolean {
-    if (aggregate?.oracles === undefined) {
+  private isAggregateValid (aggregate: OraclePriceAggregated, block: RawBlock): boolean {
+    // The last aggregated price (i.e. setOracleData), was more than an hour ago,
+    // therefore it's invalid
+    if (Math.abs(aggregate.block.time - block.time) >= 3600) {
       return false
     }
 
-    if (aggregate?.oracles.active < this.MINIMUM_LIVE_ORACLES) {
+    if (aggregate.aggregated.oracles === undefined) {
       return false
     }
 
-    if (aggregate?.weightage <= 0) {
+    if (aggregate.aggregated.oracles.active < this.MINIMUM_LIVE_ORACLES) {
+      return false
+    }
+
+    if (aggregate.aggregated.weightage <= 0) {
       return false
     }
     return true
