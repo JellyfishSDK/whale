@@ -12,6 +12,7 @@ import { UpdatePoolPairIndexer } from '@src/module.indexer/model/dftx/update.poo
 import { SetLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.loan.scheme'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { ConfigService } from '@nestjs/config'
+import { SetLoanTokenIndexer } from './set.loan.token'
 
 const indexers = [
   AppointOracleIndexer,
@@ -24,6 +25,7 @@ const indexers = [
   CreateTokenIndexer,
   CreatePoolPairIndexer,
   UpdatePoolPairIndexer,
+  SetLoanTokenIndexer,
   SetLoanSchemeIndexer
 ]
 
