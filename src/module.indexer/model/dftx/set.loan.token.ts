@@ -12,7 +12,8 @@ export class SetLoanTokenIndexer extends DfTxIndexer<SetLoanToken> {
   private readonly logger = new Logger(SetLoanTokenIndexer.name)
 
   constructor (
-    private readonly tokenMapper: TokenMapper
+    private readonly tokenMapper: TokenMapper,
+    private readonly loanTokenMapper: LoanToM
   ) {
     super()
   }
@@ -28,7 +29,7 @@ export class SetLoanTokenIndexer extends DfTxIndexer<SetLoanToken> {
         isDAT: true,
         isLPS: false,
         limit: new BigNumber(0).toFixed(8),
-        mintable: false,
+        mintable: data.mintable,
         decimal: 8,
         tradeable: true,
         block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
