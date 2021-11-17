@@ -31,24 +31,31 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
     }
   }
 
-  async invalidate (_: RawBlock, txns: Array<DfTxTransaction<LoanScheme>>): Promise<void> {
+  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<LoanScheme>>): Promise<void> {
     for (const { dftx: { data } } of txns) {
       const prevDeferredLoanScheme = await this.getCurrentLoanScheme(data.identifier)
-      const prevLoanScheme = await this.getPrevLoanScheme(data.identifier)
+      const prevLoanScheme = await this.getPrevLoanScheme(data.identifier, block.height)
       await this.deferredLoanSchemeMapper.put(prevDeferredLoanScheme)
       await this.loanSchemeMapper.put(prevLoanScheme)
     }
   }
 
   /**
-   * Get previous loan scheme before current height
+   * Get previous active loan scheme
    */
-  private async getPrevLoanScheme (loanSchemeId: string): Promise<LoanSchemeHistory> {
-    const histories = await this.loanSchemeHistoryMapper.query(loanSchemeId, 1)
+  private async getPrevLoanScheme (id: string, height: number): Promise<LoanSchemeHistory> {
+    const histories = await this.loanSchemeHistoryMapper.query(id, 1)
     if (histories.length === 0) {
-      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', loanSchemeId)
+      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', id)
     }
-    return histories[0]
+    // get the closest activateAfterBlock against height
+    // ensure its queried by DESC height
+    // looking for height >= activateHeight
+    const prevActiveLoanScheme = histories.find(h => new BigNumber(height).gte(h.activateAfterBlock))
+    if (prevActiveLoanScheme === undefined) {
+      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', id)
+    }
+    return prevActiveLoanScheme
   }
 
   /**
