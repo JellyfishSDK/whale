@@ -14,7 +14,6 @@ import { blockchain as defid } from '@defichain/jellyfish-api-core'
 import { MainDfTxIndexer } from '@src/module.indexer/model/dftx.indexer'
 import { BlockMintedIndexer } from '@src/module.indexer/model/block.minted'
 import { ActivePriceIndexer } from '@src/module.indexer/model/active.price'
-import { DeferredLoanSchemeIndexer } from '@src/module.indexer/model/deferred.loan.scheme'
 
 /**
  * This is a deterministic log based indexer.
@@ -35,8 +34,7 @@ export class MainIndexer {
     private readonly transactionVout: TransactionVoutIndexer,
     private readonly dftx: MainDfTxIndexer,
     private readonly blockMinted: BlockMintedIndexer,
-    private readonly activePrice: ActivePriceIndexer,
-    private readonly deferredLoanScheme: DeferredLoanSchemeIndexer
+    private readonly activePrice: ActivePriceIndexer
   ) {
     this.indexers = [
       block,
@@ -48,8 +46,7 @@ export class MainIndexer {
       transactionVout,
       dftx,
       blockMinted,
-      activePrice,
-      deferredLoanScheme
+      activePrice
     ]
   }
 

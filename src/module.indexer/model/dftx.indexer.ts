@@ -16,6 +16,7 @@ import { CreateTokenIndexer } from '@src/module.indexer/model/dftx/create.token'
 import { UpdatePoolPairIndexer } from '@src/module.indexer/model/dftx/update.poolpair'
 import { SetLoanTokenIndexer } from '@src/module.indexer/model/dftx/set.loan.token'
 import { SetLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.loan.scheme'
+import { SetDeferredLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.deferred.loan.scheme'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
@@ -34,7 +35,8 @@ export class MainDfTxIndexer extends Indexer {
     private readonly createPoolPair: CreatePoolPairIndexer,
     private readonly updatePoolPair: UpdatePoolPairIndexer,
     private readonly setLoanToken: SetLoanTokenIndexer,
-    private readonly setLoanScheme: SetLoanSchemeIndexer
+    private readonly setLoanScheme: SetLoanSchemeIndexer,
+    private readonly setDeferredLoanScheme: SetDeferredLoanSchemeIndexer
   ) {
     super()
     this.indexers = [
@@ -49,7 +51,8 @@ export class MainDfTxIndexer extends Indexer {
       createPoolPair,
       updatePoolPair,
       setLoanToken,
-      setLoanScheme
+      setLoanScheme,
+      setDeferredLoanScheme
     ]
   }
 
