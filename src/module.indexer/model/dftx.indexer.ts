@@ -16,7 +16,7 @@ import { CreateTokenIndexer } from './dftx/create.token'
 import { PoolAddLiquidityIndexer } from './dftx/pool.add.liquidity'
 import { PoolRemoveLiquidityIndexer } from './dftx/pool.remove.liquidity'
 import { PoolSwapIndexer } from './dftx/poolswap'
-import { UpdatePoolPairIndexer } from './dftx/update.poolpair'
+import { SetLoanTokenIndexer } from './dftx/set.loan.token'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
@@ -36,7 +36,8 @@ export class MainDfTxIndexer extends Indexer {
     updatePoolPair: UpdatePoolPairIndexer,
     poolAddLiquidityIndexer: PoolAddLiquidityIndexer,
     poolRemoveLiquidityIndexer: PoolRemoveLiquidityIndexer,
-    poolSwapIndexer: PoolSwapIndexer
+    poolSwapIndexer: PoolSwapIndexer,
+    setLoanToken: SetLoanTokenIndexer
   ) {
     super()
     this.indexers = [
@@ -52,7 +53,8 @@ export class MainDfTxIndexer extends Indexer {
       updatePoolPair,
       poolAddLiquidityIndexer,
       poolRemoveLiquidityIndexer,
-      poolSwapIndexer
+      poolSwapIndexer,
+      setLoanToken
     ]
   }
 

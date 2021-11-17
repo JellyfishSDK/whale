@@ -33,7 +33,7 @@ afterEach(async () => {
 })
 
 describe('create poolpair', () => {
-  it.skip('should index poolpairs', async () => {
+  it('should index poolpairs', async () => {
     await container.generate(1)
     const height = await container.call('getblockcount')
     await container.generate(1)
@@ -103,7 +103,7 @@ describe('create poolpair', () => {
 })
 
 describe('invalidate', () => {
-  it.skip('should create poolpair and invalidate', async () => {
+  it('should create poolpair and invalidate', async () => {
     const token = 'G'
     await container.waitForWalletBalanceGTE(110)
     await createToken(container, token)
