@@ -38,10 +38,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
         }
       }
 
-      if (
-        data.update.eq(0) ||
-        data.update.eq(new BigNumber('0xffffffffffffffff')) || // Max value is ignored as block height
-        new BigNumber(block.height).gte(data.update)) {
+      if (this.isActive(data, block.height)) {
         await this.loanSchemeMapper.put(loanScheme)
       } else {
         await this.deferredLoanSchemeMapper.put(loanScheme)
@@ -68,22 +65,38 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
 
   async invalidate (block: RawBlock, txns: Array<DfTxTransaction<LoanScheme>>): Promise<void> {
     for (const { dftx: { data } } of txns) {
-      const previous = await this.getPrevious(data.identifier)
-      await this.loanSchemeMapper.put(previous)
-      await this.deferredLoanSchemeMapper.delete(data.identifier)
+      if (this.isActive(data, block.height)) {
+        const previous = await this.getPrevious(data.identifier, block.height)
+        await this.loanSchemeMapper.put(previous)
+      } else {
+        await this.deferredLoanSchemeMapper.delete(data.identifier)
+      }
+
       await this.loanSchemeHistoryMapper.delete(`${data.identifier}-${block.height}`)
     }
   }
 
+  private isActive (loanScheme: LoanScheme, height: number): boolean {
+    return loanScheme.update.eq(0) ||
+           loanScheme.update.eq(new BigNumber('0xffffffffffffffff')) ||
+           new BigNumber(height).gte(loanScheme.update)
+  }
+
   /**
-   * Get previous loan scheme before current height
+   * Get previous active loan scheme
    */
-  private async getPrevious (loanSchemeId: string): Promise<LoanSchemeHistory> {
-    const histories = await this.loanSchemeHistoryMapper.query(loanSchemeId, 1)
+  private async getPrevious (loanSchemeId: string, height: number): Promise<LoanSchemeHistory> {
+    const histories = await this.loanSchemeHistoryMapper.query(loanSchemeId, 50)
     if (histories.length === 0) {
       throw new NotFoundIndexerError('index', 'LoanSchemeHistory', loanSchemeId)
     }
-
-    return histories[0]
+    // get the closest activateAfterBlock against height
+    // ensure its queried by DESC height
+    // looking for height > activateHeight
+    const prevActiveLoanScheme = histories.find(h => new BigNumber(height).gte(h.activateAfterBlock))
+    if (prevActiveLoanScheme === undefined) {
+      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', loanSchemeId)
+    }
+    return prevActiveLoanScheme
   }
 }
