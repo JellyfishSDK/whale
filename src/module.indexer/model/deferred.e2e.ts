@@ -3,7 +3,7 @@ import { Testing } from '@defichain/jellyfish-testing'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
-import { LoanSchemePendingMapper } from '@src/module.model/loan.scheme.pending'
+import { DeferredModelMapper } from '@src/module.model/deferred.model'
 import BigNumber from 'bignumber.js'
 
 let app: NestFastifyApplication
@@ -44,7 +44,7 @@ async function updateLoanScheme (nameAsId: string, minColRatio: number, interest
   return loanSchemeId
 }
 
-it('should daemon process pending state', async () => {
+it('should deferred model serves pending state', async () => {
   await createLoanScheme('s150', 150, new BigNumber(3))
   await updateLoanScheme('s150', 155, new BigNumber(3.05), 110)
 
@@ -55,7 +55,7 @@ it('should daemon process pending state', async () => {
   }
 
   const loanSchemeMapper = app.get(LoanSchemeMapper)
-  const loanSchemePendingMapper = app.get(LoanSchemePendingMapper)
+  const deferredMapper = app.get(DeferredModelMapper)
 
   const s150Before = await loanSchemeMapper.get('s150')
   expect(s150Before).toStrictEqual({
@@ -71,7 +71,7 @@ it('should daemon process pending state', async () => {
     }
   })
 
-  const s150PendingBefore = await loanSchemePendingMapper.get('s150')
+  const s150PendingBefore = await deferredMapper.get('s150')
   expect(s150PendingBefore).toStrictEqual({
     id: 's150',
     ratio: 155,
@@ -102,6 +102,6 @@ it('should daemon process pending state', async () => {
     }
   })
 
-  const s150PendingAfter = await loanSchemePendingMapper.get('s150')
+  const s150PendingAfter = await deferredMapper.get('s150')
   expect(s150PendingAfter).toStrictEqual(undefined) // cleared
 })

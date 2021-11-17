@@ -13,8 +13,8 @@ import { IndexStatusMapper } from '@src/module.indexer/status'
 import { DfTxIndexerModule } from '@src/module.indexer/model/dftx/_module'
 import { MainDfTxIndexer } from '@src/module.indexer/model/dftx.indexer'
 import { BlockMintedIndexer } from '@src/module.indexer/model/block.minted'
-import { ActivePriceIndexer } from './model/active.price'
-import { Daemon } from './model/daemon'
+import { ActivePriceIndexer } from '@src/module.indexer/model/active.price'
+import { DeferredModelIndexer } from '@src/module.indexer/model/deferred.model'
 import { ConfigService } from '@nestjs/config'
 import { NetworkName } from '@defichain/jellyfish-network'
 
@@ -34,7 +34,7 @@ import { NetworkName } from '@defichain/jellyfish-network'
     MainDfTxIndexer,
     ActivePriceIndexer,
     BlockMintedIndexer,
-    Daemon,
+    DeferredModelIndexer,
     {
       provide: 'NETWORK',
       useFactory: (configService: ConfigService): NetworkName => {

@@ -4,7 +4,7 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent } from '@src/module.model/loan.scheme.history'
-import { LoanSchemePendingMapper } from '@src/module.model/loan.scheme.pending'
+import { DeferredModelMapper } from '@src/module.model/deferred.model'
 import BigNumber from 'bignumber.js'
 
 let app: NestFastifyApplication
@@ -290,7 +290,7 @@ describe('setLoanScheme', () => {
 
     const loanSchemeMapper = app.get(LoanSchemeMapper)
     const loanSchemeHistoryMapper = app.get(LoanSchemeHistoryMapper)
-    const loanSchemePendingMapper = app.get(LoanSchemePendingMapper)
+    const deferredModelMapper = app.get(DeferredModelMapper)
 
     const s150Before = await loanSchemeMapper.get('s150')
     expect(s150Before).toStrictEqual({
@@ -306,7 +306,7 @@ describe('setLoanScheme', () => {
       }
     })
 
-    const s150PendingBefore = await loanSchemePendingMapper.get('s150')
+    const s150PendingBefore = await deferredModelMapper.get('s150')
     expect(s150PendingBefore).toStrictEqual({
       id: 's150',
       ratio: 155,
@@ -371,7 +371,7 @@ describe('setLoanScheme', () => {
       }
     })
 
-    const s150PendingAfter = await loanSchemePendingMapper.get('s150')
+    const s150PendingAfter = await deferredModelMapper.get('s150')
     expect(s150PendingAfter).toStrictEqual(undefined) // cleared
 
     const listAfter = await loanSchemeHistoryMapper.query('s150', 100)
