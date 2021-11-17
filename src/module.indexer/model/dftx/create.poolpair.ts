@@ -1,13 +1,28 @@
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
 import { PoolCreatePair, CPoolCreatePair } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { MAX_TOKEN_SYMBOL_LENGTH, TokenMapper } from '@src/module.model/token'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { IndexerError } from '@src/module.indexer/error'
 import { toBuffer } from '@defichain/jellyfish-transaction/dist/script/_buffer'
+import { NetworkName } from '@defichain/jellyfish-network'
+
+const ConsensusParams = {
+  mainnet: {
+    FortCanningHeight: 1367000
+  },
+  testnet: {
+    FortCanningHeight: 686200
+  },
+  regtest: {
+    FortCanningHeight: 10000000
+  }
+}
+
+const MAX_TOKEN_SYMBOL_LENGTH_POST_FC = 16
 
 @Injectable()
 export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
@@ -17,7 +32,8 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
   constructor (
     private readonly poolPairMapper: PoolPairMapper,
     private readonly poolPairTokenMapper: PoolPairTokenMapper,
-    private readonly tokenMapper: TokenMapper
+    private readonly tokenMapper: TokenMapper,
+    @Inject('NETWORK') protected readonly network: NetworkName
   ) {
     super()
   }
@@ -37,7 +53,10 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
       if (data.pairSymbol.length === 0) {
         pairSymbol = (tokenA?.symbol + '-' + tokenB?.symbol).trim().substr(0, MAX_TOKEN_SYMBOL_LENGTH)
       } else {
-        pairSymbol = data.pairSymbol.trim().substr(0, MAX_TOKEN_SYMBOL_LENGTH)
+        const symbolLength = block.height >= ConsensusParams[this.network].FortCanningHeight
+          ? MAX_TOKEN_SYMBOL_LENGTH_POST_FC : MAX_TOKEN_SYMBOL_LENGTH
+
+        pairSymbol = data.pairSymbol.trim().substr(0, symbolLength)
       }
 
       await this.poolPairMapper.put({
