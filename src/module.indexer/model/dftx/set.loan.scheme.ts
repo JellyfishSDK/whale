@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { LoanScheme, CCreateLoanScheme } from '@defichain/jellyfish-transaction'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
-import { DeferredModelMapper } from '@src/module.model/deferred.model'
+import { DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent, LoanSchemeHistory } from '@src/module.model/loan.scheme.history'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
@@ -17,7 +17,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
   constructor (
     private readonly loanSchemeMapper: LoanSchemeMapper,
     private readonly loanSchemeHistoryMapper: LoanSchemeHistoryMapper,
-    private readonly deferredModelMapper: DeferredModelMapper
+    private readonly deferredLoanSchemeMapper: DeferredLoanSchemeMapper
   ) {
     super()
   }
@@ -44,7 +44,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
         new BigNumber(block.height).gte(data.update)) {
         await this.loanSchemeMapper.put(loanScheme)
       } else {
-        await this.deferredModelMapper.put(loanScheme)
+        await this.deferredLoanSchemeMapper.put(loanScheme)
       }
 
       await this.loanSchemeHistoryMapper.put({
@@ -70,7 +70,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
     for (const { dftx: { data } } of txns) {
       const previous = await this.getPrevious(data.identifier)
       await this.loanSchemeMapper.put(previous)
-      await this.deferredModelMapper.delete(data.identifier)
+      await this.deferredLoanSchemeMapper.delete(data.identifier)
       await this.loanSchemeHistoryMapper.delete(`${data.identifier}-${block.height}`)
     }
   }

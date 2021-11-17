@@ -25,7 +25,7 @@ import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { OraclePriceActiveMapper } from './oracle.price.active'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 import { LoanSchemeHistoryMapper } from '@src/module.model/loan.scheme.history'
-import { DeferredModelMapper } from './deferred.model'
+import { DeferredLoanSchemeMapper } from './deferred.loan.scheme'
 
 @Global()
 @Module({
@@ -54,7 +54,7 @@ import { DeferredModelMapper } from './deferred.model'
     PoolPairTokenMapper,
     LoanSchemeMapper,
     LoanSchemeHistoryMapper,
-    DeferredModelMapper
+    DeferredLoanSchemeMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -81,7 +81,7 @@ import { DeferredModelMapper } from './deferred.model'
     PoolPairTokenMapper,
     LoanSchemeMapper,
     LoanSchemeHistoryMapper,
-    DeferredModelMapper
+    DeferredLoanSchemeMapper
   ]
 })
 export class ModelModule {
