@@ -16,16 +16,26 @@ import {
   LoanSchemeResult,
   LoanTokenResult
 } from '@defichain/jellyfish-api-core/dist/category/loan'
-import { CollateralToken, LoanScheme, LoanToken } from '@whale-api-client/api/loan'
+import {
+  CollateralToken,
+  LoanScheme,
+  LoanToken,
+  LoanVaultActive,
+  LoanVaultLiquidated
+} from '@whale-api-client/api/loan'
 import { mapTokenData } from '@src/module.api/token.controller'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
-import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
+import { LoanVaultService } from '@src/module.api/loan.vault.service'
+import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
+import { ActivePrice } from '@whale-api-client/api/prices'
 
 @Controller('/loans')
 export class LoanController {
   constructor (
     private readonly client: JsonRpcClient,
-    private readonly deFiDCache: DeFiDCache
+    private readonly deFiDCache: DeFiDCache,
+    private readonly vaultService: LoanVaultService,
+    private readonly priceActiveMapper: OraclePriceActiveMapper
   ) {
   }
 
@@ -115,15 +125,15 @@ export class LoanController {
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<LoanToken>> {
     const result = Object.entries(await this.client.loan.listLoanTokens())
-      .map(([, value]) => {
-        return mapLoanToken(value)
-      }).sort((a, b) => a.tokenId.localeCompare(b.tokenId))
+      .map(async ([, value]) => await this.mapLoanToken(value))
+    const items = (await Promise.all(result))
+      .sort((a, b) => a.tokenId.localeCompare(b.tokenId))
 
-    return createFakePagination(query, result, item => item.tokenId)
+    return createFakePagination(query, items, item => item.tokenId)
   }
 
   /**
-   *  Paginate loan tokens.
+   * Get information about a loan token with given loan token.
    *
    * @param {string} id
    * @return {Promise<LoanTokenResult>}
@@ -132,7 +142,7 @@ export class LoanController {
   async getLoanToken (@Param('id') id: string): Promise<LoanToken> {
     try {
       const data = await this.client.loan.getLoanToken(id)
-      return mapLoanToken(data)
+      return await this.mapLoanToken(data)
     } catch (err) {
       if (err?.payload?.message === `Token ${id} does not exist!`) {
         throw new NotFoundException('Unable to find loan token')
@@ -143,16 +153,25 @@ export class LoanController {
   }
 
   /**
-   *  Paginate auction history.
+   * Paginate loan vaults.
    *
-   * @return {Promise<LoanTokenResult>}
-   * @param query
-   * @param container
+   * @param {PaginationQuery} query
+   * @return {Promise<ApiPagedResponse<LoanVaultActive | LoanVaultLiquidated>>}
    */
-  @Get('/auctionhistory')
-  async listAuctionHistory (@Query() query: PaginationQuery, container: LoanMasterNodeRegTestContainer): Promise<any> {
-    const data = await container.call('listauctionhistory', [])
-    return data
+  @Get('/vaults')
+  async listVault (@Query() query: PaginationQuery): Promise<ApiPagedResponse<LoanVaultActive | LoanVaultLiquidated>> {
+    return await this.vaultService.list(query)
+  }
+
+  /**
+   * Get information about a vault with given vault id.
+   *
+   * @param {string} id
+   * @return {Promise<LoanVaultActive | LoanVaultLiquidated>}
+   */
+  @Get('/vaults/:id')
+  async getVault (@Param('id') id: string): Promise<LoanVaultActive | LoanVaultLiquidated> {
+    return await this.vaultService.get(id)
   }
 
   async mapCollateralToken (detail: CollateralTokenDetail): Promise<CollateralToken> {
@@ -168,9 +187,29 @@ export class LoanController {
       tokenId: detail.tokenId,
       token: mapTokenData(id, tokenInfo),
       factor: detail.factor.toFixed(),
-      priceFeedId: detail.fixedIntervalPriceId,
-      activateAfterBlock: detail.activateAfterBlock.toNumber()
+      activateAfterBlock: detail.activateAfterBlock.toNumber(),
+      fixedIntervalPriceId: detail.fixedIntervalPriceId,
+      activePrice: await this.getActivePrice(detail.fixedIntervalPriceId)
     }
+  }
+
+  async mapLoanToken (result: LoanTokenResult): Promise<LoanToken> {
+    const id = Object.keys(result.token)[0]
+    const tokenInfo = result.token[id]
+
+    return {
+      tokenId: tokenInfo.creationTx,
+      token: mapTokenData(id, tokenInfo),
+      interest: result.interest.toFixed(),
+      fixedIntervalPriceId: result.fixedIntervalPriceId,
+      activePrice: await this.getActivePrice(result.fixedIntervalPriceId)
+    }
+  }
+
+  async getActivePrice (fixedIntervalPriceId: string): Promise<ActivePrice | undefined> {
+    const [token, currency] = fixedIntervalPriceId.split('/')
+    const prices = await this.priceActiveMapper.query(`${token}-${currency}`, 1)
+    return prices[0]
   }
 }
 
@@ -195,16 +234,5 @@ function mapLoanScheme (result: LoanSchemeResult | GetLoanSchemeResult): LoanSch
     id: result.id,
     minColRatio: result.mincolratio.toFixed(),
     interestRate: result.interestrate.toFixed()
-  }
-}
-
-function mapLoanToken (result: LoanTokenResult): LoanToken {
-  const id = Object.keys(result.token)[0]
-  const tokenInfo = result.token[id]
-  return {
-    tokenId: tokenInfo.creationTx,
-    token: mapTokenData(id, tokenInfo),
-    interest: result.interest.toFixed(),
-    fixedIntervalPriceId: result.fixedIntervalPriceId
   }
 }

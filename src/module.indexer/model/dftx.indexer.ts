@@ -9,11 +9,12 @@ import { SetOracleDataIndexer } from '@src/module.indexer/model/dftx/set.oracle.
 import { SetOracleDataIntervalIndexer } from '@src/module.indexer/model/dftx/set.oracle.data.interval'
 import { CreateMasternodeIndexer } from '@src/module.indexer/model/dftx/create.masternode'
 import { ResignMasternodeIndexer } from '@src/module.indexer/model/dftx/resign.masternode'
-import { CreateTokenIndexer } from '@src/module.indexer/model/dftx/create.token'
-import { CreatePoolPairIndexer } from '@src/module.indexer/model/dftx/create.poolpair'
-import { UpdatePoolPairIndexer } from '@src/module.indexer/model/dftx/update.poolpair'
 import { Injectable, Logger } from '@nestjs/common'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
+import { CreatePoolPairIndexer } from './dftx/create.poolpair'
+import { CreateTokenIndexer } from './dftx/create.token'
+import { UpdatePoolPairIndexer } from './dftx/update.poolpair'
+import { SetLoanTokenIndexer } from './dftx/set.loan.token'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
@@ -30,7 +31,8 @@ export class MainDfTxIndexer extends Indexer {
     private readonly resignMasternode: ResignMasternodeIndexer,
     private readonly createToken: CreateTokenIndexer,
     private readonly createPoolPair: CreatePoolPairIndexer,
-    private readonly updatePoolPair: UpdatePoolPairIndexer
+    private readonly updatePoolPair: UpdatePoolPairIndexer,
+    private readonly setLoanToken: SetLoanTokenIndexer
   ) {
     super()
     this.indexers = [
@@ -43,7 +45,8 @@ export class MainDfTxIndexer extends Indexer {
       setOracleDataInterval,
       createToken,
       createPoolPair,
-      updatePoolPair
+      updatePoolPair,
+      setLoanToken
     ]
   }
 

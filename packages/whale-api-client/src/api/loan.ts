@@ -1,6 +1,7 @@
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
 import { TokenData } from './tokens'
+import { ActivePrice } from './prices'
 
 export class Loan {
   constructor (private readonly client: WhaleApiClient) {
@@ -68,6 +69,27 @@ export class Loan {
   async getLoanToken (id: string): Promise<LoanToken> {
     return await this.client.requestData('GET', `loans/tokens/${id}`)
   }
+
+  /**
+   * Paginate query loan vaults.
+   *
+   * @param {number} size of vaults to query
+   * @param {string} next set of vaults
+   * @return {Promise<ApiPagedResponse<LoanVaultActive | LoanVaultLiquidated>>}
+   */
+  async listVault (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanVaultActive | LoanVaultLiquidated>> {
+    return await this.client.requestList('GET', 'loans/vaults', size, next)
+  }
+
+  /**
+   * Get information about a vault with given vault id.
+   *
+   * @param {string} id vault id to get
+   * @return {Promise<LoanVaultActive | LoanVaultLiquidated>}
+   */
+  async getVault (id: string): Promise<LoanVaultActive | LoanVaultLiquidated> {
+    return await this.client.requestData('GET', `loans/vaults/${id}`)
+  }
 }
 
 export interface LoanScheme {
@@ -80,8 +102,9 @@ export interface CollateralToken {
   tokenId: string
   token: TokenData
   factor: string
-  priceFeedId: string
   activateAfterBlock: number
+  fixedIntervalPriceId: string
+  activePrice?: ActivePrice
 }
 
 export interface LoanToken {
@@ -89,4 +112,58 @@ export interface LoanToken {
   token: TokenData
   interest: string
   fixedIntervalPriceId: string
+  activePrice?: ActivePrice
+}
+
+export interface LoanVaultActive {
+  vaultId: string
+  loanScheme: LoanScheme
+  ownerAddress: string
+  state: LoanVaultState.ACTIVE | LoanVaultState.FROZEN | LoanVaultState.MAY_LIQUIDATE | LoanVaultState.UNKNOWN
+
+  informativeRatio: string
+  collateralRatio: string
+  collateralValue: string
+  loanValue: string
+  interestValue: string
+
+  collateralAmounts: LoanVaultTokenAmount[]
+  loanAmounts: LoanVaultTokenAmount[]
+  interestAmounts: LoanVaultTokenAmount[]
+}
+
+export interface LoanVaultLiquidated {
+  vaultId: string
+  loanScheme: LoanScheme
+  ownerAddress: string
+  state: LoanVaultState.IN_LIQUIDATION
+
+  liquidationHeight: number
+  liquidationPenalty: number
+  batchCount: number
+  batches: LoanVaultLiquidationBatch[]
+}
+
+export interface LoanVaultLiquidationBatch {
+  index: number
+  collaterals: LoanVaultTokenAmount[]
+  loan: LoanVaultTokenAmount
+}
+
+export enum LoanVaultState {
+  UNKNOWN = 'UNKNOWN',
+  ACTIVE = 'ACTIVE',
+  FROZEN = 'FROZEN',
+  IN_LIQUIDATION = 'IN_LIQUIDATION',
+  MAY_LIQUIDATE = 'MAY_LIQUIDATE'
+}
+
+export interface LoanVaultTokenAmount {
+  id: string
+  amount: string
+  symbol: string
+  displaySymbol: string
+  symbolKey: string
+  name: string
+  activePrice?: ActivePrice
 }

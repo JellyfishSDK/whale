@@ -13,7 +13,6 @@ beforeAll(async () => {
   client = new StubWhaleApiClient(service)
 
   await container.start()
-  await container.waitForReady()
   await service.start()
 
   await container.generate(1)
@@ -76,9 +75,9 @@ describe('get', () => {
     expect(Object.keys(data).length).toStrictEqual(8)
     expect(data).toStrictEqual({
       id: masternode.id,
-      sort: '00000000e86c027861cc0af423313f4152a44a83296a388eb51bf1a6dde9bd75bed55fb4',
+      sort: expect.any(String),
       state: masternode.state,
-      mintedBlocks: masternode.mintedBlocks,
+      mintedBlocks: expect.any(Number),
       owner: { address: masternode.owner.address },
       operator: { address: masternode.operator.address },
       creation: { height: masternode.creation.height },
