@@ -53,7 +53,7 @@ export class ActivePriceIndexer extends Indexer {
     return {
       id: `${ticker.id}-${block.height}`,
       key: ticker.id,
-      isLive: this.isLive(activePrice, nextPrice),
+      isLive: this.isLive(activePrice, nextPrice, aggregatedPrice.block, block),
       block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
       active: activePrice,
       next: nextPrice,
@@ -61,13 +61,22 @@ export class ActivePriceIndexer extends Indexer {
     }
   }
 
-  private isLive (active: OraclePriceActive['active'], next: OraclePriceActive['next']): boolean {
+  private isLive (active: OraclePriceActive['active'],
+    next: OraclePriceActive['next'],
+    aggregatedBlock: OraclePriceAggregated['block'],
+    block: RawBlock): boolean {
     if (active === undefined || next === undefined) {
       return false
     }
 
     const activePrice = new BigNumber(active.amount)
     const nextPrice = new BigNumber(next.amount)
+
+    // The last aggregated price (i.e. setOracleData), was more than an hour ago,
+    // therefore it's invalid
+    if (Math.abs(aggregatedBlock.time - block.time) >= 3600) {
+      return false
+    }
 
     if (!activePrice.gt(0)) {
       return false
