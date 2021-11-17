@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { LoanScheme, CCreateLoanScheme } from '@defichain/jellyfish-transaction'
-import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
+import { LoanSchemeMapper, LoanScheme as LoanSchemeModel } from '@src/module.model/loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistory } from '@src/module.model/loan.scheme.history'
 import { DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
 import BigNumber from 'bignumber.js'
@@ -31,24 +31,34 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
     }
   }
 
-  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<LoanScheme>>): Promise<void> {
+  async invalidate (_: RawBlock, txns: Array<DfTxTransaction<LoanScheme>>): Promise<void> {
     for (const { dftx: { data } } of txns) {
-      const previous = await this.getPrevious(data.identifier)
-      await this.loanSchemeMapper.put(previous)
-      await this.deferredLoanSchemeMapper.delete(data.identifier)
-      await this.loanSchemeHistoryMapper.delete(`${data.identifier}-${block.height}`)
+      const prevDeferredLoanScheme = await this.getCurrentLoanScheme(data.identifier)
+      const prevLoanScheme = await this.getPrevLoanScheme(data.identifier)
+      await this.deferredLoanSchemeMapper.put(prevDeferredLoanScheme)
+      await this.loanSchemeMapper.put(prevLoanScheme)
     }
   }
 
   /**
    * Get previous loan scheme before current height
    */
-  private async getPrevious (loanSchemeId: string): Promise<LoanSchemeHistory> {
+  private async getPrevLoanScheme (loanSchemeId: string): Promise<LoanSchemeHistory> {
     const histories = await this.loanSchemeHistoryMapper.query(loanSchemeId, 1)
     if (histories.length === 0) {
       throw new NotFoundIndexerError('index', 'LoanSchemeHistory', loanSchemeId)
     }
-
     return histories[0]
+  }
+
+  /**
+   * Get current loan scheme which is prev deferred loan scheme
+   */
+  private async getCurrentLoanScheme (loanSchemeId: string): Promise<LoanSchemeModel> {
+    const prevDeferredLoanScheme = await this.loanSchemeMapper.get(loanSchemeId)
+    if (prevDeferredLoanScheme === undefined) {
+      throw new NotFoundIndexerError('index', 'LoanScheme', loanSchemeId)
+    }
+    return prevDeferredLoanScheme
   }
 }
