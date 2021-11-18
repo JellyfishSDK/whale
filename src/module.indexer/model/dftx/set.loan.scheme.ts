@@ -105,7 +105,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
       const prevActiveLoanScheme = list.find(each => new BigNumber(height).gte(each.activateAfterBlock))
       if (prevActiveLoanScheme !== undefined) return prevActiveLoanScheme
 
-      return await findInNextPage(list[0].block.height)
+      return await findInNextPage(list[list.length - 1].block.height)
     }
     return await findInNextPage(height)
   }
