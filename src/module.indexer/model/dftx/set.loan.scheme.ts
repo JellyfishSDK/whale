@@ -69,6 +69,9 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
     for (const { dftx: { data } } of txns) {
       if (this.isActive(data, block.height)) {
         const previous = await this.getPrevious(data.identifier, block.height)
+        if (previous === undefined) {
+          throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
+        }
         await this.loanSchemeMapper.put(previous)
       } else {
         await this.deferredLoanSchemeMapper.delete(data.identifier)
@@ -91,18 +94,19 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
   /**
    * Get previous active loan scheme
    */
-  private async getPrevious (id: string, height: number): Promise<LoanSchemeHistory> {
-    const histories = await this.loanSchemeHistoryMapper.query(id, 50)
-    if (histories.length === 0) {
-      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', id)
+  private async getPrevious (id: string, height: number): Promise<LoanSchemeHistory | undefined> {
+    const findInNextPage = async (height: number): Promise<LoanSchemeHistory | undefined> => {
+      const list = await this.loanSchemeHistoryMapper.query(id, 100, HexEncoder.encodeHeight(height))
+      if (list.length === 0) return undefined
+
+      // get the closest activateAfterBlock against height
+      // ensure its queried by DESC height
+      // looking for the first height >= activateHeight
+      const prevActiveLoanScheme = list.find(each => new BigNumber(height).gte(each.activateAfterBlock))
+      if (prevActiveLoanScheme !== undefined) return prevActiveLoanScheme
+
+      return await findInNextPage(list[0].block.height)
     }
-    // get the closest activateAfterBlock against height
-    // ensure its queried by DESC height
-    // looking for height >= activateHeight
-    const prevActiveLoanScheme = histories.find(h => new BigNumber(height).gte(h.activateAfterBlock))
-    if (prevActiveLoanScheme === undefined) {
-      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', id)
-    }
-    return prevActiveLoanScheme
+    return await findInNextPage(height)
   }
 }
