@@ -3,13 +3,20 @@ import { Injectable } from '@nestjs/common'
 import { Database, SortOrder } from '@src/module.database/database'
 
 const LoanTokenHistoryMapping: ModelMapping<LoanTokenHistory> = {
-  type: 'loan_token',
+  type: 'loan_token_history',
   index: {
-    sort: {
-      name: 'loan_token_token_height',
+    height_token_id: {
+      name: 'loan_token_history_loan_height_token_id',
       partition: {
         type: 'string',
-        key: (lt: LoanTokenHistory) => lt.tokenId
+        key: (lt: LoanTokenHistory) => lt.id
+      }
+    },
+    partitioned_by_loan_token: {
+      name: 'loan_token_history_loan_token_id_height',
+      partition: {
+        type: 'string',
+        key: (lt: LoanTokenHistory) => lt.loanTokenId
       },
       sort: {
         type: 'number',
@@ -24,8 +31,17 @@ export class LoanTokenHistoryMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async query (limit: number, lt?: string): Promise<LoanTokenHistory[]> {
-    return await this.database.query(LoanTokenHistoryMapping.index.sort, {
+  async query (loanTokenId: string, limit: number, lt?: string): Promise<LoanTokenHistory[]> {
+    return await this.database.query(LoanTokenHistoryMapping.index.partitioned_by_loan_token, {
+      partitionKey: loanTokenId,
+      limit: limit,
+      order: SortOrder.DESC,
+      lt: lt
+    })
+  }
+
+  async queryAll (limit: number, lt?: string): Promise<LoanTokenHistory[]> {
+    return await this.database.query(LoanTokenHistoryMapping.index.height_token_id, {
       limit: limit,
       order: SortOrder.DESC,
       lt: lt
@@ -46,13 +62,14 @@ export class LoanTokenHistoryMapper {
 }
 
 export interface LoanTokenHistory extends Model {
-  id: string // ---------| tokenSymbol-height
+  id: string // ---------------| <height> - <32 bytes id in hex>, height first, ensure chronologically sorted
 
   symbol: string
+  name: string
   interest: string
-
-  tokenCurrency: string // ---| tokenCurrencyMapper partition key
-  tokenId: string // ----------| tokenId (hex encoded), loanTokenMapper and tokenMapper partition key
+  mintable: boolean
+  tokenCurrency: string // ----| tokenCurrencyMapper partition key (aka fixedIntervalPriceId)
+  loanTokenId: string // ------| <32 bytes id in hex>
 
   block: {
     hash: string

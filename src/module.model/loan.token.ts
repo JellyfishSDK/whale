@@ -28,6 +28,15 @@ export class LoanTokenMapper {
     })
   }
 
+  async getByTokenId (tokenId: string): Promise<LoanToken | undefined> {
+    const oneAndOnly = await this.database.query(LoanTokenMapping.index.sort, {
+      partitionKey: tokenId,
+      limit: 1,
+      order: SortOrder.DESC
+    })
+    return oneAndOnly[0]
+  }
+
   async get (id: string): Promise<LoanToken | undefined> {
     return await this.database.get(LoanTokenMapping, id)
   }
@@ -42,11 +51,12 @@ export class LoanTokenMapper {
 }
 
 export interface LoanToken extends Model {
-  symbol: string // ---------| tokenSymbol
-  name: string
+  id: string // -----------| 32 bytes id in hex
   interest: string
 
+  // foreign table partition, to retrieve price feed (CRUD) history -> price feed
   tokenCurrency: string // ---| tokenCurrencyMapper partition key
+  // FK, to retrieve latest token info
   tokenId: string // ----------| loanTokenMapper partition key, tokenMapper id
 
   block: {

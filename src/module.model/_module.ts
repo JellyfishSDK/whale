@@ -22,7 +22,9 @@ import { MasternodeStatsMapper } from '@src/module.model/masternode.stats'
 import { TokenMapper } from '@src/module.model/token'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
-import { OraclePriceActiveMapper } from './oracle.price.active'
+import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
+import { LoanTokenMapper } from '@src/module.model/loan.token'
+import { LoanTokenHistoryMapper } from '@src/module.model/loan.token.history'
 
 @Global()
 @Module({
@@ -48,7 +50,9 @@ import { OraclePriceActiveMapper } from './oracle.price.active'
     MasternodeStatsMapper,
     TokenMapper,
     PoolPairMapper,
-    PoolPairTokenMapper
+    PoolPairTokenMapper,
+    LoanTokenMapper,
+    LoanTokenHistoryMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -72,7 +76,9 @@ import { OraclePriceActiveMapper } from './oracle.price.active'
     MasternodeStatsMapper,
     TokenMapper,
     PoolPairMapper,
-    PoolPairTokenMapper
+    PoolPairTokenMapper,
+    LoanTokenMapper,
+    LoanTokenHistoryMapper
   ]
 })
 export class ModelModule {

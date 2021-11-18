@@ -25,6 +25,7 @@ export const HexEncoder = {
     }
     return height.toString(16).padStart(8, '0')
   },
+
   /**
    * 4 byte hex, Max Number = 4294967295
    * @param {number} n from vout to hex, 4 bytes max consensus rule
