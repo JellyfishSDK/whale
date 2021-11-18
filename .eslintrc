@@ -6,6 +6,7 @@
     "standard-with-typescript"
   ],
   "ignorePatterns": [
+    "*.d.ts",
     "dist",
     "*.json"
   ],
