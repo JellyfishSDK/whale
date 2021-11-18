@@ -125,6 +125,7 @@ describe('setLoanScheme', () => {
     // loanSchemeHistoryMapper
     {
       const histories = await loanSchemeHistoryMapper.query('s150', 30)
+      console.log('histories: ', histories)
       expect(histories.length).toStrictEqual(1)
       expect(histories).toStrictEqual([
         {

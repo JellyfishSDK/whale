@@ -22,7 +22,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
   }
 
   async index (block: RawBlock): Promise<void> {
-    const list = await this.deferredLoanSchemeMapper.query(100)
+    const list = await this.deferredLoanSchemeMapper.query(Number.MAX_SAFE_INTEGER)
     for (const each of list) {
       if (new BigNumber(block.height).gte(each.activateAfterBlock)) {
         await this.loanSchemeMapper.put(each)
@@ -44,7 +44,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
    * Get previous active loan scheme
    */
   private async getPrevLoanScheme (id: string, height: number): Promise<LoanSchemeHistory> {
-    const histories = await this.loanSchemeHistoryMapper.query(id, 1)
+    const histories = await this.loanSchemeHistoryMapper.query(id, 50)
     if (histories.length === 0) {
       throw new NotFoundIndexerError('index', 'LoanSchemeHistory', id)
     }
