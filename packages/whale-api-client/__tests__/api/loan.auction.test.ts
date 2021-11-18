@@ -11,8 +11,6 @@ const testing = Testing.create(container)
 
 let vaultId1
 
-/* eslint-disable no-lone-blocks */
-
 beforeAll(async () => {
   await container.start()
   await container.waitForWalletCoinbaseMaturity()
