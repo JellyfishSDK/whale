@@ -46,7 +46,22 @@ async function updateLoanScheme (nameAsId: string, minColRatio: number, interest
 
 it('should deferred model serves pending state', async () => {
   await createLoanScheme('s150', 150, new BigNumber(3))
-  await updateLoanScheme('s150', 155, new BigNumber(3.05), 110)
+  await updateLoanScheme('s150', 155, new BigNumber(3.05), 120)
+
+  await createLoanScheme('s160', 160, new BigNumber(4))
+  await updateLoanScheme('s160', 165, new BigNumber(4.05), 120)
+
+  await createLoanScheme('s170', 170, new BigNumber(5))
+  await updateLoanScheme('s170', 175, new BigNumber(5.05), 120)
+
+  await createLoanScheme('s180', 180, new BigNumber(6))
+  await updateLoanScheme('s180', 185, new BigNumber(6.05), 120)
+
+  await createLoanScheme('s190', 190, new BigNumber(7))
+  await updateLoanScheme('s190', 195, new BigNumber(7.05), 120)
+
+  await createLoanScheme('s200', 200, new BigNumber(8))
+  await updateLoanScheme('s200', 205, new BigNumber(8.05), 120)
 
   {
     const height = await testing.container.call('getblockcount')
@@ -57,6 +72,7 @@ it('should deferred model serves pending state', async () => {
   const loanSchemeMapper = app.get(LoanSchemeMapper)
   const deferredMapper = app.get(DeferredLoanSchemeMapper)
 
+  // pick s150 check as example
   const s150Before = await loanSchemeMapper.get('s150')
   expect(s150Before).toStrictEqual({
     id: 's150',
@@ -71,29 +87,100 @@ it('should deferred model serves pending state', async () => {
     }
   })
 
-  const s150PendingBefore = await deferredMapper.get('s150')
-  expect(s150PendingBefore).toStrictEqual({
-    id: 's150',
-    ratio: 155,
-    rate: '3.05',
-    activateAfterBlock: '110',
-    block: {
-      hash: expect.any(String),
-      height: expect.any(Number),
-      medianTime: expect.any(Number),
-      time: expect.any(Number)
+  // test pagination
+  const first = await deferredMapper.query(120, 2)
+  expect(first).toStrictEqual([
+    {
+      id: 's200',
+      ratio: 205,
+      rate: '8.05',
+      activateAfterBlock: '120',
+      block: {
+        hash: expect.any(String),
+        height: 113,
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      }
+    },
+    {
+      id: 's190',
+      ratio: 195,
+      rate: '7.05',
+      activateAfterBlock: '120',
+      block: {
+        hash: expect.any(String),
+        height: 111,
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      }
     }
-  })
+  ])
 
-  await testing.container.waitForBlockHeight(110)
-  await waitForIndexedHeight(app, 110)
+  const next = await deferredMapper.query(120, 2, first[first.length - 1].block.height)
+  expect(next).toStrictEqual([
+    {
+      id: 's180',
+      ratio: 185,
+      rate: '6.05',
+      activateAfterBlock: '120',
+      block: {
+        hash: expect.any(String),
+        height: 109,
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      }
+    },
+    {
+      id: 's170',
+      ratio: 175,
+      rate: '5.05',
+      activateAfterBlock: '120',
+      block: {
+        hash: expect.any(String),
+        height: 107,
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      }
+    }
+  ])
+
+  const last = await deferredMapper.query(120, 2, next[next.length - 1].block.height)
+  expect(last).toStrictEqual([
+    {
+      id: 's160',
+      ratio: 165,
+      rate: '4.05',
+      activateAfterBlock: '120',
+      block: {
+        hash: expect.any(String),
+        height: 105,
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      }
+    },
+    {
+      id: 's150',
+      ratio: 155,
+      rate: '3.05',
+      activateAfterBlock: '120',
+      block: {
+        hash: expect.any(String),
+        height: 103,
+        medianTime: expect.any(Number),
+        time: expect.any(Number)
+      }
+    }
+  ])
+
+  await testing.container.waitForBlockHeight(120)
+  await waitForIndexedHeight(app, 120)
 
   const s150After = await loanSchemeMapper.get('s150')
   expect(s150After).toStrictEqual({
     id: 's150',
     ratio: 155,
     rate: '3.05',
-    activateAfterBlock: '110',
+    activateAfterBlock: '120',
     block: {
       hash: expect.any(String),
       height: expect.any(Number),
@@ -102,6 +189,7 @@ it('should deferred model serves pending state', async () => {
     }
   })
 
-  const s150PendingAfter = await deferredMapper.get('s150')
-  expect(s150PendingAfter).toStrictEqual(undefined) // cleared
+  // cleared
+  const deferredList = await deferredMapper.query(120, 100)
+  expect(deferredList).toStrictEqual([])
 })

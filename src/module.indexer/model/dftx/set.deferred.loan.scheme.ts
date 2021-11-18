@@ -23,13 +23,17 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
   }
 
   async index (block: RawBlock): Promise<void> {
-    const list = await this.deferredLoanSchemeMapper.query(Number.MAX_SAFE_INTEGER)
-    for (const each of list) {
-      if (new BigNumber(block.height).gte(each.activateAfterBlock)) {
+    const loop = async (activeAfterBlock: number, next?: number): Promise<void> => {
+      const list = await this.deferredLoanSchemeMapper.query(activeAfterBlock, 100)
+      if (list.length === 0) return
+      for (const each of list) {
         await this.loanSchemeMapper.put(each)
         await this.deferredLoanSchemeMapper.delete(each.id)
       }
+      return await loop(activeAfterBlock, list[list.length - 1].block.height)
     }
+
+    return await loop(block.height)
   }
 
   async invalidate (block: RawBlock, txns: Array<DfTxTransaction<LoanScheme>>): Promise<void> {

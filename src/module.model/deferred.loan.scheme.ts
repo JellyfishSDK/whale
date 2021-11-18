@@ -6,11 +6,15 @@ import BigNumber from 'bignumber.js'
 const DeferredLoanSchemeMapping: ModelMapping<DeferredLoanScheme> = {
   type: 'deferred_loan_scheme',
   index: {
-    deferred_loan_scheme_id: {
-      name: 'deferred_loan_scheme_id',
+    key_sort: {
+      name: 'deferred_loan_scheme_key_sort',
       partition: {
         type: 'string',
-        key: (d: DeferredLoanScheme) => d.id
+        key: (d: DeferredLoanScheme) => d.activateAfterBlock.toString()
+      },
+      sort: {
+        type: 'number',
+        key: (d: DeferredLoanScheme) => d.block.height
       }
     }
   }
@@ -21,8 +25,9 @@ export class DeferredLoanSchemeMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async query (limit: number, lt?: string): Promise<DeferredLoanScheme[]> {
-    return await this.database.query(DeferredLoanSchemeMapping.index.deferred_loan_scheme_id, {
+  async query (activateAfterBlock: number, limit: number, lt?: number): Promise<DeferredLoanScheme[]> {
+    return await this.database.query(DeferredLoanSchemeMapping.index.key_sort, {
+      partitionKey: activateAfterBlock,
       limit: limit,
       order: SortOrder.DESC,
       lt: lt
@@ -43,14 +48,14 @@ export class DeferredLoanSchemeMapper {
 }
 
 export interface DeferredLoanScheme extends Model {
-  id: string
+  id: string // unique id
   ratio: number
   rate: BigNumber
   activateAfterBlock: BigNumber
 
   block: {
     hash: string
-    height: number
+    height: number // sort
     time: number
     medianTime: number
   }
