@@ -1,5 +1,6 @@
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import {
+  ListAuctionHistoryDetail, ListAuctionHistoryPagination,
   VaultActive,
   VaultLiquidation,
   VaultLiquidationBatch,
@@ -8,6 +9,7 @@ import {
 } from '@defichain/jellyfish-api-core/dist/category/loan'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import {
+  LoanAuctionHistory,
   LoanScheme,
   LoanVaultActive,
   LoanVaultLiquidated,
@@ -65,6 +67,31 @@ export class LoanVaultService {
         throw new BadRequestException(err)
       }
     }
+  }
+
+  async listAuctionHistory (query: PaginationQuery): Promise<ApiPagedResponse<LoanAuctionHistory>> {
+    const next = query.next !== undefined ? String(query.next) : undefined
+    const size = query.size > 30 ? 30 : query.size
+    let pagination: ListAuctionHistoryPagination
+
+    if (next !== undefined) {
+      const [vaultId, maxBlockHeight] = next.split('|')
+      pagination = {
+        vaultId,
+        maxBlockHeight: maxBlockHeight !== undefined ? parseInt(maxBlockHeight) : 0,
+        limit: size
+      }
+    } else {
+      pagination = { limit: size }
+    }
+
+    const list = (await this.client.loan.listAuctionHistory('all', pagination))
+      .map(async value => this.mapLoanAuctionHistory(value))
+    const items = await Promise.all(list)
+
+    return ApiPagedResponse.of(items, size, item => {
+      return `${item.vaultId}|${item.blockHeight}`
+    })
   }
 
   private async mapLoanVault (details: VaultActive | VaultLiquidation): Promise<LoanVaultActive | LoanVaultLiquidated> {
@@ -151,6 +178,19 @@ export class LoanVaultService {
       id: scheme.id,
       minColRatio: scheme.mincolratio.toFixed(),
       interestRate: scheme.interestrate.toFixed()
+    }
+  }
+
+  private mapLoanAuctionHistory (detail: ListAuctionHistoryDetail): LoanAuctionHistory {
+    return {
+      winner: detail.winner,
+      blockHeight: detail.blockHeight,
+      blockHash: detail.blockHash,
+      blockTime: detail.blockTime,
+      vaultId: detail.vaultId,
+      batchIndex: detail.batchIndex,
+      auctionBid: detail.auctionBid,
+      auctionWon: detail.auctionWon
     }
   }
 }

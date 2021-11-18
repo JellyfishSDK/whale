@@ -1,16 +1,16 @@
-import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp, stopTestingAppGroup } from '@src/e2e.module'
-import { GenesisKeys, MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { LoanController } from '@src/module.api/loan.controller'
-import { TestingGroup } from '@defichain/jellyfish-testing'
+import { StubWhaleApiClient } from '../stub.client'
+import { StubService } from '../stub.service'
 import BigNumber from 'bignumber.js'
-
-let app: NestFastifyApplication
-let controller: LoanController
+import { TestingGroup } from '@defichain/jellyfish-testing'
+import { GenesisKeys, MasterNodeRegTestContainer } from '@defichain/testcontainers'
 
 const tGroup = TestingGroup.create(2, i => new MasterNodeRegTestContainer(GenesisKeys[i]))
 const alice = tGroup.get(0)
 const bob = tGroup.get(1)
+
+const service = new StubService(alice.container)
+const client = new StubWhaleApiClient(service)
+
 let aliceColAddr: string
 let bobColAddr: string
 let vaultId1: string // Alice 1st vault
@@ -22,9 +22,7 @@ beforeAll(async () => {
   await tGroup.start()
   await alice.container.waitForWalletCoinbaseMaturity()
   await alice.container.waitForWalletBalanceGTE(100)
-
-  app = await createTestingApp(alice.container)
-  controller = app.get(LoanController)
+  await service.start()
 
   aliceColAddr = await alice.generateAddress()
   bobColAddr = await bob.generateAddress()
@@ -361,14 +359,18 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await stopTestingAppGroup(tGroup, app)
+  try {
+    await service.stop()
+  } finally {
+    await tGroup.stop()
+  }
 })
 
-describe('loan', () => {
+describe('list', () => {
   it('should listAuctionHistory', async () => {
-    const result = await controller.listAuctionHistory({ size: 100 })
-    expect(result.data.length).toStrictEqual(4)
-    result.data.forEach((e: any) => {
+    const result = await client.loan.listAuctionHistory()
+    expect(result.length).toStrictEqual(4)
+    result.forEach((e: any) => {
       expect(e).toStrictEqual({
         auctionBid: expect.any(String),
         auctionWon: expect.any(Array),
@@ -382,24 +384,35 @@ describe('loan', () => {
     }
     )
   })
-})
 
-it('should listAuctionHistory with pagination', async () => {
-  const first = await controller.listAuctionHistory({ size: 2 })
-  expect(first.data.length).toStrictEqual(2)
-  expect(first.page?.next).toStrictEqual(`${first.data[1].vaultId}|${first.data[1].blockHeight}`)
+  it('should listAuctionHistory with pagination', async () => {
+    const auctionList = await client.loan.listAuctionHistory()
+    console.log(auctionList)
+    const first = await client.loan.listAuctionHistory(2)
+    console.log(first)
 
-  const next = await controller.listAuctionHistory({
-    size: 2,
-    next: first.page?.next
+    expect(first.length).toStrictEqual(2)
+    expect(first.hasNext).toStrictEqual(true)
+    expect(first.nextToken).toStrictEqual(`${first[1].vaultId}|${first[1].blockHeight}`)
+
+    expect(first[0].vaultId).toStrictEqual(auctionList[0].vaultId)
+    expect(first[1].vaultId).toStrictEqual(auctionList[1].vaultId)
+
+    const next = await client.paginate(first)
+
+    expect(next.length).toStrictEqual(2)
+    expect(next.hasNext).toStrictEqual(true)
+    expect(next.nextToken).toStrictEqual(`${next[1].vaultId}|${next[1].blockHeight}`)
+
+    expect(next[0].vaultId).toStrictEqual(auctionList[2].vaultId)
+    expect(next[1].vaultId).toStrictEqual(auctionList[3].vaultId)
+
+    console.log(next)
+
+    const last = await client.paginate(next)
+
+    expect(last.length).toStrictEqual(0)
+    expect(last.hasNext).toStrictEqual(false)
+    expect(last.nextToken).toBeUndefined()
   })
-  expect(next.data.length).toStrictEqual(2)
-  expect(next.page?.next).toStrictEqual(`${next.data[1].vaultId}|${next.data[1].blockHeight}`)
-
-  // const last = await controller.listAuctionHistory({
-  //   size: 2,
-  //   next: next.page?.next
-  // })
-  // expect(last.data.length).toStrictEqual(0)
-  // expect(last.page).toBeUndefined()
 })

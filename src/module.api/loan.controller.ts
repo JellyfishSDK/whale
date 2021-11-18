@@ -17,7 +17,7 @@ import {
   LoanTokenResult
 } from '@defichain/jellyfish-api-core/dist/category/loan'
 import {
-  CollateralToken,
+  CollateralToken, LoanAuctionHistory,
   LoanScheme,
   LoanToken,
   LoanVaultActive,
@@ -172,6 +172,17 @@ export class LoanController {
   @Get('/vaults/:id')
   async getVault (@Param('id') id: string): Promise<LoanVaultActive | LoanVaultLiquidated> {
     return await this.vaultService.get(id)
+  }
+
+  /**
+   * Paginate loan auction history.
+   *
+   * @param {PaginationQuery} query
+   * @return {Promise<ApiPagedResponse<LoanAuctionHistory>>}
+   */
+  @Get('/auctionhistory')
+  async listAuctionHistory (@Query() query: PaginationQuery): Promise<ApiPagedResponse<LoanAuctionHistory>> {
+    return await this.vaultService.listAuctionHistory(query)
   }
 
   async mapCollateralToken (detail: CollateralTokenDetail): Promise<CollateralToken> {

@@ -90,6 +90,17 @@ export class Loan {
   async getVault (id: string): Promise<LoanVaultActive | LoanVaultLiquidated> {
     return await this.client.requestData('GET', `loans/vaults/${id}`)
   }
+
+  /**
+   * Paginate query auction histories.
+   *
+   * @param {number} size of vaults to query
+   * @param {string} next set of vaults
+   * @return {Promise<ApiPagedResponse<LoanAuctionHistory>>}
+   */
+  async listAuctionHistory (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanAuctionHistory>> {
+    return await this.client.requestList('GET', 'loans/auctionhistory', size, next)
+  }
 }
 
 export interface LoanScheme {
@@ -166,4 +177,15 @@ export interface LoanVaultTokenAmount {
   symbolKey: string
   name: string
   activePrice?: ActivePrice
+}
+
+export interface LoanAuctionHistory {
+  winner: string
+  blockHeight: number
+  blockHash: string
+  blockTime: number
+  vaultId: string
+  batchIndex: number
+  auctionBid: string
+  auctionWon: string[]
 }
