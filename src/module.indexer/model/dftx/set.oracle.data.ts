@@ -22,8 +22,8 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
     super()
   }
 
-  async index (block: RawBlock, txns: Array<DfTxTransaction<SetOracleData>>): Promise<void> {
-    const feeds = mapPriceFeeds(block, txns)
+  async indexTransaction (block: RawBlock, transaction: DfTxTransaction<SetOracleData>): Promise<void> {
+    const feeds = mapPriceFeeds(block, [transaction])
     const pairs = new Set<[string, string]>()
 
     for (const feed of feeds) {
@@ -95,8 +95,8 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
     }
   }
 
-  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<SetOracleData>>): Promise<void> {
-    const feeds = mapPriceFeeds(block, txns)
+  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetOracleData>): Promise<void> {
+    const feeds = mapPriceFeeds(block, [transaction])
     const pairs = new Set<[string, string]>()
 
     for (const feed of feeds) {
@@ -108,6 +108,12 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
       await this.aggregatedMapper.delete(`${token}-${currency}-${block.height}`)
       // price ticker won't be deleted
     }
+  }
+
+  async invalidateBlock (_: RawBlock): Promise<void> {
+  }
+
+  async indexBlock (_: RawBlock): Promise<void> {
   }
 }
 
