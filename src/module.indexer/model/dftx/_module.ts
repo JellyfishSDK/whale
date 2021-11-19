@@ -9,10 +9,11 @@ import { ResignMasternodeIndexer } from '@src/module.indexer/model/dftx/resign.m
 import { CreateTokenIndexer } from '@src/module.indexer/model/dftx/create.token'
 import { CreatePoolPairIndexer } from '@src/module.indexer/model/dftx/create.poolpair'
 import { UpdatePoolPairIndexer } from '@src/module.indexer/model/dftx/update.poolpair'
-import { SetLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.loan.scheme'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { ConfigService } from '@nestjs/config'
 import { SetLoanTokenIndexer } from '@src/module.indexer/model/dftx/set.loan.token'
+import { ActivePriceIndexer } from '@src/module.indexer/model/dftx/active.price'
+import { SetLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.loan.scheme'
 import { SetDeferredLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.deferred.loan.scheme'
 
 const indexers = [
@@ -27,6 +28,7 @@ const indexers = [
   CreatePoolPairIndexer,
   UpdatePoolPairIndexer,
   SetLoanTokenIndexer,
+  ActivePriceIndexer,
   SetLoanSchemeIndexer,
   SetDeferredLoanSchemeIndexer
 ]

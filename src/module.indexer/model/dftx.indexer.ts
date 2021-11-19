@@ -11,10 +11,11 @@ import { CreateMasternodeIndexer } from '@src/module.indexer/model/dftx/create.m
 import { ResignMasternodeIndexer } from '@src/module.indexer/model/dftx/resign.masternode'
 import { Injectable, Logger } from '@nestjs/common'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
-import { CreatePoolPairIndexer } from '@src/module.indexer/model/dftx/create.poolpair'
-import { CreateTokenIndexer } from '@src/module.indexer/model/dftx/create.token'
-import { UpdatePoolPairIndexer } from '@src/module.indexer/model/dftx/update.poolpair'
-import { SetLoanTokenIndexer } from '@src/module.indexer/model/dftx/set.loan.token'
+import { CreatePoolPairIndexer } from './dftx/create.poolpair'
+import { CreateTokenIndexer } from './dftx/create.token'
+import { UpdatePoolPairIndexer } from './dftx/update.poolpair'
+import { SetLoanTokenIndexer } from './dftx/set.loan.token'
+import { ActivePriceIndexer } from './dftx/active.price'
 import { SetLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.loan.scheme'
 import { SetDeferredLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.deferred.loan.scheme'
 
@@ -35,6 +36,7 @@ export class MainDfTxIndexer extends Indexer {
     private readonly createPoolPair: CreatePoolPairIndexer,
     private readonly updatePoolPair: UpdatePoolPairIndexer,
     private readonly setLoanToken: SetLoanTokenIndexer,
+    private readonly activePriceIndexer: ActivePriceIndexer,
     private readonly setLoanScheme: SetLoanSchemeIndexer,
     private readonly setDeferredLoanScheme: SetDeferredLoanSchemeIndexer
   ) {
@@ -51,6 +53,7 @@ export class MainDfTxIndexer extends Indexer {
       createPoolPair,
       updatePoolPair,
       setLoanToken,
+      activePriceIndexer,
       setLoanScheme,
       setDeferredLoanScheme
     ]
