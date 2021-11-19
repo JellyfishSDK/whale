@@ -19,7 +19,7 @@ export class RemoveOracleIndexer extends DfTxIndexer<RemoveOracle> {
     super()
   }
 
-  async indexTransaction (block: RawBlock, transaction: DfTxTransaction<RemoveOracle>): Promise<void> {
+  async indexTransaction (_: RawBlock, transaction: DfTxTransaction<RemoveOracle>): Promise<void> {
     const data = transaction.dftx.data
     const previous = await this.getPrevious(data.oracleId)
 
@@ -29,7 +29,7 @@ export class RemoveOracleIndexer extends DfTxIndexer<RemoveOracle> {
     }
   }
 
-  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<RemoveOracle>): Promise<void> {
+  async invalidateTransaction (_: RawBlock, transaction: DfTxTransaction<RemoveOracle>): Promise<void> {
     const data = transaction.dftx.data
     const previous = await this.getPrevious(data.oracleId)
 
@@ -64,11 +64,5 @@ export class RemoveOracleIndexer extends DfTxIndexer<RemoveOracle> {
     }
 
     return histories[0]
-  }
-
-  async invalidateBlock (_: RawBlock): Promise<void> {
-  }
-
-  async indexBlock (_: RawBlock): Promise<void> {
   }
 }

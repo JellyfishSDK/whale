@@ -68,10 +68,7 @@ export class ResignMasternodeIndexer extends DfTxIndexer<ResignMasternode> {
     }
   }
 
-  async invalidateBlock (block: RawBlock): Promise<void> {
+  async invalidateBlockStart (block: RawBlock): Promise<void> {
     await this.masternodeStatsMapper.delete(block.height)
-  }
-
-  async indexBlock (_: RawBlock): Promise<void> {
   }
 }

@@ -33,7 +33,7 @@ export class ActivePriceIndexer extends DfTxIndexer<SetLoanToken> {
     await this.performActivePriceTick(block, `${data.currencyPair.token}-${data.currencyPair.currency}`)
   }
 
-  async indexBlock (block: RawBlock): Promise<void> {
+  async indexBlockEnd (block: RawBlock): Promise<void> {
     if (block.height % this.BLOCK_INTERVAL === 0) {
       await this.performActivePriceTickForAll(block)
       // return early since we updated all the price ticks already
@@ -128,7 +128,7 @@ export class ActivePriceIndexer extends DfTxIndexer<SetLoanToken> {
     await this.activePriceMapper.delete(`${tickerId}-${block.height}`)
   }
 
-  async invalidateBlock (block: RawBlock): Promise<void> {
+  async invalidateBlockEnd (block: RawBlock): Promise<void> {
     if (block.height % this.BLOCK_INTERVAL !== 0) {
       return
     }

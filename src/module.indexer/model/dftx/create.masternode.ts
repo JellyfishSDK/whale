@@ -89,11 +89,8 @@ export class CreateMasternodeIndexer extends DfTxIndexer<CreateMasternode> {
     await this.masternodeMapper.delete(masternodeId)
   }
 
-  async invalidateBlock (block: RawBlock): Promise<void> {
+  async invalidateBlockStart (block: RawBlock): Promise<void> {
     await this.masternodeStatsMapper.delete(block.height)
-  }
-
-  async indexBlock (_: RawBlock): Promise<void> {
   }
 }
 

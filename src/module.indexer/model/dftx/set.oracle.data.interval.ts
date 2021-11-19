@@ -155,10 +155,4 @@ export class SetOracleDataIntervalIndexer extends DfTxIndexer<SetOracleData> {
       })
     }
   }
-
-  async invalidateBlock (_: RawBlock): Promise<void> {
-  }
-
-  async indexBlock (_: RawBlock): Promise<void> {
-  }
 }

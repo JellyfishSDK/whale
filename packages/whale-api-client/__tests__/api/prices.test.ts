@@ -678,7 +678,7 @@ describe('active price', () => {
     }
 
     {
-      await container.generate(12)
+      await container.generate(6)
       const height = await container.getBlockCount()
       await container.generate(1)
       await service.waitForIndexedHeight(height)

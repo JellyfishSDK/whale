@@ -69,10 +69,4 @@ export class AppointOracleIndexer extends DfTxIndexer<AppointOracle> {
       await this.oracleTokenCurrencyMapper.delete(`${token}-${currency}-${oracleId}`)
     }
   }
-
-  async indexBlock (_: RawBlock): Promise<void> {
-  }
-
-  async invalidateBlock (_: RawBlock): Promise<void> {
-  }
 }

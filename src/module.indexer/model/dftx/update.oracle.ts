@@ -105,10 +105,4 @@ export class UpdateOracleIndexer extends DfTxIndexer<UpdateOracle> {
 
     return histories[0]
   }
-
-  async invalidateBlock (_: RawBlock): Promise<void> {
-  }
-
-  async indexBlock (_: RawBlock): Promise<void> {
-  }
 }

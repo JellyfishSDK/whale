@@ -106,10 +106,4 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
     await this.poolPairTokenMapper.delete(`${data.tokenA}-${data.tokenB}-${tokenId - 1}`)
     await this.tokenMapper.delete(`${tokenId - 1}`)
   }
-
-  async invalidateBlock (_: RawBlock): Promise<void> {
-  }
-
-  async indexBlock (_: RawBlock): Promise<void> {
-  }
 }

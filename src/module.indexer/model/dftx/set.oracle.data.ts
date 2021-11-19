@@ -109,12 +109,6 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
       // price ticker won't be deleted
     }
   }
-
-  async invalidateBlock (_: RawBlock): Promise<void> {
-  }
-
-  async indexBlock (_: RawBlock): Promise<void> {
-  }
 }
 
 export function mapPriceFeeds (block: RawBlock, txns: Array<DfTxTransaction<SetOracleData>>): OraclePriceFeed[] {

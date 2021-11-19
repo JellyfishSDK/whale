@@ -39,10 +39,4 @@ export class CreateTokenIndexer extends DfTxIndexer<TokenCreate> {
     const tokenId = await this.tokenMapper.getNextTokenID(data.isDAT)
     await this.tokenMapper.delete(`${tokenId - 1}`)
   }
-
-  async invalidateBlock (_: RawBlock): Promise<void> {
-  }
-
-  async indexBlock (_: RawBlock): Promise<void> {
-  }
 }

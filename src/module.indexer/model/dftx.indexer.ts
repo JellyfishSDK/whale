@@ -55,7 +55,7 @@ export class MainDfTxIndexer extends Indexer {
 
   async index (block: RawBlock): Promise<void> {
     for (const indexer of this.indexers) {
-      await indexer.indexBlock(block)
+      await indexer.indexBlockStart(block)
     }
 
     const transactions = this.getDfTxTransactions(block)
@@ -65,9 +65,18 @@ export class MainDfTxIndexer extends Indexer {
         await indexer.indexTransaction(block, transaction)
       }
     }
+
+    for (const indexer of this.indexers) {
+      await indexer.indexBlockEnd(block)
+    }
   }
 
   async invalidate (block: RawBlock): Promise<void> {
+    // When invalidating reverse the order of block indexing
+    for (const indexer of this.indexers) {
+      await indexer.invalidateBlockEnd(block)
+    }
+
     // Invalidate backwards
     const transactions = this.getDfTxTransactions(block).reverse()
     for (const transaction of transactions) {
@@ -77,9 +86,8 @@ export class MainDfTxIndexer extends Indexer {
       }
     }
 
-    // When invalidating call the block callback at the end, rather than the start
     for (const indexer of this.indexers) {
-      await indexer.invalidateBlock(block)
+      await indexer.invalidateBlockStart(block)
     }
   }
 
