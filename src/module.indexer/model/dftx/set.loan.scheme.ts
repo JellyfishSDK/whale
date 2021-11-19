@@ -97,13 +97,17 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
   private async getPrevious (id: string, height: number): Promise<LoanSchemeHistory | undefined> {
     const findInNextPage = async (height: number): Promise<LoanSchemeHistory | undefined> => {
       const list = await this.loanSchemeHistoryMapper.query(id, 100, HexEncoder.encodeHeight(height))
-      if (list.length === 0) return undefined
+      if (list.length === 0) {
+        return undefined
+      }
 
       // get the closest activateAfterBlock against height
       // ensure its queried by DESC height
       // looking for the first height >= activateHeight
       const prevActiveLoanScheme = list.find(each => new BigNumber(height).gte(each.activateAfterBlock))
-      if (prevActiveLoanScheme !== undefined) return prevActiveLoanScheme
+      if (prevActiveLoanScheme !== undefined) {
+        return prevActiveLoanScheme
+      }
 
       return await findInNextPage(list[list.length - 1].block.height)
     }

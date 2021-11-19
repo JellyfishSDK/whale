@@ -25,7 +25,9 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
   async index (block: RawBlock): Promise<void> {
     const loop = async (activeAfterBlock: number, next?: number): Promise<void> => {
       const list = await this.deferredLoanSchemeMapper.query(activeAfterBlock, 100)
-      if (list.length === 0) return
+      if (list.length === 0) {
+        return
+      }
       for (const each of list) {
         await this.loanSchemeMapper.put(each)
         await this.deferredLoanSchemeMapper.delete(each.id)
@@ -54,10 +56,14 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
   private async getPrevLoanScheme (id: string, height: number): Promise<LoanSchemeHistory | undefined> {
     const findInNextPage = async (height: number): Promise<LoanSchemeHistory | undefined> => {
       const list = await this.loanSchemeHistoryMapper.query(id, 100, HexEncoder.encodeHeight(height))
-      if (list.length === 0) return undefined
+      if (list.length === 0) {
+        return undefined
+      }
 
       const prevActiveLoanScheme = list.find(each => new BigNumber(height).gte(each.activateAfterBlock))
-      if (prevActiveLoanScheme !== undefined) return prevActiveLoanScheme
+      if (prevActiveLoanScheme !== undefined) {
+        return prevActiveLoanScheme
+      }
 
       return await findInNextPage(list[list.length - 1].block.height)
     }
