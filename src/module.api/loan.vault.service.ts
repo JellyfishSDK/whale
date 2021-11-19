@@ -1,6 +1,5 @@
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import {
-  AuctionDetail,
   AuctionPagination,
   VaultActive,
   VaultLiquidation,
@@ -127,8 +126,8 @@ export class LoanVaultService {
     }
   }
 
-  private async mapLoanAuction (details: AuctionDetail): Promise<LoanVaultLiquidated> {
-    const data = details as VaultLiquidation
+  private async mapLoanAuction (details: VaultLiquidation): Promise<LoanVaultLiquidated> {
+    const data = details
     return {
       vaultId: data.vaultId,
       loanScheme: await this.mapLoanScheme(data.loanSchemeId),
