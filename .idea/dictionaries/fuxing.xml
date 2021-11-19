@@ -133,6 +133,7 @@
       <w>prevouts</w>
       <w>printtoconsole</w>
       <w>priv</w>
+      <w>protocolversion</w>
       <w>pubkey</w>
       <w>pubkeyhash</w>
       <w>pubkeys</w>
