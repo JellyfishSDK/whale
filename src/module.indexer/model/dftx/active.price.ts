@@ -33,6 +33,13 @@ export class ActivePriceIndexer extends DfTxIndexer<SetLoanToken> {
     await this.performActivePriceTick(block, `${data.currencyPair.token}-${data.currencyPair.currency}`)
   }
 
+  async indexBlock (block: RawBlock): Promise<void> {
+    if (block.height % this.BLOCK_INTERVAL === 0) {
+      await this.performActivePriceTickForAll(block)
+      // return early since we updated all the price ticks already
+    }
+  }
+
   async performActivePriceTickForAll (block: RawBlock): Promise<void> {
     const tickers: PriceTicker[] = await this.priceTickerMapper.query(Number.MAX_SAFE_INTEGER)
     for (const ticker of tickers) {
@@ -136,13 +143,6 @@ export class ActivePriceIndexer extends DfTxIndexer<SetLoanToken> {
         // already deleted in invalidateTransaction
         this.logger.warn(`Tried to delete ActivePrice entry ${ticker.id}`)
       }
-    }
-  }
-
-  async indexBlock (block: RawBlock): Promise<void> {
-    if (block.height % this.BLOCK_INTERVAL === 0) {
-      await this.performActivePriceTickForAll(block)
-      // return early since we updated all the price ticks already
     }
   }
 }
