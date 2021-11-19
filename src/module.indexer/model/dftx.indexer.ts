@@ -11,6 +11,11 @@ import { CreateMasternodeIndexer } from '@src/module.indexer/model/dftx/create.m
 import { ResignMasternodeIndexer } from '@src/module.indexer/model/dftx/resign.masternode'
 import { Injectable, Logger } from '@nestjs/common'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
+import { CreatePoolPairIndexer } from './dftx/create.poolpair'
+import { CreateTokenIndexer } from './dftx/create.token'
+import { UpdatePoolPairIndexer } from './dftx/update.poolpair'
+import { SetLoanTokenIndexer } from './dftx/set.loan.token'
+import { ActivePriceIndexer } from './dftx/active.price'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
@@ -24,10 +29,12 @@ export class MainDfTxIndexer extends Indexer {
     private readonly setOracleData: SetOracleDataIndexer,
     private readonly setOracleDataInterval: SetOracleDataIntervalIndexer,
     private readonly createMasternode: CreateMasternodeIndexer,
-    private readonly resignMasternode: ResignMasternodeIndexer
-    // private readonly createToken: CreateTokenIndexer,
-    // private readonly createPoolPair: CreatePoolPairIndexer,
-    // private readonly updatePoolPair: UpdatePoolPairIndexer
+    private readonly resignMasternode: ResignMasternodeIndexer,
+    private readonly createToken: CreateTokenIndexer,
+    private readonly createPoolPair: CreatePoolPairIndexer,
+    private readonly updatePoolPair: UpdatePoolPairIndexer,
+    private readonly setLoanToken: SetLoanTokenIndexer,
+    private readonly activePriceIndexer: ActivePriceIndexer
   ) {
     super()
     this.indexers = [
@@ -37,10 +44,12 @@ export class MainDfTxIndexer extends Indexer {
       setOracleData,
       createMasternode,
       resignMasternode,
-      setOracleDataInterval
-      // createToken,
-      // createPoolPair,
-      // updatePoolPair
+      setOracleDataInterval,
+      createToken,
+      createPoolPair,
+      updatePoolPair,
+      setLoanToken,
+      activePriceIndexer
     ]
   }
 
