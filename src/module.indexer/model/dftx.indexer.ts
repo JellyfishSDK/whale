@@ -68,10 +68,6 @@ export class MainDfTxIndexer extends Indexer {
   }
 
   async invalidate (block: RawBlock): Promise<void> {
-    for (const indexer of this.indexers) {
-      await indexer.invalidateBlock(block)
-    }
-
     // Invalidate backwards
     const transactions = this.getDfTxTransactions(block).reverse()
     for (const transaction of transactions) {
@@ -79,6 +75,11 @@ export class MainDfTxIndexer extends Indexer {
       for (const indexer of filtered) {
         await indexer.invalidateTransaction(block, transaction)
       }
+    }
+
+    // When invalidating call the block callback at the end, rather than the start
+    for (const indexer of this.indexers) {
+      await indexer.invalidateBlock(block)
     }
   }
 
