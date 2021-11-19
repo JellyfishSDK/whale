@@ -56,7 +56,7 @@ export class SetLoanTokenIndexer extends DfTxIndexer<SetLoanToken> {
         id: txn.txid,
         interest: interest,
         tokenCurrency: tokenCurrency,
-        tokenId: HexEncoder.encodeHeight(tokenId),
+        tokenId: `${tokenId}`,
         block: blockObj
       })
 

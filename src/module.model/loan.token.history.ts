@@ -41,7 +41,7 @@ export class LoanTokenHistoryMapper {
   }
 
   async queryAll (limit: number, lt?: string): Promise<LoanTokenHistory[]> {
-    return await this.database.query(LoanTokenHistoryMapping.index.height_token_id, {
+    return await this.database.query(LoanTokenHistoryMapping.index.partitioned_by_loan_token, {
       limit: limit,
       order: SortOrder.DESC,
       lt: lt
