@@ -15,6 +15,7 @@ import { PoolAddLiquidityIndexer } from './pool.add.liquidity'
 import { PoolRemoveLiquidityIndexer } from './pool.remove.liquidity'
 import { PoolSwapIndexer } from './poolswap'
 import { SetLoanTokenIndexer } from './set.loan.token'
+import { ActivePriceIndexer } from './active.price'
 
 const indexers = [
   AppointOracleIndexer,
@@ -30,7 +31,8 @@ const indexers = [
   PoolAddLiquidityIndexer,
   PoolRemoveLiquidityIndexer,
   PoolSwapIndexer,
-  SetLoanTokenIndexer
+  SetLoanTokenIndexer,
+  ActivePriceIndexer
 ]
 
 @Module({
