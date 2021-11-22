@@ -71,11 +71,18 @@ afterAll(async () => {
 
 describe('created loan token', () => {
   it('should index tokens', async () => {
-    // TODO(@ivan-zynesis): test case assertions WIP
+    console.log('loan tokens: ')
     console.log(await app.get(LoanTokenMapper).query(100))
+    console.log('========================================')
+
+    console.log('loan tokens history page 1: ')
     const page1 = await app.get(LoanTokenHistoryMapper).queryAll(2)
     console.log(page1)
+    console.log('========================================')
+
+    console.log('loan tokens history page 2: ')
     const page2 = await app.get(LoanTokenHistoryMapper).queryAll(2, page1[1].loanTokenId)
     console.log(page2)
+    console.log('========================================')
   })
 })
