@@ -175,7 +175,7 @@ describe('setLoanScheme', () => {
         id: 's200',
         ratio: 205,
         rate: '2.85',
-        activateAfterBlock: '18446744073709551615',
+        activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
         block: {
           hash: expect.any(String),
           height: expect.any(Number),
@@ -190,7 +190,7 @@ describe('setLoanScheme', () => {
           id: 's250',
           ratio: 255,
           rate: '2.55',
-          activateAfterBlock: '18446744073709551615',
+          activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
           block: {
             hash: expect.any(String),
             height: expect.any(Number),
@@ -202,7 +202,7 @@ describe('setLoanScheme', () => {
           id: 's200',
           ratio: 205,
           rate: '2.85',
-          activateAfterBlock: '18446744073709551615',
+          activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
           block: {
             hash: expect.any(String),
             height: expect.any(Number),
@@ -214,7 +214,7 @@ describe('setLoanScheme', () => {
           id: 's150',
           ratio: 155,
           rate: '3.05',
-          activateAfterBlock: '18446744073709551615',
+          activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
           block: {
             hash: expect.any(String),
             height: expect.any(Number),
@@ -234,7 +234,7 @@ describe('setLoanScheme', () => {
           sort: '00000069',
           ratio: 155,
           rate: '3.05',
-          activateAfterBlock: '18446744073709551615',
+          activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
           event: 'update',
           block: {
             hash: expect.any(String),

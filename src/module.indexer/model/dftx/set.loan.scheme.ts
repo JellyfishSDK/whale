@@ -82,7 +82,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
   }
 
   private async has (id: string): Promise<boolean> {
-    return !((await this.loanSchemeMapper.get(id)) == null)
+    return (await this.loanSchemeMapper.get(id)) !== null
   }
 
   private isActive (loanScheme: LoanScheme, height: number): boolean {
