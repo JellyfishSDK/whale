@@ -13,6 +13,7 @@ import { NetworkName } from '@defichain/jellyfish-network'
 import { ConfigService } from '@nestjs/config'
 import { SetLoanTokenIndexer } from '@src/module.indexer/model/dftx/set.loan.token'
 import { UpdateLoanTokenIndexer } from '@src/module.indexer/model/dftx/update.loan.token'
+import { ActivePriceIndexer } from '@src/module.indexer/model/dftx/active.price'
 
 const indexers = [
   AppointOracleIndexer,
@@ -26,18 +27,19 @@ const indexers = [
   CreatePoolPairIndexer,
   UpdatePoolPairIndexer,
   SetLoanTokenIndexer,
-  UpdateLoanTokenIndexer
+  UpdateLoanTokenIndexer,
+  ActivePriceIndexer
 ]
 
 @Module({
   providers: [...indexers,
-    {
-      provide: 'NETWORK',
-      useFactory: (configService: ConfigService): NetworkName => {
-        return configService.get<string>('network') as NetworkName
-      },
-      inject: [ConfigService]
-    }],
+  {
+    provide: 'NETWORK',
+    useFactory: (configService: ConfigService): NetworkName => {
+      return configService.get<string>('network') as NetworkName
+    },
+    inject: [ConfigService]
+  }],
   exports: indexers
 })
 export class DfTxIndexerModule {
