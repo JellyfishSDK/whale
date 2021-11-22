@@ -48,12 +48,13 @@ export class DeferredDestroyLoanSchemeMapper {
 }
 
 export interface DeferredDestroyLoanScheme extends Model {
-  id: string // unique id
+  id: string // ----------| loanSchemeId-height
+  loanSchemeId: string
   activateAfterBlock: BigNumber
 
   block: {
     hash: string
-    height: number // sort
+    height: number // ----| as sort key
     time: number
     medianTime: number
   }

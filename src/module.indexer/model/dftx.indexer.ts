@@ -18,6 +18,8 @@ import { SetLoanTokenIndexer } from './dftx/set.loan.token'
 import { ActivePriceIndexer } from './dftx/active.price'
 import { SetLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.loan.scheme'
 import { SetDeferredLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.deferred.loan.scheme'
+import { DestroyLoanSchemeIndexer } from '@src/module.indexer/model/dftx/destroy.loan.scheme'
+import { DestroyDeferredLoanSchemeIndexer } from '@src/module.indexer/model/dftx/destroy.deferred.loan.scheme'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
@@ -38,7 +40,9 @@ export class MainDfTxIndexer extends Indexer {
     private readonly setLoanToken: SetLoanTokenIndexer,
     private readonly activePriceIndexer: ActivePriceIndexer,
     private readonly setLoanScheme: SetLoanSchemeIndexer,
-    private readonly setDeferredLoanScheme: SetDeferredLoanSchemeIndexer
+    private readonly setDeferredLoanScheme: SetDeferredLoanSchemeIndexer,
+    private readonly destroyLoanScheme: DestroyLoanSchemeIndexer,
+    private readonly destroyDeferredLoanScheme: DestroyDeferredLoanSchemeIndexer
   ) {
     super()
     this.indexers = [
@@ -55,7 +59,9 @@ export class MainDfTxIndexer extends Indexer {
       setLoanToken,
       activePriceIndexer,
       setLoanScheme,
-      setDeferredLoanScheme
+      setDeferredLoanScheme,
+      destroyLoanScheme,
+      destroyDeferredLoanScheme
     ]
   }
 

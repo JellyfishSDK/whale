@@ -15,6 +15,8 @@ import { SetLoanTokenIndexer } from '@src/module.indexer/model/dftx/set.loan.tok
 import { ActivePriceIndexer } from '@src/module.indexer/model/dftx/active.price'
 import { SetLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.loan.scheme'
 import { SetDeferredLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.deferred.loan.scheme'
+import { DestroyLoanSchemeIndexer } from '@src/module.indexer/model/dftx/destroy.loan.scheme'
+import { DestroyDeferredLoanSchemeIndexer } from '@src/module.indexer/model/dftx/destroy.deferred.loan.scheme'
 
 const indexers = [
   AppointOracleIndexer,
@@ -30,7 +32,9 @@ const indexers = [
   SetLoanTokenIndexer,
   ActivePriceIndexer,
   SetLoanSchemeIndexer,
-  SetDeferredLoanSchemeIndexer
+  SetDeferredLoanSchemeIndexer,
+  DestroyLoanSchemeIndexer,
+  DestroyDeferredLoanSchemeIndexer
 ]
 
 @Module({

@@ -24,18 +24,20 @@ export class DestroyDeferredLoanSchemeIndexer extends DfTxIndexer<DestroyLoanSch
     super()
   }
 
-  async index (block: RawBlock): Promise<void> {
+  async indexBlockStart (block: RawBlock): Promise<void> {
     const loop = async (activeAfterBlock: number, next?: number): Promise<void> => {
       const list = await this.deferredDestroyLoanSchemeMapper.query(activeAfterBlock, 100)
       if (list.length === 0) {
         return
       }
       for (const each of list) {
-        await this.loanSchemeMapper.delete(each.id)
+        await this.loanSchemeMapper.delete(each.loanSchemeId)
         await this.deferredDestroyLoanSchemeMapper.delete(each.id)
 
-        // delete the "UPDATE" deferredLoanScheme if any
-        await this.deferredLoanSchemeMapper.delete(each.id) // FIX: each.id-height
+        // delete the coming "UPDATE" deferredLoanScheme if any
+        // activateAfterBlock: 110
+        // destroyLoanScheme.id: s250-104
+        await this.deferredLoanSchemeMapper.delete(each.id)
       }
       return await loop(activeAfterBlock, list[list.length - 1].block.height)
     }
@@ -43,20 +45,25 @@ export class DestroyDeferredLoanSchemeIndexer extends DfTxIndexer<DestroyLoanSch
     return await loop(block.height)
   }
 
-  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<DestroyLoanScheme>>): Promise<void> {
-    for (const { dftx: { data } } of txns) {
-      const prevDeferredDestroyLoanScheme = await this.getPrevDeferredDestroyLoanScheme(data.identifier, block.height)
-      if (prevDeferredDestroyLoanScheme === undefined) {
-        throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
-      }
-      // const prevDeferredLoanScheme = await this.getPrevDeferredLoanScheme(data.identifier, block.height)
-      // const prevLoanScheme = await this.getPrevLoanScheme(data.identifier, block.height)
-      // if (prevLoanScheme === undefined) {
-      //   throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
-      // }
-      // await this.deferredDestroyLoanSchemeMapper.put(prevDeferredDestroyLoanScheme)
-      // await this.loanSchemeMapper.put(prevLoanScheme)
+  async indexTransaction (block: RawBlock, transaction: DfTxTransaction<DestroyLoanScheme>): Promise<void> {
+  }
+
+  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<DestroyLoanScheme>): Promise<void> {
+    const data = transaction.dftx.data
+    const prevDeferredDestroyLoanScheme = await this.getPrevDeferredDestroyLoanScheme(data.identifier, block.height)
+    if (prevDeferredDestroyLoanScheme === undefined) {
+      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
     }
+    const prevDeferredLoanScheme = await this.getPrevDeferredLoanScheme(data.identifier, block.height)
+    if (prevDeferredLoanScheme === undefined) {
+      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
+    }
+    const prevLoanScheme = await this.getPrevLoanScheme(data.identifier, block.height)
+    if (prevLoanScheme === undefined) {
+      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
+    }
+    await this.deferredDestroyLoanSchemeMapper.put(prevDeferredDestroyLoanScheme)
+    await this.loanSchemeMapper.put(prevLoanScheme)
   }
 
   /**
