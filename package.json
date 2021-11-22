@@ -49,7 +49,7 @@
     "bignumber.js": "^9.0.1",
     "cache-manager": "^3.6.0",
     "class-transformer": "^0.4.0",
-    "class-validator": "^0.13.1",
+    "class-validator": "^0.13.2",
     "defichain": "^2.7.2",
     "level": "7.0.0",
     "level-js": "6.0.0",
