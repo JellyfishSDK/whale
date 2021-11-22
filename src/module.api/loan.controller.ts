@@ -175,6 +175,17 @@ export class LoanController {
   }
 
   /**
+   * Paginate loan auctions.
+   *
+   * @param {PaginationQuery} query
+   * @return {Promise<ApiPagedResponse<LoanVaultLiquidated>>}
+   */
+  @Get('/auctions')
+  async listAuction (@Query() query: PaginationQuery): Promise<ApiPagedResponse<LoanVaultLiquidated>> {
+    return await this.vaultService.listAuction(query)
+  }
+
+  /**
    * Paginate loan auction history.
    *
    * @param {PaginationQuery} query

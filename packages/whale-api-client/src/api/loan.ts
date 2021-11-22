@@ -92,6 +92,17 @@ export class Loan {
   }
 
   /**
+   * Paginate query loan auctions.
+   *
+   * @param {number} size of auctions to query
+   * @param {string} next set of auctions
+   * @return {Promise<ApiPagedResponse<LoanVaultLiquidated>>}
+   */
+  async listAuction (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanVaultLiquidated>> {
+    return await this.client.requestList('GET', 'loans/auctions', size, next)
+  }
+
+  /**
    * Paginate query auction histories.
    *
    * @param {number} size of vaults to query

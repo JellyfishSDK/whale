@@ -387,9 +387,7 @@ describe('list', () => {
 
   it('should listAuctionHistory with pagination', async () => {
     const auctionList = await client.loan.listAuctionHistory()
-    console.log(auctionList)
     const first = await client.loan.listAuctionHistory(2)
-    console.log(first)
 
     expect(first.length).toStrictEqual(2)
     expect(first.hasNext).toStrictEqual(true)
@@ -406,8 +404,6 @@ describe('list', () => {
 
     expect(next[0].vaultId).toStrictEqual(auctionList[2].vaultId)
     expect(next[1].vaultId).toStrictEqual(auctionList[3].vaultId)
-
-    console.log(next)
 
     const last = await client.paginate(next)
 

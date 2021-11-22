@@ -10,8 +10,8 @@
   },
   "scripts": {
     "prepare": "husky install",
-    "standard": "ts-standard --fix",
-    "lint": "ts-standard --fix",
+    "standard": "npm run lint",
+    "lint": "eslint . --fix",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "start": "nest start",
@@ -39,10 +39,10 @@
     "@defichain/jellyfish-wallet": "^2.6.0",
     "@defichain/testcontainers": "^2.6.0",
     "@defichain/testing": "^2.6.0",
-    "@nestjs/common": "^8.2.1",
+    "@nestjs/common": "^8.2.2",
     "@nestjs/config": "^1.1.0",
-    "@nestjs/core": "^8.2.1",
-    "@nestjs/platform-fastify": "^8.2.1",
+    "@nestjs/core": "^8.2.2",
+    "@nestjs/platform-fastify": "^8.2.2",
     "@nestjs/schedule": "^1.0.2",
     "@nestjs/terminus": "^8.0.1",
     "async-mutex": "^0.3.1",
@@ -63,9 +63,9 @@
     "subleveldown": "^6.0.1"
   },
   "devDependencies": {
-    "@nestjs/cli": "^8.1.4",
+    "@nestjs/cli": "^8.1.5",
     "@nestjs/schematics": "^8.0.5",
-    "@nestjs/testing": "^8.2.1",
+    "@nestjs/testing": "^8.2.2",
     "@types/cache-manager": "^3.4.2",
     "@types/cron": "^1.7.3",
     "@types/jest": "^27.0.2",
@@ -74,6 +74,9 @@
     "@types/memdown": "^3.0.0",
     "@types/node": "^14.14.36",
     "@types/subleveldown": "^4.1.1",
+    "eslint": "^7.32.0",
+    "eslint-config-standard-jsx": "^10.0.0",
+    "eslint-config-standard-with-typescript": "^21.0.1",
     "husky": "^7.0.4",
     "jest": "^27.0.6",
     "lerna": "^4.0.0",
@@ -81,14 +84,13 @@
     "ts-jest": "^27.0.7",
     "ts-loader": "^9.2.6",
     "ts-node": "^10.4.0",
-    "ts-standard": "^10.0.0",
     "tsconfig-paths": "^3.10.1",
     "typescript": "4.3.5",
     "wait-for-expect": "^3.0.2"
   },
   "lint-staged": {
     "*.{ts,js}": [
-      "npm run standard"
+      "eslint --fix"
     ]
   }
 }
