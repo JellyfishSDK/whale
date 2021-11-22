@@ -313,14 +313,14 @@ describe('list', () => {
   it('should listAuctions with pagination', async () => {
     const first = await controller.listAuction({ size: 2 })
     expect(first.data.length).toStrictEqual(2)
-    expect(first.page?.next).toStrictEqual(`${first.data[1].vaultId}|${first.data[1].liquidationHeight}`)
+    expect(first.page?.next).toStrictEqual(`${first.data[1].vaultId}${first.data[1].liquidationHeight}`)
 
     const next = await controller.listAuction({
       size: 2,
       next: first.page?.next
     })
     expect(next.data.length).toStrictEqual(2)
-    expect(next.page?.next).toStrictEqual(`${next.data[1].vaultId}|${next.data[1].liquidationHeight}`)
+    expect(next.page?.next).toStrictEqual(`${next.data[1].vaultId}${next.data[1].liquidationHeight}`)
 
     const last = await controller.listAuction({
       size: 2,
@@ -330,8 +330,8 @@ describe('list', () => {
     expect(last.page).toBeUndefined()
   })
 
-  it('should listAuctions with an empty object if size 100 next 51f6233c4403f6ce113bb4e90f83b176587f401081605b8a8bb723ff3b0ab5b6|300 which is out of range', async () => {
-    const result = await controller.listAuction({ size: 100, next: '51f6233c4403f6ce113bb4e90f83b176587f401081605b8a8bb723ff3b0ab5b6|300' })
+  it('should listAuctions with an empty object if size 100 next 51f6233c4403f6ce113bb4e90f83b176587f401081605b8a8bb723ff3b0ab5b6 300 which is out of range', async () => {
+    const result = await controller.listAuction({ size: 100, next: '51f6233c4403f6ce113bb4e90f83b176587f401081605b8a8bb723ff3b0ab5b6300' })
 
     expect(result.data.length).toStrictEqual(0)
     expect(result.page).toBeUndefined()

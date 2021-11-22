@@ -43,7 +43,10 @@ export class LoanVaultService {
     }
 
     const list: Array<VaultActive | VaultLiquidation> = await this.client.loan
-      .listVaults(pagination, { ownerAddress: address, verbose: true }) as any
+      .listVaults(pagination, {
+        ownerAddress: address,
+        verbose: true
+      }) as any
     const vaults = list.map(async (vault: VaultActive | VaultLiquidation) => {
       return await this.mapLoanVault(vault)
     })
@@ -74,9 +77,14 @@ export class LoanVaultService {
     let pagination: AuctionPagination
 
     if (next !== undefined) {
-      const [vaultId, height] = next.split('|')
+      const vaultId = next.substr(0, 64)
+      const height = next.substr(64)
+
       pagination = {
-        start: { vaultId, height: height !== undefined ? parseInt(height) : 0 },
+        start: {
+          vaultId,
+          height: height !== undefined ? parseInt(height) : 0
+        },
         limit: size
       }
     } else {
@@ -88,23 +96,13 @@ export class LoanVaultService {
     const items = await Promise.all(list)
 
     return ApiPagedResponse.of(items, size, item => {
-      return `${item.vaultId}|${item.liquidationHeight}`
+      return `${item.vaultId}${item.liquidationHeight}`
     })
   }
 
   private async mapLoanVault (details: VaultActive | VaultLiquidation): Promise<LoanVaultActive | LoanVaultLiquidated> {
     if (details.state === VaultState.IN_LIQUIDATION) {
-      const data = details as VaultLiquidation
-      return {
-        vaultId: data.vaultId,
-        loanScheme: await this.mapLoanScheme(data.loanSchemeId),
-        ownerAddress: data.ownerAddress,
-        state: LoanVaultState.IN_LIQUIDATION,
-        batchCount: data.batchCount,
-        liquidationHeight: data.liquidationHeight,
-        liquidationPenalty: data.liquidationPenalty,
-        batches: await this.mapLiquidationBatches(data.batches)
-      }
+      return await this.mapLoanAuction(details as VaultLiquidation)
     }
 
     const data = details as VaultActive
