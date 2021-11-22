@@ -22,7 +22,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     super()
   }
 
-  async index (block: RawBlock): Promise<void> {
+  async indexTransaction (block: RawBlock): Promise<void> {
     const loop = async (activeAfterBlock: number, next?: number): Promise<void> => {
       const list = await this.deferredLoanSchemeMapper.query(activeAfterBlock, 100)
       if (list.length === 0) {
@@ -48,19 +48,18 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     }
   }
 
-  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<SetLoanScheme>>): Promise<void> {
-    for (const { dftx: { data } } of txns) {
-      const prevDeferredLoanScheme = await this.getPrevDeferredLoanScheme(data.identifier, block.height)
-      if (prevDeferredLoanScheme === undefined) {
-        throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
-      }
-      const prevLoanScheme = await this.getPrevLoanScheme(data.identifier, block.height)
-      if (prevLoanScheme === undefined) {
-        throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
-      }
-      await this.deferredLoanSchemeMapper.put(prevDeferredLoanScheme)
-      await this.loanSchemeMapper.put(prevLoanScheme)
+  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>): Promise<void> {
+    const data = transaction.dftx.data
+    const prevDeferredLoanScheme = await this.getPrevDeferredLoanScheme(data.identifier, block.height)
+    if (prevDeferredLoanScheme === undefined) {
+      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
     }
+    const prevLoanScheme = await this.getPrevLoanScheme(data.identifier, block.height)
+    if (prevLoanScheme === undefined) {
+      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
+    }
+    await this.deferredLoanSchemeMapper.put(prevDeferredLoanScheme)
+    await this.loanSchemeMapper.put(prevLoanScheme)
   }
 
   /**

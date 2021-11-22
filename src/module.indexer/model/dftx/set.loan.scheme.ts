@@ -22,67 +22,67 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     super()
   }
 
-  async index (block: RawBlock, txns: Array<DfTxTransaction<SetLoanScheme>>): Promise<void> {
-    for (const { dftx: { data } } of txns) {
-      const loanScheme = {
-        id: data.identifier,
-        ratio: data.ratio,
-        rate: new BigNumber(data.rate),
-        activateAfterBlock: data.update,
+  async indexTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>): Promise<void> {
+    const data = transaction.dftx.data
 
-        block: {
-          hash: block.hash,
-          height: block.height,
-          medianTime: block.mediantime,
-          time: block.time
-        }
+    const loanScheme = {
+      id: data.identifier,
+      ratio: data.ratio,
+      rate: new BigNumber(data.rate),
+      activateAfterBlock: data.update,
+
+      block: {
+        hash: block.hash,
+        height: block.height,
+        medianTime: block.mediantime,
+        time: block.time
       }
+    }
 
-      const isExists = await this.has(data.identifier)
+    const isExists = await this.has(data.identifier)
 
-      if (this.isActive(data, block.height)) {
-        await this.loanSchemeMapper.put(loanScheme)
-      } else {
-        await this.deferredLoanSchemeMapper.put({
-          ...loanScheme,
-          loanSchemeId: data.identifier,
-          id: `${data.identifier}-${block.height}`
-        })
-      }
-
-      await this.loanSchemeHistoryMapper.put({
-        id: `${data.identifier}-${block.height}`,
+    if (this.isActive(data, block.height)) {
+      await this.loanSchemeMapper.put(loanScheme)
+    } else {
+      await this.deferredLoanSchemeMapper.put({
+        ...loanScheme,
         loanSchemeId: data.identifier,
-        sort: HexEncoder.encodeHeight(block.height),
-        ratio: data.ratio,
-        rate: new BigNumber(data.rate),
-        activateAfterBlock: data.update,
-        event: isExists ? LoanSchemeHistoryEvent.UPDATE : LoanSchemeHistoryEvent.CREATE,
-
-        block: {
-          hash: block.hash,
-          height: block.height,
-          medianTime: block.mediantime,
-          time: block.time
-        }
+        id: `${data.identifier}-${block.height}`
       })
     }
+
+    await this.loanSchemeHistoryMapper.put({
+      id: `${data.identifier}-${block.height}`,
+      loanSchemeId: data.identifier,
+      sort: HexEncoder.encodeHeight(block.height),
+      ratio: data.ratio,
+      rate: new BigNumber(data.rate),
+      activateAfterBlock: data.update,
+      event: isExists ? LoanSchemeHistoryEvent.UPDATE : LoanSchemeHistoryEvent.CREATE,
+
+      block: {
+        hash: block.hash,
+        height: block.height,
+        medianTime: block.mediantime,
+        time: block.time
+      }
+    })
   }
 
-  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<SetLoanScheme>>): Promise<void> {
-    for (const { dftx: { data } } of txns) {
-      if (this.isActive(data, block.height)) {
-        const previous = await this.getPrevious(data.identifier, block.height)
-        if (previous === undefined) {
-          throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
-        }
-        await this.loanSchemeMapper.put(previous)
-      } else {
-        await this.deferredLoanSchemeMapper.delete(`${data.identifier}-${block.height}`)
-      }
+  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>): Promise<void> {
+    const data = transaction.dftx.data
 
-      await this.loanSchemeHistoryMapper.delete(`${data.identifier}-${block.height}`)
+    if (this.isActive(data, block.height)) {
+      const previous = await this.getPrevious(data.identifier, block.height)
+      if (previous === undefined) {
+        throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
+      }
+      await this.loanSchemeMapper.put(previous)
+    } else {
+      await this.deferredLoanSchemeMapper.delete(`${data.identifier}-${block.height}`)
     }
+
+    await this.loanSchemeHistoryMapper.delete(`${data.identifier}-${block.height}`)
   }
 
   private async has (id: string): Promise<boolean> {
@@ -98,7 +98,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   /**
    * Get previous active loan scheme
    */
-  private async getPrevious (id: string, height: number): Promise<LoanSchemeHistory | undefined> {
+  private async async getPrevious (id: string, height: number): Promise<LoanSchemeHistory | undefined> {
     const findInNextPage = async (height: number): Promise<LoanSchemeHistory | undefined> => {
       const list = await this.loanSchemeHistoryMapper.query(id, 100, HexEncoder.encodeHeight(height))
       if (list.length === 0) {
