@@ -65,9 +65,9 @@ export class LoanSchemeHistoryMapper {
 }
 
 export interface LoanSchemeHistory extends Model {
-  id: string // loanSchemeId-height
-  loanSchemeId: string // key
-  sort: string // height
+  id: string // --------------| loanSchemeId-height
+  loanSchemeId: string // ----| as partition key
+  sort: string // ------------| Hex encoded height
   ratio: number
   rate: BigNumber
   activateAfterBlock: BigNumber

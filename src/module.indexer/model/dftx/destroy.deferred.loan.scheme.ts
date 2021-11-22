@@ -33,11 +33,6 @@ export class DestroyDeferredLoanSchemeIndexer extends DfTxIndexer<DestroyLoanSch
       for (const each of list) {
         await this.loanSchemeMapper.delete(each.loanSchemeId)
         await this.deferredDestroyLoanSchemeMapper.delete(each.id)
-
-        // delete the coming "UPDATE" deferredLoanScheme if any
-        // activateAfterBlock: 110
-        // destroyLoanScheme.id: s250-104
-        await this.deferredLoanSchemeMapper.delete(each.id)
       }
       return await loop(activeAfterBlock, list[list.length - 1].block.height)
     }

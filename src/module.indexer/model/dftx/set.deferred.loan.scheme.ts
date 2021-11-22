@@ -29,6 +29,11 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
         return
       }
       for (const each of list) {
+        // check if the loanScheme exists, else its destroyed previously
+        const exists = await this.loanSchemeMapper.get(each.loanSchemeId)
+        if (exists === undefined) {
+          return await this.deferredLoanSchemeMapper.delete(each.id)
+        }
         await this.loanSchemeMapper.put(this.mapLoanScheme(each))
         await this.deferredLoanSchemeMapper.delete(each.id)
       }

@@ -273,7 +273,7 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
   expect(deferredAfter).toStrictEqual([])
 })
 
-it.only('test destroy before update', async () => {
+it('test destroy before update', async () => {
   await createLoanScheme('default', 100, new BigNumber(3))
 
   await createLoanScheme('s250', 250, new BigNumber(3))
@@ -311,7 +311,6 @@ it.only('test destroy before update', async () => {
       activateAfterBlock: '110',
       event: 'destroy',
       block: expect.any(Object)
-
     },
     {
       id: 's250-104',
@@ -322,7 +321,6 @@ it.only('test destroy before update', async () => {
       activateAfterBlock: '111',
       event: 'update',
       block: expect.any(Object)
-
     },
     {
       id: 's250-103',
@@ -367,19 +365,10 @@ it.only('test destroy before update', async () => {
   await testing.container.waitForBlockHeight(111)
   await waitForIndexedHeight(app, 111)
 
-  // ensure the destroyed s250 should be created again
+  // ensure the destroyed s250 should not be created again
   {
     const deferred111 = await deferredLoanSchemeMapper.query(111, 100)
-    expect(deferred111).toStrictEqual([
-      {
-        id: 's250-104',
-        ratio: 255,
-        rate: '3.3',
-        activateAfterBlock: '111',
-        block: expect.any(Object),
-        loanSchemeId: 's250'
-      }
-    ])
+    expect(deferred111).toStrictEqual([])
 
     const s250After = await loanSchemeMapper.get('s250')
     expect(s250After).toStrictEqual(undefined)
