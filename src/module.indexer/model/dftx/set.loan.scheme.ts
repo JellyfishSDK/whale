@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { LoanScheme, CSetLoanScheme } from '@defichain/jellyfish-transaction'
+import { SetLoanScheme, CSetLoanScheme } from '@defichain/jellyfish-transaction'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 import { DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent, LoanSchemeHistory } from '@src/module.model/loan.scheme.history'
@@ -10,7 +10,7 @@ import BigNumber from 'bignumber.js'
 import { NotFoundIndexerError } from '@src/module.indexer/error'
 
 @Injectable()
-export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
+export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   OP_CODE: number = CSetLoanScheme.OP_CODE
   private readonly logger = new Logger(SetLoanSchemeIndexer.name)
 
@@ -22,7 +22,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
     super()
   }
 
-  async index (block: RawBlock, txns: Array<DfTxTransaction<LoanScheme>>): Promise<void> {
+  async index (block: RawBlock, txns: Array<DfTxTransaction<SetLoanScheme>>): Promise<void> {
     for (const { dftx: { data } } of txns) {
       const loanScheme = {
         id: data.identifier,
@@ -69,7 +69,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
     }
   }
 
-  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<LoanScheme>>): Promise<void> {
+  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<SetLoanScheme>>): Promise<void> {
     for (const { dftx: { data } } of txns) {
       if (this.isActive(data, block.height)) {
         const previous = await this.getPrevious(data.identifier, block.height)
@@ -89,7 +89,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
     return (await this.loanSchemeMapper.get(id)) !== undefined
   }
 
-  private isActive (loanScheme: LoanScheme, height: number): boolean {
+  private isActive (loanScheme: SetLoanScheme, height: number): boolean {
     return loanScheme.update.eq(0) ||
            loanScheme.update.eq(new BigNumber('0xffffffffffffffff')) ||
            new BigNumber(height).gte(loanScheme.update)

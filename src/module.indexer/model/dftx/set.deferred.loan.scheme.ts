@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
-import { LoanScheme, CSetLoanScheme } from '@defichain/jellyfish-transaction'
-import { LoanSchemeMapper, LoanScheme as LoanSchemeModel } from '@src/module.model/loan.scheme'
+import { SetLoanScheme, CSetLoanScheme } from '@defichain/jellyfish-transaction'
+import { LoanSchemeMapper, LoanScheme } from '@src/module.model/loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistory, LoanSchemeHistoryEvent } from '@src/module.model/loan.scheme.history'
 import { DeferredLoanScheme, DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
 import BigNumber from 'bignumber.js'
@@ -10,7 +10,7 @@ import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_ab
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 @Injectable()
-export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
+export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   OP_CODE: number = CSetLoanScheme.OP_CODE
   private readonly logger = new Logger(SetDeferredLoanSchemeIndexer.name)
 
@@ -38,7 +38,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
     return await loop(block.height)
   }
 
-  private mapLoanScheme (deferredLoanScheme: DeferredLoanScheme): LoanSchemeModel {
+  private mapLoanScheme (deferredLoanScheme: DeferredLoanScheme): LoanScheme {
     return {
       id: deferredLoanScheme.loanSchemeId,
       ratio: deferredLoanScheme.ratio,
@@ -48,7 +48,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
     }
   }
 
-  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<LoanScheme>>): Promise<void> {
+  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<SetLoanScheme>>): Promise<void> {
     for (const { dftx: { data } } of txns) {
       const prevDeferredLoanScheme = await this.getPrevDeferredLoanScheme(data.identifier, block.height)
       if (prevDeferredLoanScheme === undefined) {
