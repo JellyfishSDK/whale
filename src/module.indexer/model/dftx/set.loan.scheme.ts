@@ -98,7 +98,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   /**
    * Get previous active loan scheme
    */
-  private async async getPrevious (id: string, height: number): Promise<LoanSchemeHistory | undefined> {
+  private async getPrevious (id: string, height: number): Promise<LoanSchemeHistory | undefined> {
     const findInNextPage = async (height: number): Promise<LoanSchemeHistory | undefined> => {
       const list = await this.loanSchemeHistoryMapper.query(id, 100, HexEncoder.encodeHeight(height))
       if (list.length === 0) {
