@@ -43,7 +43,11 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
       if (this.isActive(data, block.height)) {
         await this.loanSchemeMapper.put(loanScheme)
       } else {
-        await this.deferredLoanSchemeMapper.put(loanScheme)
+        await this.deferredLoanSchemeMapper.put({
+          ...loanScheme,
+          loanSchemeId: data.identifier,
+          id: `${data.identifier}-${block.height}`
+        })
       }
 
       await this.loanSchemeHistoryMapper.put({
@@ -74,7 +78,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
         }
         await this.loanSchemeMapper.put(previous)
       } else {
-        await this.deferredLoanSchemeMapper.delete(data.identifier)
+        await this.deferredLoanSchemeMapper.delete(`${data.identifier}-${block.height}`)
       }
 
       await this.loanSchemeHistoryMapper.delete(`${data.identifier}-${block.height}`)
@@ -82,7 +86,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
   }
 
   private async has (id: string): Promise<boolean> {
-    return (await this.loanSchemeMapper.get(id)) !== null
+    return (await this.loanSchemeMapper.get(id)) !== undefined
   }
 
   private isActive (loanScheme: LoanScheme, height: number): boolean {
