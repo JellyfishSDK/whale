@@ -1,6 +1,7 @@
 import { WhaleApiClient } from '../whale.api.client'
 import { ApiPagedResponse } from '../whale.api.response'
 import { TokenData } from './tokens'
+import { ActivePrice } from './prices'
 
 export class Loan {
   constructor (private readonly client: WhaleApiClient) {
@@ -89,6 +90,17 @@ export class Loan {
   async getVault (id: string): Promise<LoanVaultActive | LoanVaultLiquidated> {
     return await this.client.requestData('GET', `loans/vaults/${id}`)
   }
+
+  /**
+   * Paginate query loan auctions.
+   *
+   * @param {number} size of auctions to query
+   * @param {string} next set of auctions
+   * @return {Promise<ApiPagedResponse<LoanVaultLiquidated>>}
+   */
+  async listAuction (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanVaultLiquidated>> {
+    return await this.client.requestList('GET', 'loans/auctions', size, next)
+  }
 }
 
 export interface LoanScheme {
@@ -101,8 +113,9 @@ export interface CollateralToken {
   tokenId: string
   token: TokenData
   factor: string
-  priceFeedId: string
   activateAfterBlock: number
+  fixedIntervalPriceId: string
+  activePrice?: ActivePrice
 }
 
 export interface LoanToken {
@@ -110,11 +123,12 @@ export interface LoanToken {
   token: TokenData
   interest: string
   fixedIntervalPriceId: string
+  activePrice?: ActivePrice
 }
 
 export interface LoanVaultActive {
   vaultId: string
-  loanSchemeId: string
+  loanScheme: LoanScheme
   ownerAddress: string
   state: LoanVaultState.ACTIVE | LoanVaultState.FROZEN | LoanVaultState.MAY_LIQUIDATE | LoanVaultState.UNKNOWN
 
@@ -131,7 +145,7 @@ export interface LoanVaultActive {
 
 export interface LoanVaultLiquidated {
   vaultId: string
-  loanSchemeId: string
+  loanScheme: LoanScheme
   ownerAddress: string
   state: LoanVaultState.IN_LIQUIDATION
 
@@ -162,4 +176,5 @@ export interface LoanVaultTokenAmount {
   displaySymbol: string
   symbolKey: string
   name: string
+  activePrice?: ActivePrice
 }

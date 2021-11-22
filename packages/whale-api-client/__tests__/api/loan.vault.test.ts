@@ -47,7 +47,7 @@ beforeAll(async () => {
   }
 
   let oracleId: string
-  { // Oracle
+  { // Oracle 1
     const oracleAddress = await testing.generateAddress()
     const priceFeeds = [
       { token: 'DFI', currency: 'USD' },
@@ -56,6 +56,32 @@ beforeAll(async () => {
       { token: 'GOOGL', currency: 'USD' }
     ]
     oracleId = await testing.rpc.oracle.appointOracle(oracleAddress, priceFeeds, { weightage: 1 })
+    await testing.generate(1)
+
+    const timestamp = Math.floor(new Date().getTime() / 1000)
+    await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
+      prices: [{ tokenAmount: '1@DFI', currency: 'USD' }]
+    })
+    await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
+      prices: [{ tokenAmount: '2@TSLA', currency: 'USD' }]
+    })
+    await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
+      prices: [{ tokenAmount: '2@AAPL', currency: 'USD' }]
+    })
+    await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
+      prices: [{ tokenAmount: '4@GOOGL', currency: 'USD' }]
+    })
+    await testing.generate(1)
+  }
+
+  { // Oracle 2
+    const priceFeeds = [
+      { token: 'DFI', currency: 'USD' },
+      { token: 'TSLA', currency: 'USD' },
+      { token: 'AAPL', currency: 'USD' },
+      { token: 'GOOGL', currency: 'USD' }
+    ]
+    const oracleId = await testing.rpc.oracle.appointOracle(await testing.generateAddress(), priceFeeds, { weightage: 1 })
     await testing.generate(1)
 
     const timestamp = Math.floor(new Date().getTime() / 1000)
@@ -170,6 +196,11 @@ beforeAll(async () => {
     // Wait for 12 blocks which are equivalent to 2 hours (1 block = 10 minutes in regtest) in order to liquidate the vault
     await testing.generate(12)
   }
+
+  {
+    const height = await container.getBlockCount()
+    await service.waitForIndexedHeight(height - 1)
+  }
 })
 
 afterAll(async () => {
@@ -187,7 +218,11 @@ describe('list', () => {
     result.forEach(e =>
       expect(e).toStrictEqual(expect.objectContaining({
         vaultId: expect.any(String),
-        loanSchemeId: expect.any(String),
+        loanScheme: {
+          id: expect.any(String),
+          interestRate: expect.any(String),
+          minColRatio: expect.any(String)
+        },
         ownerAddress: expect.any(String),
         state: expect.any(String)
       }))
@@ -229,7 +264,11 @@ describe('get', () => {
     const vault = await client.loan.getVault(johnEmptyVaultId)
     expect(vault).toStrictEqual({
       vaultId: johnEmptyVaultId,
-      loanSchemeId: 'default',
+      loanScheme: {
+        id: 'default',
+        interestRate: '1',
+        minColRatio: '100'
+      },
       ownerAddress: expect.any(String),
       state: LoanVaultState.ACTIVE,
       informativeRatio: '-1',
@@ -247,7 +286,11 @@ describe('get', () => {
     const vault = await client.loan.getVault(bobDepositedVaultId)
     expect(vault).toStrictEqual({
       vaultId: bobDepositedVaultId,
-      loanSchemeId: 'default',
+      loanScheme: {
+        id: 'default',
+        interestRate: '1',
+        minColRatio: '100'
+      },
       ownerAddress: expect.any(String),
       state: LoanVaultState.ACTIVE,
       informativeRatio: '-1',
@@ -262,7 +305,16 @@ describe('get', () => {
           id: '0',
           name: 'Default Defi token',
           symbol: 'DFI',
-          symbolKey: 'DFI'
+          symbolKey: 'DFI',
+          activePrice: {
+            active: expect.any(Object),
+            block: expect.any(Object),
+            id: expect.any(String),
+            isLive: expect.any(Boolean),
+            key: 'DFI-USD',
+            next: expect.any(Object),
+            sort: expect.any(String)
+          }
         }
       ],
       loanAmounts: [],
@@ -274,7 +326,11 @@ describe('get', () => {
     const vault = await client.loan.getVault(johnLoanedVaultId)
     expect(vault).toStrictEqual({
       vaultId: johnLoanedVaultId,
-      loanSchemeId: 'scheme',
+      loanScheme: {
+        id: 'scheme',
+        interestRate: '1',
+        minColRatio: '110'
+      },
       ownerAddress: expect.any(String),
       state: LoanVaultState.ACTIVE,
       collateralRatio: '16667',
@@ -289,7 +345,16 @@ describe('get', () => {
           id: '0',
           name: 'Default Defi token',
           symbol: 'DFI',
-          symbolKey: 'DFI'
+          symbolKey: 'DFI',
+          activePrice: {
+            active: expect.any(Object),
+            block: expect.any(Object),
+            id: expect.any(String),
+            isLive: expect.any(Boolean),
+            key: 'DFI-USD',
+            next: expect.any(Object),
+            sort: expect.any(String)
+          }
         }
       ],
       loanAmounts: [
@@ -299,7 +364,16 @@ describe('get', () => {
           id: '1',
           name: '',
           symbol: 'TSLA',
-          symbolKey: 'TSLA'
+          symbolKey: 'TSLA',
+          activePrice: {
+            active: expect.any(Object),
+            block: expect.any(Object),
+            id: expect.any(String),
+            isLive: expect.any(Boolean),
+            key: 'TSLA-USD',
+            next: expect.any(Object),
+            sort: expect.any(String)
+          }
         }
       ],
       interestAmounts: [
@@ -309,7 +383,16 @@ describe('get', () => {
           id: '1',
           name: '',
           symbol: 'TSLA',
-          symbolKey: 'TSLA'
+          symbolKey: 'TSLA',
+          activePrice: {
+            active: expect.any(Object),
+            block: expect.any(Object),
+            id: expect.any(String),
+            isLive: expect.any(Boolean),
+            key: 'TSLA-USD',
+            next: expect.any(Object),
+            sort: expect.any(String)
+          }
         }
       ]
     })
@@ -319,7 +402,11 @@ describe('get', () => {
     const vault = await client.loan.getVault(adamLiquidatedVaultId)
     expect(vault).toStrictEqual({
       vaultId: adamLiquidatedVaultId,
-      loanSchemeId: 'default',
+      loanScheme: {
+        id: 'default',
+        interestRate: '1',
+        minColRatio: '100'
+      },
       ownerAddress: expect.any(String),
       state: LoanVaultState.IN_LIQUIDATION,
       batchCount: 1,
@@ -335,16 +422,34 @@ describe('get', () => {
               id: '0',
               name: 'Default Defi token',
               symbol: 'DFI',
-              symbolKey: 'DFI'
+              symbolKey: 'DFI',
+              activePrice: {
+                active: expect.any(Object),
+                block: expect.any(Object),
+                id: expect.any(String),
+                isLive: expect.any(Boolean),
+                key: 'DFI-USD',
+                next: expect.any(Object),
+                sort: expect.any(String)
+              }
             }
           ],
           loan: {
-            amount: '30.00005130',
+            amount: expect.any(String),
             displaySymbol: 'dAAPL',
             id: '2',
             name: '',
             symbol: 'AAPL',
-            symbolKey: 'AAPL'
+            symbolKey: 'AAPL',
+            activePrice: {
+              active: expect.any(Object),
+              block: expect.any(Object),
+              id: expect.any(String),
+              isLive: expect.any(Boolean),
+              key: 'AAPL-USD',
+              next: expect.any(Object),
+              sort: expect.any(String)
+            }
           }
         }
       ]

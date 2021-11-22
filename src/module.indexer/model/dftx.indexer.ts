@@ -9,12 +9,14 @@ import { SetOracleDataIndexer } from '@src/module.indexer/model/dftx/set.oracle.
 import { SetOracleDataIntervalIndexer } from '@src/module.indexer/model/dftx/set.oracle.data.interval'
 import { CreateMasternodeIndexer } from '@src/module.indexer/model/dftx/create.masternode'
 import { ResignMasternodeIndexer } from '@src/module.indexer/model/dftx/resign.masternode'
-import { CreateTokenIndexer } from '@src/module.indexer/model/dftx/create.token'
-import { CreatePoolPairIndexer } from '@src/module.indexer/model/dftx/create.poolpair'
-import { UpdatePoolPairIndexer } from '@src/module.indexer/model/dftx/update.poolpair'
-import { DepositToVaultIndexer } from '@src/module.indexer/model/dftx/deposit.vault'
 import { Injectable, Logger } from '@nestjs/common'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
+import { CreatePoolPairIndexer } from './dftx/create.poolpair'
+import { CreateTokenIndexer } from './dftx/create.token'
+import { UpdatePoolPairIndexer } from './dftx/update.poolpair'
+import { SetLoanTokenIndexer } from './dftx/set.loan.token'
+import { ActivePriceIndexer } from './dftx/active.price'
+import { DepositToVaultIndexer } from '@src/module.indexer/model/dftx/deposit.vault'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
@@ -32,6 +34,8 @@ export class MainDfTxIndexer extends Indexer {
     private readonly createToken: CreateTokenIndexer,
     private readonly createPoolPair: CreatePoolPairIndexer,
     private readonly updatePoolPair: UpdatePoolPairIndexer,
+    private readonly setLoanToken: SetLoanTokenIndexer,
+    private readonly activePriceIndexer: ActivePriceIndexer,
     private readonly depositToVault: DepositToVaultIndexer
   ) {
     super()
@@ -46,25 +50,47 @@ export class MainDfTxIndexer extends Indexer {
       createToken,
       createPoolPair,
       updatePoolPair,
+      setLoanToken,
+      activePriceIndexer,
       depositToVault
     ]
   }
 
   async index (block: RawBlock): Promise<void> {
+    for (const indexer of this.indexers) {
+      await indexer.indexBlockStart(block)
+    }
+
     const transactions = this.getDfTxTransactions(block)
+    for (const transaction of transactions) {
+      const filtered = this.indexers.filter(value => transaction.dftx.type === value.OP_CODE)
+      for (const indexer of filtered) {
+        await indexer.indexTransaction(block, transaction)
+      }
+    }
 
     for (const indexer of this.indexers) {
-      const filtered = transactions.filter(value => value.dftx.type === indexer.OP_CODE)
-      await indexer.index(block, filtered)
+      await indexer.indexBlockEnd(block)
     }
   }
 
   async invalidate (block: RawBlock): Promise<void> {
-    const transactions = this.getDfTxTransactions(block)
+    // When invalidating reverse the order of block indexing
+    for (const indexer of this.indexers) {
+      await indexer.invalidateBlockEnd(block)
+    }
+
+    // Invalidate backwards
+    const transactions = this.getDfTxTransactions(block).reverse()
+    for (const transaction of transactions) {
+      const filtered = this.indexers.filter(value => transaction.dftx.type === value.OP_CODE).reverse()
+      for (const indexer of filtered) {
+        await indexer.invalidateTransaction(block, transaction)
+      }
+    }
 
     for (const indexer of this.indexers) {
-      const filtered = transactions.filter(value => value.dftx.type === indexer.OP_CODE)
-      await indexer.invalidate(block, filtered)
+      await indexer.invalidateBlockStart(block)
     }
   }
 

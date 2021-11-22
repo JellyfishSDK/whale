@@ -22,6 +22,7 @@ import { MasternodeStatsMapper } from '@src/module.model/masternode.stats'
 import { TokenMapper } from '@src/module.model/token'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
+import { OraclePriceActiveMapper } from './oracle.price.active'
 import { VaultDepositMapper } from '@src/module.model/vault.deposit'
 
 @Global()
@@ -42,6 +43,7 @@ import { VaultDepositMapper } from '@src/module.model/vault.deposit'
     OraclePriceFeedMapper,
     OracleTokenCurrencyMapper,
     OracleMapper,
+    OraclePriceActiveMapper,
     PriceTickerMapper,
     MasternodeMapper,
     MasternodeStatsMapper,
@@ -66,6 +68,7 @@ import { VaultDepositMapper } from '@src/module.model/vault.deposit'
     OraclePriceFeedMapper,
     OracleTokenCurrencyMapper,
     OracleMapper,
+    OraclePriceActiveMapper,
     PriceTickerMapper,
     MasternodeMapper,
     MasternodeStatsMapper,

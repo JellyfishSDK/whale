@@ -44,6 +44,7 @@
       <w>dogfooding</w>
       <w>dummypos</w>
       <w>dumpprivkey</w>
+      <w>dusd</w>
       <w>equalverify</w>
       <w>eunos</w>
       <w>fromaltstack</w>
@@ -132,6 +133,7 @@
       <w>prevouts</w>
       <w>printtoconsole</w>
       <w>priv</w>
+      <w>protocolversion</w>
       <w>pubkey</w>
       <w>pubkeyhash</w>
       <w>pubkeys</w>

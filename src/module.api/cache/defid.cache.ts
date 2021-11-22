@@ -4,6 +4,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { TokenInfo, TokenResult } from '@defichain/jellyfish-api-core/dist/category/token'
 import { CachePrefix, GlobalCache } from '@src/module.api/cache/global.cache'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
+import { GetLoanSchemeResult } from '@defichain/jellyfish-api-core/dist/category/loan'
 
 @Injectable()
 export class DeFiDCache extends GlobalCache {
@@ -48,6 +49,14 @@ export class DeFiDCache extends GlobalCache {
     return await this.rpcClient.token.getToken(symbol)
   }
 
+  async getLoanScheme (id: string): Promise<GetLoanSchemeResult | undefined> {
+    return await this.get<GetLoanSchemeResult>(CachePrefix.LOAN_SCHEME_INFO, id, this.fetchLoanSchemeInfo.bind(this))
+  }
+
+  private async fetchLoanSchemeInfo (id: string): Promise<GetLoanSchemeResult | undefined> {
+    return await this.rpcClient.loan.getLoanScheme(id)
+  }
+
   async getPoolPairInfo (id: string): Promise<PoolPairInfo | undefined> {
     return await this.get<PoolPairInfo>(CachePrefix.POOL_PAIR_INFO, id, this.fetchPoolPairInfo.bind(this))
   }
@@ -63,9 +72,8 @@ export class DeFiDCache extends GlobalCache {
       /* istanbul ignore else */
       if (err?.payload?.message === 'Pool not found') {
         return undefined
-      } else {
-        throw err
       }
+      throw err
     }
   }
 }
