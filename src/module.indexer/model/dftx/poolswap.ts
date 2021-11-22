@@ -6,6 +6,7 @@ import { PoolPairMapper, PoolPair } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { NetworkName } from '@defichain/jellyfish-network'
 import BigNumber from 'bignumber.js'
+import { IndexerError } from '@src/module.indexer/error'
 
 export const PoolswapConsensusParams = {
   mainnet: {
@@ -33,24 +34,23 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     super()
   }
 
-  async index (block: RawBlock, txns: Array<DfTxTransaction<PoolSwap>>): Promise<void> {
-    for (const { dftx: { data } } of txns) {
-      const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(data.fromTokenId, data.toTokenId)
+  async indexTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
+    const data = transaction.dftx.data
+    const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(data.fromTokenId, data.toTokenId)
 
-      if (poolPairToken === undefined) {
-        continue
-      }
+    if (poolPairToken === undefined) {
+      throw new IndexerError(`Pool for pair ${data.fromTokenId}, ${data.toTokenId} not found`)
+    }
 
-      const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
+    const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
 
-      if (poolPair !== undefined) {
-        const BayFrontGardensHeight = PoolswapConsensusParams[this.network].BayFrontGardensHeight
-        const swappedPoolpair = PoolSwapIndexer.executeSwap(poolPair, data.fromTokenId, data.fromAmount,
-          block.height > BayFrontGardensHeight).poolPair
-        swappedPoolpair.id = `${poolPair.poolPairId}-${block.height}`
-        swappedPoolpair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
-        await this.poolPairMapper.put(swappedPoolpair)
-      }
+    if (poolPair !== undefined) {
+      const BayFrontGardensHeight = PoolswapConsensusParams[this.network].BayFrontGardensHeight
+      const swappedPoolpair = PoolSwapIndexer.executeSwap(poolPair, data.fromTokenId, data.fromAmount,
+        block.height > BayFrontGardensHeight).poolPair
+      swappedPoolpair.id = `${poolPair.poolPairId}-${block.height}`
+      swappedPoolpair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
+      await this.poolPairMapper.put(swappedPoolpair)
     }
   }
 
@@ -101,18 +101,19 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     return { swapped, poolFrom, poolTo }
   }
 
-  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<PoolSwap>>): Promise<void> {
-    for (const { dftx: { data } } of txns) {
-      const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(data.fromTokenId, data.toTokenId)
+  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
+    const data = transaction.dftx.data
+    const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(data.fromTokenId, data.toTokenId)
 
-      if (poolPairToken === undefined) {
-        continue
-      }
-
-      const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
-      if (poolPair !== undefined) {
-        await this.poolPairMapper.delete(`${poolPair.poolPairId}-${block.height}`)
-      }
+    if (poolPairToken === undefined) {
+      throw new IndexerError(`Pool for pair ${data.fromTokenId}, ${data.toTokenId} not found`)
     }
+
+    const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
+    if (poolPair === undefined) {
+      throw new IndexerError(`Pool with id ${poolPairToken.poolPairId} not found`)
+    }
+
+    await this.poolPairMapper.delete(`${poolPair.poolPairId}-${block.height}`)
   }
 }
