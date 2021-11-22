@@ -6,15 +6,15 @@ import BigNumber from 'bignumber.js'
 const VaultDepositMapping: ModelMapping<VaultDeposit> = {
   type: 'vault_deposit',
   index: {
-    vault_deposit_id: {
+    vault_deposit_key_sort: {
       name: 'vault_deposit_key_sort',
       partition: {
         type: 'string',
         key: (vd: VaultDeposit) => vd.vaultId
       },
       sort: {
-        type: 'number',
-        key: (vd: VaultDeposit) => vd.block.height
+        type: 'string',
+        key: (vd: VaultDeposit) => vd.sort
       }
     }
   }
@@ -26,7 +26,7 @@ export class VaultDepositMapper {
   }
 
   async getLatest (vaultDepositId: string): Promise<VaultDeposit | undefined> {
-    const latest = await this.database.query(VaultDepositMapping.index.vault_deposit_id, {
+    const latest = await this.database.query(VaultDepositMapping.index.vault_deposit_key_sort, {
       partitionKey: vaultDepositId,
       order: SortOrder.DESC,
       limit: 1
@@ -35,7 +35,7 @@ export class VaultDepositMapper {
   }
 
   async query (vaultId: string, limit: number, lt?: string): Promise<VaultDeposit[]> {
-    return await this.database.query(VaultDepositMapping.index.vault_deposit_id, {
+    return await this.database.query(VaultDepositMapping.index.vault_deposit_key_sort, {
       partitionKey: vaultId,
       limit: limit,
       order: SortOrder.DESC,
@@ -44,7 +44,7 @@ export class VaultDepositMapper {
   }
 
   async list (limit: number, lt?: string): Promise<VaultDeposit[]> {
-    return await this.database.query(VaultDepositMapping.index.poolpair_id, {
+    return await this.database.query(VaultDepositMapping.index.vault_deposit_key_sort, {
       limit: limit,
       order: SortOrder.DESC,
       lt: lt
@@ -65,8 +65,9 @@ export class VaultDepositMapper {
 }
 
 export interface VaultDeposit extends Model {
-  id: string // vaultId-blockHeight
-  vaultId: string // vaultId (decimal encoded integer as string)
+  id: string // -------------| vaultId-height
+  vaultId: string // --------| as partition key
+  sort: string // -----------| Hex encoded height
   block: {
     hash: string
     height: number

@@ -23,30 +23,30 @@ export class DepositToVaultIndexer extends DfTxIndexer<DepositToVault> {
     super()
   }
 
-  async index (block: RawBlock, txns: Array<DfTxTransaction<DepositToVault>>): Promise<void> {
-    for (const { dftx: { data } } of txns) {
-      console.log('data: ', data)
+  async indexTransaction (block: RawBlock, transaction: DfTxTransaction<DepositToVault>): Promise<void> {
+    const data = transaction.dftx.data
+    console.log('data: ', data)
 
-      const token = await this.tokenMapper.get(data.tokenAmount.token.toString()) as Token
+    const token = await this.tokenMapper.get(data.tokenAmount.token.toString()) as Token
 
-      // const ownerAddress = P2PKH.to(this.network, data.from).utf8String
-      await this.vaultDepositMapper.put({
-        id: `${data.vaultId}-${block.height}`,
-        vaultId: data.vaultId,
-        ownerAddress: 'addr',
-        tokenAmount: new BigNumber(1010),
-        symbol: token.symbol,
-        block: {
-          hash: block.hash,
-          height: block.height,
-          medianTime: block.mediantime,
-          time: block.time
-        }
-      })
-    }
+    // const ownerAddress = P2PKH.to(this.network, data.from).utf8String
+    await this.vaultDepositMapper.put({
+      id: `${data.vaultId}-${block.height}`,
+      vaultId: data.vaultId,
+      ownerAddress: 'addr',
+      tokenAmount: new BigNumber(1010),
+      symbol: token.symbol,
+      block: {
+        hash: block.hash,
+        height: block.height,
+        medianTime: block.mediantime,
+        time: block.time
+      }
+    })
   }
 
-  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<DepositToVault>>): Promise<void> {
+  async invalidateTransaction (block: RawBlock, txn: DfTxTransaction<DepositToVault>): Promise<void> {
+    // const data = transaction.dftx.data
     // for (const { dftx: { data } } of txns) {
     // const tokenId = await this.tokenMapper.getNextTokenID(true)
     // await this.poolPairMapper.delete(`${tokenId - 1}-${block.height}`)
