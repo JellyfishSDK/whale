@@ -91,7 +91,8 @@ it('should deferred model serves pending state', async () => {
   const first = await deferredMapper.query(120, 2)
   expect(first).toStrictEqual([
     {
-      id: 's200',
+      id: 's200-113',
+      loanSchemeId: 's200',
       ratio: 205,
       rate: '8.05',
       activateAfterBlock: '120',
@@ -103,7 +104,8 @@ it('should deferred model serves pending state', async () => {
       }
     },
     {
-      id: 's190',
+      id: 's190-111',
+      loanSchemeId: 's190',
       ratio: 195,
       rate: '7.05',
       activateAfterBlock: '120',
@@ -119,7 +121,8 @@ it('should deferred model serves pending state', async () => {
   const next = await deferredMapper.query(120, 2, first[first.length - 1].block.height)
   expect(next).toStrictEqual([
     {
-      id: 's180',
+      id: 's180-109',
+      loanSchemeId: 's180',
       ratio: 185,
       rate: '6.05',
       activateAfterBlock: '120',
@@ -131,7 +134,8 @@ it('should deferred model serves pending state', async () => {
       }
     },
     {
-      id: 's170',
+      id: 's170-107',
+      loanSchemeId: 's170',
       ratio: 175,
       rate: '5.05',
       activateAfterBlock: '120',
@@ -147,7 +151,8 @@ it('should deferred model serves pending state', async () => {
   const last = await deferredMapper.query(120, 2, next[next.length - 1].block.height)
   expect(last).toStrictEqual([
     {
-      id: 's160',
+      id: 's160-105',
+      loanSchemeId: 's160',
       ratio: 165,
       rate: '4.05',
       activateAfterBlock: '120',
@@ -159,7 +164,8 @@ it('should deferred model serves pending state', async () => {
       }
     },
     {
-      id: 's150',
+      id: 's150-103',
+      loanSchemeId: 's150',
       ratio: 155,
       rate: '3.05',
       activateAfterBlock: '120',

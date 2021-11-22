@@ -1,17 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
-import { LoanScheme, CCreateLoanScheme } from '@defichain/jellyfish-transaction'
-import { LoanSchemeMapper, LoanScheme as LoanSchemeModel } from '@src/module.model/loan.scheme'
-import { LoanSchemeHistoryMapper, LoanSchemeHistory } from '@src/module.model/loan.scheme.history'
-import { DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
+import { SetLoanScheme, CSetLoanScheme } from '@defichain/jellyfish-transaction'
+import { LoanSchemeMapper, LoanScheme } from '@src/module.model/loan.scheme'
+import { LoanSchemeHistoryMapper, LoanSchemeHistory, LoanSchemeHistoryEvent } from '@src/module.model/loan.scheme.history'
+import { DeferredLoanScheme, DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
 import BigNumber from 'bignumber.js'
 import { NotFoundIndexerError } from '@src/module.indexer/error'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 @Injectable()
-export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
-  OP_CODE: number = CCreateLoanScheme.OP_CODE
+export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
+  OP_CODE: number = CSetLoanScheme.OP_CODE
   private readonly logger = new Logger(SetDeferredLoanSchemeIndexer.name)
 
   constructor (
@@ -22,14 +22,14 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
     super()
   }
 
-  async index (block: RawBlock): Promise<void> {
+  async indexTransaction (block: RawBlock): Promise<void> {
     const loop = async (activeAfterBlock: number, next?: number): Promise<void> => {
       const list = await this.deferredLoanSchemeMapper.query(activeAfterBlock, 100)
       if (list.length === 0) {
         return
       }
       for (const each of list) {
-        await this.loanSchemeMapper.put(each)
+        await this.loanSchemeMapper.put(this.mapLoanScheme(each))
         await this.deferredLoanSchemeMapper.delete(each.id)
       }
       return await loop(activeAfterBlock, list[list.length - 1].block.height)
@@ -38,16 +38,28 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
     return await loop(block.height)
   }
 
-  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<LoanScheme>>): Promise<void> {
-    for (const { dftx: { data } } of txns) {
-      const prevDeferredLoanScheme = await this.getCurrentLoanScheme(data.identifier)
-      const prevLoanScheme = await this.getPrevLoanScheme(data.identifier, block.height)
-      if (prevLoanScheme === undefined) {
-        throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
-      }
-      await this.deferredLoanSchemeMapper.put(prevDeferredLoanScheme)
-      await this.loanSchemeMapper.put(prevLoanScheme)
+  private mapLoanScheme (deferredLoanScheme: DeferredLoanScheme): LoanScheme {
+    return {
+      id: deferredLoanScheme.loanSchemeId,
+      ratio: deferredLoanScheme.ratio,
+      rate: deferredLoanScheme.rate,
+      activateAfterBlock: deferredLoanScheme.activateAfterBlock,
+      block: deferredLoanScheme.block
     }
+  }
+
+  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>): Promise<void> {
+    const data = transaction.dftx.data
+    const prevDeferredLoanScheme = await this.getPrevDeferredLoanScheme(data.identifier, block.height)
+    if (prevDeferredLoanScheme === undefined) {
+      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
+    }
+    const prevLoanScheme = await this.getPrevLoanScheme(data.identifier, block.height)
+    if (prevLoanScheme === undefined) {
+      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
+    }
+    await this.deferredLoanSchemeMapper.put(prevDeferredLoanScheme)
+    await this.loanSchemeMapper.put(prevLoanScheme)
   }
 
   /**
@@ -72,13 +84,26 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
   }
 
   /**
-   * Get current loan scheme which is prev deferred loan scheme
+   * Get prev deferred loan scheme
    */
-  private async getCurrentLoanScheme (loanSchemeId: string): Promise<LoanSchemeModel> {
-    const prevDeferredLoanScheme = await this.loanSchemeMapper.get(loanSchemeId)
-    if (prevDeferredLoanScheme === undefined) {
-      throw new NotFoundIndexerError('index', 'LoanScheme', loanSchemeId)
+  private async getPrevDeferredLoanScheme (id: string, height: number): Promise<LoanSchemeHistory | undefined> {
+    const findInNextPage = async (height: number): Promise<LoanSchemeHistory | undefined> => {
+      const list = await this.loanSchemeHistoryMapper.query(id, 100, HexEncoder.encodeHeight(height))
+      if (list.length === 0) {
+        return undefined
+      }
+
+      const prevDeferredLoanScheme = list.find(each =>
+        each.event === LoanSchemeHistoryEvent.UPDATE &&
+        new BigNumber(height).eq(each.activateAfterBlock))
+
+      if (prevDeferredLoanScheme !== undefined) {
+        return prevDeferredLoanScheme
+      }
+
+      return await findInNextPage(list[list.length - 1].block.height)
     }
-    return prevDeferredLoanScheme
+
+    return await findInNextPage(height)
   }
 }

@@ -125,7 +125,6 @@ describe('setLoanScheme', () => {
     // loanSchemeHistoryMapper
     {
       const histories = await loanSchemeHistoryMapper.query('s150', 30)
-      console.log('histories: ', histories)
       expect(histories.length).toStrictEqual(1)
       expect(histories).toStrictEqual([
         {
@@ -175,7 +174,7 @@ describe('setLoanScheme', () => {
         id: 's200',
         ratio: 205,
         rate: '2.85',
-        activateAfterBlock: '18446744073709551615',
+        activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
         block: {
           hash: expect.any(String),
           height: expect.any(Number),
@@ -190,7 +189,7 @@ describe('setLoanScheme', () => {
           id: 's250',
           ratio: 255,
           rate: '2.55',
-          activateAfterBlock: '18446744073709551615',
+          activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
           block: {
             hash: expect.any(String),
             height: expect.any(Number),
@@ -202,7 +201,7 @@ describe('setLoanScheme', () => {
           id: 's200',
           ratio: 205,
           rate: '2.85',
-          activateAfterBlock: '18446744073709551615',
+          activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
           block: {
             hash: expect.any(String),
             height: expect.any(Number),
@@ -214,7 +213,7 @@ describe('setLoanScheme', () => {
           id: 's150',
           ratio: 155,
           rate: '3.05',
-          activateAfterBlock: '18446744073709551615',
+          activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
           block: {
             hash: expect.any(String),
             height: expect.any(Number),
@@ -234,7 +233,7 @@ describe('setLoanScheme', () => {
           sort: '00000069',
           ratio: 155,
           rate: '3.05',
-          activateAfterBlock: '18446744073709551615',
+          activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
           event: 'update',
           block: {
             hash: expect.any(String),
@@ -307,9 +306,11 @@ describe('setLoanScheme', () => {
       }
     })
 
-    const s150PendingBefore = await deferredLoanSchemeMapper.get('s150')
+    const deferredLoanSchemesBefore = await deferredLoanSchemeMapper.query(110, 100)
+    const s150PendingBefore = deferredLoanSchemesBefore.find(l => l.loanSchemeId === 's150')
     expect(s150PendingBefore).toStrictEqual({
-      id: 's150',
+      id: 's150-103',
+      loanSchemeId: 's150',
       ratio: 155,
       rate: '3.05',
       activateAfterBlock: '110',
@@ -372,7 +373,8 @@ describe('setLoanScheme', () => {
       }
     })
 
-    const s150PendingAfter = await deferredLoanSchemeMapper.get('s150')
+    const deferredLoanSchemesAfter = await deferredLoanSchemeMapper.query(110, 100)
+    const s150PendingAfter = deferredLoanSchemesAfter.find(l => l.loanSchemeId === 's150')
     expect(s150PendingAfter).toStrictEqual(undefined) // cleared
 
     const listAfter = await loanSchemeHistoryMapper.query('s150', 100)
