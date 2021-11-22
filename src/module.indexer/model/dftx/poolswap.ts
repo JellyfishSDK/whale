@@ -6,6 +6,7 @@ import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { NetworkName } from '@defichain/jellyfish-network'
 import BigNumber from 'bignumber.js'
+import { IndexerError } from '@src/module.indexer/error'
 
 const PoolswapConsensusParams = {
   mainnet: {
@@ -33,38 +34,37 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     super()
   }
 
-  async index (block: RawBlock, txns: Array<DfTxTransaction<PoolSwap>>): Promise<void> {
-    for (const { dftx: { data } } of txns) {
-      const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(data.fromTokenId, data.toTokenId)
+  async indexTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
+    const data = transaction.dftx.data
+    const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(data.fromTokenId, data.toTokenId)
 
-      if (poolPairToken === undefined) {
-        continue
+    if (poolPairToken === undefined) {
+      throw new IndexerError(`Pool for pair ${data.fromTokenId}, ${data.toTokenId} not found`)
+    }
+
+    const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
+
+    if (poolPair !== undefined) {
+      const forward = data.fromTokenId === poolPair.tokenA.id
+      const reserveF = new BigNumber(forward ? poolPair.tokenA.reserve : poolPair.tokenB.reserve)
+      const reserveT = new BigNumber(forward ? poolPair.tokenB.reserve : poolPair.tokenA.reserve)
+
+      const BayFrontGardensHeight = PoolswapConsensusParams[this.network].BayFrontGardensHeight
+
+      let fromAmount = data.fromAmount
+      const commission = new BigNumber(poolPair.commission)
+      if (commission.gt(0)) {
+        fromAmount = fromAmount.minus(fromAmount.times(commission))
       }
 
-      const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
+      const result = this.slopeSwap(fromAmount, reserveF, reserveT, block.height > BayFrontGardensHeight)
 
-      if (poolPair !== undefined) {
-        const forward = data.fromTokenId === poolPair.tokenA.id
-        const reserveF = new BigNumber(forward ? poolPair.tokenA.reserve : poolPair.tokenB.reserve)
-        const reserveT = new BigNumber(forward ? poolPair.tokenB.reserve : poolPair.tokenA.reserve)
+      poolPair.id = `${poolPair.poolPairId}-${block.height}`
+      poolPair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
+      poolPair.tokenA.reserve = (forward ? result.poolFrom : result.poolTo).toFixed(8, BigNumber.ROUND_DOWN)
+      poolPair.tokenB.reserve = (forward ? result.poolTo : result.poolFrom).toFixed(8, BigNumber.ROUND_DOWN)
 
-        const BayFrontGardensHeight = PoolswapConsensusParams[this.network].BayFrontGardensHeight
-
-        let fromAmount = data.fromAmount
-        const commission = new BigNumber(poolPair.commission)
-        if (commission.gt(0)) {
-          fromAmount = fromAmount.minus(fromAmount.times(commission))
-        }
-
-        const result = this.slopeSwap(fromAmount, reserveF, reserveT, block.height > BayFrontGardensHeight)
-
-        poolPair.id = `${poolPair.poolPairId}-${block.height}`
-        poolPair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
-        poolPair.tokenA.reserve = (forward ? result.poolFrom : result.poolTo).toFixed(8, BigNumber.ROUND_DOWN)
-        poolPair.tokenB.reserve = (forward ? result.poolTo : result.poolFrom).toFixed(8, BigNumber.ROUND_DOWN)
-
-        await this.poolPairMapper.put(poolPair)
-      }
+      await this.poolPairMapper.put(poolPair)
     }
   }
 
@@ -96,18 +96,19 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     return { swapped, poolFrom, poolTo }
   }
 
-  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<PoolSwap>>): Promise<void> {
-    for (const { dftx: { data } } of txns) {
-      const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(data.fromTokenId, data.toTokenId)
+  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
+    const data = transaction.dftx.data
+    const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(data.fromTokenId, data.toTokenId)
 
-      if (poolPairToken === undefined) {
-        continue
-      }
-
-      const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
-      if (poolPair !== undefined) {
-        await this.poolPairMapper.delete(`${poolPair.poolPairId}-${block.height}`)
-      }
+    if (poolPairToken === undefined) {
+      throw new IndexerError(`Pool for pair ${data.fromTokenId}, ${data.toTokenId} not found`)
     }
+
+    const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
+    if (poolPair === undefined) {
+      throw new IndexerError(`Pool with id ${poolPairToken.poolPairId} not found`)
+    }
+
+    await this.poolPairMapper.delete(`${poolPair.poolPairId}-${block.height}`)
   }
 }
