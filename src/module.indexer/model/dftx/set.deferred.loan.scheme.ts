@@ -22,7 +22,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     super()
   }
 
-  async indexTransaction (block: RawBlock): Promise<void> {
+  async indexBlockStart (block: RawBlock): Promise<void> {
     const loop = async (activeAfterBlock: number, next?: number): Promise<void> => {
       const list = await this.deferredLoanSchemeMapper.query(activeAfterBlock, 100)
       if (list.length === 0) {
@@ -46,6 +46,9 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       activateAfterBlock: deferredLoanScheme.activateAfterBlock,
       block: deferredLoanScheme.block
     }
+  }
+
+  async indexTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>): Promise<void> {
   }
 
   async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>): Promise<void> {
