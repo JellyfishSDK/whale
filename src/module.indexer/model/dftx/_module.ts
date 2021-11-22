@@ -33,13 +33,14 @@ const indexers = [
 
 @Module({
   providers: [...indexers,
-  {
-    provide: 'NETWORK',
-    useFactory: (configService: ConfigService): NetworkName => {
-      return configService.get<string>('network') as NetworkName
-    },
-    inject: [ConfigService]
-  }],
+    {
+      provide: 'NETWORK',
+      useFactory: (configService: ConfigService): NetworkName => {
+        return configService.get<string>('network') as NetworkName
+      },
+      inject: [ConfigService]
+    }
+  ],
   exports: indexers
 })
 export class DfTxIndexerModule {
