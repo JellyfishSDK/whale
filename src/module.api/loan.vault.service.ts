@@ -1,5 +1,6 @@
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import {
+  AuctionPagination,
   VaultActive,
   VaultLiquidation,
   VaultLiquidationBatch,
@@ -19,30 +20,39 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
+import { parseDisplaySymbol } from '@src/module.api/token.controller'
+import { ActivePrice } from '@whale-api-client/api/prices'
+import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 
 @Injectable()
 export class LoanVaultService {
   constructor (
     private readonly client: JsonRpcClient,
-    private readonly deFiDCache: DeFiDCache
+    private readonly deFiDCache: DeFiDCache,
+    private readonly activePriceMapper: OraclePriceActiveMapper
   ) {
   }
 
   async list (query: PaginationQuery, address?: string): Promise<ApiPagedResponse<LoanVaultActive | LoanVaultLiquidated>> {
+    const next = query.next !== undefined ? String(query.next) : undefined
+    const size = query.size > 30 ? 30 : query.size
     const pagination: VaultPagination = {
-      start: query.next !== undefined ? String(query.next) : undefined,
+      start: next,
       // including_start: query.next === undefined,
-      limit: query.size > 10 ? 10 : query.size // limit size to 10 for vault querying
+      limit: size
     }
 
     const list: Array<VaultActive | VaultLiquidation> = await this.client.loan
-      .listVaults(pagination, { ownerAddress: address, verbose: true }) as any
+      .listVaults(pagination, {
+        ownerAddress: address,
+        verbose: true
+      }) as any
     const vaults = list.map(async (vault: VaultActive | VaultLiquidation) => {
       return await this.mapLoanVault(vault)
     })
 
     const items = await Promise.all(vaults)
-    return ApiPagedResponse.of(items, query.size, item => {
+    return ApiPagedResponse.of(items, size, item => {
       return item.vaultId
     })
   }
@@ -61,19 +71,38 @@ export class LoanVaultService {
     }
   }
 
+  async listAuction (query: PaginationQuery): Promise<ApiPagedResponse<LoanVaultLiquidated>> {
+    const next = query.next !== undefined ? String(query.next) : undefined
+    const size = query.size > 30 ? 30 : query.size
+    let pagination: AuctionPagination
+
+    if (next !== undefined) {
+      const vaultId = next.substr(0, 64)
+      const height = next.substr(64)
+
+      pagination = {
+        start: {
+          vaultId,
+          height: height !== undefined ? parseInt(height) : 0
+        },
+        limit: size
+      }
+    } else {
+      pagination = { limit: size }
+    }
+
+    const list = (await this.client.loan.listAuctions(pagination))
+      .map(async value => await this.mapLoanAuction(value))
+    const items = await Promise.all(list)
+
+    return ApiPagedResponse.of(items, size, item => {
+      return `${item.vaultId}${item.liquidationHeight}`
+    })
+  }
+
   private async mapLoanVault (details: VaultActive | VaultLiquidation): Promise<LoanVaultActive | LoanVaultLiquidated> {
     if (details.state === VaultState.IN_LIQUIDATION) {
-      const data = details as VaultLiquidation
-      return {
-        vaultId: data.vaultId,
-        loanScheme: await this.mapLoanScheme(data.loanSchemeId),
-        ownerAddress: data.ownerAddress,
-        state: LoanVaultState.IN_LIQUIDATION,
-        batchCount: data.batchCount,
-        liquidationHeight: data.liquidationHeight,
-        liquidationPenalty: data.liquidationPenalty,
-        batches: await this.mapLiquidationBatches(data.batches)
-      }
+      return await this.mapLoanAuction(details as VaultLiquidation)
     }
 
     const data = details as VaultActive
@@ -95,6 +124,20 @@ export class LoanVaultService {
     }
   }
 
+  private async mapLoanAuction (details: VaultLiquidation): Promise<LoanVaultLiquidated> {
+    const data = details
+    return {
+      vaultId: data.vaultId,
+      loanScheme: await this.mapLoanScheme(data.loanSchemeId),
+      ownerAddress: data.ownerAddress,
+      state: LoanVaultState.IN_LIQUIDATION,
+      batchCount: data.batchCount,
+      liquidationHeight: data.liquidationHeight,
+      liquidationPenalty: data.liquidationPenalty,
+      batches: await this.mapLiquidationBatches(data.batches)
+    }
+  }
+
   private async mapTokenAmounts (items?: string[]): Promise<LoanVaultTokenAmount[]> {
     if (items === undefined || items.length === 0) {
       return []
@@ -104,18 +147,20 @@ export class LoanVaultService {
     const tokenInfos = await this.deFiDCache
       .batchTokenInfoBySymbol(tokenAmounts.map(([_, symbol]) => symbol))
 
-    return tokenAmounts
-      .map(([amount, symbol]): LoanVaultTokenAmount => {
-        const result = tokenInfos[symbol]
-        if (result === undefined) {
-          throw new ConflictException('unable to find token')
-        }
+    const mappedItems = tokenAmounts.map(async ([amount, symbol]): Promise<LoanVaultTokenAmount> => {
+      const result = tokenInfos[symbol]
+      if (result === undefined) {
+        throw new ConflictException('unable to find token')
+      }
 
-        const info = Object.values(result)[0]
-        const id = Object.keys(result)[0]
+      const info = Object.values(result)[0]
+      const id = Object.keys(result)[0]
+      const activePrice = await this.activePriceMapper.query(`${symbol}-USD`, 1)
+      return mapLoanVaultTokenAmount(id, info, amount, activePrice[0])
+    })
 
-        return mapLoanVaultTokenAmount(id, info, amount)
-      }).sort(a => Number.parseInt(a.id))
+    return (await Promise.all(mappedItems))
+      .sort(a => Number.parseInt(a.id))
   }
 
   private async mapLiquidationBatches (batches: VaultLiquidationBatch[]): Promise<LoanVaultLiquidationBatch[]> {
@@ -147,14 +192,15 @@ export class LoanVaultService {
   }
 }
 
-function mapLoanVaultTokenAmount (id: string, tokenInfo: TokenInfo, amount: string): LoanVaultTokenAmount {
+function mapLoanVaultTokenAmount (id: string, tokenInfo: TokenInfo, amount: string, activePrice?: ActivePrice): LoanVaultTokenAmount {
   return {
     id: id,
     amount: amount,
     symbol: tokenInfo.symbol,
     symbolKey: tokenInfo.symbolKey,
     name: tokenInfo.name,
-    displaySymbol: tokenInfo.isDAT && tokenInfo.symbol !== 'DFI' && !tokenInfo.isLPS ? `d${tokenInfo.symbol}` : tokenInfo.symbol
+    displaySymbol: parseDisplaySymbol(tokenInfo),
+    activePrice: activePrice
   }
 }
 

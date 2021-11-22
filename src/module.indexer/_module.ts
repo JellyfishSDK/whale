@@ -13,6 +13,8 @@ import { IndexStatusMapper } from '@src/module.indexer/status'
 import { DfTxIndexerModule } from '@src/module.indexer/model/dftx/_module'
 import { MainDfTxIndexer } from '@src/module.indexer/model/dftx.indexer'
 import { BlockMintedIndexer } from '@src/module.indexer/model/block.minted'
+import { ConfigService } from '@nestjs/config'
+import { NetworkName } from '@defichain/jellyfish-network'
 
 @Module({
   providers: [
@@ -28,7 +30,14 @@ import { BlockMintedIndexer } from '@src/module.indexer/model/block.minted'
     TransactionVinIndexer,
     TransactionVoutIndexer,
     MainDfTxIndexer,
-    BlockMintedIndexer
+    BlockMintedIndexer,
+    {
+      provide: 'NETWORK',
+      useFactory: (configService: ConfigService): NetworkName => {
+        return configService.get<string>('network') as NetworkName
+      },
+      inject: [ConfigService]
+    }
   ],
   imports: [
     DfTxIndexerModule

@@ -11,10 +11,12 @@ import { CreateMasternodeIndexer } from '@src/module.indexer/model/dftx/create.m
 import { ResignMasternodeIndexer } from '@src/module.indexer/model/dftx/resign.masternode'
 import { Injectable, Logger } from '@nestjs/common'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
+import { CreatePoolPairIndexer } from '@src/module.indexer/model/dftx/create.poolpair'
+import { CreateTokenIndexer } from '@src/module.indexer/model/dftx/create.token'
+import { UpdatePoolPairIndexer } from '@src/module.indexer/model/dftx/update.poolpair'
+import { SetLoanTokenIndexer } from '@src/module.indexer/model/dftx/set.loan.token'
+import { ActivePriceIndexer } from '@src/module.indexer/model/dftx/active.price'
 import { SetCollateralTokenIndexer } from '@src/module.indexer/model/dftx/set.collateral.token'
-import { CreateTokenIndexer } from './dftx/create.token'
-// import { CreatePoolPairIndexer } from './dftx/create.poolpair'
-// import { UpdatePoolPairIndexer } from './dftx/update.poolpair'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
@@ -29,10 +31,12 @@ export class MainDfTxIndexer extends Indexer {
     private readonly setOracleDataInterval: SetOracleDataIntervalIndexer,
     private readonly createMasternode: CreateMasternodeIndexer,
     private readonly resignMasternode: ResignMasternodeIndexer,
-    private readonly collateralToken: SetCollateralTokenIndexer,
-    private readonly createToken: CreateTokenIndexer
-    // private readonly createPoolPair: CreatePoolPairIndexer,
-    // private readonly updatePoolPair: UpdatePoolPairIndexer
+    private readonly createToken: CreateTokenIndexer,
+    private readonly createPoolPair: CreatePoolPairIndexer,
+    private readonly updatePoolPair: UpdatePoolPairIndexer,
+    private readonly setLoanToken: SetLoanTokenIndexer,
+    private readonly activePriceIndexer: ActivePriceIndexer,
+    private readonly collateralToken: SetCollateralTokenIndexer
   ) {
     super()
     this.indexers = [
@@ -43,28 +47,50 @@ export class MainDfTxIndexer extends Indexer {
       createMasternode,
       resignMasternode,
       setOracleDataInterval,
-      collateralToken,
-      createToken
-      // createPoolPair,
-      // updatePoolPair
+      createToken,
+      createPoolPair,
+      updatePoolPair,
+      setLoanToken,
+      activePriceIndexer,
+      collateralToken
     ]
   }
 
   async index (block: RawBlock): Promise<void> {
+    for (const indexer of this.indexers) {
+      await indexer.indexBlockStart(block)
+    }
+
     const transactions = this.getDfTxTransactions(block)
+    for (const transaction of transactions) {
+      const filtered = this.indexers.filter(value => transaction.dftx.type === value.OP_CODE)
+      for (const indexer of filtered) {
+        await indexer.indexTransaction(block, transaction)
+      }
+    }
 
     for (const indexer of this.indexers) {
-      const filtered = transactions.filter(value => value.dftx.type === indexer.OP_CODE)
-      await indexer.index(block, filtered)
+      await indexer.indexBlockEnd(block)
     }
   }
 
   async invalidate (block: RawBlock): Promise<void> {
-    const transactions = this.getDfTxTransactions(block)
+    // When invalidating reverse the order of block indexing
+    for (const indexer of this.indexers) {
+      await indexer.invalidateBlockEnd(block)
+    }
+
+    // Invalidate backwards
+    const transactions = this.getDfTxTransactions(block).reverse()
+    for (const transaction of transactions) {
+      const filtered = this.indexers.filter(value => transaction.dftx.type === value.OP_CODE).reverse()
+      for (const indexer of filtered) {
+        await indexer.invalidateTransaction(block, transaction)
+      }
+    }
 
     for (const indexer of this.indexers) {
-      const filtered = transactions.filter(value => value.dftx.type === indexer.OP_CODE)
-      await indexer.invalidate(block, filtered)
+      await indexer.invalidateBlockStart(block)
     }
   }
 
