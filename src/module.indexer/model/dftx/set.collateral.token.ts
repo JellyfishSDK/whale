@@ -36,7 +36,7 @@ export class SetCollateralTokenIndexer extends DfTxIndexer<SetCollateralToken> {
           id: setCollateralToken.token,
           symbol: token.symbol
         },
-        priceFeed: `${setCollateralToken.currencyPair.token}/${setCollateralToken.currencyPair.currency}`,
+        priceFeed: `${setCollateralToken.currencyPair.token}-${setCollateralToken.currencyPair.currency}`,
         block: {
           hash: block.hash,
           height: block.height,
