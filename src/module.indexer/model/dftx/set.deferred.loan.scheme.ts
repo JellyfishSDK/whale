@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
-import { LoanScheme, CCreateLoanScheme } from '@defichain/jellyfish-transaction'
+import { LoanScheme, CSetLoanScheme } from '@defichain/jellyfish-transaction'
 import { LoanSchemeMapper, LoanScheme as LoanSchemeModel } from '@src/module.model/loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistory, LoanSchemeHistoryEvent } from '@src/module.model/loan.scheme.history'
 import { DeferredLoanScheme, DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
@@ -11,7 +11,7 @@ import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 @Injectable()
 export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
-  OP_CODE: number = CCreateLoanScheme.OP_CODE
+  OP_CODE: number = CSetLoanScheme.OP_CODE
   private readonly logger = new Logger(SetDeferredLoanSchemeIndexer.name)
 
   constructor (

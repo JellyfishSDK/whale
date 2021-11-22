@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { LoanScheme, CCreateLoanScheme } from '@defichain/jellyfish-transaction'
+import { LoanScheme, CSetLoanScheme } from '@defichain/jellyfish-transaction'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 import { DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent, LoanSchemeHistory } from '@src/module.model/loan.scheme.history'
@@ -11,7 +11,7 @@ import { NotFoundIndexerError } from '@src/module.indexer/error'
 
 @Injectable()
 export class SetLoanSchemeIndexer extends DfTxIndexer<LoanScheme> {
-  OP_CODE: number = CCreateLoanScheme.OP_CODE
+  OP_CODE: number = CSetLoanScheme.OP_CODE
   private readonly logger = new Logger(SetLoanSchemeIndexer.name)
 
   constructor (
