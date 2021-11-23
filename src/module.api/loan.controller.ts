@@ -17,7 +17,8 @@ import {
   LoanTokenResult
 } from '@defichain/jellyfish-api-core/dist/category/loan'
 import {
-  CollateralToken, LoanAuctionHistory,
+  CollateralToken,
+  LoanAuctionHistory,
   LoanScheme,
   LoanToken,
   LoanVaultActive,

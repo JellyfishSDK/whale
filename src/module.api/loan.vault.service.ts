@@ -109,7 +109,8 @@ export class LoanVaultService {
     let pagination: ListAuctionHistoryPagination
 
     if (next !== undefined) {
-      const [vaultId, maxBlockHeight] = next.split('|')
+      const vaultId = next.substr(0, 64)
+      const maxBlockHeight = next.substr(64)
       pagination = {
         vaultId,
         maxBlockHeight: maxBlockHeight !== undefined ? parseInt(maxBlockHeight) : 0,
@@ -130,17 +131,7 @@ export class LoanVaultService {
 
   private async mapLoanVault (details: VaultActive | VaultLiquidation): Promise<LoanVaultActive | LoanVaultLiquidated> {
     if (details.state === VaultState.IN_LIQUIDATION) {
-      const data = details as VaultLiquidation
-      return {
-        vaultId: data.vaultId,
-        loanScheme: await this.mapLoanScheme(data.loanSchemeId),
-        ownerAddress: data.ownerAddress,
-        state: LoanVaultState.IN_LIQUIDATION,
-        batchCount: data.batchCount,
-        liquidationHeight: data.liquidationHeight,
-        liquidationPenalty: data.liquidationPenalty,
-        batches: await this.mapLiquidationBatches(data.batches)
-      }
+      return await this.mapLoanAuction(details as VaultLiquidation)
     }
 
     const data = details as VaultActive
