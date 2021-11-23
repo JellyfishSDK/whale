@@ -52,6 +52,7 @@ export interface DeferredLoanScheme extends Model {
   loanSchemeId: string
   ratio: number
   rate: BigNumber
+  default: boolean
   activateAfterBlock: BigNumber
 
   block: {

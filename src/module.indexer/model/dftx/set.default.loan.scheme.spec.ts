@@ -2,9 +2,8 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { Testing } from '@defichain/jellyfish-testing'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
-// import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
-// import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent } from '@src/module.model/loan.scheme.history'
-// import { DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
+import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
+import { LoanSchemeHistoryMapper } from '@src/module.model/loan.scheme.history'
 import BigNumber from 'bignumber.js'
 
 let app: NestFastifyApplication
@@ -42,15 +41,57 @@ it('should index setDefaultLoanScheme', async () => {
   await createLoanScheme('s200', 200, new BigNumber(2.8))
   await setDefaultLoanScheme('s200')
 
-  const list = await testing.rpc.loan.listLoanSchemes()
-  console.log('list: ', list)
-
   {
     const height = await testing.container.call('getblockcount')
     await testing.container.generate(1)
     await waitForIndexedHeight(app, height)
   }
 
-  // const loanSchemeMapper = app.get(LoanSchemeMapper)
-  // const loanSchemeHistoryMapper = app.get(LoanSchemeHistoryMapper)
+  const loanSchemeMapper = app.get(LoanSchemeMapper)
+  const loanSchemeHistoryMapper = app.get(LoanSchemeHistoryMapper)
+
+  const s150 = await loanSchemeMapper.get('s150')
+  expect(s150).toStrictEqual({
+    id: 's150',
+    ratio: 150,
+    rate: '3',
+    activateAfterBlock: '0',
+    default: false,
+    block: expect.any(Object)
+  })
+  const s200 = await loanSchemeMapper.get('s200')
+  expect(s200).toStrictEqual({
+    id: 's200',
+    ratio: 200,
+    rate: '2.8',
+    activateAfterBlock: '0',
+    default: true,
+    block: expect.any(Object)
+  })
+
+  const s200History = await loanSchemeHistoryMapper.query('s200', 100)
+  expect(s200History).toStrictEqual([
+    {
+      id: 's200-104',
+      ratio: 200,
+      rate: '2.8',
+      activateAfterBlock: '0',
+      default: true,
+      block: expect.any(Object),
+      loanSchemeId: 's200',
+      sort: '00000068',
+      event: 'setDefault'
+    },
+    {
+      id: 's200-103',
+      ratio: 200,
+      rate: '2.8',
+      activateAfterBlock: '0',
+      default: false,
+      block: expect.any(Object),
+      loanSchemeId: 's200',
+      sort: '00000067',
+      event: 'create'
+    }
+  ])
 })
