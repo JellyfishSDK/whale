@@ -364,7 +364,7 @@ afterAll(async () => {
   await stopTestingAppGroup(tGroup, app)
 })
 
-describe('loan', () => {
+describe('list', () => {
   it('should listAuctionHistory', async () => {
     const result = await controller.listAuctionHistory({ size: 100 })
     expect(result.data.length).toStrictEqual(4)
@@ -387,19 +387,29 @@ describe('loan', () => {
 it('should listAuctionHistory with pagination', async () => {
   const first = await controller.listAuctionHistory({ size: 2 })
   expect(first.data.length).toStrictEqual(2)
-  expect(first.page?.next).toStrictEqual(`${first.data[1].vaultId}|${first.data[1].blockHeight}`)
+  expect(first.page?.next).toStrictEqual(`${first.data[1].vaultId}${first.data[1].blockHeight}`)
 
   const next = await controller.listAuctionHistory({
     size: 2,
     next: first.page?.next
   })
   expect(next.data.length).toStrictEqual(2)
-  expect(next.page?.next).toStrictEqual(`${next.data[1].vaultId}|${next.data[1].blockHeight}`)
+  expect(next.page?.next).toStrictEqual(`${next.data[1].vaultId}${next.data[1].blockHeight}`)
 
-  // const last = await controller.listAuctionHistory({
-  //   size: 2,
-  //   next: next.page?.next
-  // })
-  // expect(last.data.length).toStrictEqual(0)
-  // expect(last.page).toBeUndefined()
+  const last = await controller.listAuctionHistory({
+    size: 2,
+    next: next.page?.next
+  })
+  expect(last.data.length).toStrictEqual(0)
+  expect(last.page).toBeUndefined()
+})
+
+it('should listAuctionHistory with an empty object if size 100 next 51f6233c4403f6ce113bb4e90f83b176587f401081605b8a8bb723ff3b0ab5b6 300 which is out of range', async () => {
+  const result = await controller.listAuctionHistory({
+    size: 100,
+    next: '51f6233c4403f6ce113bb4e90f83b176587f401081605b8a8bb723ff3b0ab5b6300'
+  })
+
+  expect(result.data.length).toStrictEqual(0)
+  expect(result.page).toBeUndefined()
 })

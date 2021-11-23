@@ -103,10 +103,10 @@ export class Loan {
   }
 
   /**
-   * Paginate query auction histories.
+   * Paginate query auction history.
    *
-   * @param {number} size of vaults to query
-   * @param {string} next set of vaults
+   * @param {number} size of auction history to query
+   * @param {string} next set of auction history
    * @return {Promise<ApiPagedResponse<LoanAuctionHistory>>}
    */
   async listAuctionHistory (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanAuctionHistory>> {
