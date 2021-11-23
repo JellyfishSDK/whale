@@ -1,7 +1,8 @@
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import {
-  AuctionDetail,
-  AuctionPagination, ListAuctionHistoryDetail, ListAuctionHistoryPagination,
+  AuctionPagination,
+  ListAuctionHistoryDetail,
+  ListAuctionHistoryPagination,
   VaultActive,
   VaultLiquidation,
   VaultLiquidationBatch,
@@ -45,7 +46,10 @@ export class LoanVaultService {
     }
 
     const list: Array<VaultActive | VaultLiquidation> = await this.client.loan
-      .listVaults(pagination, { ownerAddress: address, verbose: true }) as any
+      .listVaults(pagination, {
+        ownerAddress: address,
+        verbose: true
+      }) as any
     const vaults = list.map(async (vault: VaultActive | VaultLiquidation) => {
       return await this.mapLoanVault(vault)
     })
@@ -76,9 +80,14 @@ export class LoanVaultService {
     let pagination: AuctionPagination
 
     if (next !== undefined) {
-      const [vaultId, height] = next.split('|')
+      const vaultId = next.substr(0, 64)
+      const height = next.substr(64)
+
       pagination = {
-        start: { vaultId, height: height !== undefined ? parseInt(height) : 0 },
+        start: {
+          vaultId,
+          height: height !== undefined ? parseInt(height) : 0
+        },
         limit: size
       }
     } else {
@@ -90,7 +99,7 @@ export class LoanVaultService {
     const items = await Promise.all(list)
 
     return ApiPagedResponse.of(items, size, item => {
-      return `${item.vaultId}|${item.liquidationHeight}`
+      return `${item.vaultId}${item.liquidationHeight}`
     })
   }
 
@@ -153,8 +162,8 @@ export class LoanVaultService {
     }
   }
 
-  private async mapLoanAuction (details: AuctionDetail): Promise<LoanVaultLiquidated> {
-    const data = details as VaultLiquidation
+  private async mapLoanAuction (details: VaultLiquidation): Promise<LoanVaultLiquidated> {
+    const data = details
     return {
       vaultId: data.vaultId,
       loanScheme: await this.mapLoanScheme(data.loanSchemeId),

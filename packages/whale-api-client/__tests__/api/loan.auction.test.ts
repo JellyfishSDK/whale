@@ -11,8 +11,6 @@ const testing = Testing.create(container)
 
 let vaultId1
 
-/* eslint-disable no-lone-blocks */
-
 beforeAll(async () => {
   await container.start()
   await container.waitForWalletCoinbaseMaturity()
@@ -318,7 +316,7 @@ describe('list', () => {
 
     expect(first.length).toStrictEqual(2)
     expect(first.hasNext).toStrictEqual(true)
-    expect(first.nextToken).toStrictEqual(`${first[1].vaultId}|${first[1].liquidationHeight}`)
+    expect(first.nextToken).toStrictEqual(`${first[1].vaultId}${first[1].liquidationHeight}`)
 
     expect(first[0].vaultId).toStrictEqual(auctionList[0].vaultId)
     expect(first[1].vaultId).toStrictEqual(auctionList[1].vaultId)
@@ -327,7 +325,7 @@ describe('list', () => {
 
     expect(next.length).toStrictEqual(2)
     expect(next.hasNext).toStrictEqual(true)
-    expect(next.nextToken).toStrictEqual(`${next[1].vaultId}|${next[1].liquidationHeight}`)
+    expect(next.nextToken).toStrictEqual(`${next[1].vaultId}${next[1].liquidationHeight}`)
 
     expect(next[0].vaultId).toStrictEqual(auctionList[2].vaultId)
     expect(next[1].vaultId).toStrictEqual(auctionList[3].vaultId)
