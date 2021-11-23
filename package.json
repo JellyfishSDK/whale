@@ -65,7 +65,7 @@
   "devDependencies": {
     "@nestjs/cli": "^8.1.5",
     "@nestjs/schematics": "^8.0.5",
-    "@nestjs/testing": "^8.2.2",
+    "@nestjs/testing": "^8.2.3",
     "@types/cache-manager": "^3.4.2",
     "@types/cron": "^1.7.3",
     "@types/jest": "^27.0.3",
