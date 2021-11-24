@@ -170,9 +170,10 @@ export class LoanVaultService {
 
     const items = batches.map(async batch => {
       return {
-        index: batch.index as any, // fixed in https://github.com/DeFiCh/jellyfish/pull/805
+        index: batch.index,
         collaterals: await this.mapTokenAmounts(batch.collaterals),
-        loan: (await this.mapTokenAmounts([batch.loan]))[0]
+        loan: (await this.mapTokenAmounts([batch.loan]))[0],
+        highestBid: batch.highestBid
       }
     })
 
