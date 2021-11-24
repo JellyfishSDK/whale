@@ -1,56 +1,47 @@
-import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
 import { CSetCollateralToken, SetCollateralToken } from '@defichain/jellyfish-transaction'
+import { CollateralToken, CollateralTokenMapper } from '@src/module.model/collateral.token'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable } from '@nestjs/common'
-import { HexEncoder } from '@src/module.model/_hex.encoder'
-import { CollateralTokenMapper } from '@src/module.model/collateral.token'
 import { TokenMapper } from '@src/module.model/token'
 import { IndexerError } from '@src/module.indexer/error'
+import { DeferableIndexer } from './_deferred'
+import { Database } from '@src/module.database/database'
 
 @Injectable()
-export class SetCollateralTokenIndexer extends DfTxIndexer<SetCollateralToken> {
+export class SetCollateralTokenIndexer extends DeferableIndexer<CollateralToken, SetCollateralToken> {
   OP_CODE: number = CSetCollateralToken.OP_CODE
 
   constructor (
+    private readonly database: Database,
     private readonly tokenMapper: TokenMapper,
     private readonly collateralTokenMapper: CollateralTokenMapper
   ) {
-    super()
+    super(collateralTokenMapper)
   }
 
-  async index (block: RawBlock, txns: Array<DfTxTransaction<SetCollateralToken>>): Promise<void> {
-    for (const txn of txns) {
-      const setCollateralToken = txn.dftx.data
-      const token = await this.tokenMapper.get(`${setCollateralToken.token}`)
-
-      if (token === undefined) {
-        throw new IndexerError(`Token id "${setCollateralToken.token}" referenced by SetCollateralToken do not exist`)
-      }
-
-      await this.collateralTokenMapper.put({
-        id: `${setCollateralToken.token}-${block.height}`,
-        sort: HexEncoder.encodeHeight(block.height),
-        factor: setCollateralToken.factor.toFixed(),
-        activateAfterBlock: setCollateralToken.activateAfterBlock,
-        token: {
-          id: setCollateralToken.token,
-          symbol: token.symbol
-        },
-        priceFeed: `${setCollateralToken.currencyPair.token}-${setCollateralToken.currencyPair.currency}`,
-        block: {
-          hash: block.hash,
-          height: block.height,
-          time: block.time,
-          medianTime: block.mediantime
-        }
-      })
+  async mapDfTxToModel (dftx: SetCollateralToken, block: RawBlock): Promise<CollateralToken> {
+    const token = await this.tokenMapper.get(`${dftx.token}`)
+    if (token === undefined) {
+      throw new IndexerError(`Token with id ${dftx.token} referenced and not found`)
     }
-  }
 
-  async invalidate (block: RawBlock, txns: Array<DfTxTransaction<SetCollateralToken>>): Promise<void> {
-    for (const txn of txns) {
-      const { token } = txn.dftx.data
-      await this.collateralTokenMapper.delete(`${token}-${block.height}`)
+    return {
+      id: `${dftx.token}`,
+      factor: dftx.factor.toFixed(),
+      token: {
+        id: dftx.token,
+        symbol: token.symbol
+      },
+      tokenCurrency: `${dftx.currencyPair.token}-${dftx.currencyPair.currency}`,
+
+      uniqueKey: `${dftx.token}`,
+      activationHeight: dftx.activateAfterBlock,
+      block: {
+        height: block.height,
+        hash: block.hash,
+        medianTime: block.mediantime,
+        time: block.time
+      }
     }
   }
 }
