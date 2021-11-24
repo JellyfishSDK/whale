@@ -181,6 +181,6 @@ export interface LoanVaultTokenAmount {
 }
 
 export interface HighestBid {
-  amount: string
   owner: string
+  amount: LoanVaultTokenAmount
 }
