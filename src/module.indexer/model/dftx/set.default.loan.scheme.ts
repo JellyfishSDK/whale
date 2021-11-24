@@ -57,11 +57,13 @@ export class SetDefaultLoanSchemeIndexer extends DfTxIndexer<SetDefaultLoanSchem
       if (list.length === 0) {
         return
       }
+      const prevIds: string[] = []
       const previous: LoanScheme[] = await Promise.all(list.map(async each => {
         const prev = await this.loanSchemeHistoryMapper.getLatest(each.id)
         if (prev === undefined) {
           throw new NotFoundIndexerError('index', 'LoanSchemeHistory', each.id)
         }
+        prevIds.push(prev.id)
         return {
           id: prev.loanSchemeId,
           ratio: prev.ratio,
@@ -74,7 +76,7 @@ export class SetDefaultLoanSchemeIndexer extends DfTxIndexer<SetDefaultLoanSchem
       // overwrite all previous record
       await Promise.all(previous.map(async prev => await this.loanSchemeMapper.put(prev)))
       // delete all the new history record
-      await Promise.all(previous.map(async prev => await this.loanSchemeHistoryMapper.delete(prev.id)))
+      await Promise.all(prevIds.map(async id => await this.loanSchemeHistoryMapper.delete(id)))
 
       return await loop(list[list.length - 1].id)
     }
