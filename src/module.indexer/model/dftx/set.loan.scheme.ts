@@ -116,6 +116,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
         ratio: previous.ratio,
         rate: previous.rate,
         activateAfterBlock: previous.activateAfterBlock,
+        default: previous.default,
         block: previous.block
       })
     } else {
