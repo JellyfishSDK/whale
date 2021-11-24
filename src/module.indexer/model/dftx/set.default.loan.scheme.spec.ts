@@ -39,8 +39,6 @@ async function setDefaultLoanScheme (id: string): Promise<string> {
 it('should index setDefaultLoanScheme', async () => {
   await createLoanScheme('s150', 150, new BigNumber(3)) // first loan scheme is default
   await createLoanScheme('s200', 200, new BigNumber(2.8))
-  // await createLoanScheme('s250', 250, new BigNumber(2.5))
-  // await createLoanScheme('s300', 300, new BigNumber(2.3))
 
   await setDefaultLoanScheme('s200')
 
@@ -90,7 +88,7 @@ it('should index setDefaultLoanScheme', async () => {
       ratio: 150,
       rate: '3',
       activateAfterBlock: '0',
-      default: false,
+      default: true,
       block: expect.any(Object),
       loanSchemeId: 's150',
       sort: '00000066',

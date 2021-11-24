@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { SetDefaultLoanScheme, CSetDefaultLoanScheme } from '@defichain/jellyfish-transaction'
-import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
+import { LoanSchemeMapper, LoanScheme } from '@src/module.model/loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent, LoanSchemeHistory } from '@src/module.model/loan.scheme.history'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
@@ -27,21 +27,7 @@ export class SetDefaultLoanSchemeIndexer extends DfTxIndexer<SetDefaultLoanSchem
       throw new NotFoundIndexerError('index', 'LoanScheme', data.identifier)
     }
 
-    // set all default:false
-    const list = await this.loanSchemeMapper.query(Number.MAX_SAFE_INTEGER)
-    const reset = list.map(async each => await this.loanSchemeMapper.put({ ...each, default: false }))
-    await Promise.all(reset)
-
-    // update history
-    const rest = list.filter(each => each.id !== data.identifier)
-    const items = await Promise.all(rest.map(async each => await this.loanSchemeHistoryMapper.getLatest(each.id))) as LoanSchemeHistory[]
-    await Promise.all(items.map(async item => await this.loanSchemeHistoryMapper.put({
-      ...item,
-      default: false,
-      id: `${item.loanSchemeId}-${block.height}`,
-      sort: HexEncoder.encodeHeight(block.height),
-      event: LoanSchemeHistoryEvent.UNSET_DEFAULT
-    })))
+    await this.setAllFalsyDefault(data.identifier, block.height)
 
     // set the target loan scheme to default:true
     await this.loanSchemeMapper.put({
@@ -66,14 +52,57 @@ export class SetDefaultLoanSchemeIndexer extends DfTxIndexer<SetDefaultLoanSchem
   }
 
   async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetDefaultLoanScheme>): Promise<void> {
-    const list = await this.loanSchemeMapper.query(Number.MAX_SAFE_INTEGER)
-    for (const each of list) {
-      const previous = await this.loanSchemeHistoryMapper.getLatest(each.id)
-      if (previous === undefined) {
-        throw new NotFoundIndexerError('index', 'LoanSchemeHistory', each.id)
+    const loop = async (next?: string): Promise<void> => {
+      const list = await this.loanSchemeMapper.query(100, next)
+      if (list.length === 0) {
+        return
       }
-      await this.loanSchemeMapper.put({ ...each, default: previous.default, block: previous.block })
-      await this.loanSchemeHistoryMapper.delete(previous.id)
+      const previous: LoanScheme[] = await Promise.all(list.map(async each => {
+        const prev = await this.loanSchemeHistoryMapper.getLatest(each.id)
+        if (prev === undefined) {
+          throw new NotFoundIndexerError('index', 'LoanSchemeHistory', each.id)
+        }
+        return {
+          id: prev.loanSchemeId,
+          ratio: prev.ratio,
+          rate: prev.rate,
+          activateAfterBlock: prev.activateAfterBlock,
+          default: prev.default,
+          block: prev.block
+        }
+      }))
+      // overwrite all previous record
+      await Promise.all(previous.map(async prev => await this.loanSchemeMapper.put(prev)))
+      // delete all the new history record
+      await Promise.all(previous.map(async prev => await this.loanSchemeHistoryMapper.delete(prev.id)))
+
+      return await loop(list[list.length - 1].id)
     }
+    return await loop()
+  }
+
+  private async setAllFalsyDefault (id: string, height: number): Promise<void> {
+    const loop = async (next?: string): Promise<void> => {
+      const list = await this.loanSchemeMapper.query(100, next)
+      if (list.length === 0) {
+        return
+      }
+      const reset = list.map(async each => await this.loanSchemeMapper.put({ ...each, default: false }))
+      await Promise.all(reset)
+
+      // update history
+      const rest = list.filter(each => each.id !== id)
+      const items = await Promise.all(rest.map(async each => await this.loanSchemeHistoryMapper.getLatest(each.id))) as LoanSchemeHistory[]
+      await Promise.all(items.map(async item => await this.loanSchemeHistoryMapper.put({
+        ...item,
+        default: false,
+        id: `${item.loanSchemeId}-${height}`,
+        sort: HexEncoder.encodeHeight(height),
+        event: LoanSchemeHistoryEvent.UNSET_DEFAULT
+      })))
+
+      return await loop(list[list.length - 1].id)
+    }
+    return await loop()
   }
 }
