@@ -367,10 +367,10 @@ afterAll(async () => {
 })
 
 describe('list', () => {
-  it('should listAuctionHistory', async () => {
+  it('should listAuctionHistory with size only', async () => {
     const result = await client.loan.listAuctionHistory()
     expect(result.length).toStrictEqual(4)
-    result.forEach((e: any) => {
+    result.forEach((e) => {
       expect(e).toStrictEqual({
         auctionBid: expect.any(String),
         auctionWon: expect.any(Array),
@@ -385,7 +385,7 @@ describe('list', () => {
     )
   })
 
-  it('should listAuctionHistory with pagination', async () => {
+  it('should listAuctionHistory with size and pagination', async () => {
     const auctionList = await client.loan.listAuctionHistory()
     const first = await client.loan.listAuctionHistory(2)
 

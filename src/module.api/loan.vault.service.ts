@@ -125,7 +125,7 @@ export class LoanVaultService {
     const items = await Promise.all(list)
 
     return ApiPagedResponse.of(items, size, item => {
-      return `${item.vaultId}|${item.blockHeight}`
+      return `${item.vaultId}${item.blockHeight}`
     })
   }
 
