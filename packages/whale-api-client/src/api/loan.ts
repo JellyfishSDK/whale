@@ -170,6 +170,7 @@ export interface LoanVaultLiquidationBatch {
   index: number
   collaterals: LoanVaultTokenAmount[]
   loan: LoanVaultTokenAmount
+  highestBid?: HighestBid
 }
 
 export enum LoanVaultState {
@@ -188,6 +189,11 @@ export interface LoanVaultTokenAmount {
   symbolKey: string
   name: string
   activePrice?: ActivePrice
+}
+
+export interface HighestBid {
+  owner: string
+  amount: LoanVaultTokenAmount
 }
 
 export interface LoanAuctionHistory {
