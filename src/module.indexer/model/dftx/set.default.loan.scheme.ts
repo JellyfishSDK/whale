@@ -29,8 +29,19 @@ export class SetDefaultLoanSchemeIndexer extends DfTxIndexer<SetDefaultLoanSchem
 
     // set all default:false
     const list = await this.loanSchemeMapper.query(Number.MAX_SAFE_INTEGER)
-    const queries = list.map(async each => await this.loanSchemeMapper.put({ ...each, default: false }))
-    await Promise.all(queries)
+    const reset = list.map(async each => await this.loanSchemeMapper.put({ ...each, default: false }))
+    await Promise.all(reset)
+
+    // update history
+    const rest = list.filter(each => each.id !== data.identifier)
+    const items = await Promise.all(rest.map(async each => await this.loanSchemeHistoryMapper.getLatest(each.id))) as LoanSchemeHistory[]
+    await Promise.all(items.map(async item => await this.loanSchemeHistoryMapper.put({
+      ...item,
+      default: false,
+      id: `${item.loanSchemeId}-${block.height}`,
+      sort: HexEncoder.encodeHeight(block.height),
+      event: LoanSchemeHistoryEvent.UNSET_DEFAULT
+    })))
 
     // set the target loan scheme to default:true
     await this.loanSchemeMapper.put({
@@ -55,18 +66,14 @@ export class SetDefaultLoanSchemeIndexer extends DfTxIndexer<SetDefaultLoanSchem
   }
 
   async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetDefaultLoanScheme>): Promise<void> {
-    const data = transaction.dftx.data
-    const loanScheme = await this.loanSchemeMapper.get(data.identifier)
-    if (loanScheme === undefined) {
-      throw new NotFoundIndexerError('index', 'LoanScheme', data.identifier)
+    const list = await this.loanSchemeMapper.query(Number.MAX_SAFE_INTEGER)
+    for (const each of list) {
+      const previous = await this.loanSchemeHistoryMapper.getLatest(each.id)
+      if (previous === undefined) {
+        throw new NotFoundIndexerError('index', 'LoanSchemeHistory', each.id)
+      }
+      await this.loanSchemeMapper.put({ ...each, default: previous.default, block: previous.block })
+      await this.loanSchemeHistoryMapper.delete(previous.id)
     }
-  }
-
-  private async getPrevious (id: string): Promise<LoanSchemeHistory | undefined> {
-    const list = await this.loanSchemeHistoryMapper.query(id, 1)
-    if (list.length === 0) {
-      return undefined
-    }
-    return list[0]
   }
 }

@@ -70,8 +70,8 @@ export interface LoanSchemeHistory extends Model {
   sort: string // ------------| Hex encoded height
   ratio: number
   rate: BigNumber
-  default: boolean
   activateAfterBlock: BigNumber
+  default: boolean
   event: LoanSchemeHistoryEvent
 
   block: {
@@ -86,5 +86,6 @@ export enum LoanSchemeHistoryEvent {
   CREATE = 'create',
   UPDATE = 'update',
   DESTROY = 'destroy',
-  SET_DEFAULT = 'setDefault'
+  SET_DEFAULT = 'setDefault',
+  UNSET_DEFAULT = 'unsetDefault'
 }
