@@ -66,8 +66,21 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     if (prevLoanScheme === undefined) {
       throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
     }
-    await this.deferredLoanSchemeMapper.put(prevDeferredLoanScheme)
-    await this.loanSchemeMapper.put(prevLoanScheme)
+    await this.deferredLoanSchemeMapper.put({
+      id: prevDeferredLoanScheme.id,
+      loanSchemeId: prevDeferredLoanScheme.loanSchemeId,
+      ratio: prevDeferredLoanScheme.ratio,
+      rate: prevDeferredLoanScheme.rate,
+      activateAfterBlock: prevDeferredLoanScheme.activateAfterBlock,
+      block: prevDeferredLoanScheme.block
+    })
+    await this.loanSchemeMapper.put({
+      id: prevLoanScheme.loanSchemeId,
+      ratio: prevLoanScheme.ratio,
+      rate: prevLoanScheme.rate,
+      activateAfterBlock: prevLoanScheme.activateAfterBlock,
+      block: prevLoanScheme.block
+    })
   }
 
   /**
