@@ -72,6 +72,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       loanSchemeId: prevDeferredLoanScheme.loanSchemeId,
       ratio: prevDeferredLoanScheme.ratio,
       rate: prevDeferredLoanScheme.rate,
+      default: prevDeferredLoanScheme.default,
       activateAfterBlock: prevDeferredLoanScheme.activateAfterBlock,
       block: prevDeferredLoanScheme.block
     })
@@ -79,6 +80,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       id: prevLoanScheme.loanSchemeId,
       ratio: prevLoanScheme.ratio,
       rate: prevLoanScheme.rate,
+      default: prevLoanScheme.default,
       activateAfterBlock: prevLoanScheme.activateAfterBlock,
       block: prevLoanScheme.block
     })
