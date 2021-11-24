@@ -30,12 +30,6 @@ export class SetLoanTokenIndexer extends DfTxIndexer<SetLoanToken> {
     const name = data?.name?.trim().substr(0, MAX_TOKEN_NAME_LENGTH) ?? data.symbol.trim().substr(0, MAX_TOKEN_NAME_LENGTH)
     const interest = data.interest.toFixed()
     const tokenCurrency = `${data.currencyPair.token}-${data.currencyPair.currency}`
-    const blockObj = {
-      hash: block.hash,
-      height: block.height,
-      time: block.time,
-      medianTime: block.mediantime
-    }
 
     // create new token
     await this.tokenMapper.put({
@@ -49,7 +43,12 @@ export class SetLoanTokenIndexer extends DfTxIndexer<SetLoanToken> {
       mintable: data.mintable,
       decimal: 8,
       tradeable: true,
-      block: blockObj
+      block: {
+        hash: block.hash,
+        height: block.height,
+        time: block.time,
+        medianTime: block.mediantime
+      }
     })
 
     // create new loan token
@@ -58,7 +57,12 @@ export class SetLoanTokenIndexer extends DfTxIndexer<SetLoanToken> {
       interest: interest,
       tokenCurrency: tokenCurrency,
       tokenId: `${tokenId}`,
-      block: blockObj
+      block: {
+        hash: block.hash,
+        height: block.height,
+        time: block.time,
+        medianTime: block.mediantime
+      }
     })
 
     // create first history for new loan token
@@ -70,7 +74,12 @@ export class SetLoanTokenIndexer extends DfTxIndexer<SetLoanToken> {
       interest: interest,
       mintable: data.mintable,
       tokenCurrency: tokenCurrency,
-      block: blockObj
+      block: {
+        hash: block.hash,
+        height: block.height,
+        time: block.time,
+        medianTime: block.mediantime
+      }
     })
   }
 

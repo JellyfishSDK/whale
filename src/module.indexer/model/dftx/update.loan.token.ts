@@ -26,12 +26,6 @@ export class UpdateLoanTokenIndexer extends DfTxIndexer<UpdateLoanToken> {
     const name = data?.name?.trim().substr(0, MAX_TOKEN_NAME_LENGTH) ?? data.symbol.trim().substr(0, MAX_TOKEN_NAME_LENGTH)
     const interest = data.interest.toFixed()
     const tokenCurrency = `${data.currencyPair.token}-${data.currencyPair.currency}`
-    const blockObj = {
-      hash: block.hash,
-      height: block.height,
-      time: block.time,
-      medianTime: block.mediantime
-    }
 
     // update token
     await this.tokenMapper.put({
@@ -39,7 +33,6 @@ export class UpdateLoanTokenIndexer extends DfTxIndexer<UpdateLoanToken> {
       symbol: symbol,
       name: name,
       mintable: data.mintable
-      // block: blockObj // TBD: this info can be referenced as token creation date
     })
 
     // update loan token
@@ -59,7 +52,12 @@ export class UpdateLoanTokenIndexer extends DfTxIndexer<UpdateLoanToken> {
       interest: interest,
       mintable: data.mintable,
       tokenCurrency: tokenCurrency,
-      block: blockObj
+      block: {
+        hash: block.hash,
+        height: block.height,
+        time: block.time,
+        medianTime: block.mediantime
+      }
     })
   }
 

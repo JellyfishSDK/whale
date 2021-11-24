@@ -54,10 +54,8 @@ export interface LoanToken extends Model {
   id: string // -----------| 32 bytes id in hex
   interest: string
 
-  // foreign table partition, to retrieve price feed (CRUD) history -> price feed
-  tokenCurrency: string // ---| tokenCurrencyMapper partition key
-  // FK, to retrieve latest token info
-  tokenId: string // ----------| loanTokenMapper partition key, tokenMapper id
+  tokenCurrency: string // ---| token-currency (symbol-symbol)
+  tokenId: string // ----------| tokenId (number string)
 
   block: {
     hash: string
