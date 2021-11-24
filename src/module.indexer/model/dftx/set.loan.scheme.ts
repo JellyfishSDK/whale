@@ -111,7 +111,13 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       if (previous === undefined) {
         throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
       }
-      await this.loanSchemeMapper.put(previous)
+      await this.loanSchemeMapper.put({
+        id: previous.loanSchemeId,
+        ratio: previous.ratio,
+        rate: previous.rate,
+        activateAfterBlock: previous.activateAfterBlock,
+        block: previous.block
+      })
     } else {
       await this.deferredLoanSchemeMapper.delete(`${data.identifier}-${block.height}`)
     }
