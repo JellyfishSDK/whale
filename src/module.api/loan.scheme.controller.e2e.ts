@@ -1,5 +1,5 @@
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp, stopTestingApp } from '@src/e2e.module'
+import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import BigNumber from 'bignumber.js'
 import { LoanMasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { LoanController } from '@src/module.api/loan.controller'
@@ -46,6 +46,9 @@ beforeAll(async () => {
     id: 'scheme3'
   })
   await container.generate(1)
+
+  const height = await testing.container.getBlockCount()
+  await waitForIndexedHeight(app, height - 1)
 })
 
 afterAll(async () => {
@@ -58,36 +61,49 @@ describe('loan', () => {
     expect(result.data.length).toStrictEqual(4)
     expect(result.data).toStrictEqual([
       {
-        id: 'default',
-        minColRatio: '100',
-        interestRate: '6.5'
-      },
-      {
-        id: 'scheme1',
-        minColRatio: '150',
-        interestRate: '5.5'
+        id: 'scheme3',
+        sort: '00000069',
+        minColRatio: 250,
+        interestRate: '3.5',
+        activateAfterBlock: '0',
+        block: expect.any(Object)
       },
       {
         id: 'scheme2',
-        minColRatio: '200',
-        interestRate: '4.5'
+        sort: '00000068',
+        minColRatio: 200,
+        interestRate: '4.5',
+        activateAfterBlock: '0',
+        block: expect.any(Object)
       },
       {
-        id: 'scheme3',
-        minColRatio: '250',
-        interestRate: '3.5'
+        id: 'scheme1',
+        sort: '00000067',
+        minColRatio: 150,
+        interestRate: '5.5',
+        activateAfterBlock: '0',
+        block: expect.any(Object)
+      },
+      {
+        id: 'default',
+        sort: '00000066',
+        minColRatio: 100,
+        interestRate: '6.5',
+        activateAfterBlock: '0',
+        block: expect.any(Object)
       }
     ])
+    expect(result.page).toStrictEqual(undefined)
   })
 
   it('should listSchemes with pagination', async () => {
     const first = await controller.listScheme({ size: 2 })
 
     expect(first.data.length).toStrictEqual(2)
-    expect(first.page?.next).toStrictEqual('scheme1')
+    expect(first.page?.next).toStrictEqual('00000068')
 
-    expect(first.data[0].id).toStrictEqual('default')
-    expect(first.data[1].id).toStrictEqual('scheme1')
+    expect(first.data[0].id).toStrictEqual('scheme3')
+    expect(first.data[1].id).toStrictEqual('scheme2')
 
     const next = await controller.listScheme({
       size: 2,
@@ -95,10 +111,10 @@ describe('loan', () => {
     })
 
     expect(next.data.length).toStrictEqual(2)
-    expect(next.page?.next).toStrictEqual('scheme3')
+    expect(next.page?.next).toStrictEqual('00000066')
 
-    expect(next.data[0].id).toStrictEqual('scheme2')
-    expect(next.data[1].id).toStrictEqual('scheme3')
+    expect(next.data[0].id).toStrictEqual('scheme1')
+    expect(next.data[1].id).toStrictEqual('default')
 
     const last = await controller.listScheme({
       size: 2,
@@ -109,8 +125,8 @@ describe('loan', () => {
     expect(last.page).toBeUndefined()
   })
 
-  it('should listSchemes with an empty object if size 100 next 300 which is out of range', async () => {
-    const result = await controller.listScheme({ size: 100, next: '300' })
+  it('should listSchemes with an empty object if size 1 next 300 which is out of range', async () => {
+    const result = await controller.listScheme({ size: 1, next: 'undefined' })
 
     expect(result.data.length).toStrictEqual(0)
     expect(result.page).toBeUndefined()
@@ -123,8 +139,11 @@ describe('get', () => {
     expect(data).toStrictEqual(
       {
         id: 'default',
-        minColRatio: '100',
-        interestRate: '6.5'
+        sort: '00000066',
+        minColRatio: 100,
+        interestRate: '6.5',
+        activateAfterBlock: '0',
+        block: expect.any(Object)
       }
     )
   })
@@ -133,7 +152,8 @@ describe('get', () => {
     expect.assertions(2)
     try {
       await controller.getScheme('999')
-    } catch (err) {
+    } catch (err: any) {
+      console.log('err 1: ', err)
       expect(err).toBeInstanceOf(NotFoundException)
       expect(err.response).toStrictEqual({
         statusCode: 404,

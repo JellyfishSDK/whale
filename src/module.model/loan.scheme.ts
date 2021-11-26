@@ -10,7 +10,7 @@ const LoanSchemeMapping: ModelMapping<LoanScheme> = {
       name: 'loan_scheme_id',
       partition: {
         type: 'string',
-        key: (ls: LoanScheme) => ls.id
+        key: (ls: LoanScheme) => ls.sort
       }
     }
   }
@@ -43,9 +43,10 @@ export class LoanSchemeMapper {
 }
 
 export interface LoanScheme extends Model {
-  id: string // loanSchemeId
-  ratio: number
-  rate: BigNumber
+  id: string // ------------| loanSchemeId
+  sort: string // ----------| height encoded
+  minColRatio: number
+  interestRate: BigNumber
   activateAfterBlock: BigNumber
 
   block: {

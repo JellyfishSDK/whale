@@ -76,8 +76,9 @@ it('should deferred model serves pending state', async () => {
   const s150Before = await loanSchemeMapper.get('s150')
   expect(s150Before).toStrictEqual({
     id: 's150',
-    ratio: 150,
-    rate: '3',
+    sort: '00000066',
+    minColRatio: 150,
+    interestRate: '3',
     activateAfterBlock: '0',
     block: {
       hash: expect.any(String),
@@ -92,9 +93,10 @@ it('should deferred model serves pending state', async () => {
   expect(first).toStrictEqual([
     {
       id: 's200-113',
+      sort: '00000071',
       loanSchemeId: 's200',
-      ratio: 205,
-      rate: '8.05',
+      minColRatio: 205,
+      interestRate: '8.05',
       activateAfterBlock: '120',
       block: {
         hash: expect.any(String),
@@ -105,9 +107,10 @@ it('should deferred model serves pending state', async () => {
     },
     {
       id: 's190-111',
+      sort: '0000006f',
       loanSchemeId: 's190',
-      ratio: 195,
-      rate: '7.05',
+      minColRatio: 195,
+      interestRate: '7.05',
       activateAfterBlock: '120',
       block: {
         hash: expect.any(String),
@@ -122,9 +125,10 @@ it('should deferred model serves pending state', async () => {
   expect(next).toStrictEqual([
     {
       id: 's180-109',
+      sort: '0000006d',
       loanSchemeId: 's180',
-      ratio: 185,
-      rate: '6.05',
+      minColRatio: 185,
+      interestRate: '6.05',
       activateAfterBlock: '120',
       block: {
         hash: expect.any(String),
@@ -135,9 +139,10 @@ it('should deferred model serves pending state', async () => {
     },
     {
       id: 's170-107',
+      sort: '0000006b',
       loanSchemeId: 's170',
-      ratio: 175,
-      rate: '5.05',
+      minColRatio: 175,
+      interestRate: '5.05',
       activateAfterBlock: '120',
       block: {
         hash: expect.any(String),
@@ -152,9 +157,10 @@ it('should deferred model serves pending state', async () => {
   expect(last).toStrictEqual([
     {
       id: 's160-105',
+      sort: '00000069',
       loanSchemeId: 's160',
-      ratio: 165,
-      rate: '4.05',
+      minColRatio: 165,
+      interestRate: '4.05',
       activateAfterBlock: '120',
       block: {
         hash: expect.any(String),
@@ -165,9 +171,10 @@ it('should deferred model serves pending state', async () => {
     },
     {
       id: 's150-103',
+      sort: '00000067',
       loanSchemeId: 's150',
-      ratio: 155,
-      rate: '3.05',
+      minColRatio: 155,
+      interestRate: '3.05',
       activateAfterBlock: '120',
       block: {
         hash: expect.any(String),
@@ -184,8 +191,9 @@ it('should deferred model serves pending state', async () => {
   const s150After = await loanSchemeMapper.get('s150')
   expect(s150After).toStrictEqual({
     id: 's150',
-    ratio: 155,
-    rate: '3.05',
+    sort: '00000067',
+    minColRatio: 155,
+    interestRate: '3.05',
     activateAfterBlock: '120',
     block: {
       hash: expect.any(String),

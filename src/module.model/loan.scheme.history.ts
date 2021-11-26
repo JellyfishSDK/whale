@@ -68,8 +68,8 @@ export interface LoanSchemeHistory extends Model {
   id: string // loanSchemeId-height
   loanSchemeId: string // key
   sort: string // height
-  ratio: number
-  rate: BigNumber
+  minColRatio: number
+  interestRate: BigNumber
   activateAfterBlock: BigNumber
   event: LoanSchemeHistoryEvent
 

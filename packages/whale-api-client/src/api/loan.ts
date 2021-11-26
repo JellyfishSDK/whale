@@ -105,8 +105,17 @@ export class Loan {
 
 export interface LoanScheme {
   id: string
+  // sort: string
   minColRatio: string
   interestRate: string
+  // activateAfterBlock: BigNumber
+
+  // block: {
+  //   hash: string
+  //   height: number
+  //   time: number
+  //   medianTime: number
+  // }
 }
 
 export interface CollateralToken {

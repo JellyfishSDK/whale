@@ -64,8 +64,9 @@ it('should index setLoanScheme in CREATE event', async () => {
     const s200 = await loanSchemeMapper.get('s200')
     expect(s200).toStrictEqual({
       id: 's200',
-      ratio: 200,
-      rate: '2.8',
+      sort: '00000067',
+      minColRatio: 200,
+      interestRate: '2.8',
       activateAfterBlock: '0',
       block: {
         hash: expect.any(String),
@@ -80,8 +81,9 @@ it('should index setLoanScheme in CREATE event', async () => {
     expect(list).toStrictEqual([
       {
         id: 's250',
-        ratio: 250,
-        rate: '2.5',
+        sort: '00000068',
+        minColRatio: 250,
+        interestRate: '2.5',
         activateAfterBlock: '0',
         block: {
           hash: expect.any(String),
@@ -92,8 +94,9 @@ it('should index setLoanScheme in CREATE event', async () => {
       },
       {
         id: 's200',
-        ratio: 200,
-        rate: '2.8',
+        sort: '00000067',
+        minColRatio: 200,
+        interestRate: '2.8',
         activateAfterBlock: '0',
         block: {
           hash: expect.any(String),
@@ -104,8 +107,9 @@ it('should index setLoanScheme in CREATE event', async () => {
       },
       {
         id: 's150',
-        ratio: 150,
-        rate: '3',
+        sort: '00000066',
+        minColRatio: 150,
+        interestRate: '3',
         activateAfterBlock: '0',
         block: {
           hash: expect.any(String),
@@ -130,8 +134,8 @@ it('should index setLoanScheme in CREATE event', async () => {
         id: 's150-102',
         loanSchemeId: 's150',
         sort: '00000066',
-        ratio: 150,
-        rate: '3',
+        minColRatio: 150,
+        interestRate: '3',
         activateAfterBlock: '0',
         event: LoanSchemeHistoryEvent.CREATE,
         block: {
@@ -171,8 +175,9 @@ it('should index setLoanScheme in UPDATE event', async () => {
     const s200 = await loanSchemeMapper.get('s200')
     expect(s200).toStrictEqual({
       id: 's200',
-      ratio: 205,
-      rate: '2.85',
+      sort: '0000006a',
+      minColRatio: 205,
+      interestRate: '2.85',
       activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
       block: {
         hash: expect.any(String),
@@ -186,8 +191,9 @@ it('should index setLoanScheme in UPDATE event', async () => {
     expect(list).toStrictEqual([
       {
         id: 's250',
-        ratio: 255,
-        rate: '2.55',
+        sort: '0000006b',
+        minColRatio: 255,
+        interestRate: '2.55',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
         block: {
           hash: expect.any(String),
@@ -198,8 +204,9 @@ it('should index setLoanScheme in UPDATE event', async () => {
       },
       {
         id: 's200',
-        ratio: 205,
-        rate: '2.85',
+        sort: '0000006a',
+        minColRatio: 205,
+        interestRate: '2.85',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
         block: {
           hash: expect.any(String),
@@ -210,8 +217,9 @@ it('should index setLoanScheme in UPDATE event', async () => {
       },
       {
         id: 's150',
-        ratio: 155,
-        rate: '3.05',
+        sort: '00000069',
+        minColRatio: 155,
+        interestRate: '3.05',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
         block: {
           hash: expect.any(String),
@@ -230,8 +238,8 @@ it('should index setLoanScheme in UPDATE event', async () => {
         id: 's150-105',
         loanSchemeId: 's150',
         sort: '00000069',
-        ratio: 155,
-        rate: '3.05',
+        minColRatio: 155,
+        interestRate: '3.05',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
         event: 'update',
         block: {
@@ -245,8 +253,8 @@ it('should index setLoanScheme in UPDATE event', async () => {
         id: 's150-102',
         loanSchemeId: 's150',
         sort: '00000066',
-        ratio: 150,
-        rate: '3',
+        minColRatio: 150,
+        interestRate: '3',
         activateAfterBlock: '0',
         event: 'create',
         block: {
@@ -263,8 +271,8 @@ it('should index setLoanScheme in UPDATE event', async () => {
       id: 's150-102',
       loanSchemeId: 's150',
       sort: '00000066',
-      ratio: 150,
-      rate: '3',
+      minColRatio: 150,
+      interestRate: '3',
       activateAfterBlock: '0',
       event: 'create',
       block: {
@@ -294,8 +302,9 @@ it('test update loanScheme with activateAfterBlock', async () => {
   const s150Before = await loanSchemeMapper.get('s150')
   expect(s150Before).toStrictEqual({
     id: 's150',
-    ratio: 150,
-    rate: '3',
+    sort: '00000066',
+    minColRatio: 150,
+    interestRate: '3',
     activateAfterBlock: '0',
     block: {
       hash: expect.any(String),
@@ -309,9 +318,10 @@ it('test update loanScheme with activateAfterBlock', async () => {
   const s150PendingBefore = deferredLoanSchemesBefore.find(l => l.loanSchemeId === 's150')
   expect(s150PendingBefore).toStrictEqual({
     id: 's150-103',
+    sort: '00000067',
     loanSchemeId: 's150',
-    ratio: 155,
-    rate: '3.05',
+    minColRatio: 155,
+    interestRate: '3.05',
     activateAfterBlock: '110',
     block: {
       hash: expect.any(String),
@@ -327,8 +337,8 @@ it('test update loanScheme with activateAfterBlock', async () => {
       id: 's150-103',
       loanSchemeId: 's150',
       sort: '00000067',
-      ratio: 155,
-      rate: '3.05',
+      minColRatio: 155,
+      interestRate: '3.05',
       activateAfterBlock: '110',
       event: 'update',
       block: {
@@ -342,8 +352,8 @@ it('test update loanScheme with activateAfterBlock', async () => {
       id: 's150-102',
       loanSchemeId: 's150',
       sort: '00000066',
-      ratio: 150,
-      rate: '3',
+      minColRatio: 150,
+      interestRate: '3',
       activateAfterBlock: '0',
       event: 'create',
       block: {
@@ -361,8 +371,9 @@ it('test update loanScheme with activateAfterBlock', async () => {
   const s150After = await loanSchemeMapper.get('s150')
   expect(s150After).toStrictEqual({
     id: 's150',
-    ratio: 155,
-    rate: '3.05',
+    sort: '00000067',
+    minColRatio: 155,
+    interestRate: '3.05',
     activateAfterBlock: '110',
     block: {
       hash: expect.any(String),

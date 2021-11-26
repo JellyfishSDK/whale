@@ -27,8 +27,9 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
 
     const loanScheme = {
       id: data.identifier,
-      ratio: data.ratio,
-      rate: new BigNumber(data.rate),
+      sort: HexEncoder.encodeHeight(block.height),
+      minColRatio: data.ratio,
+      interestRate: new BigNumber(data.rate),
       activateAfterBlock: data.update,
 
       block: {
@@ -55,8 +56,8 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       id: `${data.identifier}-${block.height}`,
       loanSchemeId: data.identifier,
       sort: HexEncoder.encodeHeight(block.height),
-      ratio: data.ratio,
-      rate: new BigNumber(data.rate),
+      minColRatio: data.ratio,
+      interestRate: new BigNumber(data.rate),
       activateAfterBlock: data.update,
       event: isExists ? LoanSchemeHistoryEvent.UPDATE : LoanSchemeHistoryEvent.CREATE,
 
@@ -79,8 +80,9 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       }
       await this.loanSchemeMapper.put({
         id: previous.loanSchemeId,
-        ratio: previous.ratio,
-        rate: previous.rate,
+        sort: previous.sort,
+        minColRatio: previous.minColRatio,
+        interestRate: previous.interestRate,
         activateAfterBlock: previous.activateAfterBlock,
         block: previous.block
       })

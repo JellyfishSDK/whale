@@ -12,13 +12,10 @@ import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import {
   CollateralTokenDetail,
-  GetLoanSchemeResult,
-  LoanSchemeResult,
   LoanTokenResult
 } from '@defichain/jellyfish-api-core/dist/category/loan'
 import {
   CollateralToken,
-  LoanScheme,
   LoanToken,
   LoanVaultActive,
   LoanVaultLiquidated
@@ -28,6 +25,7 @@ import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { LoanVaultService } from '@src/module.api/loan.vault.service'
 import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { ActivePrice } from '@whale-api-client/api/prices'
+import { LoanSchemeMapper, LoanScheme } from '@src/module.model/loan.scheme'
 
 @Controller('/loans')
 export class LoanController {
@@ -35,7 +33,8 @@ export class LoanController {
     private readonly client: JsonRpcClient,
     private readonly deFiDCache: DeFiDCache,
     private readonly vaultService: LoanVaultService,
-    private readonly priceActiveMapper: OraclePriceActiveMapper
+    private readonly priceActiveMapper: OraclePriceActiveMapper,
+    private readonly loanSchemeMapper: LoanSchemeMapper
   ) {
   }
 
@@ -43,30 +42,30 @@ export class LoanController {
    * Paginate loan schemes.
    *
    * @param {PaginationQuery} query
-   * @return {Promise<ApiPagedResponse<LoanSchemeResult>>}
+   * @return {Promise<ApiPagedResponse<LoanScheme>>}
    */
   @Get('/schemes')
   async listScheme (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<LoanScheme>> {
-    const result = (await this.client.loan.listLoanSchemes())
-      .sort((a, b) => a.id.localeCompare(b.id))
-      .map(value => mapLoanScheme(value))
+    const items = await this.loanSchemeMapper.query(query.size, query.next)
 
-    return createFakePagination(query, result, item => item.id)
+    return ApiPagedResponse.of(items, query.size, item => {
+      return item.sort
+    })
   }
 
   /**
    * Get information about a scheme with given scheme id.
    *
    * @param {string} id
-   * @return {Promise<GetLoanSchemeResult>}
+   * @return {Promise<LoanScheme>}
    */
   @Get('/schemes/:id')
   async getScheme (@Param('id') id: string): Promise<LoanScheme> {
     try {
-      const data = await this.client.loan.getLoanScheme(id)
-      return mapLoanScheme(data)
+      const data = await this.loanSchemeMapper.get(id) as LoanScheme
+      return data
     } catch (err) {
       if (err?.payload?.message === `Cannot find existing loan scheme with id ${id}`) {
         throw new NotFoundException('Unable to find scheme')
@@ -143,7 +142,7 @@ export class LoanController {
     try {
       const data = await this.client.loan.getLoanToken(id)
       return await this.mapLoanToken(data)
-    } catch (err) {
+    } catch (err: unknown) {
       if (err?.payload?.message === `Token ${id} does not exist!`) {
         throw new NotFoundException('Unable to find loan token')
       } else {
@@ -237,13 +236,4 @@ function createFakePagination<T> (query: PaginationQuery, items: T[], mapId: (it
   const index = findNextIndex()
   const sliced = items.slice(index, index + query.size)
   return ApiPagedResponse.of(sliced, query.size, mapId)
-}
-
-function mapLoanScheme (result: LoanSchemeResult | GetLoanSchemeResult): LoanScheme {
-  // TODO: default not exposed because getLoanScheme vs listLoanSchemes don't return same data
-  return {
-    id: result.id,
-    minColRatio: result.mincolratio.toFixed(),
-    interestRate: result.interestrate.toFixed()
-  }
 }
