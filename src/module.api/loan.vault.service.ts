@@ -1,3 +1,4 @@
+import { RpcApiError } from '@defichain/jellyfish-api-core'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import {
   AuctionPagination,
@@ -62,7 +63,8 @@ export class LoanVaultService {
       const vault = await this.client.loan.getVault(id)
       return await this.mapLoanVault(vault)
     } catch (err) {
-      if (err?.payload?.message === `Vault <${id}> not found` || err?.payload?.message === 'vaultId must be of length 64 (not 3, for \'999\')'
+      if (err instanceof RpcApiError &&
+        (err?.payload?.message === `Vault <${id}> not found` || err?.payload?.message === 'vaultId must be of length 64 (not 3, for \'999\')')
       ) {
         throw new NotFoundException('Unable to find vault')
       } else {

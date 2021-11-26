@@ -8,6 +8,7 @@ import {
   Query
 } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
+import { RpcApiError } from '@defichain/jellyfish-api-core'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import {
@@ -67,7 +68,7 @@ export class LoanController {
       const data = await this.loanSchemeMapper.get(id) as LoanScheme
       return data
     } catch (err) {
-      if (err?.payload?.message === `Cannot find existing loan scheme with id ${id}`) {
+      if (err instanceof RpcApiError && err?.payload?.message === `Cannot find existing loan scheme with id ${id}`) {
         throw new NotFoundException('Unable to find scheme')
       } else {
         throw new BadRequestException(err)
@@ -105,7 +106,7 @@ export class LoanController {
       const data = await this.client.loan.getCollateralToken(id)
       return await this.mapCollateralToken(data)
     } catch (err) {
-      if (err?.payload?.message === `Token ${id} does not exist!`) {
+      if (err instanceof RpcApiError && err?.payload?.message === `Token ${id} does not exist!`) {
         throw new NotFoundException('Unable to find collateral token')
       } else {
         throw new BadRequestException(err)
@@ -142,8 +143,8 @@ export class LoanController {
     try {
       const data = await this.client.loan.getLoanToken(id)
       return await this.mapLoanToken(data)
-    } catch (err: unknown) {
-      if (err?.payload?.message === `Token ${id} does not exist!`) {
+    } catch (err) {
+      if (err instanceof RpcApiError && err?.payload?.message === `Token ${id} does not exist!`) {
         throw new NotFoundException('Unable to find loan token')
       } else {
         throw new BadRequestException(err)
