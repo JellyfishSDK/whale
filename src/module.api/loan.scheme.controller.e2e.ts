@@ -148,7 +148,7 @@ describe('get', () => {
     )
   })
 
-  it.only('should throw error while getting non-existent scheme', async () => {
+  it('should throw error while getting non-existent scheme', async () => {
     const promise = controller.getScheme('999')
 
     await expect(promise).rejects.toThrow(NotFoundException)

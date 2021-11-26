@@ -1,7 +1,6 @@
 import { Model, ModelMapping } from '@src/module.database/model'
 import { Injectable } from '@nestjs/common'
 import { Database, SortOrder } from '@src/module.database/database'
-import BigNumber from 'bignumber.js'
 
 const LoanSchemeMapping: ModelMapping<LoanScheme> = {
   type: 'loan_scheme',
@@ -46,8 +45,8 @@ export interface LoanScheme extends Model {
   id: string // ------------| loanSchemeId
   sort: string // ----------| height encoded
   minColRatio: number
-  interestRate: BigNumber
-  activateAfterBlock: BigNumber
+  interestRate: string
+  activateAfterBlock: string
 
   block: {
     hash: string

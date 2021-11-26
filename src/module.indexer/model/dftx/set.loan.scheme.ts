@@ -29,8 +29,8 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       id: data.identifier,
       sort: HexEncoder.encodeHeight(block.height),
       minColRatio: data.ratio,
-      interestRate: new BigNumber(data.rate),
-      activateAfterBlock: data.update,
+      interestRate: data.rate.toString(),
+      activateAfterBlock: data.update.toString(),
 
       block: {
         hash: block.hash,
@@ -57,8 +57,8 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       loanSchemeId: data.identifier,
       sort: HexEncoder.encodeHeight(block.height),
       minColRatio: data.ratio,
-      interestRate: new BigNumber(data.rate),
-      activateAfterBlock: data.update,
+      interestRate: data.rate.toString(),
+      activateAfterBlock: data.update.toString(),
       event: isExists ? LoanSchemeHistoryEvent.UPDATE : LoanSchemeHistoryEvent.CREATE,
 
       block: {

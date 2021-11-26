@@ -65,7 +65,7 @@ export class LoanController {
   @Get('/schemes/:id')
   async getScheme (@Param('id') id: string): Promise<LoanScheme> {
     try {
-      const data = await this.loanSchemeMapper.get(id) as LoanScheme
+      const data = await this.loanSchemeMapper.get(id)
       if (data === undefined) {
         throw new NotFoundException('Unable to find scheme')
       }

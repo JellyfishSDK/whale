@@ -10,7 +10,6 @@ import {
 } from '@defichain/jellyfish-api-core/dist/category/loan'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import {
-  LoanScheme,
   LoanVaultActive,
   LoanVaultLiquidated,
   LoanVaultLiquidationBatch,
@@ -24,13 +23,15 @@ import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { parseDisplaySymbol } from '@src/module.api/token.controller'
 import { ActivePrice } from '@whale-api-client/api/prices'
 import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
+import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 
 @Injectable()
 export class LoanVaultService {
   constructor (
     private readonly client: JsonRpcClient,
     private readonly deFiDCache: DeFiDCache,
-    private readonly activePriceMapper: OraclePriceActiveMapper
+    private readonly activePriceMapper: OraclePriceActiveMapper,
+    private readonly loanSchemeMapper: LoanSchemeMapper
   ) {
   }
 
@@ -108,9 +109,14 @@ export class LoanVaultService {
     }
 
     const data = details as VaultActive
+
+    const loanScheme = await this.loanSchemeMapper.get(data.loanSchemeId)
+    if (loanScheme === undefined) {
+      throw new ConflictException('unable to find loan scheme')
+    }
     return {
       vaultId: data.vaultId,
-      loanScheme: await this.mapLoanScheme(data.loanSchemeId),
+      loanScheme: loanScheme,
       ownerAddress: data.ownerAddress,
       state: mapLoanVaultState(data.state) as any,
 
@@ -128,9 +134,13 @@ export class LoanVaultService {
 
   private async mapLoanAuction (details: VaultLiquidation): Promise<LoanVaultLiquidated> {
     const data = details
+    const loanScheme = await this.loanSchemeMapper.get(data.loanSchemeId)
+    if (loanScheme === undefined) {
+      throw new ConflictException('unable to find loan scheme')
+    }
     return {
       vaultId: data.vaultId,
-      loanScheme: await this.mapLoanScheme(data.loanSchemeId),
+      loanScheme: loanScheme,
       ownerAddress: data.ownerAddress,
       state: LoanVaultState.IN_LIQUIDATION,
       batchCount: data.batchCount,
@@ -179,18 +189,6 @@ export class LoanVaultService {
     })
 
     return await Promise.all(items)
-  }
-
-  private async mapLoanScheme (id: string): Promise<LoanScheme> {
-    const scheme = await this.deFiDCache.getLoanScheme(id)
-    if (scheme === undefined) {
-      throw new ConflictException('unable to find loan scheme')
-    }
-    return {
-      id: scheme.id,
-      minColRatio: scheme.mincolratio.toFixed(),
-      interestRate: scheme.interestrate.toFixed()
-    }
   }
 }
 
