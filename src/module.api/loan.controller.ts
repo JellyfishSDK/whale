@@ -66,10 +66,13 @@ export class LoanController {
   async getScheme (@Param('id') id: string): Promise<LoanScheme> {
     try {
       const data = await this.loanSchemeMapper.get(id) as LoanScheme
+      if (data === undefined) {
+        throw new NotFoundException('Unable to find scheme')
+      }
       return data
     } catch (err) {
-      if (err instanceof RpcApiError && err?.payload?.message === `Cannot find existing loan scheme with id ${id}`) {
-        throw new NotFoundException('Unable to find scheme')
+      if (err instanceof NotFoundException && err.message === 'Unable to find scheme') {
+        throw err
       } else {
         throw new BadRequestException(err)
       }

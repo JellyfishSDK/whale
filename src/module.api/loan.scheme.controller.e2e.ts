@@ -125,8 +125,8 @@ describe('loan', () => {
     expect(last.page).toBeUndefined()
   })
 
-  it('should listSchemes with an empty object if size 1 next 300 which is out of range', async () => {
-    const result = await controller.listScheme({ size: 1, next: 'undefined' })
+  it('should listSchemes with an empty object when providing out of range request', async () => {
+    const result = await controller.listScheme({ size: 1, next: '00000018' })
 
     expect(result.data.length).toStrictEqual(0)
     expect(result.page).toBeUndefined()
@@ -148,18 +148,10 @@ describe('get', () => {
     )
   })
 
-  it('should throw error while getting non-existent scheme', async () => {
-    expect.assertions(2)
-    try {
-      await controller.getScheme('999')
-    } catch (err: any) {
-      console.log('err 1: ', err)
-      expect(err).toBeInstanceOf(NotFoundException)
-      expect(err.response).toStrictEqual({
-        statusCode: 404,
-        message: 'Unable to find scheme',
-        error: 'Not Found'
-      })
-    }
+  it.only('should throw error while getting non-existent scheme', async () => {
+    const promise = controller.getScheme('999')
+
+    await expect(promise).rejects.toThrow(NotFoundException)
+    await expect(promise).rejects.toThrow('Unable to find scheme')
   })
 })
