@@ -80,12 +80,7 @@ it('should deferred model serves pending state', async () => {
     minColRatio: 150,
     interestRate: '3',
     activateAfterBlock: '0',
-    block: {
-      hash: expect.any(String),
-      height: expect.any(Number),
-      medianTime: expect.any(Number),
-      time: expect.any(Number)
-    }
+    block: expect.any(Object)
   })
 
   // test pagination
@@ -98,12 +93,7 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 205,
       interestRate: '8.05',
       activateAfterBlock: '120',
-      block: {
-        hash: expect.any(String),
-        height: 113,
-        medianTime: expect.any(Number),
-        time: expect.any(Number)
-      }
+      block: expect.any(Object)
     },
     {
       id: 's190-111',
@@ -112,16 +102,11 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 195,
       interestRate: '7.05',
       activateAfterBlock: '120',
-      block: {
-        hash: expect.any(String),
-        height: 111,
-        medianTime: expect.any(Number),
-        time: expect.any(Number)
-      }
+      block: expect.any(Object)
     }
   ])
 
-  const next = await deferredMapper.query(120, 2, first[first.length - 1].block.height)
+  const next = await deferredMapper.query(120, 2, first[first.length - 1].sort)
   expect(next).toStrictEqual([
     {
       id: 's180-109',
@@ -130,12 +115,7 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 185,
       interestRate: '6.05',
       activateAfterBlock: '120',
-      block: {
-        hash: expect.any(String),
-        height: 109,
-        medianTime: expect.any(Number),
-        time: expect.any(Number)
-      }
+      block: expect.any(Object)
     },
     {
       id: 's170-107',
@@ -144,16 +124,11 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 175,
       interestRate: '5.05',
       activateAfterBlock: '120',
-      block: {
-        hash: expect.any(String),
-        height: 107,
-        medianTime: expect.any(Number),
-        time: expect.any(Number)
-      }
+      block: expect.any(Object)
     }
   ])
 
-  const last = await deferredMapper.query(120, 2, next[next.length - 1].block.height)
+  const last = await deferredMapper.query(120, 2, next[next.length - 1].sort)
   expect(last).toStrictEqual([
     {
       id: 's160-105',
@@ -162,12 +137,7 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 165,
       interestRate: '4.05',
       activateAfterBlock: '120',
-      block: {
-        hash: expect.any(String),
-        height: 105,
-        medianTime: expect.any(Number),
-        time: expect.any(Number)
-      }
+      block: expect.any(Object)
     },
     {
       id: 's150-103',
@@ -176,12 +146,7 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 155,
       interestRate: '3.05',
       activateAfterBlock: '120',
-      block: {
-        hash: expect.any(String),
-        height: 103,
-        medianTime: expect.any(Number),
-        time: expect.any(Number)
-      }
+      block: expect.any(Object)
     }
   ])
 
@@ -195,12 +160,7 @@ it('should deferred model serves pending state', async () => {
     minColRatio: 155,
     interestRate: '3.05',
     activateAfterBlock: '120',
-    block: {
-      hash: expect.any(String),
-      height: expect.any(Number),
-      medianTime: expect.any(Number),
-      time: expect.any(Number)
-    }
+    block: expect.any(Object)
   })
 
   // cleared

@@ -68,12 +68,7 @@ it('should index setLoanScheme in CREATE event', async () => {
       minColRatio: 200,
       interestRate: '2.8',
       activateAfterBlock: '0',
-      block: {
-        hash: expect.any(String),
-        height: expect.any(Number),
-        medianTime: expect.any(Number),
-        time: expect.any(Number)
-      }
+      block: expect.any(Object)
     })
 
     const list = await loanSchemeMapper.query(30)
@@ -85,12 +80,7 @@ it('should index setLoanScheme in CREATE event', async () => {
         minColRatio: 250,
         interestRate: '2.5',
         activateAfterBlock: '0',
-        block: {
-          hash: expect.any(String),
-          height: expect.any(Number),
-          medianTime: expect.any(Number),
-          time: expect.any(Number)
-        }
+        block: expect.any(Object)
       },
       {
         id: 's200',
@@ -98,12 +88,7 @@ it('should index setLoanScheme in CREATE event', async () => {
         minColRatio: 200,
         interestRate: '2.8',
         activateAfterBlock: '0',
-        block: {
-          hash: expect.any(String),
-          height: expect.any(Number),
-          medianTime: expect.any(Number),
-          time: expect.any(Number)
-        }
+        block: expect.any(Object)
       },
       {
         id: 's150',
@@ -111,12 +96,7 @@ it('should index setLoanScheme in CREATE event', async () => {
         minColRatio: 150,
         interestRate: '3',
         activateAfterBlock: '0',
-        block: {
-          hash: expect.any(String),
-          height: expect.any(Number),
-          medianTime: expect.any(Number),
-          time: expect.any(Number)
-        }
+        block: expect.any(Object)
       }
     ])
 
@@ -138,12 +118,7 @@ it('should index setLoanScheme in CREATE event', async () => {
         interestRate: '3',
         activateAfterBlock: '0',
         event: LoanSchemeHistoryEvent.CREATE,
-        block: {
-          hash: expect.any(String),
-          height: expect.any(Number),
-          medianTime: expect.any(Number),
-          time: expect.any(Number)
-        }
+        block: expect.any(Object)
       }
     ])
 
@@ -179,12 +154,7 @@ it('should index setLoanScheme in UPDATE event', async () => {
       minColRatio: 205,
       interestRate: '2.85',
       activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
-      block: {
-        hash: expect.any(String),
-        height: expect.any(Number),
-        medianTime: expect.any(Number),
-        time: expect.any(Number)
-      }
+      block: expect.any(Object)
     })
 
     const list = await loanSchemeMapper.query(30)
@@ -195,12 +165,7 @@ it('should index setLoanScheme in UPDATE event', async () => {
         minColRatio: 255,
         interestRate: '2.55',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
-        block: {
-          hash: expect.any(String),
-          height: expect.any(Number),
-          medianTime: expect.any(Number),
-          time: expect.any(Number)
-        }
+        block: expect.any(Object)
       },
       {
         id: 's200',
@@ -208,12 +173,7 @@ it('should index setLoanScheme in UPDATE event', async () => {
         minColRatio: 205,
         interestRate: '2.85',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
-        block: {
-          hash: expect.any(String),
-          height: expect.any(Number),
-          medianTime: expect.any(Number),
-          time: expect.any(Number)
-        }
+        block: expect.any(Object)
       },
       {
         id: 's150',
@@ -221,12 +181,7 @@ it('should index setLoanScheme in UPDATE event', async () => {
         minColRatio: 155,
         interestRate: '3.05',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
-        block: {
-          hash: expect.any(String),
-          height: expect.any(Number),
-          medianTime: expect.any(Number),
-          time: expect.any(Number)
-        }
+        block: expect.any(Object)
       }
     ])
   }
@@ -242,12 +197,7 @@ it('should index setLoanScheme in UPDATE event', async () => {
         interestRate: '3.05',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
         event: 'update',
-        block: {
-          hash: expect.any(String),
-          height: expect.any(Number),
-          medianTime: expect.any(Number),
-          time: expect.any(Number)
-        }
+        block: expect.any(Object)
       },
       {
         id: 's150-102',
@@ -257,12 +207,7 @@ it('should index setLoanScheme in UPDATE event', async () => {
         interestRate: '3',
         activateAfterBlock: '0',
         event: 'create',
-        block: {
-          hash: expect.any(String),
-          height: expect.any(Number),
-          medianTime: expect.any(Number),
-          time: expect.any(Number)
-        }
+        block: expect.any(Object)
       }
     ])
 
@@ -275,12 +220,7 @@ it('should index setLoanScheme in UPDATE event', async () => {
       interestRate: '3',
       activateAfterBlock: '0',
       event: 'create',
-      block: {
-        hash: expect.any(String),
-        height: expect.any(Number),
-        medianTime: expect.any(Number),
-        time: expect.any(Number)
-      }
+      block: expect.any(Object)
     })
   }
 })
@@ -306,12 +246,7 @@ it('test update loanScheme with activateAfterBlock', async () => {
     minColRatio: 150,
     interestRate: '3',
     activateAfterBlock: '0',
-    block: {
-      hash: expect.any(String),
-      height: expect.any(Number),
-      medianTime: expect.any(Number),
-      time: expect.any(Number)
-    }
+    block: expect.any(Object)
   })
 
   const deferredLoanSchemesBefore = await deferredLoanSchemeMapper.query(110, 100)
@@ -323,12 +258,7 @@ it('test update loanScheme with activateAfterBlock', async () => {
     minColRatio: 155,
     interestRate: '3.05',
     activateAfterBlock: '110',
-    block: {
-      hash: expect.any(String),
-      height: expect.any(Number),
-      medianTime: expect.any(Number),
-      time: expect.any(Number)
-    }
+    block: expect.any(Object)
   })
 
   const listBefore = await loanSchemeHistoryMapper.query('s150', 100)
@@ -341,12 +271,7 @@ it('test update loanScheme with activateAfterBlock', async () => {
       interestRate: '3.05',
       activateAfterBlock: '110',
       event: 'update',
-      block: {
-        hash: expect.any(String),
-        height: expect.any(Number),
-        medianTime: expect.any(Number),
-        time: expect.any(Number)
-      }
+      block: expect.any(Object)
     },
     {
       id: 's150-102',
@@ -356,12 +281,7 @@ it('test update loanScheme with activateAfterBlock', async () => {
       interestRate: '3',
       activateAfterBlock: '0',
       event: 'create',
-      block: {
-        hash: expect.any(String),
-        height: expect.any(Number),
-        medianTime: expect.any(Number),
-        time: expect.any(Number)
-      }
+      block: expect.any(Object)
     }
   ])
 
@@ -375,12 +295,7 @@ it('test update loanScheme with activateAfterBlock', async () => {
     minColRatio: 155,
     interestRate: '3.05',
     activateAfterBlock: '110',
-    block: {
-      hash: expect.any(String),
-      height: expect.any(Number),
-      medianTime: expect.any(Number),
-      time: expect.any(Number)
-    }
+    block: expect.any(Object)
   })
 
   const deferredLoanSchemesAfter = await deferredLoanSchemeMapper.query(110, 100)

@@ -12,8 +12,8 @@ const DeferredLoanSchemeMapping: ModelMapping<DeferredLoanScheme> = {
         key: (d: DeferredLoanScheme) => d.activateAfterBlock.toString()
       },
       sort: {
-        type: 'number',
-        key: (d: DeferredLoanScheme) => d.block.height
+        type: 'string',
+        key: (d: DeferredLoanScheme) => d.sort
       }
     }
   }
@@ -24,7 +24,7 @@ export class DeferredLoanSchemeMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async query (activateAfterBlock: number, limit: number, lt?: number): Promise<DeferredLoanScheme[]> {
+  async query (activateAfterBlock: number, limit: number, lt?: string): Promise<DeferredLoanScheme[]> {
     return await this.database.query(DeferredLoanSchemeMapping.index.key_sort, {
       partitionKey: activateAfterBlock,
       limit: limit,
@@ -47,16 +47,16 @@ export class DeferredLoanSchemeMapper {
 }
 
 export interface DeferredLoanScheme extends Model {
-  id: string // ----------| loanSchemeId-height
-  sort: string // --------| height encoded
+  id: string // -------------------------| loanSchemeId-height
   loanSchemeId: string
+  sort: string // -----------------------| encoded height
   minColRatio: number
-  interestRate: string
-  activateAfterBlock: string
+  interestRate: string // ---------------| stringified bignumber
+  activateAfterBlock: string // ---------| stringified bignumber, partition key
 
   block: {
     hash: string
-    height: number // ----| as sort key
+    height: number
     time: number
     medianTime: number
   }
