@@ -1,7 +1,6 @@
 import { Model, ModelMapping } from '@src/module.database/model'
 import { Injectable } from '@nestjs/common'
 import { Database, SortOrder } from '@src/module.database/database'
-import BigNumber from 'bignumber.js'
 
 const LoanSchemeHistoryMapping: ModelMapping<LoanSchemeHistory> = {
   type: 'loan_scheme_history',
@@ -65,14 +64,14 @@ export class LoanSchemeHistoryMapper {
 }
 
 export interface LoanSchemeHistory extends Model {
-  id: string // --------------| loanSchemeId-height
-  loanSchemeId: string // ----| as partition key
-  sort: string // ------------| Hex encoded height
-  ratio: number
-  rate: BigNumber
-  activateAfterBlock: BigNumber
-  default: boolean
+  id: string // -------------------------| loanSchemeId-height
+  loanSchemeId: string // ---------------| partition key
+  sort: string // -----------------------| encoded height
+  minColRatio: number
+  interestRate: string // ---------------| stringified bignumber
+  activateAfterBlock: string // ---------| stringified bignumber
   event: LoanSchemeHistoryEvent
+  default: boolean
 
   block: {
     hash: string

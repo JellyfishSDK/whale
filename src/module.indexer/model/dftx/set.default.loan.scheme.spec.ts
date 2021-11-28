@@ -45,7 +45,7 @@ it('should index setDefaultLoanScheme', async () => {
   {
     const height = await testing.container.call('getblockcount')
     await testing.container.generate(1)
-    await waitForIndexedHeight(app, height)
+    await waitForIndexedHeight(app, height - 1)
   }
 
   const loanSchemeMapper = app.get(LoanSchemeMapper)
@@ -54,8 +54,9 @@ it('should index setDefaultLoanScheme', async () => {
   const s150 = await loanSchemeMapper.get('s150')
   expect(s150).toStrictEqual({
     id: 's150',
-    ratio: 150,
-    rate: '3',
+    sort: '00000066',
+    minColRatio: 150,
+    interestRate: '3',
     activateAfterBlock: '0',
     default: false,
     block: expect.any(Object)
@@ -63,8 +64,9 @@ it('should index setDefaultLoanScheme', async () => {
   const s200 = await loanSchemeMapper.get('s200')
   expect(s200).toStrictEqual({
     id: 's200',
-    ratio: 200,
-    rate: '2.8',
+    sort: '00000067',
+    minColRatio: 200,
+    interestRate: '2.8',
     activateAfterBlock: '0',
     default: true,
     block: expect.any(Object)
@@ -74,8 +76,8 @@ it('should index setDefaultLoanScheme', async () => {
   expect(s150History).toStrictEqual([
     {
       id: 's150-104',
-      ratio: 150,
-      rate: '3',
+      minColRatio: 150,
+      interestRate: '3',
       activateAfterBlock: '0',
       default: false,
       block: expect.any(Object),
@@ -85,8 +87,8 @@ it('should index setDefaultLoanScheme', async () => {
     },
     {
       id: 's150-102',
-      ratio: 150,
-      rate: '3',
+      minColRatio: 150,
+      interestRate: '3',
       activateAfterBlock: '0',
       default: true,
       block: expect.any(Object),
@@ -100,8 +102,8 @@ it('should index setDefaultLoanScheme', async () => {
   expect(s200History).toStrictEqual([
     {
       id: 's200-104',
-      ratio: 200,
-      rate: '2.8',
+      minColRatio: 200,
+      interestRate: '2.8',
       activateAfterBlock: '0',
       default: true,
       block: expect.any(Object),
@@ -111,8 +113,8 @@ it('should index setDefaultLoanScheme', async () => {
     },
     {
       id: 's200-103',
-      ratio: 200,
-      rate: '2.8',
+      minColRatio: 200,
+      interestRate: '2.8',
       activateAfterBlock: '0',
       default: false,
       block: expect.any(Object),

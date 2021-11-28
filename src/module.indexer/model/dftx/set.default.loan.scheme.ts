@@ -66,8 +66,9 @@ export class SetDefaultLoanSchemeIndexer extends DfTxIndexer<SetDefaultLoanSchem
         prevIds.push(prev.id)
         return {
           id: prev.loanSchemeId,
-          ratio: prev.ratio,
-          rate: prev.rate,
+          sort: prev.sort,
+          minColRatio: prev.minColRatio,
+          interestRate: prev.interestRate,
           activateAfterBlock: prev.activateAfterBlock,
           default: prev.default,
           block: prev.block

@@ -31,8 +31,9 @@ export class DestroyLoanSchemeIndexer extends DfTxIndexer<DestroyLoanScheme> {
       } else {
         await this.deferredDestroyLoanSchemeMapper.put({
           id: `${data.identifier}-${block.height}`,
+          sort: HexEncoder.encodeHeight(block.height),
           loanSchemeId: data.identifier,
-          activateAfterBlock: data.height,
+          activateAfterBlock: data.height.toString(),
           block: {
             hash: block.hash,
             height: block.height,
@@ -45,10 +46,10 @@ export class DestroyLoanSchemeIndexer extends DfTxIndexer<DestroyLoanScheme> {
         id: `${data.identifier}-${block.height}`,
         loanSchemeId: data.identifier,
         sort: HexEncoder.encodeHeight(block.height),
-        ratio: loanScheme.ratio,
-        rate: new BigNumber(loanScheme.rate),
+        minColRatio: loanScheme.minColRatio,
+        interestRate: loanScheme.interestRate,
         default: loanScheme.default,
-        activateAfterBlock: data.height,
+        activateAfterBlock: data.height.toString(),
         event: LoanSchemeHistoryEvent.DESTROY,
         block: {
           hash: block.hash,

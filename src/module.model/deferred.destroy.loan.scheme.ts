@@ -1,7 +1,6 @@
 import { Model, ModelMapping } from '@src/module.database/model'
 import { Injectable } from '@nestjs/common'
 import { Database, SortOrder } from '@src/module.database/database'
-import BigNumber from 'bignumber.js'
 
 const DeferredDestroyLoanSchemeMapping: ModelMapping<DeferredDestroyLoanScheme> = {
   type: 'deferred_destroy_loan_scheme',
@@ -13,8 +12,8 @@ const DeferredDestroyLoanSchemeMapping: ModelMapping<DeferredDestroyLoanScheme> 
         key: (d: DeferredDestroyLoanScheme) => d.activateAfterBlock.toString()
       },
       sort: {
-        type: 'number',
-        key: (d: DeferredDestroyLoanScheme) => d.block.height
+        type: 'string',
+        key: (d: DeferredDestroyLoanScheme) => d.sort
       }
     }
   }
@@ -48,13 +47,14 @@ export class DeferredDestroyLoanSchemeMapper {
 }
 
 export interface DeferredDestroyLoanScheme extends Model {
-  id: string // ----------| loanSchemeId-height
+  id: string // ----------------------| loanSchemeId-height
+  sort: string // --------------------| Hex encoded height
   loanSchemeId: string
-  activateAfterBlock: BigNumber
+  activateAfterBlock: string // ------| stringified bignumber
 
   block: {
     hash: string
-    height: number // ----| as sort key
+    height: number
     time: number
     medianTime: number
   }
