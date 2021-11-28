@@ -71,7 +71,6 @@ export interface LoanSchemeHistory extends Model {
   interestRate: string // ---------------| stringified bignumber
   activateAfterBlock: string // ---------| stringified bignumber
   event: LoanSchemeHistoryEvent
-  default: boolean
 
   block: {
     hash: string
@@ -86,5 +85,4 @@ export enum LoanSchemeHistoryEvent {
   UPDATE = 'update',
   DESTROY = 'destroy',
   SET_DEFAULT = 'setDefault',
-  UNSET_DEFAULT = 'unsetDefault'
 }

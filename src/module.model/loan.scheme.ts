@@ -47,7 +47,6 @@ export interface LoanScheme extends Model {
   minColRatio: number
   interestRate: string // ---------------| stringified bignumber
   activateAfterBlock: string // ---------| stringified bignumber
-  default: boolean
 
   block: {
     hash: string

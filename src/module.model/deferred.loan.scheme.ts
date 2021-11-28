@@ -53,7 +53,6 @@ export interface DeferredLoanScheme extends Model {
   minColRatio: number
   interestRate: string // ---------------| stringified bignumber
   activateAfterBlock: string // ---------| stringified bignumber, partition key
-  default: boolean
 
   block: {
     hash: string

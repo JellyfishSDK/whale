@@ -50,7 +50,6 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       minColRatio: deferredLoanScheme.minColRatio,
       interestRate: deferredLoanScheme.interestRate,
       activateAfterBlock: deferredLoanScheme.activateAfterBlock,
-      default: deferredLoanScheme.default,
       block: deferredLoanScheme.block
     }
   }
@@ -75,7 +74,6 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       minColRatio: prevDeferredLoanScheme.minColRatio,
       interestRate: prevDeferredLoanScheme.interestRate,
       activateAfterBlock: prevDeferredLoanScheme.activateAfterBlock,
-      default: prevDeferredLoanScheme.default,
       block: prevDeferredLoanScheme.block
     })
     await this.loanSchemeMapper.put({
@@ -84,7 +82,6 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       minColRatio: prevLoanScheme.minColRatio,
       interestRate: prevLoanScheme.interestRate,
       activateAfterBlock: prevLoanScheme.activateAfterBlock,
-      default: prevLoanScheme.default,
       block: prevLoanScheme.block
     })
   }

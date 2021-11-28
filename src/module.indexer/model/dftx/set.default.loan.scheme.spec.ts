@@ -2,7 +2,7 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { Testing } from '@defichain/jellyfish-testing'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
-import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
+import { DefaultLoanSchemeMapper } from '@src/module.model/default.loan.scheme'
 import { LoanSchemeHistoryMapper } from '@src/module.model/loan.scheme.history'
 import BigNumber from 'bignumber.js'
 
@@ -48,55 +48,11 @@ it('should index setDefaultLoanScheme', async () => {
     await waitForIndexedHeight(app, height - 1)
   }
 
-  const loanSchemeMapper = app.get(LoanSchemeMapper)
   const loanSchemeHistoryMapper = app.get(LoanSchemeHistoryMapper)
+  const defaultLoanSchemeMapper = app.get(DefaultLoanSchemeMapper)
 
-  const s150 = await loanSchemeMapper.get('s150')
-  expect(s150).toStrictEqual({
-    id: 's150',
-    sort: '00000066',
-    minColRatio: 150,
-    interestRate: '3',
-    activateAfterBlock: '0',
-    default: false,
-    block: expect.any(Object)
-  })
-  const s200 = await loanSchemeMapper.get('s200')
-  expect(s200).toStrictEqual({
-    id: 's200',
-    sort: '00000067',
-    minColRatio: 200,
-    interestRate: '2.8',
-    activateAfterBlock: '0',
-    default: true,
-    block: expect.any(Object)
-  })
-
-  const s150History = await loanSchemeHistoryMapper.query('s150', 100)
-  expect(s150History).toStrictEqual([
-    {
-      id: 's150-104',
-      minColRatio: 150,
-      interestRate: '3',
-      activateAfterBlock: '0',
-      default: false,
-      block: expect.any(Object),
-      loanSchemeId: 's150',
-      sort: '00000068',
-      event: 'unsetDefault'
-    },
-    {
-      id: 's150-102',
-      minColRatio: 150,
-      interestRate: '3',
-      activateAfterBlock: '0',
-      default: true,
-      block: expect.any(Object),
-      loanSchemeId: 's150',
-      sort: '00000066',
-      event: 'create'
-    }
-  ])
+  const defaultLoanScheme = await defaultLoanSchemeMapper.get()
+  expect(defaultLoanScheme).toStrictEqual({ id: 's200' })
 
   const s200History = await loanSchemeHistoryMapper.query('s200', 100)
   expect(s200History).toStrictEqual([
@@ -105,7 +61,6 @@ it('should index setDefaultLoanScheme', async () => {
       minColRatio: 200,
       interestRate: '2.8',
       activateAfterBlock: '0',
-      default: true,
       block: expect.any(Object),
       loanSchemeId: 's200',
       sort: '00000068',
@@ -116,7 +71,6 @@ it('should index setDefaultLoanScheme', async () => {
       minColRatio: 200,
       interestRate: '2.8',
       activateAfterBlock: '0',
-      default: false,
       block: expect.any(Object),
       loanSchemeId: 's200',
       sort: '00000067',

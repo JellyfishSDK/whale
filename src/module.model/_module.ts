@@ -27,6 +27,7 @@ import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 import { LoanSchemeHistoryMapper } from '@src/module.model/loan.scheme.history'
 import { DeferredLoanSchemeMapper } from './deferred.loan.scheme'
 import { DeferredDestroyLoanSchemeMapper } from './deferred.destroy.loan.scheme'
+import { DefaultLoanSchemeMapper } from './default.loan.scheme'
 
 @Global()
 @Module({
@@ -56,7 +57,8 @@ import { DeferredDestroyLoanSchemeMapper } from './deferred.destroy.loan.scheme'
     LoanSchemeMapper,
     LoanSchemeHistoryMapper,
     DeferredLoanSchemeMapper,
-    DeferredDestroyLoanSchemeMapper
+    DeferredDestroyLoanSchemeMapper,
+    DefaultLoanSchemeMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -84,7 +86,8 @@ import { DeferredDestroyLoanSchemeMapper } from './deferred.destroy.loan.scheme'
     LoanSchemeMapper,
     LoanSchemeHistoryMapper,
     DeferredLoanSchemeMapper,
-    DeferredDestroyLoanSchemeMapper
+    DeferredDestroyLoanSchemeMapper,
+    DefaultLoanSchemeMapper
   ]
 })
 export class ModelModule {

@@ -68,7 +68,6 @@ it('should index setLoanScheme in CREATE event', async () => {
       minColRatio: 200,
       interestRate: '2.8',
       activateAfterBlock: '0',
-      default: false,
       block: expect.any(Object)
     })
 
@@ -81,7 +80,6 @@ it('should index setLoanScheme in CREATE event', async () => {
         minColRatio: 250,
         interestRate: '2.5',
         activateAfterBlock: '0',
-        default: false,
         block: expect.any(Object)
       },
       {
@@ -90,7 +88,6 @@ it('should index setLoanScheme in CREATE event', async () => {
         minColRatio: 200,
         interestRate: '2.8',
         activateAfterBlock: '0',
-        default: false,
         block: expect.any(Object)
       },
       {
@@ -99,7 +96,6 @@ it('should index setLoanScheme in CREATE event', async () => {
         minColRatio: 150,
         interestRate: '3',
         activateAfterBlock: '0',
-        default: true,
         block: expect.any(Object)
       }
     ])
@@ -122,7 +118,6 @@ it('should index setLoanScheme in CREATE event', async () => {
         interestRate: '3',
         activateAfterBlock: '0',
         event: LoanSchemeHistoryEvent.CREATE,
-        default: true,
         block: expect.any(Object)
       }
     ])
@@ -159,7 +154,6 @@ it('should index setLoanScheme in UPDATE event', async () => {
       minColRatio: 205,
       interestRate: '2.85',
       activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
-      default: false,
       block: expect.any(Object)
     })
 
@@ -171,7 +165,6 @@ it('should index setLoanScheme in UPDATE event', async () => {
         minColRatio: 255,
         interestRate: '2.55',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
-        default: false,
         block: expect.any(Object)
       },
       {
@@ -180,7 +173,6 @@ it('should index setLoanScheme in UPDATE event', async () => {
         minColRatio: 205,
         interestRate: '2.85',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
-        default: false,
         block: expect.any(Object)
       },
       {
@@ -189,7 +181,6 @@ it('should index setLoanScheme in UPDATE event', async () => {
         minColRatio: 155,
         interestRate: '3.05',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
-        default: true,
         block: expect.any(Object)
       }
     ])
@@ -205,7 +196,6 @@ it('should index setLoanScheme in UPDATE event', async () => {
         minColRatio: 155,
         interestRate: '3.05',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
-        default: true,
         event: 'update',
         block: expect.any(Object)
       },
@@ -217,7 +207,6 @@ it('should index setLoanScheme in UPDATE event', async () => {
         interestRate: '3',
         activateAfterBlock: '0',
         event: 'create',
-        default: true,
         block: expect.any(Object)
       }
     ])
@@ -231,7 +220,6 @@ it('should index setLoanScheme in UPDATE event', async () => {
       interestRate: '3',
       activateAfterBlock: '0',
       event: 'create',
-      default: true,
       block: expect.any(Object)
     })
   }
@@ -258,7 +246,6 @@ it('test update loanScheme with activateAfterBlock', async () => {
     minColRatio: 150,
     interestRate: '3',
     activateAfterBlock: '0',
-    default: true,
     block: expect.any(Object)
   })
 
@@ -271,7 +258,6 @@ it('test update loanScheme with activateAfterBlock', async () => {
     minColRatio: 155,
     interestRate: '3.05',
     activateAfterBlock: '110',
-    default: true,
     block: expect.any(Object)
   })
 
@@ -285,7 +271,6 @@ it('test update loanScheme with activateAfterBlock', async () => {
       interestRate: '3.05',
       activateAfterBlock: '110',
       event: 'update',
-      default: true,
       block: expect.any(Object)
     },
     {
@@ -296,7 +281,6 @@ it('test update loanScheme with activateAfterBlock', async () => {
       interestRate: '3',
       activateAfterBlock: '0',
       event: 'create',
-      default: true,
       block: expect.any(Object)
     }
   ])
@@ -311,7 +295,6 @@ it('test update loanScheme with activateAfterBlock', async () => {
     minColRatio: 155,
     interestRate: '3.05',
     activateAfterBlock: '110',
-    default: true,
     block: expect.any(Object)
   })
 

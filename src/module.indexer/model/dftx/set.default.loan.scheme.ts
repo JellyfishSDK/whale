@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { SetDefaultLoanScheme, CSetDefaultLoanScheme } from '@defichain/jellyfish-transaction'
-import { LoanSchemeMapper, LoanScheme } from '@src/module.model/loan.scheme'
+import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
+import { DefaultLoanSchemeMapper } from '@src/module.model/default.loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent, LoanSchemeHistory } from '@src/module.model/loan.scheme.history'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
@@ -14,7 +15,8 @@ export class SetDefaultLoanSchemeIndexer extends DfTxIndexer<SetDefaultLoanSchem
 
   constructor (
     private readonly loanSchemeMapper: LoanSchemeMapper,
-    private readonly loanSchemeHistoryMapper: LoanSchemeHistoryMapper
+    private readonly loanSchemeHistoryMapper: LoanSchemeHistoryMapper,
+    private readonly defaultLoanSchemeMapper: DefaultLoanSchemeMapper
   ) {
     super()
   }
@@ -27,23 +29,10 @@ export class SetDefaultLoanSchemeIndexer extends DfTxIndexer<SetDefaultLoanSchem
       throw new NotFoundIndexerError('index', 'LoanScheme', data.identifier)
     }
 
-    await this.setAllFalsyDefault(data.identifier, block.height)
-
-    // set the target loan scheme to default:true
-    await this.loanSchemeMapper.put({
-      ...loanScheme,
-      default: true,
-      block: {
-        hash: block.hash,
-        height: block.height,
-        medianTime: block.mediantime,
-        time: block.time
-      }
-    })
+    await this.defaultLoanSchemeMapper.put({ id: loanScheme.id })
 
     await this.loanSchemeHistoryMapper.put({
       ...loanScheme,
-      default: true,
       id: `${data.identifier}-${block.height}`,
       loanSchemeId: data.identifier,
       sort: HexEncoder.encodeHeight(block.height),
@@ -52,60 +41,38 @@ export class SetDefaultLoanSchemeIndexer extends DfTxIndexer<SetDefaultLoanSchem
   }
 
   async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetDefaultLoanScheme>): Promise<void> {
-    const loop = async (next?: string): Promise<void> => {
-      const list = await this.loanSchemeMapper.query(100, next)
-      if (list.length === 0) {
-        return
-      }
-      const prevIds: string[] = []
-      const previous: LoanScheme[] = await Promise.all(list.map(async each => {
-        const prev = await this.loanSchemeHistoryMapper.getLatest(each.id)
-        if (prev === undefined) {
-          throw new NotFoundIndexerError('index', 'LoanSchemeHistory', each.id)
-        }
-        prevIds.push(prev.id)
-        return {
-          id: prev.loanSchemeId,
-          sort: prev.sort,
-          minColRatio: prev.minColRatio,
-          interestRate: prev.interestRate,
-          activateAfterBlock: prev.activateAfterBlock,
-          default: prev.default,
-          block: prev.block
-        }
-      }))
-      // overwrite all previous record
-      await Promise.all(previous.map(async prev => await this.loanSchemeMapper.put(prev)))
-      // delete all the new history record
-      await Promise.all(prevIds.map(async id => await this.loanSchemeHistoryMapper.delete(id)))
+    const data = transaction.dftx.data
+    // delete the new set_default
+    // find the prev latest set_default in history
 
-      return await loop(list[list.length - 1].id)
+    const prevDefault = await this.getPrevious(data.identifier, block.height)
+    if (prevDefault === undefined) {
+      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
     }
-    return await loop()
+
+    await this.defaultLoanSchemeMapper.put({ id: prevDefault.id })
+    await this.loanSchemeHistoryMapper.delete(`${data.identifier}-${block.height}`)
   }
 
-  private async setAllFalsyDefault (id: string, height: number): Promise<void> {
-    const loop = async (next?: string): Promise<void> => {
-      const list = await this.loanSchemeMapper.query(100, next)
+  /**
+   * Get previous default loan scheme
+   */
+  private async getPrevious (id: string, height: number): Promise<LoanSchemeHistory | undefined> {
+    const findInNextPage = async (height: number): Promise<LoanSchemeHistory | undefined> => {
+      const list = await this.loanSchemeHistoryMapper.query(id, 100, HexEncoder.encodeHeight(height))
       if (list.length === 0) {
-        return
+        return undefined
       }
-      const reset = list.map(async each => await this.loanSchemeMapper.put({ ...each, default: false }))
-      await Promise.all(reset)
 
-      // update history
-      const rest = list.filter(each => each.id !== id)
-      const items = await Promise.all(rest.map(async each => await this.loanSchemeHistoryMapper.getLatest(each.id))) as LoanSchemeHistory[]
-      await Promise.all(items.map(async item => await this.loanSchemeHistoryMapper.put({
-        ...item,
-        default: false,
-        id: `${item.loanSchemeId}-${height}`,
-        sort: HexEncoder.encodeHeight(height),
-        event: LoanSchemeHistoryEvent.UNSET_DEFAULT
-      })))
+      // order by DESC order
+      // looking for the first loan scheme SET_DEFAULT event
+      const prevDefaultLoanScheme = list.find(each => each.event === LoanSchemeHistoryEvent.SET_DEFAULT)
+      if (prevDefaultLoanScheme !== undefined) {
+        return prevDefaultLoanScheme
+      }
 
-      return await loop(list[list.length - 1].id)
+      return await findInNextPage(list[list.length - 1].block.height)
     }
-    return await loop()
+    return await findInNextPage(height)
   }
 }

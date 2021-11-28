@@ -80,7 +80,6 @@ it('should deferred model serves pending state', async () => {
     minColRatio: 150,
     interestRate: '3',
     activateAfterBlock: '0',
-    default: true,
     block: expect.any(Object)
   })
 
@@ -94,7 +93,6 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 205,
       interestRate: '8.05',
       activateAfterBlock: '120',
-      default: false,
       block: expect.any(Object)
     },
     {
@@ -104,7 +102,6 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 195,
       interestRate: '7.05',
       activateAfterBlock: '120',
-      default: false,
       block: expect.any(Object)
     }
   ])
@@ -118,7 +115,6 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 185,
       interestRate: '6.05',
       activateAfterBlock: '120',
-      default: false,
       block: expect.any(Object)
     },
     {
@@ -128,7 +124,6 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 175,
       interestRate: '5.05',
       activateAfterBlock: '120',
-      default: false,
       block: expect.any(Object)
     }
   ])
@@ -142,7 +137,6 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 165,
       interestRate: '4.05',
       activateAfterBlock: '120',
-      default: false,
       block: expect.any(Object)
     },
     {
@@ -152,7 +146,6 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 155,
       interestRate: '3.05',
       activateAfterBlock: '120',
-      default: true,
       block: expect.any(Object)
     }
   ])
@@ -167,7 +160,6 @@ it('should deferred model serves pending state', async () => {
     minColRatio: 155,
     interestRate: '3.05',
     activateAfterBlock: '120',
-    default: true,
     block: expect.any(Object)
   })
 

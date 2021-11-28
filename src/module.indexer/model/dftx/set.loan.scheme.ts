@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { SetLoanScheme, CSetLoanScheme } from '@defichain/jellyfish-transaction'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 import { DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
+import { DefaultLoanSchemeMapper } from '@src/module.model/default.loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent, LoanSchemeHistory } from '@src/module.model/loan.scheme.history'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
@@ -17,7 +18,8 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   constructor (
     private readonly loanSchemeMapper: LoanSchemeMapper,
     private readonly loanSchemeHistoryMapper: LoanSchemeHistoryMapper,
-    private readonly deferredLoanSchemeMapper: DeferredLoanSchemeMapper
+    private readonly deferredLoanSchemeMapper: DeferredLoanSchemeMapper,
+    private readonly defaultLoanSchemeMapper: DefaultLoanSchemeMapper
   ) {
     super()
   }
@@ -27,22 +29,48 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
 
     const loanScheme = await this.loanSchemeMapper.get(data.identifier)
     if (loanScheme !== undefined) {
-      return await this.update(block, data, loanScheme.default)
+      return await this.update(block, data)
     }
 
     return await this.create(block, data)
   }
 
   private async create (block: RawBlock, data: SetLoanScheme): Promise<void> {
-    const isFirst = await this.first()
-
     const loanScheme = {
       id: data.identifier,
       sort: HexEncoder.encodeHeight(block.height),
       minColRatio: data.ratio,
       interestRate: data.rate.toString(),
       activateAfterBlock: data.update.toString(),
-      default: !!isFirst,
+      block: {
+        hash: block.hash,
+        height: block.height,
+        medianTime: block.mediantime,
+        time: block.time
+      }
+    }
+
+    const isFirst = await this.first()
+    if (isFirst) {
+      await this.defaultLoanSchemeMapper.put({ id: data.identifier })
+    }
+    await this.loanSchemeMapper.put(loanScheme)
+
+    await this.loanSchemeHistoryMapper.put({
+      ...loanScheme,
+      id: `${data.identifier}-${block.height}`,
+      loanSchemeId: data.identifier,
+      event: LoanSchemeHistoryEvent.CREATE
+    })
+  }
+
+  private async update (block: RawBlock, data: SetLoanScheme): Promise<void> {
+    const loanScheme = {
+      id: data.identifier,
+      sort: HexEncoder.encodeHeight(block.height),
+      minColRatio: data.ratio,
+      interestRate: data.rate.toString(),
+      activateAfterBlock: data.update.toString(),
       block: {
         hash: block.hash,
         height: block.height,
@@ -65,42 +93,6 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       ...loanScheme,
       id: `${data.identifier}-${block.height}`,
       loanSchemeId: data.identifier,
-      sort: HexEncoder.encodeHeight(block.height),
-      event: LoanSchemeHistoryEvent.CREATE
-    })
-  }
-
-  private async update (block: RawBlock, data: SetLoanScheme, isDefault: boolean): Promise<void> {
-    const metadata = {
-      id: data.identifier,
-      sort: HexEncoder.encodeHeight(block.height),
-      minColRatio: data.ratio,
-      interestRate: data.rate.toString(),
-      activateAfterBlock: data.update.toString(),
-      default: isDefault, // refer to previous state
-      block: {
-        hash: block.hash,
-        height: block.height,
-        medianTime: block.mediantime,
-        time: block.time
-      }
-    }
-
-    if (this.isActive(data, block.height)) {
-      await this.loanSchemeMapper.put(metadata)
-    } else {
-      await this.deferredLoanSchemeMapper.put({
-        ...metadata,
-        loanSchemeId: data.identifier,
-        id: `${data.identifier}-${block.height}`
-      })
-    }
-
-    await this.loanSchemeHistoryMapper.put({
-      ...metadata,
-      id: `${data.identifier}-${block.height}`,
-      loanSchemeId: data.identifier,
-      sort: HexEncoder.encodeHeight(block.height),
       event: LoanSchemeHistoryEvent.UPDATE
     })
   }
@@ -109,6 +101,12 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     const data = transaction.dftx.data
 
     if (this.isActive(data, block.height)) {
+      const list = await this.loanSchemeMapper.query(2)
+      // total one loan scheme is recorded which means it was first created
+      if (list.length === 1) {
+        await this.defaultLoanSchemeMapper.delete(data.identifier)
+      }
+
       const previous = await this.getPrevious(data.identifier, block.height)
       if (previous === undefined) {
         throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
@@ -119,7 +117,6 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
         minColRatio: previous.minColRatio,
         interestRate: previous.interestRate,
         activateAfterBlock: previous.activateAfterBlock,
-        default: previous.default,
         block: previous.block
       })
     } else {
@@ -130,8 +127,8 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   }
 
   private async first (): Promise<boolean> {
-    const list = await this.loanSchemeMapper.query(Number.MAX_SAFE_INTEGER)
-    return list.length === 0
+    const loanScheme = await this.defaultLoanSchemeMapper.get()
+    return loanScheme !== undefined
   }
 
   private isActive (loanScheme: SetLoanScheme, height: number): boolean {
