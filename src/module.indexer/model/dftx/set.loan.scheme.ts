@@ -6,8 +6,8 @@ import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent, LoanSchemeHistory } fr
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
-import BigNumber from 'bignumber.js'
 import { NotFoundIndexerError } from '@src/module.indexer/error'
+import BigNumber from 'bignumber.js'
 
 @Injectable()
 export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
@@ -27,9 +27,10 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
 
     const loanScheme = {
       id: data.identifier,
-      ratio: data.ratio,
-      rate: new BigNumber(data.rate),
-      activateAfterBlock: data.update,
+      sort: HexEncoder.encodeHeight(block.height),
+      minColRatio: data.ratio,
+      interestRate: data.rate.toString(),
+      activateAfterBlock: data.update.toString(),
 
       block: {
         hash: block.hash,
@@ -55,9 +56,9 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       id: `${data.identifier}-${block.height}`,
       loanSchemeId: data.identifier,
       sort: HexEncoder.encodeHeight(block.height),
-      ratio: data.ratio,
-      rate: new BigNumber(data.rate),
-      activateAfterBlock: data.update,
+      minColRatio: data.ratio,
+      interestRate: data.rate.toString(),
+      activateAfterBlock: data.update.toString(),
       event: isExists ? LoanSchemeHistoryEvent.UPDATE : LoanSchemeHistoryEvent.CREATE,
 
       block: {
@@ -79,8 +80,9 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       }
       await this.loanSchemeMapper.put({
         id: previous.loanSchemeId,
-        ratio: previous.ratio,
-        rate: previous.rate,
+        sort: previous.sort,
+        minColRatio: previous.minColRatio,
+        interestRate: previous.interestRate,
         activateAfterBlock: previous.activateAfterBlock,
         block: previous.block
       })
@@ -114,7 +116,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       // get the closest activateAfterBlock against height
       // ensure its queried by DESC height
       // looking for the first height >= activateHeight
-      const prevActiveLoanScheme = list.find(each => new BigNumber(height).gte(each.activateAfterBlock))
+      const prevActiveLoanScheme = list.find(each => new BigNumber(height).gte(new BigNumber(each.activateAfterBlock)))
       if (prevActiveLoanScheme !== undefined) {
         return prevActiveLoanScheme
       }

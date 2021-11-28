@@ -46,8 +46,9 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   private mapLoanScheme (deferredLoanScheme: DeferredLoanScheme): LoanScheme {
     return {
       id: deferredLoanScheme.loanSchemeId,
-      ratio: deferredLoanScheme.ratio,
-      rate: deferredLoanScheme.rate,
+      sort: deferredLoanScheme.sort,
+      minColRatio: deferredLoanScheme.minColRatio,
+      interestRate: deferredLoanScheme.interestRate,
       activateAfterBlock: deferredLoanScheme.activateAfterBlock,
       block: deferredLoanScheme.block
     }
@@ -68,16 +69,18 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     }
     await this.deferredLoanSchemeMapper.put({
       id: prevDeferredLoanScheme.id,
+      sort: prevDeferredLoanScheme.sort,
       loanSchemeId: prevDeferredLoanScheme.loanSchemeId,
-      ratio: prevDeferredLoanScheme.ratio,
-      rate: prevDeferredLoanScheme.rate,
+      minColRatio: prevDeferredLoanScheme.minColRatio,
+      interestRate: prevDeferredLoanScheme.interestRate,
       activateAfterBlock: prevDeferredLoanScheme.activateAfterBlock,
       block: prevDeferredLoanScheme.block
     })
     await this.loanSchemeMapper.put({
       id: prevLoanScheme.loanSchemeId,
-      ratio: prevLoanScheme.ratio,
-      rate: prevLoanScheme.rate,
+      sort: prevLoanScheme.sort,
+      minColRatio: prevLoanScheme.minColRatio,
+      interestRate: prevLoanScheme.interestRate,
       activateAfterBlock: prevLoanScheme.activateAfterBlock,
       block: prevLoanScheme.block
     })
