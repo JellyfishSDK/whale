@@ -86,8 +86,8 @@ it('should index destroyLoanScheme', async () => {
         id: 's150-104',
         loanSchemeId: 's150',
         sort: '00000068',
-        ratio: 150,
-        rate: '3',
+        minColRatio: 150,
+        interestRate: '3',
         activateAfterBlock: '0',
         event: 'destroy',
         block: expect.any(Object)
@@ -96,8 +96,8 @@ it('should index destroyLoanScheme', async () => {
         id: 's150-103',
         loanSchemeId: 's150',
         sort: '00000067',
-        ratio: 150,
-        rate: '3',
+        minColRatio: 150,
+        interestRate: '3',
         activateAfterBlock: '0',
         event: 'create',
         block: expect.any(Object)
@@ -115,8 +115,8 @@ it('should index destroyLoanScheme', async () => {
         id: 's200-107',
         loanSchemeId: 's200',
         sort: '0000006b',
-        ratio: 202,
-        rate: '3.3',
+        minColRatio: 202,
+        interestRate: '3.3',
         activateAfterBlock: '0',
         event: 'destroy',
         block: expect.any(Object)
@@ -125,8 +125,8 @@ it('should index destroyLoanScheme', async () => {
         id: 's200-106',
         loanSchemeId: 's200',
         sort: '0000006a',
-        ratio: 202,
-        rate: '3.3',
+        minColRatio: 202,
+        interestRate: '3.3',
         activateAfterBlock: '18446744073709551615',
         event: 'update',
         block: expect.any(Object)
@@ -135,8 +135,8 @@ it('should index destroyLoanScheme', async () => {
         id: 's200-105',
         loanSchemeId: 's200',
         sort: '00000069',
-        ratio: 200,
-        rate: '3',
+        minColRatio: 200,
+        interestRate: '3',
         activateAfterBlock: '0',
         event: 'create',
         block: expect.any(Object)
@@ -168,8 +168,9 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
   const s150Before = await loanSchemeMapper.get('s150')
   expect(s150Before).toStrictEqual({
     id: 's150',
-    ratio: 150,
-    rate: '3',
+    sort: '00000067',
+    minColRatio: 150,
+    interestRate: '3',
     activateAfterBlock: '0',
     block: expect.any(Object)
   })
@@ -177,8 +178,9 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
   const s200Before = await loanSchemeMapper.get('s200')
   expect(s200Before).toStrictEqual({
     id: 's200',
-    ratio: 200,
-    rate: '3',
+    sort: '00000069',
+    minColRatio: 200,
+    interestRate: '3',
     activateAfterBlock: '0',
     block: expect.any(Object)
   })
@@ -187,12 +189,14 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
   expect(deferredBefore).toStrictEqual([
     {
       id: 's200-107',
+      sort: '0000006b',
       loanSchemeId: 's200',
       activateAfterBlock: '110',
       block: expect.any(Object)
     },
     {
       id: 's150-104',
+      sort: '00000068',
       loanSchemeId: 's150',
       activateAfterBlock: '110',
       block: expect.any(Object)
@@ -205,8 +209,8 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
       id: 's150-104',
       loanSchemeId: 's150',
       sort: '00000068',
-      ratio: 150,
-      rate: '3',
+      minColRatio: 150,
+      interestRate: '3',
       activateAfterBlock: '110',
       event: 'destroy',
       block: expect.any(Object)
@@ -215,8 +219,8 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
       id: 's150-103',
       loanSchemeId: 's150',
       sort: '00000067',
-      ratio: 150,
-      rate: '3',
+      minColRatio: 150,
+      interestRate: '3',
       activateAfterBlock: '0',
       event: 'create',
       block: expect.any(Object)
@@ -229,8 +233,8 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
       id: 's200-107',
       loanSchemeId: 's200',
       sort: '0000006b',
-      ratio: 200,
-      rate: '3',
+      minColRatio: 200,
+      interestRate: '3',
       activateAfterBlock: '110',
       event: 'destroy',
       block: expect.any(Object)
@@ -240,8 +244,8 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
       id: 's200-106',
       loanSchemeId: 's200',
       sort: '0000006a',
-      ratio: 202,
-      rate: '3.3',
+      minColRatio: 202,
+      interestRate: '3.3',
       activateAfterBlock: '109',
       event: 'update',
       block: expect.any(Object)
@@ -251,8 +255,8 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
       id: 's200-105',
       loanSchemeId: 's200',
       sort: '00000069',
-      ratio: 200,
-      rate: '3',
+      minColRatio: 200,
+      interestRate: '3',
       activateAfterBlock: '0',
       event: 'create',
       block: expect.any(Object)
@@ -294,8 +298,9 @@ it('test destroy before update', async () => {
   const s250Before = await loanSchemeMapper.get('s250')
   expect(s250Before).toStrictEqual({
     id: 's250',
-    ratio: 250,
-    rate: '3',
+    sort: '00000067',
+    minColRatio: 250,
+    interestRate: '3',
     activateAfterBlock: '0',
     block: expect.any(Object)
   })
@@ -306,8 +311,8 @@ it('test destroy before update', async () => {
       id: 's250-105',
       loanSchemeId: 's250',
       sort: '00000069',
-      ratio: 250,
-      rate: '3',
+      minColRatio: 250,
+      interestRate: '3',
       activateAfterBlock: '110',
       event: 'destroy',
       block: expect.any(Object)
@@ -316,8 +321,8 @@ it('test destroy before update', async () => {
       id: 's250-104',
       loanSchemeId: 's250',
       sort: '00000068',
-      ratio: 255,
-      rate: '3.3',
+      minColRatio: 255,
+      interestRate: '3.3',
       activateAfterBlock: '111',
       event: 'update',
       block: expect.any(Object)
@@ -326,8 +331,8 @@ it('test destroy before update', async () => {
       id: 's250-103',
       loanSchemeId: 's250',
       sort: '00000067',
-      ratio: 250,
-      rate: '3',
+      minColRatio: 250,
+      interestRate: '3',
       activateAfterBlock: '0',
       event: 'create',
       block: expect.any(Object)
@@ -338,6 +343,7 @@ it('test destroy before update', async () => {
   expect(deferredDestroy110).toStrictEqual([
     {
       id: 's250-105',
+      sort: '00000069',
       loanSchemeId: 's250',
       activateAfterBlock: '110',
       block: expect.any(Object)
@@ -348,8 +354,9 @@ it('test destroy before update', async () => {
   expect(deferred111).toStrictEqual([
     {
       id: 's250-104',
-      ratio: 255,
-      rate: '3.3',
+      sort: '00000068',
+      minColRatio: 255,
+      interestRate: '3.3',
       activateAfterBlock: '111',
       block: expect.any(Object),
       loanSchemeId: 's250'
