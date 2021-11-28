@@ -84,5 +84,5 @@ export enum LoanSchemeHistoryEvent {
   CREATE = 'create',
   UPDATE = 'update',
   DESTROY = 'destroy',
-  SET_DEFAULT = 'setDefault',
+  SET_DEFAULT = 'setDefault'
 }
