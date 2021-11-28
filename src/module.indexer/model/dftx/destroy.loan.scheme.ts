@@ -48,9 +48,9 @@ export class DestroyLoanSchemeIndexer extends DfTxIndexer<DestroyLoanScheme> {
         sort: HexEncoder.encodeHeight(block.height),
         minColRatio: loanScheme.minColRatio,
         interestRate: loanScheme.interestRate,
-        default: loanScheme.default,
         activateAfterBlock: data.height.toString(),
         event: LoanSchemeHistoryEvent.DESTROY,
+        default: loanScheme.default,
         block: {
           hash: block.hash,
           height: block.height,
