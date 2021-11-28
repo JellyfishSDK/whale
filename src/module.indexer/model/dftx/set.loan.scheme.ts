@@ -25,13 +25,21 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   async indexTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>): Promise<void> {
     const data = transaction.dftx.data
 
+    const loanScheme = await this.loanSchemeMapper.get(data.identifier)
+    if (loanScheme !== undefined) {
+      return await this.update(block, data)
+    }
+
+    return await this.create(block, data)
+  }
+
+  private async create (block: RawBlock, data: SetLoanScheme): Promise<void> {
     const loanScheme = {
       id: data.identifier,
       sort: HexEncoder.encodeHeight(block.height),
       minColRatio: data.ratio,
       interestRate: data.rate.toString(),
       activateAfterBlock: data.update.toString(),
-
       block: {
         hash: block.hash,
         height: block.height,
@@ -40,7 +48,30 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       }
     }
 
-    const isExists = await this.has(data.identifier)
+    await this.loanSchemeMapper.put(loanScheme)
+
+    await this.loanSchemeHistoryMapper.put({
+      ...loanScheme,
+      id: `${data.identifier}-${block.height}`,
+      loanSchemeId: data.identifier,
+      event: LoanSchemeHistoryEvent.CREATE
+    })
+  }
+
+  private async update (block: RawBlock, data: SetLoanScheme): Promise<void> {
+    const loanScheme = {
+      id: data.identifier,
+      sort: HexEncoder.encodeHeight(block.height),
+      minColRatio: data.ratio,
+      interestRate: data.rate.toString(),
+      activateAfterBlock: data.update.toString(),
+      block: {
+        hash: block.hash,
+        height: block.height,
+        medianTime: block.mediantime,
+        time: block.time
+      }
+    }
 
     if (this.isActive(data, block.height)) {
       await this.loanSchemeMapper.put(loanScheme)
@@ -53,20 +84,10 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     }
 
     await this.loanSchemeHistoryMapper.put({
+      ...loanScheme,
       id: `${data.identifier}-${block.height}`,
       loanSchemeId: data.identifier,
-      sort: HexEncoder.encodeHeight(block.height),
-      minColRatio: data.ratio,
-      interestRate: data.rate.toString(),
-      activateAfterBlock: data.update.toString(),
-      event: isExists ? LoanSchemeHistoryEvent.UPDATE : LoanSchemeHistoryEvent.CREATE,
-
-      block: {
-        hash: block.hash,
-        height: block.height,
-        medianTime: block.mediantime,
-        time: block.time
-      }
+      event: LoanSchemeHistoryEvent.UPDATE
     })
   }
 
@@ -91,10 +112,6 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     }
 
     await this.loanSchemeHistoryMapper.delete(`${data.identifier}-${block.height}`)
-  }
-
-  private async has (id: string): Promise<boolean> {
-    return (await this.loanSchemeMapper.get(id)) !== undefined
   }
 
   private isActive (loanScheme: SetLoanScheme, height: number): boolean {
