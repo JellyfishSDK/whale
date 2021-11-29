@@ -4,7 +4,6 @@ import { DestroyLoanScheme, CDestroyLoanScheme } from '@defichain/jellyfish-tran
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistory, LoanSchemeHistoryEvent } from '@src/module.model/loan.scheme.history'
 import { DeferredDestroyLoanSchemeMapper } from '@src/module.model/deferred.destroy.loan.scheme'
-import { DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
 import BigNumber from 'bignumber.js'
 import { NotFoundIndexerError } from '@src/module.indexer/error'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
@@ -18,8 +17,7 @@ export class DestroyDeferredLoanSchemeIndexer extends DfTxIndexer<DestroyLoanSch
   constructor (
     private readonly loanSchemeMapper: LoanSchemeMapper,
     private readonly loanSchemeHistoryMapper: LoanSchemeHistoryMapper,
-    private readonly deferredDestroyLoanSchemeMapper: DeferredDestroyLoanSchemeMapper,
-    private readonly deferredLoanSchemeMapper: DeferredLoanSchemeMapper
+    private readonly deferredDestroyLoanSchemeMapper: DeferredDestroyLoanSchemeMapper
   ) {
     super()
   }
