@@ -36,6 +36,11 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   }
 
   private async create (block: RawBlock, data: SetLoanScheme): Promise<void> {
+    const isFirst = await this.first()
+    if (isFirst) {
+      await this.defaultLoanSchemeMapper.put({ id: data.identifier })
+    }
+
     const loanScheme = {
       id: data.identifier,
       sort: HexEncoder.encodeHeight(block.height),
@@ -48,11 +53,6 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
         medianTime: block.mediantime,
         time: block.time
       }
-    }
-
-    const isFirst = await this.first()
-    if (isFirst) {
-      await this.defaultLoanSchemeMapper.put({ id: data.identifier })
     }
     await this.loanSchemeMapper.put(loanScheme)
 
