@@ -5,8 +5,11 @@ import { createSignedTxnHex } from '@defichain/testing'
 import { Bech32, Elliptic, HRP } from '@defichain/jellyfish-crypto'
 import { RegTest } from '@defichain/jellyfish-network'
 import { BadRequestApiException } from '@src/module.api/_core/api.error'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { RawtxController } from '@src/module.api/rawtx.controller'
+import { DeFiDCache } from '@src/module.api/cache/defid.cache'
+import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
+import { PoolPairService } from '@src/module.api/poolpair.service'
 
 const container = new MasterNodeRegTestContainer()
 let client: JsonRpcClient
@@ -34,7 +37,16 @@ beforeEach(async () => {
       })
     ],
     controllers: [RawtxController],
-    providers: [{ provide: JsonRpcClient, useValue: client }]
+    providers: [
+      {
+        provide: JsonRpcClient,
+        useValue: client
+      },
+      DeFiDCache,
+      SemaphoreCache,
+      PoolPairService,
+      ConfigService
+    ]
   }).compile()
 
   controller = app.get<RawtxController>(RawtxController)
@@ -85,7 +97,8 @@ describe('test', () => {
     expect.assertions(2)
     try {
       await controller.test({
-        hex: hex, maxFeeRate: 1.0
+        hex: hex,
+        maxFeeRate: 1.0
       })
     } catch (err) {
       expect(err).toBeInstanceOf(BadRequestApiException)
@@ -104,7 +117,10 @@ describe('send', () => {
     const aPair = Elliptic.fromPrivKey(Buffer.alloc(32, Math.random().toString(), 'ascii'))
     const bPair = Elliptic.fromPrivKey(Buffer.alloc(32, Math.random().toString(), 'ascii'))
 
-    const hex = await createSignedTxnHex(container, 10, 9.9999, { aEllipticPair: aPair, bEllipticPair: bPair })
+    const hex = await createSignedTxnHex(container, 10, 9.9999, {
+      aEllipticPair: aPair,
+      bEllipticPair: bPair
+    })
     const txid = await controller.send({
       hex: hex
     })
@@ -117,7 +133,10 @@ describe('send', () => {
     const aPair = Elliptic.fromPrivKey(Buffer.alloc(32, Math.random().toString(), 'ascii'))
     const bPair = Elliptic.fromPrivKey(Buffer.alloc(32, Math.random().toString(), 'ascii'))
 
-    const hex = await createSignedTxnHex(container, 10, 9.995, { aEllipticPair: aPair, bEllipticPair: bPair })
+    const hex = await createSignedTxnHex(container, 10, 9.995, {
+      aEllipticPair: aPair,
+      bEllipticPair: bPair
+    })
     const txid = await controller.send({
       hex: hex,
       maxFeeRate: 0.05
@@ -149,7 +168,8 @@ describe('send', () => {
     expect.assertions(2)
     try {
       await controller.send({
-        hex: hex, maxFeeRate: 1
+        hex: hex,
+        maxFeeRate: 1
       })
     } catch (err) {
       expect(err).toBeInstanceOf(BadRequestApiException)
@@ -167,7 +187,8 @@ describe('send', () => {
     expect.assertions(2)
     try {
       await controller.send({
-        hex: hex, maxFeeRate: 1
+        hex: hex,
+        maxFeeRate: 1
       })
     } catch (err) {
       expect(err).toBeInstanceOf(BadRequestApiException)
