@@ -26,7 +26,7 @@ export class DestroyLoanSchemeIndexer extends DfTxIndexer<DestroyLoanScheme> {
     const data = transaction.dftx.data
     const loanScheme = await this.loanSchemeMapper.get(data.identifier)
     if (loanScheme !== undefined) {
-      if (data.height.eq(0)) {
+      if (this.isActive(data.height)) {
         await this.loanSchemeMapper.delete(data.identifier)
       } else {
         await this.deferredDestroyLoanSchemeMapper.put({
@@ -39,7 +39,8 @@ export class DestroyLoanSchemeIndexer extends DfTxIndexer<DestroyLoanScheme> {
             height: block.height,
             medianTime: block.mediantime,
             time: block.time
-          }
+          },
+          activated: false
         })
       }
       await this.loanSchemeHistoryMapper.put({
@@ -62,18 +63,30 @@ export class DestroyLoanSchemeIndexer extends DfTxIndexer<DestroyLoanScheme> {
 
   async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<DestroyLoanScheme>): Promise<void> {
     const data = transaction.dftx.data
-    const previous = await this.getPrevious(data.identifier, block.height)
-    if (previous === undefined) {
-      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
-    }
-    await this.loanSchemeMapper.put(previous)
-    const prevDeferredDestroyLoanScheme = await this.getPrevDeferredDestroyLoanScheme(data.identifier, block.height)
-    if (prevDeferredDestroyLoanScheme === undefined) {
-      throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
+
+    if (this.isActive(data.height)) {
+      const previous = await this.getPrevious(data.identifier, block.height)
+      if (previous === undefined) {
+        throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
+      }
+      await this.loanSchemeMapper.put({
+        id: previous.loanSchemeId,
+        sort: previous.sort,
+        minColRatio: previous.minColRatio,
+        interestRate: previous.interestRate,
+        activateAfterBlock: previous.activateAfterBlock,
+        block: previous.block
+      })
+    } else {
+      await this.deferredDestroyLoanSchemeMapper.delete(`${data.identifier}-${block.height}`)
     }
 
     await this.loanSchemeHistoryMapper.delete(`${data.identifier}-${block.height}`)
-    await this.deferredDestroyLoanSchemeMapper.put(prevDeferredDestroyLoanScheme)
+  }
+
+  private isActive (height: BigNumber): boolean {
+    // zero means no activateHeight mentioned, do destroy now
+    return height.eq(0)
   }
 
   /**
@@ -92,29 +105,6 @@ export class DestroyLoanSchemeIndexer extends DfTxIndexer<DestroyLoanScheme> {
       const prevActiveLoanScheme = list.find(each => new BigNumber(height).gte(each.activateAfterBlock))
       if (prevActiveLoanScheme !== undefined) {
         return prevActiveLoanScheme
-      }
-
-      return await findInNextPage(list[list.length - 1].block.height)
-    }
-    return await findInNextPage(height)
-  }
-
-  /**
-   * Get previous deferred destroy loan scheme
-   */
-  private async getPrevDeferredDestroyLoanScheme (id: string, height: number): Promise<LoanSchemeHistory | undefined> {
-    const findInNextPage = async (height: number): Promise<LoanSchemeHistory | undefined> => {
-      const list = await this.loanSchemeHistoryMapper.query(id, 100, HexEncoder.encodeHeight(height))
-      if (list.length === 0) {
-        return undefined
-      }
-
-      const prevDeferredDestroyLoanScheme = list.find(each =>
-        each.event === LoanSchemeHistoryEvent.DESTROY &&
-        new BigNumber(height).eq(each.activateAfterBlock)
-      )
-      if (prevDeferredDestroyLoanScheme !== undefined) {
-        return prevDeferredDestroyLoanScheme
       }
 
       return await findInNextPage(list[list.length - 1].block.height)

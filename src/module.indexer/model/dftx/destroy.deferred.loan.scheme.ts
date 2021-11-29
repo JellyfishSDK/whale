@@ -27,12 +27,13 @@ export class DestroyDeferredLoanSchemeIndexer extends DfTxIndexer<DestroyLoanSch
   async indexBlockStart (block: RawBlock): Promise<void> {
     const loop = async (activeAfterBlock: number, next?: number): Promise<void> => {
       const list = await this.deferredDestroyLoanSchemeMapper.query(activeAfterBlock, 100)
-      if (list.length === 0) {
+      const pending = list.filter(each => !each.activated)
+      if (pending.length === 0) {
         return
       }
-      for (const each of list) {
+      for (const each of pending) {
         await this.loanSchemeMapper.delete(each.loanSchemeId)
-        await this.deferredDestroyLoanSchemeMapper.delete(each.id)
+        await this.deferredDestroyLoanSchemeMapper.put({ ...each, activated: true })
       }
       return await loop(activeAfterBlock, list[list.length - 1].block.height)
     }
@@ -57,8 +58,22 @@ export class DestroyDeferredLoanSchemeIndexer extends DfTxIndexer<DestroyLoanSch
     if (prevLoanScheme === undefined) {
       throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
     }
-    await this.deferredDestroyLoanSchemeMapper.put(prevDeferredDestroyLoanScheme)
-    await this.loanSchemeMapper.put(prevLoanScheme)
+    await this.deferredDestroyLoanSchemeMapper.put({
+      id: prevDeferredDestroyLoanScheme.id,
+      sort: prevDeferredDestroyLoanScheme.sort,
+      loanSchemeId: prevDeferredDestroyLoanScheme.loanSchemeId,
+      activateAfterBlock: prevDeferredDestroyLoanScheme.activateAfterBlock,
+      block: prevDeferredDestroyLoanScheme.block,
+      activated: false
+    })
+    await this.loanSchemeMapper.put({
+      id: prevLoanScheme.loanSchemeId,
+      sort: prevLoanScheme.sort,
+      minColRatio: prevLoanScheme.minColRatio,
+      interestRate: prevLoanScheme.interestRate,
+      activateAfterBlock: prevLoanScheme.activateAfterBlock,
+      block: prevLoanScheme.block
+    })
   }
 
   /**

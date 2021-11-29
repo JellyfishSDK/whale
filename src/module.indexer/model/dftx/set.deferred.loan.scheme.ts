@@ -75,8 +75,8 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       minColRatio: prevDeferredLoanScheme.minColRatio,
       interestRate: prevDeferredLoanScheme.interestRate,
       activateAfterBlock: prevDeferredLoanScheme.activateAfterBlock,
-      activated: false,
-      block: prevDeferredLoanScheme.block
+      block: prevDeferredLoanScheme.block,
+      activated: false
     })
     await this.loanSchemeMapper.put({
       id: prevLoanScheme.loanSchemeId,
