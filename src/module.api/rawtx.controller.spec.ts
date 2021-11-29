@@ -10,6 +10,7 @@ import { RawtxController } from '@src/module.api/rawtx.controller'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 import { PoolPairService } from '@src/module.api/poolpair.service'
+import { CacheModule } from '@nestjs/common'
 
 const container = new MasterNodeRegTestContainer()
 let client: JsonRpcClient
@@ -31,6 +32,7 @@ beforeEach(async () => {
 
   const app: TestingModule = await Test.createTestingModule({
     imports: [
+      CacheModule.register(),
       ConfigModule.forRoot({
         isGlobal: true,
         load: [() => ({ defid: { url: defidUrl } })]
