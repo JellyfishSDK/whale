@@ -192,14 +192,16 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
       sort: '0000006b',
       loanSchemeId: 's200',
       activateAfterBlock: '110',
-      block: expect.any(Object)
+      block: expect.any(Object),
+      activated: false
     },
     {
       id: 's150-104',
       sort: '00000068',
       loanSchemeId: 's150',
       activateAfterBlock: '110',
-      block: expect.any(Object)
+      block: expect.any(Object),
+      activated: false
     }
   ])
 
@@ -274,7 +276,7 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
   expect(s200After).toStrictEqual(undefined)
 
   const deferredAfter = await deferredDestroyLoanSchemeMapper.query(110, 100)
-  expect(deferredAfter).toStrictEqual([])
+  expect(deferredAfter.every(each => each.activated)).toStrictEqual(true)
 })
 
 it('test destroy before update', async () => {
@@ -346,7 +348,8 @@ it('test destroy before update', async () => {
       sort: '00000069',
       loanSchemeId: 's250',
       activateAfterBlock: '110',
-      block: expect.any(Object)
+      block: expect.any(Object),
+      activated: false
     }
   ])
 
@@ -359,7 +362,8 @@ it('test destroy before update', async () => {
       interestRate: '3.3',
       activateAfterBlock: '111',
       block: expect.any(Object),
-      loanSchemeId: 's250'
+      loanSchemeId: 's250',
+      activated: false
     }
   ])
 
@@ -375,7 +379,7 @@ it('test destroy before update', async () => {
   // ensure the destroyed s250 should not be created again
   {
     const deferred111 = await deferredLoanSchemeMapper.query(111, 100)
-    expect(deferred111).toStrictEqual([])
+    expect(deferred111).toStrictEqual([]) // the deferred update should not exists as it came after destroy
 
     const s250After = await loanSchemeMapper.get('s250')
     expect(s250After).toStrictEqual(undefined)

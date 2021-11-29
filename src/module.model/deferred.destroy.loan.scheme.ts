@@ -51,6 +51,7 @@ export interface DeferredDestroyLoanScheme extends Model {
   sort: string // --------------------| Hex encoded height
   loanSchemeId: string
   activateAfterBlock: string // ------| stringified bignumber
+  activated: boolean
 
   block: {
     hash: string
