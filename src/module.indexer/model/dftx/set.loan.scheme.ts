@@ -79,7 +79,8 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       await this.deferredLoanSchemeMapper.put({
         ...loanScheme,
         loanSchemeId: data.identifier,
-        id: `${data.identifier}-${block.height}`
+        id: `${data.identifier}-${block.height}`,
+        activated: false
       })
     }
 
