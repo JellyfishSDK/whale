@@ -3,6 +3,7 @@ import { Testing } from '@defichain/jellyfish-testing'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
+import { DefaultLoanSchemeMapper, DefaultLoanScheme } from '@src/module.model/default.loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent } from '@src/module.model/loan.scheme.history'
 import { DeferredLoanSchemeMapper, DeferredLoanScheme } from '@src/module.model/deferred.loan.scheme'
 import BigNumber from 'bignumber.js'
@@ -57,7 +58,11 @@ it('should index setLoanScheme in CREATE event', async () => {
   }
 
   const loanSchemeMapper = app.get(LoanSchemeMapper)
+  const defaultLoanSchemeMapper = app.get(DefaultLoanSchemeMapper)
   const loanSchemeHistoryMapper = app.get(LoanSchemeHistoryMapper)
+
+  const defaultLoanScheme = await defaultLoanSchemeMapper.get() as DefaultLoanScheme
+  expect(defaultLoanScheme).toStrictEqual({ id: 's150' })
 
   // loanSchemeMapper
   {
@@ -144,6 +149,10 @@ it('should index setLoanScheme in UPDATE event', async () => {
 
   const loanSchemeMapper = app.get(LoanSchemeMapper)
   const loanSchemeHistoryMapper = app.get(LoanSchemeHistoryMapper)
+  const defaultLoanSchemeMapper = app.get(DefaultLoanSchemeMapper)
+
+  const defaultLoanScheme = await defaultLoanSchemeMapper.get() as DefaultLoanScheme
+  expect(defaultLoanScheme).toStrictEqual({ id: 's150' })
 
   // loanSchemeMapper
   {
@@ -238,6 +247,10 @@ it('test update loanScheme with activateAfterBlock', async () => {
   const loanSchemeMapper = app.get(LoanSchemeMapper)
   const loanSchemeHistoryMapper = app.get(LoanSchemeHistoryMapper)
   const deferredLoanSchemeMapper = app.get(DeferredLoanSchemeMapper)
+  const defaultLoanSchemeMapper = app.get(DefaultLoanSchemeMapper)
+
+  const defaultLoanScheme = await defaultLoanSchemeMapper.get() as DefaultLoanScheme
+  expect(defaultLoanScheme).toStrictEqual({ id: 's150' })
 
   const s150Before = await loanSchemeMapper.get('s150')
   expect(s150Before).toStrictEqual({

@@ -129,7 +129,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
 
   private async first (): Promise<boolean> {
     const loanScheme = await this.defaultLoanSchemeMapper.get()
-    return loanScheme !== undefined
+    return loanScheme === undefined
   }
 
   private isActive (loanScheme: SetLoanScheme, height: number): boolean {
