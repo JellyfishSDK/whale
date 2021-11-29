@@ -25,12 +25,18 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   async indexBlockStart (block: RawBlock): Promise<void> {
     const loop = async (activeAfterBlock: number, next?: number): Promise<void> => {
       const list = await this.deferredLoanSchemeMapper.query(activeAfterBlock, 100)
-      if (list.length === 0) {
+      const pending = list.filter(each => !each.activated)
+      if (pending.length === 0) {
         return
       }
-      for (const each of list) {
+      for (const each of pending) {
+        // check if the loanScheme exists, else its destroyed previously
+        const exists = await this.loanSchemeMapper.get(each.loanSchemeId)
+        if (exists === undefined) {
+          return await this.deferredLoanSchemeMapper.delete(each.id)
+        }
         await this.loanSchemeMapper.put(this.mapLoanScheme(each))
-        await this.deferredLoanSchemeMapper.delete(each.id)
+        await this.deferredLoanSchemeMapper.put({ ...each, activated: true })
       }
       return await loop(activeAfterBlock, list[list.length - 1].block.height)
     }
@@ -69,6 +75,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       minColRatio: prevDeferredLoanScheme.minColRatio,
       interestRate: prevDeferredLoanScheme.interestRate,
       activateAfterBlock: prevDeferredLoanScheme.activateAfterBlock,
+      activated: false,
       block: prevDeferredLoanScheme.block
     })
     await this.loanSchemeMapper.put({

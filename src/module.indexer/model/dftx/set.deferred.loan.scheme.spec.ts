@@ -93,6 +93,7 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 205,
       interestRate: '8.05',
       activateAfterBlock: '120',
+      activated: false,
       block: expect.any(Object)
     },
     {
@@ -102,6 +103,7 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 195,
       interestRate: '7.05',
       activateAfterBlock: '120',
+      activated: false,
       block: expect.any(Object)
     }
   ])
@@ -115,6 +117,7 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 185,
       interestRate: '6.05',
       activateAfterBlock: '120',
+      activated: false,
       block: expect.any(Object)
     },
     {
@@ -124,6 +127,7 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 175,
       interestRate: '5.05',
       activateAfterBlock: '120',
+      activated: false,
       block: expect.any(Object)
     }
   ])
@@ -137,6 +141,7 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 165,
       interestRate: '4.05',
       activateAfterBlock: '120',
+      activated: false,
       block: expect.any(Object)
     },
     {
@@ -146,6 +151,7 @@ it('should deferred model serves pending state', async () => {
       minColRatio: 155,
       interestRate: '3.05',
       activateAfterBlock: '120',
+      activated: false,
       block: expect.any(Object)
     }
   ])
@@ -163,7 +169,8 @@ it('should deferred model serves pending state', async () => {
     block: expect.any(Object)
   })
 
-  // cleared
+  // all 6 should be activated
   const deferredList = await deferredMapper.query(120, 100)
-  expect(deferredList).toStrictEqual([])
+  const activated = deferredList.filter(each => each.activated)
+  expect(activated.length).toStrictEqual(6)
 })

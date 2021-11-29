@@ -4,7 +4,7 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent } from '@src/module.model/loan.scheme.history'
-import { DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
+import { DeferredLoanSchemeMapper, DeferredLoanScheme } from '@src/module.model/deferred.loan.scheme'
 import BigNumber from 'bignumber.js'
 
 let app: NestFastifyApplication
@@ -258,6 +258,7 @@ it('test update loanScheme with activateAfterBlock', async () => {
     minColRatio: 155,
     interestRate: '3.05',
     activateAfterBlock: '110',
+    activated: false,
     block: expect.any(Object)
   })
 
@@ -299,8 +300,8 @@ it('test update loanScheme with activateAfterBlock', async () => {
   })
 
   const deferredLoanSchemesAfter = await deferredLoanSchemeMapper.query(110, 100)
-  const s150PendingAfter = deferredLoanSchemesAfter.find(l => l.loanSchemeId === 's150')
-  expect(s150PendingAfter).toStrictEqual(undefined) // cleared
+  const s150PendingAfter = deferredLoanSchemesAfter.find(l => l.loanSchemeId === 's150') as DeferredLoanScheme
+  expect(s150PendingAfter.activated).toStrictEqual(true)
 
   const listAfter = await loanSchemeHistoryMapper.query('s150', 100)
   expect(listAfter).toStrictEqual(listBefore)
