@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { SetLoanScheme, CSetLoanScheme } from '@defichain/jellyfish-transaction'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 import { DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
+import { DefaultLoanSchemeMapper } from '@src/module.model/default.loan.scheme'
 import { LoanSchemeHistoryMapper, LoanSchemeHistoryEvent, LoanSchemeHistory } from '@src/module.model/loan.scheme.history'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
@@ -17,7 +18,8 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   constructor (
     private readonly loanSchemeMapper: LoanSchemeMapper,
     private readonly loanSchemeHistoryMapper: LoanSchemeHistoryMapper,
-    private readonly deferredLoanSchemeMapper: DeferredLoanSchemeMapper
+    private readonly deferredLoanSchemeMapper: DeferredLoanSchemeMapper,
+    private readonly defaultLoanSchemeMapper: DefaultLoanSchemeMapper
   ) {
     super()
   }
@@ -34,6 +36,11 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   }
 
   private async create (block: RawBlock, data: SetLoanScheme): Promise<void> {
+    const isFirst = await this.first()
+    if (isFirst) {
+      await this.defaultLoanSchemeMapper.put({ id: data.identifier })
+    }
+
     const loanScheme = {
       id: data.identifier,
       sort: HexEncoder.encodeHeight(block.height),
@@ -47,7 +54,6 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
         time: block.time
       }
     }
-
     await this.loanSchemeMapper.put(loanScheme)
 
     await this.loanSchemeHistoryMapper.put({
@@ -96,6 +102,12 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     const data = transaction.dftx.data
 
     if (this.isActive(data, block.height)) {
+      const list = await this.loanSchemeMapper.query(2)
+      // total one loan scheme is recorded which means it was first created
+      if (list.length === 1) {
+        await this.defaultLoanSchemeMapper.delete(data.identifier)
+      }
+
       const previous = await this.getPrevious(data.identifier, block.height)
       if (previous === undefined) {
         throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
@@ -113,6 +125,11 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     }
 
     await this.loanSchemeHistoryMapper.delete(`${data.identifier}-${block.height}`)
+  }
+
+  private async first (): Promise<boolean> {
+    const loanScheme = await this.defaultLoanSchemeMapper.get()
+    return loanScheme !== undefined
   }
 
   private isActive (loanScheme: SetLoanScheme, height: number): boolean {
