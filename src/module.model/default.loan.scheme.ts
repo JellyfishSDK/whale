@@ -3,10 +3,10 @@ import { Injectable } from '@nestjs/common'
 import { Database, SortOrder } from '@src/module.database/database'
 
 const DefaultLoanSchemeMapping: ModelMapping<DefaultLoanScheme> = {
-  type: 'loan_scheme',
+  type: 'default_loan_scheme',
   index: {
-    loan_scheme_default: {
-      name: 'loan_scheme_default',
+    default_loan_scheme: {
+      name: 'default_loan_scheme',
       partition: {
         type: 'string',
         key: (ls: DefaultLoanScheme) => ls.id
@@ -21,7 +21,7 @@ export class DefaultLoanSchemeMapper {
   }
 
   async get (): Promise<DefaultLoanScheme | undefined> {
-    const loanSchemes = await this.database.query(DefaultLoanSchemeMapping.index.loan_scheme_default, {
+    const loanSchemes = await this.database.query(DefaultLoanSchemeMapping.index.default_loan_scheme, {
       order: SortOrder.DESC,
       limit: 1
     })
