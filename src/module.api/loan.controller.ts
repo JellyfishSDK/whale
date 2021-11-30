@@ -192,7 +192,7 @@ export class LoanController {
    * @param {PaginationQuery} query
    * @return {Promise<ApiPagedResponse<LoanAuctionHistory>>}
    */
-  @Get('/auctionhistory')
+  @Get('/auctions/history')
   async listAuctionHistory (@Query() query: PaginationQuery): Promise<ApiPagedResponse<LoanAuctionHistory>> {
     return await this.vaultService.listAuctionHistory(query)
   }

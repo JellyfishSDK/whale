@@ -110,7 +110,7 @@ export class Loan {
    * @return {Promise<ApiPagedResponse<LoanAuctionHistory>>}
    */
   async listAuctionHistory (size: number = 30, next?: string): Promise<ApiPagedResponse<LoanAuctionHistory>> {
-    return await this.client.requestList('GET', 'loans/auctionhistory', size, next)
+    return await this.client.requestList('GET', 'loans/auctions/history', size, next)
   }
 }
 
