@@ -20,11 +20,11 @@ export class LoanSchemeMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async query (limit: number, lt?: string): Promise<LoanScheme[]> {
+  async query (limit: number, gt?: string): Promise<LoanScheme[]> {
     return await this.database.query(LoanSchemeMapping.index.loan_scheme_id, {
       limit: limit,
-      order: SortOrder.DESC,
-      lt: lt
+      order: SortOrder.ASC,
+      gt: gt
     })
   }
 

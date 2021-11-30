@@ -24,6 +24,7 @@ import { parseDisplaySymbol } from '@src/module.api/token.controller'
 import { ActivePrice } from '@whale-api-client/api/prices'
 import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
+import { DefaultLoanSchemeMapper } from '@src/module.model/default.loan.scheme'
 
 @Injectable()
 export class LoanVaultService {
@@ -31,7 +32,8 @@ export class LoanVaultService {
     private readonly client: JsonRpcClient,
     private readonly deFiDCache: DeFiDCache,
     private readonly activePriceMapper: OraclePriceActiveMapper,
-    private readonly loanSchemeMapper: LoanSchemeMapper
+    private readonly loanSchemeMapper: LoanSchemeMapper,
+    private readonly defaultLoanSchemeMapper: DefaultLoanSchemeMapper
   ) {
   }
 
@@ -112,11 +114,15 @@ export class LoanVaultService {
 
     const loanScheme = await this.loanSchemeMapper.get(data.loanSchemeId)
     if (loanScheme === undefined) {
-      throw new ConflictException('unable to find loan scheme')
+      throw new NotFoundException('unable to find loan scheme')
+    }
+    const defaultScheme = await this.defaultLoanSchemeMapper.get()
+    if (defaultScheme === undefined) {
+      throw new NotFoundException('Unable to find default scheme')
     }
     return {
       vaultId: data.vaultId,
-      loanScheme: loanScheme,
+      loanScheme: { ...loanScheme, default: loanScheme.id === defaultScheme.id },
       ownerAddress: data.ownerAddress,
       state: mapLoanVaultState(data.state) as any,
 
@@ -136,11 +142,15 @@ export class LoanVaultService {
     const data = details
     const loanScheme = await this.loanSchemeMapper.get(data.loanSchemeId)
     if (loanScheme === undefined) {
-      throw new ConflictException('unable to find loan scheme')
+      throw new NotFoundException('unable to find loan scheme')
+    }
+    const defaultScheme = await this.defaultLoanSchemeMapper.get()
+    if (defaultScheme === undefined) {
+      throw new NotFoundException('Unable to find default scheme')
     }
     return {
       vaultId: data.vaultId,
-      loanScheme: loanScheme,
+      loanScheme: { ...loanScheme, default: loanScheme.id === defaultScheme.id },
       ownerAddress: data.ownerAddress,
       state: LoanVaultState.IN_LIQUIDATION,
       batchCount: data.batchCount,

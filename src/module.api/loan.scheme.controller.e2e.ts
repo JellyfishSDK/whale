@@ -61,36 +61,33 @@ describe('loan', () => {
     expect(result.data.length).toStrictEqual(4)
     expect(result.data).toStrictEqual([
       {
-        id: 'scheme3',
-        sort: '00000069',
-        minColRatio: 250,
-        interestRate: '3.5',
-        activateAfterBlock: '0',
-        block: expect.any(Object)
-      },
-      {
-        id: 'scheme2',
-        sort: '00000068',
-        minColRatio: 200,
-        interestRate: '4.5',
-        activateAfterBlock: '0',
-        block: expect.any(Object)
+        id: 'default',
+        minColRatio: 100,
+        interestRate: '6.5',
+        sort: '00000066',
+        default: true
       },
       {
         id: 'scheme1',
-        sort: '00000067',
         minColRatio: 150,
         interestRate: '5.5',
-        activateAfterBlock: '0',
-        block: expect.any(Object)
+        sort: '00000067',
+        default: false
       },
       {
-        id: 'default',
-        sort: '00000066',
-        minColRatio: 100,
-        interestRate: '6.5',
-        activateAfterBlock: '0',
-        block: expect.any(Object)
+        id: 'scheme2',
+        minColRatio: 200,
+        interestRate: '4.5',
+        sort: '00000068',
+        default: false
+      },
+
+      {
+        id: 'scheme3',
+        minColRatio: 250,
+        interestRate: '3.5',
+        sort: '00000069',
+        default: false
       }
     ])
     expect(result.page).toStrictEqual(undefined)
@@ -100,10 +97,10 @@ describe('loan', () => {
     const first = await controller.listScheme({ size: 2 })
 
     expect(first.data.length).toStrictEqual(2)
-    expect(first.page?.next).toStrictEqual('00000068')
+    expect(first.page?.next).toStrictEqual('00000067')
 
-    expect(first.data[0].id).toStrictEqual('scheme3')
-    expect(first.data[1].id).toStrictEqual('scheme2')
+    expect(first.data[0].id).toStrictEqual('default')
+    expect(first.data[1].id).toStrictEqual('scheme1')
 
     const next = await controller.listScheme({
       size: 2,
@@ -111,10 +108,10 @@ describe('loan', () => {
     })
 
     expect(next.data.length).toStrictEqual(2)
-    expect(next.page?.next).toStrictEqual('00000066')
+    expect(next.page?.next).toStrictEqual('00000069')
 
-    expect(next.data[0].id).toStrictEqual('scheme1')
-    expect(next.data[1].id).toStrictEqual('default')
+    expect(next.data[0].id).toStrictEqual('scheme2')
+    expect(next.data[1].id).toStrictEqual('scheme3')
 
     const last = await controller.listScheme({
       size: 2,
@@ -126,7 +123,7 @@ describe('loan', () => {
   })
 
   it('should listSchemes with an empty object when providing out of range request', async () => {
-    const result = await controller.listScheme({ size: 1, next: '00000018' })
+    const result = await controller.listScheme({ size: 1, next: '300' })
 
     expect(result.data.length).toStrictEqual(0)
     expect(result.page).toBeUndefined()
@@ -139,11 +136,10 @@ describe('get', () => {
     expect(data).toStrictEqual(
       {
         id: 'default',
-        sort: '00000066',
         minColRatio: 100,
         interestRate: '6.5',
-        activateAfterBlock: '0',
-        block: expect.any(Object)
+        sort: '00000066',
+        default: true
       }
     )
   })

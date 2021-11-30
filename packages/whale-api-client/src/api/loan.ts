@@ -105,17 +105,10 @@ export class Loan {
 
 export interface LoanScheme {
   id: string
-  sort: string
   minColRatio: number
   interestRate: string
-  activateAfterBlock: string
-
-  block: {
-    hash: string
-    height: number
-    time: number
-    medianTime: number
-  }
+  sort: string
+  default: boolean
 }
 
 export interface CollateralToken {

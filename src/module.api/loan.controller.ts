@@ -17,6 +17,7 @@ import {
 } from '@defichain/jellyfish-api-core/dist/category/loan'
 import {
   CollateralToken,
+  LoanScheme,
   LoanToken,
   LoanVaultActive,
   LoanVaultLiquidated
@@ -26,7 +27,8 @@ import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { LoanVaultService } from '@src/module.api/loan.vault.service'
 import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { ActivePrice } from '@whale-api-client/api/prices'
-import { LoanSchemeMapper, LoanScheme } from '@src/module.model/loan.scheme'
+import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
+import { DefaultLoanSchemeMapper } from '@src/module.model/default.loan.scheme'
 
 @Controller('/loans')
 export class LoanController {
@@ -35,7 +37,8 @@ export class LoanController {
     private readonly deFiDCache: DeFiDCache,
     private readonly vaultService: LoanVaultService,
     private readonly priceActiveMapper: OraclePriceActiveMapper,
-    private readonly loanSchemeMapper: LoanSchemeMapper
+    private readonly loanSchemeMapper: LoanSchemeMapper,
+    private readonly defaultLoanSchemeMapper: DefaultLoanSchemeMapper
   ) {
   }
 
@@ -49,11 +52,31 @@ export class LoanController {
   async listScheme (
     @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<LoanScheme>> {
-    const items = await this.loanSchemeMapper.query(query.size, query.next)
+    try {
+      const schemes = await this.loanSchemeMapper.query(query.size, query.next)
+      const defaultScheme = await this.defaultLoanSchemeMapper.get()
+      if (defaultScheme === undefined) {
+        throw new NotFoundException('Unable to find default scheme')
+      }
+      const items = schemes
+        .map(scheme => {
+          return {
+            id: scheme.id,
+            interestRate: scheme.interestRate,
+            minColRatio: scheme.minColRatio,
+            sort: scheme.sort,
+            default: defaultScheme.id === scheme.id
+          }
+        })
 
-    return ApiPagedResponse.of(items, query.size, item => {
-      return item.sort
-    })
+      return ApiPagedResponse.of(items, query.size, item => item.sort)
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err
+      } else {
+        throw new BadRequestException(err)
+      }
+    }
   }
 
   /**
@@ -65,13 +88,25 @@ export class LoanController {
   @Get('/schemes/:id')
   async getScheme (@Param('id') id: string): Promise<LoanScheme> {
     try {
-      const data = await this.loanSchemeMapper.get(id)
-      if (data === undefined) {
+      const scheme = await this.loanSchemeMapper.get(id)
+      if (scheme === undefined) {
         throw new NotFoundException('Unable to find scheme')
       }
-      return data
+
+      const defaultScheme = await this.defaultLoanSchemeMapper.get()
+      if (defaultScheme === undefined) {
+        throw new NotFoundException('Unable to find default scheme')
+      }
+
+      return {
+        id: scheme.id,
+        interestRate: scheme.interestRate,
+        minColRatio: scheme.minColRatio,
+        sort: scheme.sort,
+        default: defaultScheme.id === scheme.id
+      }
     } catch (err) {
-      if (err instanceof NotFoundException && err.message === 'Unable to find scheme') {
+      if (err instanceof NotFoundException) {
         throw err
       } else {
         throw new BadRequestException(err)
