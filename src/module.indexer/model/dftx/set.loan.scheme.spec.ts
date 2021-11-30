@@ -80,10 +80,10 @@ it('should index setLoanScheme in CREATE event', async () => {
     expect(list.length).toStrictEqual(3)
     expect(list).toStrictEqual([
       {
-        id: 's250',
-        sort: '00000068',
-        minColRatio: 250,
-        interestRate: '2.5',
+        id: 's150',
+        sort: '00000066',
+        minColRatio: 150,
+        interestRate: '3',
         activateAfterBlock: '0',
         block: expect.any(Object)
       },
@@ -96,10 +96,10 @@ it('should index setLoanScheme in CREATE event', async () => {
         block: expect.any(Object)
       },
       {
-        id: 's150',
-        sort: '00000066',
-        minColRatio: 150,
-        interestRate: '3',
+        id: 's250',
+        sort: '00000068',
+        minColRatio: 250,
+        interestRate: '2.5',
         activateAfterBlock: '0',
         block: expect.any(Object)
       }
@@ -169,10 +169,10 @@ it('should index setLoanScheme in UPDATE event', async () => {
     const list = await loanSchemeMapper.query(30)
     expect(list).toStrictEqual([
       {
-        id: 's250',
-        sort: '0000006b',
-        minColRatio: 255,
-        interestRate: '2.55',
+        id: 's150',
+        sort: '00000069',
+        minColRatio: 155,
+        interestRate: '3.05',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
         block: expect.any(Object)
       },
@@ -185,10 +185,10 @@ it('should index setLoanScheme in UPDATE event', async () => {
         block: expect.any(Object)
       },
       {
-        id: 's150',
-        sort: '00000069',
-        minColRatio: 155,
-        interestRate: '3.05',
+        id: 's250',
+        sort: '0000006b',
+        minColRatio: 255,
+        interestRate: '2.55',
         activateAfterBlock: '18446744073709551615', // new BigNumber('0xffffffffffffffff')
         block: expect.any(Object)
       }
