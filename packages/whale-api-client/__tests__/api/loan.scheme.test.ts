@@ -68,36 +68,33 @@ describe('list', () => {
     expect(list.length).toStrictEqual(4)
     expect([...list]).toStrictEqual([
       {
-        id: 'scheme3',
-        sort: '00000069',
-        minColRatio: 250,
-        interestRate: '3.5',
-        activateAfterBlock: '0',
-        block: expect.any(Object)
-      },
-      {
-        id: 'scheme2',
-        sort: '00000068',
-        minColRatio: 200,
-        interestRate: '4.5',
-        activateAfterBlock: '0',
-        block: expect.any(Object)
+        id: 'default',
+        minColRatio: 100,
+        interestRate: '6.5',
+        sort: '00000066',
+        default: true
       },
       {
         id: 'scheme1',
-        sort: '00000067',
         minColRatio: 150,
         interestRate: '5.5',
-        activateAfterBlock: '0',
-        block: expect.any(Object)
+        sort: '00000067',
+        default: false
       },
       {
-        id: 'default',
-        sort: '00000066',
-        minColRatio: 100,
-        interestRate: '6.5',
-        activateAfterBlock: '0',
-        block: expect.any(Object)
+        id: 'scheme2',
+        minColRatio: 200,
+        interestRate: '4.5',
+        sort: '00000068',
+        default: false
+      },
+
+      {
+        id: 'scheme3',
+        minColRatio: 250,
+        interestRate: '3.5',
+        sort: '00000069',
+        default: false
       }
     ])
   })
@@ -107,19 +104,19 @@ describe('list', () => {
 
     expect(first.length).toStrictEqual(2)
     expect(first.hasNext).toStrictEqual(true)
-    expect(first.nextToken).toStrictEqual('00000068')
+    expect(first.nextToken).toStrictEqual('00000067')
 
-    expect(first[0].id).toStrictEqual('scheme3')
-    expect(first[1].id).toStrictEqual('scheme2')
+    expect(first[0].id).toStrictEqual('default')
+    expect(first[1].id).toStrictEqual('scheme1')
 
     const next = await client.paginate(first)
 
     expect(next.length).toStrictEqual(2)
     expect(next.hasNext).toStrictEqual(true)
-    expect(next.nextToken).toStrictEqual('00000066')
+    expect(next.nextToken).toStrictEqual('00000069')
 
-    expect(next[0].id).toStrictEqual('scheme1')
-    expect(next[1].id).toStrictEqual('default')
+    expect(next[0].id).toStrictEqual('scheme2')
+    expect(next[1].id).toStrictEqual('scheme3')
 
     const last = await client.paginate(next)
 
@@ -137,8 +134,7 @@ describe('get', () => {
       sort: '00000067',
       minColRatio: 150,
       interestRate: '5.5',
-      activateAfterBlock: '0',
-      block: expect.any(Object)
+      default: false
     })
   })
 
