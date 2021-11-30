@@ -145,9 +145,18 @@ describe('get', () => {
   })
 
   it('should throw error while getting non-existent scheme', async () => {
-    const promise = controller.getScheme('999')
-
-    await expect(promise).rejects.toThrow(NotFoundException)
-    await expect(promise).rejects.toThrow('Unable to find scheme')
+    expect.assertions(2)
+    try {
+      await controller.getScheme('999')
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        expect(err).toBeInstanceOf(NotFoundException)
+        expect(err.getResponse()).toStrictEqual({
+          statusCode: 404,
+          message: 'Unable to find scheme',
+          error: 'Not Found'
+        })
+      }
+    }
   })
 })
