@@ -65,7 +65,7 @@ describe('set loan token', () => {
     expect(result.length).toStrictEqual(6)
 
     const poolPairs = await Promise.all(result.map(async x => {
-      return await poolPairMapper.getLatest(`${x.poolpairId}`)
+      return await poolPairMapper.getLatest(`${x.poolPairId}`)
     }))
 
     expect(poolPairs[0]).toStrictEqual({
