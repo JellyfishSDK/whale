@@ -65,23 +65,32 @@ describe('set loan token', () => {
     expect(result.length).toStrictEqual(6)
 
     const poolPairs = await Promise.all(result.map(async x => {
-      return await poolPairMapper.getLatest(`${x.poolpairId}`)
+      return await poolPairMapper.getLatest(`${x.poolPairId}`)
     }))
 
     expect(poolPairs[0]).toStrictEqual({
       commission: '0.00000000',
-      id: '13-116',
-      pairSymbol: 'F-DFI',
-      poolPairId: '13',
       status: true,
+      creationHeight: 111,
+      creationTx: expect.any(String),
+      customRewards: expect.any(Array),
+      id: '8-111',
+      name: 'USDT-Default Defi token',
+      ownerScript: expect.any(String),
+      pairSymbol: 'USDT-DFI',
+      poolPairId: '8',
+      sort: '00000008',
       tokenA: {
-        id: 7,
-        symbol: 'F'
+        id: 2,
+        reserve: '0',
+        symbol: 'USDT'
       },
       tokenB: {
         id: 0,
+        reserve: '0',
         symbol: 'DFI'
       },
+      totalLiquidity: '0',
       block: expect.any(Object)
     })
   })
