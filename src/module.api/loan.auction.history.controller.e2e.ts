@@ -10,6 +10,7 @@ let controller: LoanController
 const testing = Testing.create(new MasterNodeRegTestContainer())
 
 beforeAll(async () => {
+  await testing.container.start()
   await testing.container.waitForWalletCoinbaseMaturity()
   app = await createTestingApp(testing.container)
   controller = app.get(LoanController)
@@ -170,9 +171,8 @@ afterAll(async () => {
   await stopTestingApp(testing.container, app)
 })
 
-it.only('should listAuctionHistory', async () => {
+it('should listAuctionHistory', async () => {
   const result = await controller.listAuctionHistory({ size: 100 })
-  console.log('result: ', result)
   expect(result.data.length).toStrictEqual(8)
   expect(result.data.every((e: any) => e === {
     winner: expect.any(String),
@@ -187,37 +187,47 @@ it.only('should listAuctionHistory', async () => {
 })
 
 it('should listAuctionHistory with pagination', async () => {
+  const full = await controller.listAuctionHistory({ size: 100 })
+
   const first = await controller.listAuctionHistory({ size: 3 })
-  console.log('first: ', first)
   expect(first.data.length).toStrictEqual(3)
   expect(first.page?.next).toStrictEqual(`${first.data[2].vaultId}${first.data[2].blockHeight}`)
+
+  expect(first.data[0].vaultId).toStrictEqual(full.data[0].vaultId)
+  expect(first.data[1].vaultId).toStrictEqual(full.data[1].vaultId)
+  expect(first.data[2].vaultId).toStrictEqual(full.data[2].vaultId)
 
   const next = await controller.listAuctionHistory({
     size: 3,
     next: first.page?.next
   })
-  console.log('next: ', next)
   expect(next.data.length).toStrictEqual(3)
   expect(next.page?.next).toStrictEqual(`${next.data[2].vaultId}${next.data[2].blockHeight}`)
+
+  expect(next.data[0].vaultId).toStrictEqual(full.data[3].vaultId)
+  expect(next.data[1].vaultId).toStrictEqual(full.data[4].vaultId)
+  expect(next.data[2].vaultId).toStrictEqual(full.data[5].vaultId)
 
   const last = await controller.listAuctionHistory({
     size: 3,
     next: next.page?.next
   })
-  console.log('last: ', last)
   expect(last.data.length).toStrictEqual(2)
   expect(last.page).toBeUndefined()
+
+  expect(last.data[0].vaultId).toStrictEqual(full.data[6].vaultId)
+  expect(last.data[1].vaultId).toStrictEqual(full.data[7].vaultId)
 })
 
-it('should listAuctionHistory with an empty object if size 100 next 51f6233c4403f6ce113bb4e90f83b176587f401081605b8a8bb723ff3b0ab5b6 300 which is out of range', async () => {
-  const result = await controller.listAuctionHistory({
-    size: 100,
-    next: '51f6233c4403f6ce113bb4e90f83b176587f401081605b8a8bb723ff3b0ab5b6300'
-  })
+// it('should listAuctionHistory with an empty object if size 100 next 51f6233c4403f6ce113bb4e90f83b176587f401081605b8a8bb723ff3b0ab5b6 300 which is out of range', async () => {
+//   const result = await controller.listAuctionHistory({
+//     size: 100,
+//     next: '51f6233c4403f6ce113bb4e90f83b176587f401081605b8a8bb723ff3b0ab5b6300'
+//   })
 
-  expect(result.data.length).toStrictEqual(0)
-  expect(result.page).toBeUndefined()
-})
+//   expect(result.data.length).toStrictEqual(0)
+//   expect(result.page).toBeUndefined()
+// })
 
 function now (): number {
   return Math.floor(new Date().getTime() / 1000)
