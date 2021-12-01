@@ -1,8 +1,6 @@
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import {
   AuctionPagination,
-  ListAuctionHistoryDetail,
-  ListAuctionHistoryPagination,
   VaultActive,
   VaultLiquidation,
   VaultLiquidationBatch,
@@ -104,29 +102,30 @@ export class LoanVaultService {
   }
 
   async listAuctionHistory (query: PaginationQuery): Promise<ApiPagedResponse<LoanAuctionHistory>> {
-    const next = query.next !== undefined ? String(query.next) : undefined
     const size = query.size > 30 ? 30 : query.size
-    let pagination: ListAuctionHistoryPagination
+    const next = query.next ?? undefined
 
     if (next !== undefined) {
       const vaultId = next.substr(0, 64)
-      const maxBlockHeight = next.substr(64)
-      pagination = {
-        vaultId,
-        maxBlockHeight: maxBlockHeight !== undefined ? parseInt(maxBlockHeight) : 0,
-        limit: size
+      const maxBlockHeight = parseInt(next.substr(64))
+      const items = await this.client.loan.listAuctionHistory('all', { limit: size + 1, maxBlockHeight })
+
+      if (items[0].vaultId !== vaultId) { // due to same block height
+        // items in same height fixes
+        // straight away grap the full list then return the slice will do
+        // loop is required
+        const full = await this.client.loan.listAuctionHistory('all', { limit: 30, maxBlockHeight })
+        const index = full.findIndex(f => f.vaultId === vaultId)
+        const sliced = full.slice(index + 1, index + 1 + query.size)
+        return ApiPagedResponse.of(sliced, query.size, item => `${item.vaultId}${item.blockHeight}`)
       }
-    } else {
-      pagination = { limit: size }
+
+      const sliced = items.slice(1, query.size + 1)
+      return ApiPagedResponse.of(sliced, query.size, item => `${item.vaultId}${item.blockHeight}`)
     }
 
-    const list = (await this.client.loan.listAuctionHistory('all', pagination))
-      .map(async value => this.mapLoanAuctionHistory(value))
-    const items = await Promise.all(list)
-
-    return ApiPagedResponse.of(items, size, item => {
-      return `${item.vaultId}${item.blockHeight}`
-    })
+    const items = await this.client.loan.listAuctionHistory('all', { limit: size })
+    return ApiPagedResponse.of(items, query.size, item => `${item.vaultId}${item.blockHeight}`)
   }
 
   private async mapLoanVault (details: VaultActive | VaultLiquidation): Promise<LoanVaultActive | LoanVaultLiquidated> {
@@ -223,19 +222,6 @@ export class LoanVaultService {
       id: scheme.id,
       minColRatio: scheme.mincolratio.toFixed(),
       interestRate: scheme.interestrate.toFixed()
-    }
-  }
-
-  private mapLoanAuctionHistory (detail: ListAuctionHistoryDetail): LoanAuctionHistory {
-    return {
-      winner: detail.winner,
-      blockHeight: detail.blockHeight,
-      blockHash: detail.blockHash,
-      blockTime: detail.blockTime,
-      vaultId: detail.vaultId,
-      batchIndex: detail.batchIndex,
-      auctionBid: detail.auctionBid,
-      auctionWon: detail.auctionWon
     }
   }
 }
