@@ -9,7 +9,6 @@ import { BlockMapper } from '@src/module.model/block'
 import waitForExpect from 'wait-for-expect'
 import { addressToHid } from '@src/module.api/address.controller'
 import { ScriptAggregationMapper } from '@src/module.model/script.aggregation'
-import { TestingGroup } from '@defichain/jellyfish-testing'
 
 /**
  * Configures an end-to-end testing app integrated with all modules.
@@ -49,20 +48,6 @@ export async function stopTestingApp (container: MasterNodeRegTestContainer, app
       setTimeout(_ => resolve(0), 500)
     })
     await container.stop()
-  }
-}
-
-export async function stopTestingAppGroup (testingGroup: TestingGroup, app: NestFastifyApplication): Promise<void> {
-  try {
-    const indexer = app.get(RPCBlockProvider)
-    indexer.close()
-    await app.close()
-  } finally {
-    await new Promise((resolve) => {
-      // Wait 2000ms between indexer cycle time to prevent database error
-      setTimeout(_ => resolve(0), 500)
-    })
-    await testingGroup.stop()
   }
 }
 
