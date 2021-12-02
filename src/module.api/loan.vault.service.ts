@@ -111,10 +111,8 @@ export class LoanVaultService {
       const items = await this.client.loan.listAuctionHistory('all', { limit: size + 1, maxBlockHeight })
 
       if (items[0].vaultId !== vaultId) { // due to same block height
-        // items in same height fixes
-        // straight away grap the full list then return the slice will do
-        // loop is required
-        const full = await this.client.loan.listAuctionHistory('all', { limit: 30, maxBlockHeight })
+        // re-grab the full list then return the sliced
+        const full = await this.client.loan.listAuctionHistory('all', { limit: Number.MAX_SAFE_INTEGER, maxBlockHeight })
         const index = full.findIndex(f => f.vaultId === vaultId)
         const sliced = full.slice(index + 1, index + 1 + query.size)
         return ApiPagedResponse.of(sliced, query.size, item => `${item.vaultId}${item.blockHeight}`)

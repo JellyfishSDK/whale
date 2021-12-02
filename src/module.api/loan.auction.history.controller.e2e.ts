@@ -219,16 +219,6 @@ it('should listAuctionHistory with pagination', async () => {
   expect(last.data[1].vaultId).toStrictEqual(full.data[7].vaultId)
 })
 
-// it('should listAuctionHistory with an empty object if size 100 next 51f6233c4403f6ce113bb4e90f83b176587f401081605b8a8bb723ff3b0ab5b6 300 which is out of range', async () => {
-//   const result = await controller.listAuctionHistory({
-//     size: 100,
-//     next: '51f6233c4403f6ce113bb4e90f83b176587f401081605b8a8bb723ff3b0ab5b6300'
-//   })
-
-//   expect(result.data.length).toStrictEqual(0)
-//   expect(result.page).toBeUndefined()
-// })
-
 function now (): number {
   return Math.floor(new Date().getTime() / 1000)
 }
