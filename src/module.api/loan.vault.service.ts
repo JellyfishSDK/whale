@@ -110,12 +110,18 @@ export class LoanVaultService {
       const maxBlockHeight = parseInt(next.substr(64))
       const items = await this.client.loan.listAuctionHistory('all', { limit: size + 1, maxBlockHeight })
 
-      if (items[0].vaultId !== vaultId) { // due to same block height
-        // re-grab the full list then return the sliced
-        const full = await this.client.loan.listAuctionHistory('all', { limit: Number.MAX_SAFE_INTEGER, maxBlockHeight })
-        const index = full.findIndex(f => f.vaultId === vaultId)
-        const sliced = full.slice(index + 1, index + 1 + query.size)
-        return ApiPagedResponse.of(sliced, query.size, item => `${item.vaultId}${item.blockHeight}`)
+      if (items[0].vaultId !== vaultId) { // due to same height and currently it can only filter by maxBlockHeight
+        // re-grab the full list then return the sliced will do
+        const loop = async (limit = 0): Promise<ApiPagedResponse<LoanAuctionHistory>> => {
+          const full = await this.client.loan.listAuctionHistory('all', { limit: limit + 30, maxBlockHeight })
+          const index = full.findIndex(f => f.vaultId === vaultId)
+          if (index > 0) {
+            const sliced = full.slice(index + 1, index + 1 + query.size)
+            return ApiPagedResponse.of(sliced, query.size, item => `${item.vaultId}${item.blockHeight}`)
+          }
+          return await loop(limit + 30) // loop with larger size call until get the vaultId
+        }
+        return await loop()
       }
 
       const sliced = items.slice(1, query.size + 1)
