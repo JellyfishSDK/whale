@@ -88,6 +88,9 @@ export class DepositToVaultIndexer extends DfTxIndexer<DepositToVault> {
     if (previous === undefined) {
       throw new NotFoundIndexerError('index', 'DepositToVault', data.vaultId)
     }
+
+    await this.vaultMapper.put(previous)
+    await this.vaultHistoryMapper.delete(`${data.vaultId}-${block.height}`)
   }
 
   /**
