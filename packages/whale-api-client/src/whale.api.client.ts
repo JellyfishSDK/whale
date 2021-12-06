@@ -174,6 +174,8 @@ export class WhaleApiClient {
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
         throw new WhaleClientTimeoutException(timeout!)
       }
+
+      throw err
     }
   }
 }

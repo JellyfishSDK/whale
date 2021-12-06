@@ -79,7 +79,7 @@ export interface Vault extends Model {
     currency: string // ----------------| stringified bignumber
   }>
 
-  collateralValue: string // ------------| stringified bignumber
+  collateralValue: string // -----------| stringified bignumber
   loanValue: string // -----------------| stringified bignumber
   interestValue: string // -------------| stringified bignumber
 

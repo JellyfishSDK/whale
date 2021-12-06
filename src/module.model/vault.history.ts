@@ -76,23 +76,23 @@ export interface VaultHistory extends Vault {
 
   collateralAmounts: Array<{
     token: string
-    currency: string // ----------------| stringified bignumber
+    currency: string // ----------| stringified bignumber
   }>
   loanAmounts: Array<{
     token: string
-    currency: string // ----------------| stringified bignumber
+    currency: string // ----------| stringified bignumber
   }>
   interestAmounts: Array<{
     token: string
-    currency: string // ----------------| stringified bignumber
+    currency: string // ----------| stringified bignumber
   }>
 
-  collateralValue: string // -----------| stringified bignumber
-  loanValue: string // -----------------| stringified bignumber
-  interestValue: string // -------------| stringified bignumber
+  collateralValue: string // -----| stringified bignumber
+  loanValue: string // -----------| stringified bignumber
+  interestValue: string // -------| stringified bignumber
 
-  informativeRatio: string // ----------| stringified bignumber
-  collateralRatio: number // -----------| stringified bignumber
+  informativeRatio: string // ----| stringified bignumber
+  collateralRatio: number // -----| stringified bignumber
 
   event: VaultHistoryEvent
 
