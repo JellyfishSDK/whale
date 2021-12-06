@@ -97,13 +97,8 @@ beforeAll(async () => {
 
   await takeLoan(testing, vaultId, '7500@AAPL')
   const vault = await testing.rpc.loan.getVault(vaultId) as VaultActive
-  // console.log('vault: ', vault)
-  // console.log('loanValue: ', vault.loanValue.toString())
-  // console.log('collateralValue: ', vault.collateralValue.toString())
-  // console.log('informativeRatio: ', vault.informativeRatio.toString())
-
-  // index for takeLoan to calculate the collateralRatio
   const indexed = await vaultMapper.get(vaultId) as Vault
+  // index for takeLoan to calculate the collateralRatio
   await vaultMapper.put({
     ...indexed,
     interestValue: vault.interestValue.toString(),
@@ -160,6 +155,7 @@ describe('deposit to vault', () => {
       block: expect.any(Object)
     })
 
+    // to compare indexed data with blockchain data
     const vaultRPC = await testing.rpc.loan.getVault(vaultId) as VaultActive
     expect(vaultRPC).toStrictEqual({
       vaultId: 'afdf7972997f07b1a5ac5af28d12bcb09fdbf5a32dd30f3100a672d214b71581',
