@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 import { PoolPairData } from '@whale-api-client/api/poolpairs'
-import { getBlockSubsidy } from '@src/module.api/stats.controller'
+import { getBlockSubsidy } from '@src/module.api/subsidy'
 
 @Injectable()
 export class PoolPairService {
