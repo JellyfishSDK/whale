@@ -4,6 +4,7 @@ import BigNumber from 'bignumber.js'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 import { PoolPairData } from '@whale-api-client/api/poolpairs'
+import { getBlockSubsidy } from '@src/module.api/subsidy'
 
 @Injectable()
 export class PoolPairService {
@@ -73,7 +74,7 @@ export class PoolPairService {
     return await this.cache.get<BigNumber>('USD_PER_DFI', async () => {
       const usdt = await this.getPoolPair('DFI', 'USDT')
       const usdc = await this.getPoolPair('DFI', 'USDC')
-      const dusd = await this.getPoolPair('DFI', 'DUSD')
+      // const dusd = await this.getPoolPair('DFI', 'DUSD')
       let totalUSD = new BigNumber(0)
       let totalDFI = new BigNumber(0)
 
@@ -95,9 +96,9 @@ export class PoolPairService {
         add(usdc)
       }
 
-      if (dusd !== undefined) {
-        add(dusd)
-      }
+      // if (dusd !== undefined) {
+      //   add(dusd)
+      // }
 
       if (!totalUSD.isZero()) {
         return totalUSD.div(totalDFI)
@@ -111,6 +112,25 @@ export class PoolPairService {
     return await this.cache.get<BigNumber>('LP_DAILY_DFI_REWARD', async () => {
       const rpcResult = await this.rpcClient.masternode.getGov('LP_DAILY_DFI_REWARD')
       return new BigNumber(rpcResult.LP_DAILY_DFI_REWARD)
+    }, {
+      ttl: 3600 // 60 minutes
+    })
+  }
+
+  private async getLoanTokenSplits (): Promise<Record<string, number> | undefined> {
+    return await this.cache.get<Record<string, number>>('LP_LOAN_TOKEN_SPLITS', async () => {
+      const result = await this.rpcClient.masternode.getGov('LP_LOAN_TOKEN_SPLITS')
+      return result.LP_LOAN_TOKEN_SPLITS
+    }, {
+      ttl: 600 // 10 minutes
+    })
+  }
+
+  private async getLoanEmission (): Promise<BigNumber | undefined> {
+    return await this.cache.get<BigNumber>('LP_LOAN_TOKEN_EMISSION', async () => {
+      const info = await this.rpcClient.blockchain.getBlockchainInfo()
+      const eunosHeight = info.softforks.eunos.height ?? 0
+      return getBlockSubsidy(eunosHeight, info.blocks).multipliedBy('0.2468')
     }, {
       ttl: 3600 // 60 minutes
     })
@@ -147,29 +167,57 @@ export class PoolPairService {
       return new BigNumber(0)
     }
 
-    const dfiPriceUsdt = await this.getUSD_PER_DFI()
+    const dfiPriceUSD = await this.getUSD_PER_DFI()
     const dailyDfiReward = await this.getDailyDFIReward()
 
-    if (dfiPriceUsdt === undefined || dailyDfiReward === undefined) {
+    if (dfiPriceUSD === undefined || dailyDfiReward === undefined) {
       return undefined
     }
 
     return info.rewardPct
       .times(dailyDfiReward)
       .times(365)
-      .times(dfiPriceUsdt)
+      .times(dfiPriceUSD)
   }
 
-  async getAPR (info: PoolPairInfo): Promise<PoolPairData['apr'] | undefined> {
-    const customUSD = await this.getYearlyCustomRewardUSD(info)
-    const pctUSD = await this.getYearlyRewardPCTUSD(info)
-    const totalLiquidityUSD = await this.getTotalLiquidityUsd(info)
+  private async getYearlyRewardLoanUSD (id: string): Promise<BigNumber | undefined> {
+    const splits = await this.getLoanTokenSplits()
+    if (splits === undefined) {
+      return new BigNumber(0)
+    }
 
-    if (customUSD === undefined || pctUSD === undefined || totalLiquidityUSD === undefined) {
+    const split = splits[id]
+    if (split === undefined) {
+      return new BigNumber(0)
+    }
+
+    const dfiPriceUSD = await this.getUSD_PER_DFI()
+    if (dfiPriceUSD === undefined) {
       return undefined
     }
 
-    const yearlyUSD = customUSD.plus(pctUSD)
+    const loanEmission = await this.getLoanEmission()
+    if (loanEmission === undefined) {
+      return new BigNumber(0)
+    }
+
+    return loanEmission.multipliedBy(split)
+      .times(60 * 60 * 24 / 30) // 30 seconds = 1 block
+      .times(365) // 1 year
+      .times(dfiPriceUSD)
+  }
+
+  async getAPR (id: string, info: PoolPairInfo): Promise<PoolPairData['apr'] | undefined> {
+    const customUSD = await this.getYearlyCustomRewardUSD(info)
+    const pctUSD = await this.getYearlyRewardPCTUSD(info)
+    const loanUSD = await this.getYearlyRewardLoanUSD(id)
+    const totalLiquidityUSD = await this.getTotalLiquidityUsd(info)
+
+    if (customUSD === undefined || pctUSD === undefined || loanUSD === undefined || totalLiquidityUSD === undefined) {
+      return undefined
+    }
+
+    const yearlyUSD = customUSD.plus(pctUSD).plus(loanUSD)
     // 1 == 100%, 0.1 = 10%
     const apr = yearlyUSD.div(totalLiquidityUSD).toNumber()
 
