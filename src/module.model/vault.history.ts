@@ -1,12 +1,14 @@
-import { Model, ModelMapping } from '@src/module.database/model'
+import { ModelMapping } from '@src/module.database/model'
 import { Injectable } from '@nestjs/common'
 import { Database, SortOrder } from '@src/module.database/database'
+import { Vault } from './vault'
+import { VaultState } from '@defichain/jellyfish-api-core/dist/category/loan'
 
 const VaultHistoryMapping: ModelMapping<VaultHistory> = {
-  type: 'vault_deposit',
+  type: 'vault',
   index: {
-    vault_deposit_key_sort: {
-      name: 'vault_deposit_key_sort',
+    vault_key_sort: {
+      name: 'vault_key_sort',
       partition: {
         type: 'string',
         key: (vd: VaultHistory) => vd.vaultId
@@ -25,7 +27,7 @@ export class VaultHistoryMapper {
   }
 
   async getLatest (vaultDepositId: string): Promise<VaultHistory | undefined> {
-    const latest = await this.database.query(VaultHistoryMapping.index.vault_deposit_key_sort, {
+    const latest = await this.database.query(VaultHistoryMapping.index.vault_key_sort, {
       partitionKey: vaultDepositId,
       order: SortOrder.DESC,
       limit: 1
@@ -34,7 +36,7 @@ export class VaultHistoryMapper {
   }
 
   async query (vaultId: string, limit: number, lt?: string): Promise<VaultHistory[]> {
-    return await this.database.query(VaultHistoryMapping.index.vault_deposit_key_sort, {
+    return await this.database.query(VaultHistoryMapping.index.vault_key_sort, {
       partitionKey: vaultId,
       limit: limit,
       order: SortOrder.DESC,
@@ -43,7 +45,7 @@ export class VaultHistoryMapper {
   }
 
   async list (limit: number, lt?: string): Promise<VaultHistory[]> {
-    return await this.database.query(VaultHistoryMapping.index.vault_deposit_key_sort, {
+    return await this.database.query(VaultHistoryMapping.index.vault_key_sort, {
       limit: limit,
       order: SortOrder.DESC,
       lt: lt
@@ -63,33 +65,36 @@ export class VaultHistoryMapper {
   }
 }
 
-export interface Vault extends Model {
-  id: string // vaultId
+export interface VaultHistory extends Vault {
+  id: string // ------------------| vaultId-height
+  vaultId: string // -------------| as partition key
+  sort: string // ----------------| hex encoded height
 
-  block: {
-    hash: string
-    height: number
-    time: number
-    medianTime: number
-  }
-}
+  loanSchemeId: string
+  ownerAddress: string
+  state: VaultState
 
-export interface VaultHistory extends Model {
-  id: string // --------------| vaultId-height
+  collateralAmounts: Array<{
+    token: string
+    currency: string // ----------------| stringified bignumber
+  }>
+  loanAmounts: Array<{
+    token: string
+    currency: string // ----------------| stringified bignumber
+  }>
+  interestAmounts: Array<{
+    token: string
+    currency: string // ----------------| stringified bignumber
+  }>
 
-  vaultId: string // ---------| as partition key
-  sort: string // ------------| hex encoded height
+  collateralValue: string // -----------| stringified bignumber
+  loanValue: string // -----------------| stringified bignumber
+  interestValue: string // -------------| stringified bignumber
+
+  informativeRatio: string // ----------| stringified bignumber
+  collateralRatio: number // -----------| stringified bignumber
 
   event: VaultHistoryEvent
-  ownerAddress?: string // create | u
-  loanSchemeId?: string // create | u
-  from?: string // d | p | a
-  to?: string // w | t | close
-  amounts?: Array<{ // d | w | a | t | p
-    token: string
-    symbol: string
-  }>
-  index?: number // a
 
   block: {
     hash: string
@@ -97,6 +102,10 @@ export interface VaultHistory extends Model {
     time: number
     medianTime: number
   }
+
+  from?: string // d | p | a
+  to?: string // w | t | close
+  index?: number // a
 }
 
 export enum VaultHistoryEvent {

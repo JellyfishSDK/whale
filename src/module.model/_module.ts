@@ -23,7 +23,8 @@ import { TokenMapper } from '@src/module.model/token'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { OraclePriceActiveMapper } from './oracle.price.active'
-import { VaultDepositMapper } from '@src/module.model/vault.deposit'
+import { VaultMapper } from '@src/module.model/vault'
+import { VaultHistoryMapper } from '@src/module.model/vault.history'
 
 @Global()
 @Module({
@@ -50,7 +51,8 @@ import { VaultDepositMapper } from '@src/module.model/vault.deposit'
     TokenMapper,
     PoolPairMapper,
     PoolPairTokenMapper,
-    VaultDepositMapper
+    VaultMapper,
+    VaultHistoryMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -75,7 +77,8 @@ import { VaultDepositMapper } from '@src/module.model/vault.deposit'
     TokenMapper,
     PoolPairMapper,
     PoolPairTokenMapper,
-    VaultDepositMapper
+    VaultMapper,
+    VaultHistoryMapper
   ]
 })
 export class ModelModule {
