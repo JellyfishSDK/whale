@@ -42,9 +42,7 @@ beforeAll(async () => {
     { token: 'DFI', currency: 'USD' },
     { token: 'BTC', currency: 'USD' },
     { token: 'ETH', currency: 'USD' },
-    { token: 'AAPL', currency: 'USD' },
-    { token: 'TSLA', currency: 'USD' },
-    { token: 'MSFT', currency: 'USD' }
+    { token: 'AAPL', currency: 'USD' }
   ]
   const oracleId = await testing.rpc.oracle.appointOracle(await testing.generateAddress(), priceFeeds, { weightage: 1 })
   await testing.generate(1)
@@ -53,9 +51,7 @@ beforeAll(async () => {
       { tokenAmount: '1@DFI', currency: 'USD' },
       { tokenAmount: '10000@BTC', currency: 'USD' },
       { tokenAmount: '400@ETH', currency: 'USD' },
-      { tokenAmount: '2@AAPL', currency: 'USD' },
-      { tokenAmount: '2@TSLA', currency: 'USD' },
-      { tokenAmount: '2@MSFT', currency: 'USD' }
+      { tokenAmount: '2@AAPL', currency: 'USD' }
     ]
   })
   await testing.generate(1)
@@ -63,10 +59,7 @@ beforeAll(async () => {
   await setCollateralToken(testing, 'DFI')
   await setCollateralToken(testing, 'BTC')
   await setCollateralToken(testing, 'ETH')
-
   await setLoanToken(testing, 'AAPL')
-  await setLoanToken(testing, 'TSLA')
-  await setLoanToken(testing, 'MSFT')
 
   vaultAddr = await testing.generateAddress()
   vaultId = await createVault(testing, 'default', vaultAddr)
@@ -136,7 +129,7 @@ describe('deposit to vault', () => {
     const vault = await vaultMapper.get(vaultId) as Vault
     expect(vault).toStrictEqual({
       id: vaultId,
-      sort: '00000079',
+      sort: expect.any(String),
       loanSchemeId: 'default',
       ownerAddress: vaultAddr,
       state: VaultState.ACTIVE,
@@ -158,10 +151,10 @@ describe('deposit to vault', () => {
     // to compare indexed data with blockchain data
     const vaultRPC = await testing.rpc.loan.getVault(vaultId) as VaultActive
     expect(vaultRPC).toStrictEqual({
-      vaultId: 'afdf7972997f07b1a5ac5af28d12bcb09fdbf5a32dd30f3100a672d214b71581',
+      vaultId: vaultId,
       loanSchemeId: 'default',
-      ownerAddress: 'bcrt1qmuq8mtw7qk9klpej2v2waqzxj4gg3yzpljsw06',
-      state: 'active',
+      ownerAddress: vaultAddr,
+      state: VaultState.ACTIVE,
       collateralAmounts: ['10300.00000000@DFI', '0.50000000@BTC', '0.45600000@ETH'],
       loanAmounts: ['7500.00428082@AAPL'],
       interestAmounts: ['0.00428082@AAPL'],
