@@ -8,6 +8,7 @@ import BigNumber from 'bignumber.js'
 import { PriceTickerMapper } from '@src/module.model/price.ticker'
 import { MasternodeStats, MasternodeStatsMapper } from '@src/module.model/masternode.stats'
 import { BlockchainInfo } from '@defichain/jellyfish-api-core/dist/category/blockchain'
+import { getBlockSubsidy } from '@src/module.api/subsidy'
 
 @Controller('/stats')
 export class StatsController {
@@ -31,10 +32,10 @@ export class StatsController {
         blocks: block.height
       },
       burned: await this.cachedGet('burned', this.getBurned.bind(this), 1800),
-      tvl: await this.cachedGet('tvl', this.getTVL.bind(this), 600),
-      price: await this.cachedGet('price', this.getPrice.bind(this), 300),
+      tvl: await this.cachedGet('tvl', this.getTVL.bind(this), 300),
+      price: await this.cachedGet('price', this.getPrice.bind(this), 240),
       masternodes: await this.cachedGet('masternodes', this.getMasternodes.bind(this), 300),
-      loan: await this.cachedGet('loan', this.getLoan.bind(this), 1800),
+      loan: await this.cachedGet('loan', this.getLoan.bind(this), 300),
       emission: await this.cachedGet('emission', this.getEmission.bind(this), 1800),
       net: await this.cachedGet('net', this.getNet.bind(this), 1800),
       blockchain: {
@@ -198,26 +199,6 @@ export function getEmission (eunosHeight: number, height: number): StatsData['em
     burned: burned.toNumber(),
     total: total.toNumber()
   }
-}
-
-export function getBlockSubsidy (eunosHeight: number, height: number): BigNumber {
-  let blockSubsidy = new BigNumber(405.04)
-
-  if (height >= eunosHeight) {
-    const reductionAmount = new BigNumber(0.01658) // 1.658%
-    const reductions = Math.floor((height - eunosHeight) / 32690) // Two weeks
-
-    for (let i = reductions; i > 0; i--) {
-      const amount = reductionAmount.times(blockSubsidy)
-      if (amount.lte(0.00001)) {
-        return new BigNumber(0)
-      }
-
-      blockSubsidy = blockSubsidy.minus(amount)
-    }
-  }
-
-  return blockSubsidy
 }
 
 function requireValue<T> (value: T | undefined, name: string): T {
