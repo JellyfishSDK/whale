@@ -72,7 +72,7 @@
     "@types/level": "^6.0.0",
     "@types/lossless-json": "^1.0.1",
     "@types/memdown": "^3.0.0",
-    "@types/node": "^14.14.36",
+    "@types/node": "^14.18.0",
     "@types/subleveldown": "^4.1.1",
     "eslint": "^7.32.0",
     "eslint-config-standard-jsx": "^10.0.0",
