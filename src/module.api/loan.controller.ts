@@ -7,7 +7,8 @@ import {
   NotFoundException,
   Param,
   Query,
-  ParseIntPipe
+  ParseIntPipe,
+  Inject
 } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
@@ -23,7 +24,8 @@ import {
   LoanScheme,
   LoanToken,
   LoanVaultActive,
-  LoanVaultLiquidated
+  LoanVaultLiquidated,
+  VaultAuctionBatchHistory
 } from '@whale-api-client/api/loan'
 import { mapTokenData } from '@src/module.api/token.controller'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
@@ -31,10 +33,14 @@ import { LoanVaultService } from '@src/module.api/loan.vault.service'
 import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { VaultAuctionHistoryMapper } from '@src/module.model/vault.auction.history'
 import { ActivePrice } from '@whale-api-client/api/prices'
+import { NetworkName } from '@defichain/jellyfish-network'
 
 @Controller('/loans')
 export class LoanController {
+  liqBlockExpiry = this.network === 'regtest' ? 36 : 720
+
   constructor (
+    @Inject('NETWORK') protected readonly network: NetworkName,
     private readonly client: JsonRpcClient,
     private readonly deFiDCache: DeFiDCache,
     private readonly vaultService: LoanVaultService,
@@ -179,21 +185,35 @@ export class LoanController {
   }
 
   /**
-   * Get vault auction history
+   * List vault auction history.
    *
-   * @param
-   * @returns
+   * @param {string} id vaultId
+   * @param {number} batch liquidation height
+   * @param {number} index batch index
+   * @param {PaginationQuery} query
+   * @return Promise<ApiPagedResponse<VaultAuctionBatchHistory>>
    */
   @Get('/vaults/:id/auctions/:batch/history/:index')
   async listVaultAuctionHistory (
     @Param('id') id: string,
       @Param('batch', ParseIntPipe) batch: number, // liquidationHeight
-      @Param('index', ParseIntPipe) index: number
-  ): Promise<any> {
-    console.log('batch: ', typeof batch, batch)
-
-    const unprocessed = await this.vaultAuctionHistoryMapper.query(`${id}-index`, 100)
-    console.log('unprocessed: ', unprocessed)
+      @Param('index', ParseIntPipe) index: number,
+      @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<VaultAuctionBatchHistory>> {
+    const list = await this.vaultAuctionHistoryMapper.query(`${id}-${index}`, 100)
+    const filtered = list.filter(each => each.block.height >= batch - this.liqBlockExpiry && each.block.height <= batch)
+    const remap = filtered.map(f => {
+      return {
+        id: f.vaultId,
+        index: f.index,
+        from: f.from,
+        amount: f.amount.token,
+        symbol: f.amount.currency
+      }
+    })
+    return ApiPagedResponse.of(remap, query.size, item => {
+      return item.amount
+    })
   }
 
   /**

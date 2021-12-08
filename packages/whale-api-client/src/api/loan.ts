@@ -184,3 +184,11 @@ export interface HighestBid {
   owner: string
   amount: LoanVaultTokenAmount
 }
+
+export interface VaultAuctionBatchHistory {
+  id: string
+  index: number
+  from: string
+  amount: string
+  symbol: string
+}

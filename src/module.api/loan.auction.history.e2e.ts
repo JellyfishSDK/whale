@@ -1,5 +1,5 @@
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { createTestingApp, stopTestingApp } from '@src/e2e.module'
+import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import BigNumber from 'bignumber.js'
 import { LoanController } from '@src/module.api/loan.controller'
 import { TestingGroup, Testing } from '@defichain/jellyfish-testing'
@@ -10,36 +10,22 @@ import { VaultLiquidation } from '@defichain/jellyfish-api-core/dist/category/lo
 let app: NestFastifyApplication
 let controller: LoanController
 
-const container = new MasterNodeRegTestContainer()
 const tGroup = TestingGroup.create(2, i => new MasterNodeRegTestContainer(RegTestFoundationKeys[i]))
 const alice = tGroup.get(0)
 const bob = tGroup.get(1)
 let colAddr: string
 let bobColAddr: string
 let vaultId: string
-// let vaultId1: string
+let batch: number
+let batch1: number
 
 beforeAll(async () => {
-  await container.start()
-  await container.waitForWalletCoinbaseMaturity()
-  await container.waitForWalletBalanceGTE(100)
+  await tGroup.start()
+  await alice.container.waitForWalletCoinbaseMaturity()
 
-  app = await createTestingApp(container)
+  app = await createTestingApp(alice.container)
   controller = app.get(LoanController)
 
-  await setup()
-})
-
-afterAll(async () => {
-  await stopTestingApp(container, app)
-})
-
-it('should listVaultAuctionHistory', async () => {
-  const result = await controller.listVaultAuctionHistory(vaultId, 200, 0)
-  console.log('result: ', result)
-})
-
-async function setup (): Promise<void> {
   colAddr = await alice.generateAddress()
   bobColAddr = await bob.generateAddress()
 
@@ -93,16 +79,6 @@ async function setup (): Promise<void> {
   await takeLoan(alice, vaultId, '7500@AAPL')
   await takeLoan(alice, vaultId, '2500@TSLA')
 
-  // vaultId1 = await createVault(alice, 'default')
-  // await depositToVault(alice, vaultId1, colAddr, '20000@DFI')
-  // await depositToVault(alice, vaultId1, colAddr, '1@BTC')
-  // await takeLoan(alice, vaultId1, '15000@TSLA')
-
-  // const vaultId2 = await createVault(alice, 'default')
-  // await depositToVault(alice, vaultId2, colAddr, '30000@DFI')
-  // await depositToVault(alice, vaultId2, colAddr, '1.5@BTC')
-  // await takeLoan(alice, vaultId2, '22500@MSFT')
-
   {
     // When there is no liquidation occurs
     const data = await alice.container.call('listauctions', [])
@@ -116,8 +92,7 @@ async function setup (): Promise<void> {
   await alice.rpc.oracle.setOracleData(oracleId, now(), {
     prices: [
       { tokenAmount: '2.2@AAPL', currency: 'USD' },
-      { tokenAmount: '2.2@TSLA', currency: 'USD' },
-      { tokenAmount: '2.2@MSFT', currency: 'USD' }
+      { tokenAmount: '2.2@TSLA', currency: 'USD' }
     ]
   })
   await alice.container.generate(13)
@@ -128,8 +103,7 @@ async function setup (): Promise<void> {
   }
 
   let vault = await alice.rpc.loan.getVault(vaultId) as VaultLiquidation
-  console.log('vault: ', vault)
-  console.log('vault: ', vault.batches)
+  batch = vault.liquidationHeight
 
   // BID WAR!!
   // vaultId[0]
@@ -156,29 +130,81 @@ async function setup (): Promise<void> {
   await alice.generate(40)
   await tGroup.waitForSync()
 
+  await depositToVault(alice, vaultId, colAddr, '10000@DFI')
+  await depositToVault(alice, vaultId, colAddr, '1@BTC')
+  await takeLoan(alice, vaultId, '10000@MSFT')
+
+  // liquidated #2
+  await alice.rpc.oracle.setOracleData(oracleId, now(), {
+    prices: [
+      { tokenAmount: '2.2@MSFT', currency: 'USD' }
+    ]
+  })
+  await alice.container.generate(13)
+
   vault = await alice.rpc.loan.getVault(vaultId) as VaultLiquidation
-  console.log('vault 2: ', vault)
-  console.log('vault 2: ', vault.batches)
+  batch1 = vault.liquidationHeight
 
-  // vaultId1 = await createVault(alice, 'default')
-  // await depositToVault(alice, vaultId, colAddr, '10000@DFI')
-  // await depositToVault(alice, vaultId, colAddr, '1@BTC')
-  // await takeLoan(alice, vaultId, '7500@AAPL')
-  // await takeLoan(alice, vaultId, '2500@TSLA')
+  // BID WAR #2!!
+  await placeAuctionBid(alice, vaultId, 0, colAddr, '5300.123@MSFT')
+  await tGroup.waitForSync()
+  await placeAuctionBid(bob, vaultId, 0, bobColAddr, '5355.123@MSFT')
+  await tGroup.waitForSync()
 
-  // const vault1 = await alice.rpc.loan.getVault(vaultId1) as VaultLiquidation
-  // console.log('vault1: ', vault1)
-  // console.log('vault1: ', vault1.batches)
+  const height = await alice.container.call('getblockcount')
+  await waitForIndexedHeight(app, height - 1)
+})
 
-  // // BID WAR #2!!
-  // // vaultId[0]
-  // await placeAuctionBid(alice, vaultId, 0, colAddr, '5300.123@AAPL')
-  // await tGroup.waitForSync()
-  // await placeAuctionBid(bob, vaultId, 0, bobColAddr, '5355.123@AAPL')
-  // await tGroup.waitForSync()
-  // await placeAuctionBid(alice, vaultId, 0, colAddr, '5408.55123@AAPL')
-  // await tGroup.waitForSync()
-}
+afterAll(async () => {
+  await stopTestingApp(tGroup, app)
+})
+
+it('should listVaultAuctionHistory', async () => {
+  const result = await controller.listVaultAuctionHistory(vaultId, batch, 0, { size: 30 })
+  expect(result.data.length).toStrictEqual(3)
+  expect(result.data).toStrictEqual([
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5408.55',
+      symbol: 'AAPL'
+    },
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5355',
+      symbol: 'AAPL'
+    },
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5300',
+      symbol: 'AAPL'
+    }
+  ])
+
+  const result1 = await controller.listVaultAuctionHistory(vaultId, batch1, 0, { size: 30 })
+  expect(result.data.length).toStrictEqual(2)
+  expect(result1.data).toStrictEqual([
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5355.123',
+      symbol: 'MSFT'
+    },
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5300.123',
+      symbol: 'MSFT'
+    }
+  ])
+})
 
 function now (): number {
   return Math.floor(new Date().getTime() / 1000)
