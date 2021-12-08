@@ -80,7 +80,6 @@ beforeAll(async () => {
   await takeLoan(alice, vaultId, '2500@TSLA')
 
   {
-    // When there is no liquidation occurs
     const data = await alice.container.call('listauctions', [])
     expect(data).toStrictEqual([])
 
@@ -168,42 +167,89 @@ it('should listVaultAuctionHistory', async () => {
       index: 0,
       from: expect.any(String),
       amount: '5408.55',
-      symbol: 'AAPL'
+      symbol: 'AAPL',
+      sort: '0000008a'
     },
     {
       id: vaultId,
       index: 0,
       from: expect.any(String),
       amount: '5355',
-      symbol: 'AAPL'
+      symbol: 'AAPL',
+      sort: '00000089'
     },
     {
       id: vaultId,
       index: 0,
       from: expect.any(String),
       amount: '5300',
-      symbol: 'AAPL'
+      symbol: 'AAPL',
+      sort: '00000088'
     }
   ])
 
   const result1 = await controller.listVaultAuctionHistory(vaultId, batch1, 0, { size: 30 })
-  expect(result.data.length).toStrictEqual(2)
+  expect(result1.data.length).toStrictEqual(2)
   expect(result1.data).toStrictEqual([
     {
       id: vaultId,
       index: 0,
       from: expect.any(String),
       amount: '5355.123',
-      symbol: 'MSFT'
+      symbol: 'MSFT',
+      sort: '000000c8'
     },
     {
       id: vaultId,
       index: 0,
       from: expect.any(String),
       amount: '5300.123',
-      symbol: 'MSFT'
+      symbol: 'MSFT',
+      sort: '000000c7'
     }
   ])
+})
+
+it('should listVaultAuctionHistory with pagination', async () => {
+  const first = await controller.listVaultAuctionHistory(vaultId, batch, 0, { size: 1 })
+  expect(first.data.length).toStrictEqual(1)
+  expect(first.data).toStrictEqual([
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5408.55',
+      symbol: 'AAPL',
+      sort: '0000008a'
+    }
+  ])
+  expect(first.page).toStrictEqual({ next: '0000008a' })
+
+  const next = await controller.listVaultAuctionHistory(vaultId, batch, 0, { size: 1, next: first?.page?.next })
+  expect(next.data).toStrictEqual([
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5355',
+      symbol: 'AAPL',
+      sort: '00000089'
+    }
+  ])
+  expect(next.page).toStrictEqual({ next: '00000089' })
+
+  const last = await controller.listVaultAuctionHistory(vaultId, batch, 0, { size: 2, next: next?.page?.next })
+  expect(last.data).toStrictEqual([
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5300',
+      symbol: 'AAPL',
+      sort: '00000088'
+    }
+  ])
+  expect(last.page).toStrictEqual(undefined)
 })
 
 function now (): number {

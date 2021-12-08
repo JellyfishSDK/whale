@@ -1,23 +1,27 @@
-import { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { StubWhaleApiClient } from '../stub.client'
+import { StubService } from '../stub.service'
+import BigNumber from 'bignumber.js'
 import { TestingGroup, Testing } from '@defichain/jellyfish-testing'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
-import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
-import { VaultAuctionHistoryMapper } from '@src/module.model/vault.auction.history'
-import BigNumber from 'bignumber.js'
 import { RegTestFoundationKeys } from '@defichain/jellyfish-network'
+import { VaultLiquidation } from '@defichain/jellyfish-api-core/dist/category/loan'
 
-let app: NestFastifyApplication
 const tGroup = TestingGroup.create(2, i => new MasterNodeRegTestContainer(RegTestFoundationKeys[i]))
 const alice = tGroup.get(0)
 const bob = tGroup.get(1)
 let colAddr: string
 let bobColAddr: string
 let vaultId: string
+let batch: number
+let batch1: number
 
-beforeEach(async () => {
+const service = new StubService(alice.container)
+const client = new StubWhaleApiClient(service)
+
+beforeAll(async () => {
   await tGroup.start()
   await alice.container.waitForWalletCoinbaseMaturity()
-  app = await createTestingApp(alice.container)
+  await service.start()
 
   colAddr = await alice.generateAddress()
   bobColAddr = await bob.generateAddress()
@@ -84,8 +88,7 @@ beforeEach(async () => {
   await alice.rpc.oracle.setOracleData(oracleId, now(), {
     prices: [
       { tokenAmount: '2.2@AAPL', currency: 'USD' },
-      { tokenAmount: '2.2@TSLA', currency: 'USD' },
-      { tokenAmount: '2.2@MSFT', currency: 'USD' }
+      { tokenAmount: '2.2@TSLA', currency: 'USD' }
     ]
   })
   await alice.container.generate(13)
@@ -94,6 +97,9 @@ beforeEach(async () => {
     const list = await alice.container.call('listauctions')
     expect(list.every((each: any) => each.state === 'inLiquidation'))
   }
+
+  let vault = await alice.rpc.loan.getVault(vaultId) as VaultLiquidation
+  batch = vault.liquidationHeight
 
   // BID WAR!!
   // vaultId[0]
@@ -115,107 +121,146 @@ beforeEach(async () => {
   // vaultId[2]
   await placeAuctionBid(alice, vaultId, 2, colAddr, '2625.00499422@TSLA')
   await tGroup.waitForSync()
+
+  // do another batch
+  await alice.generate(40)
+  await tGroup.waitForSync()
+
+  await depositToVault(alice, vaultId, colAddr, '10000@DFI')
+  await depositToVault(alice, vaultId, colAddr, '1@BTC')
+  await takeLoan(alice, vaultId, '10000@MSFT')
+
+  // liquidated #2
+  await alice.rpc.oracle.setOracleData(oracleId, now(), {
+    prices: [
+      { tokenAmount: '2.2@MSFT', currency: 'USD' }
+    ]
+  })
+  await alice.container.generate(13)
+
+  vault = await alice.rpc.loan.getVault(vaultId) as VaultLiquidation
+  batch1 = vault.liquidationHeight
+
+  // BID WAR #2!!
+  await placeAuctionBid(alice, vaultId, 0, colAddr, '5300.123@MSFT')
+  await tGroup.waitForSync()
+  await placeAuctionBid(bob, vaultId, 0, bobColAddr, '5355.123@MSFT')
+  await tGroup.waitForSync()
+
+  const height = await alice.container.call('getblockcount')
+  await alice.generate(1)
+  await service.waitForIndexedHeight(height)
 })
 
-afterEach(async () => {
-  await stopTestingApp(tGroup, app)
+afterAll(async () => {
+  try {
+    await service.stop()
+  } finally {
+    await tGroup.stop()
+  }
 })
 
-it('should index placeAuctionBid', async () => {
-  {
-    const height = await alice.container.call('getblockcount')
-    await alice.container.generate(1)
-    await waitForIndexedHeight(app, height - 1)
-  }
-
-  const mapper = app.get(VaultAuctionHistoryMapper)
-  { // vaultId[0]
-    const history = await mapper.query(`${vaultId}-0`, 100)
-    expect(history).toStrictEqual([
-      {
-        id: expect.any(String),
-        key: `${vaultId}-0`,
-        sort: '0000008a',
-        vaultId: vaultId,
-        index: 0,
-        from: expect.any(String),
-        amount: { token: '5408.55', currency: 'AAPL' },
-        block: expect.any(Object)
-      },
-      {
-        id: expect.any(String),
-        key: `${vaultId}-0`,
-        sort: '00000089',
-        vaultId: vaultId,
-        index: 0,
-        from: expect.any(String),
-        amount: { token: '5355', currency: 'AAPL' },
-        block: expect.any(Object)
-      },
-      {
-        id: expect.any(String),
-        key: `${vaultId}-0`,
-        sort: '00000088',
-        vaultId: vaultId,
-        index: 0,
-        from: expect.any(String),
-        amount: { token: '5300', currency: 'AAPL' },
-        block: expect.any(Object)
-      }
-    ])
-
-    { // vaultId[1]
-      const history = await mapper.query(`${vaultId}-1`, 100)
-      expect(history).toStrictEqual([
-        {
-          id: expect.any(String),
-          key: `${vaultId}-1`,
-          sort: '0000008d',
-          vaultId: vaultId,
-          index: 1,
-          from: expect.any(String),
-          amount: { token: '2760.0666069', currency: 'AAPL' },
-          block: expect.any(Object)
-        },
-        {
-          id: expect.any(String),
-          key: `${vaultId}-1`,
-          sort: '0000008c',
-          vaultId: vaultId,
-          index: 1,
-          from: expect.any(String),
-          amount: { token: '2730', currency: 'AAPL' },
-          block: expect.any(Object)
-        },
-        {
-          id: expect.any(String),
-          key: `${vaultId}-1`,
-          sort: '0000008b',
-          vaultId: vaultId,
-          index: 1,
-          from: expect.any(String),
-          amount: { token: '2700.00012', currency: 'AAPL' },
-          block: expect.any(Object)
-        }
-      ])
+it('should listVaultAuctionHistory', async () => {
+  const result = await client.loan.listVaultAuctionHistory(vaultId, batch, 0)
+  expect(result.length).toStrictEqual(3)
+  expect([...result]).toStrictEqual([
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5408.55',
+      symbol: 'AAPL',
+      sort: '0000008a'
+    },
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5355',
+      symbol: 'AAPL',
+      sort: '00000089'
+    },
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5300',
+      symbol: 'AAPL',
+      sort: '00000088'
     }
+  ])
 
-    { // vaultId[2]
-      const history = await mapper.query(`${vaultId}-2`, 100)
-      expect(history).toStrictEqual([
-        {
-          id: expect.any(String),
-          key: `${vaultId}-2`,
-          sort: '0000008e',
-          vaultId: vaultId,
-          index: 2,
-          from: expect.any(String),
-          amount: { token: '2625.00499422', currency: 'TSLA' },
-          block: expect.any(Object)
-        }
-      ])
+  const result1 = await client.loan.listVaultAuctionHistory(vaultId, batch1, 0)
+  expect(result1.length).toStrictEqual(2)
+  expect([...result1]).toStrictEqual([
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5355.123',
+      symbol: 'MSFT',
+      sort: '000000c8'
+    },
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5300.123',
+      symbol: 'MSFT',
+      sort: '000000c7'
     }
-  }
+  ])
+})
+
+it('should listVaultAuctionHistory with pagination', async () => {
+  const first = await client.loan.listVaultAuctionHistory(vaultId, batch, 0, 1)
+  expect(first.length).toStrictEqual(1)
+  expect(first.hasNext).toStrictEqual(true)
+  expect(first.nextToken).toStrictEqual('0000008a')
+  expect([...first]).toStrictEqual([
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5408.55',
+      symbol: 'AAPL',
+      sort: '0000008a'
+    }
+  ])
+
+  const next = await client.paginate(first)
+  expect(next.length).toStrictEqual(1)
+  expect(next.hasNext).toStrictEqual(true)
+  expect(next.nextToken).toStrictEqual('00000089')
+  expect([...next]).toStrictEqual([
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5355',
+      symbol: 'AAPL',
+      sort: '00000089'
+    }
+  ])
+
+  const last = await client.paginate(next)
+  expect(last.length).toStrictEqual(1)
+  expect(last.hasNext).toStrictEqual(true)
+  expect(last.nextToken).toStrictEqual('00000088')
+  expect([...last]).toStrictEqual([
+    {
+      id: vaultId,
+      index: 0,
+      from: expect.any(String),
+      amount: '5300',
+      symbol: 'AAPL',
+      sort: '00000088'
+    }
+  ])
+
+  const none = await client.paginate(last)
+  expect(none.length).toStrictEqual(0)
+  expect(none.hasNext).toStrictEqual(false)
 })
 
 function now (): number {
@@ -258,18 +303,18 @@ async function setLoanToken (testing: Testing, symbol: string): Promise<void> {
   await testing.generate(1)
 }
 async function createVault (testing: Testing, schemeId: string, address?: string): Promise<string> {
-  const vaultId = await testing.container.call(
+  const vaultId = await testing.rpc.container.call(
     'createvault', [address ?? await testing.generateAddress(), schemeId]
   )
   await testing.generate(1)
   return vaultId
 }
 async function depositToVault (testing: Testing, vaultId: string, address: string, tokenAmt: string): Promise<void> {
-  await testing.container.call('deposittovault', [vaultId, address, tokenAmt])
+  await testing.rpc.container.call('deposittovault', [vaultId, address, tokenAmt])
   await testing.generate(1)
 }
 async function takeLoan (testing: Testing, vaultId: string, amounts: string | string[]): Promise<void> {
-  await testing.rpc.loan.takeLoan({ vaultId, amounts })
+  await testing.rpc.container.call('takeloan', [{ vaultId, amounts }])
   await testing.generate(1)
 }
 async function placeAuctionBid (testing: Testing, vaultId: string, index: number, addr: string, tokenAmt: string): Promise<void> {

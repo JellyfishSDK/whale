@@ -31,7 +31,7 @@ import { mapTokenData } from '@src/module.api/token.controller'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { LoanVaultService } from '@src/module.api/loan.vault.service'
 import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
-import { VaultAuctionHistoryMapper } from '@src/module.model/vault.auction.history'
+import { VaultAuctionHistoryMapper, VaultAuctionHistory } from '@src/module.model/vault.auction.history'
 import { ActivePrice } from '@whale-api-client/api/prices'
 import { NetworkName } from '@defichain/jellyfish-network'
 
@@ -191,7 +191,7 @@ export class LoanController {
    * @param {number} batch liquidation height
    * @param {number} index batch index
    * @param {PaginationQuery} query
-   * @return Promise<ApiPagedResponse<VaultAuctionBatchHistory>>
+   * @return {Promise<ApiPagedResponse<VaultAuctionBatchHistory>>}
    */
   @Get('/vaults/:id/auctions/:batch/history/:index')
   async listVaultAuctionHistory (
@@ -200,19 +200,38 @@ export class LoanController {
       @Param('index', ParseIntPipe) index: number,
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<VaultAuctionBatchHistory>> {
-    const list = await this.vaultAuctionHistoryMapper.query(`${id}-${index}`, 100)
-    const filtered = list.filter(each => each.block.height >= batch - this.liqBlockExpiry && each.block.height <= batch)
+    let history: VaultAuctionHistory[] = []
+    const loop = async (next?: string): Promise<VaultAuctionHistory[]> => {
+      const list = await this.vaultAuctionHistoryMapper.query(`${id}-${index}`, 100, next)
+      const filtered = list.filter(each => each.block.height >= batch - this.liqBlockExpiry && each.block.height <= batch)
+      if (filtered.length === 0) {
+        return history
+      }
+      history = history.concat(filtered)
+      if (history.length < query.size) {
+        return await loop(history[history.length - 1].sort)
+      }
+      return history
+    }
+
+    let filtered = await loop(query.next)
+    if (filtered.length > query.size) {
+      filtered = filtered.splice(0, query.size)
+    }
+
     const remap = filtered.map(f => {
       return {
         id: f.vaultId,
         index: f.index,
         from: f.from,
         amount: f.amount.token,
-        symbol: f.amount.currency
+        symbol: f.amount.currency,
+        sort: f.sort
       }
     })
+
     return ApiPagedResponse.of(remap, query.size, item => {
-      return item.amount
+      return item.sort
     })
   }
 
