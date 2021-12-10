@@ -95,14 +95,14 @@ export class Loan {
    * List vault auction history.
    *
    * @param {string} id vaultId
-   * @param {number} batch liquidation height
-   * @param {number} index batch index
+   * @param {number} height liquidation height
+   * @param {number} batchIndex batch index
    * @param {number} size of auction batch index history
    * @param {string} next set of auction batch index history
    * @return {Promise<ApiPagedResponse<VaultAuctionBatchHistory>>}
    */
-  async listVaultAuctionHistory (id: string, batch: number, index: number, size: number = 30, next?: string): Promise<ApiPagedResponse<VaultAuctionBatchHistory>> {
-    return await this.client.requestList('GET', `loans/vaults/${id}/auctions/${batch}/history/${index}`, size, next)
+  async listVaultAuctionHistory (id: string, height: number, batchIndex: number, size: number = 30, next?: string): Promise<ApiPagedResponse<VaultAuctionBatchHistory>> {
+    return await this.client.requestList('GET', `loans/vaults/${id}/auctions/${height}/batches/${batchIndex}/history`, size, next)
   }
 
   /**
