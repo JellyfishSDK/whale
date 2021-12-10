@@ -30,7 +30,7 @@ import { mapTokenData } from '@src/module.api/token.controller'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { LoanVaultService } from '@src/module.api/loan.vault.service'
 import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
-import { VaultAuctionHistoryMapper, VaultAuctionBatchHistory } from '@src/module.model/vault.auction.history'
+import { VaultAuctionHistoryMapper, VaultAuctionBatchHistory } from '@src/module.model/vault.auction.batch.history'
 import { ActivePrice } from '@whale-api-client/api/prices'
 import { NetworkName } from '@defichain/jellyfish-network'
 

@@ -2,7 +2,7 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { TestingGroup, Testing } from '@defichain/jellyfish-testing'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
-import { VaultAuctionHistoryMapper } from '@src/module.model/vault.auction.history'
+import { VaultAuctionHistoryMapper } from '@src/module.model/vault.auction.batch.history'
 import BigNumber from 'bignumber.js'
 import { RegTestFoundationKeys } from '@defichain/jellyfish-network'
 
