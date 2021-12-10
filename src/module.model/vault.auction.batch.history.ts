@@ -2,18 +2,18 @@ import { Model, ModelMapping } from '@src/module.database/model'
 import { Injectable } from '@nestjs/common'
 import { Database, SortOrder } from '@src/module.database/database'
 
-const VaultAuctionHistoryMapping: ModelMapping<VaultAuctionHistory> = {
+const VaultAuctionHistoryMapping: ModelMapping<VaultAuctionBatchHistory> = {
   type: 'vault_auction_history',
   index: {
     vault_auction_history_key_sort: {
       name: 'vault_auction_history_key_sort',
       partition: {
         type: 'string',
-        key: (vah: VaultAuctionHistory) => vah.key
+        key: (vah: VaultAuctionBatchHistory) => vah.key
       },
       sort: {
         type: 'string',
-        key: (vah: VaultAuctionHistory) => vah.sort
+        key: (vah: VaultAuctionBatchHistory) => vah.sort
       }
     }
   }
@@ -24,7 +24,7 @@ export class VaultAuctionHistoryMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async getLatest (key: string): Promise<VaultAuctionHistory | undefined> {
+  async getLatest (key: string): Promise<VaultAuctionBatchHistory | undefined> {
     const latest = await this.database.query(VaultAuctionHistoryMapping.index.vault_auction_history_key_sort, {
       partitionKey: key,
       order: SortOrder.DESC,
@@ -33,7 +33,7 @@ export class VaultAuctionHistoryMapper {
     return latest[0]
   }
 
-  async query (key: string, limit: number, lt?: string, gt?: string): Promise<VaultAuctionHistory[]> {
+  async query (key: string, limit: number, lt?: string, gt?: string): Promise<VaultAuctionBatchHistory[]> {
     return await this.database.query(VaultAuctionHistoryMapping.index.vault_auction_history_key_sort, {
       partitionKey: key,
       limit: limit,
@@ -43,12 +43,12 @@ export class VaultAuctionHistoryMapper {
     })
   }
 
-  async get (id: string): Promise<VaultAuctionHistory | undefined> {
+  async get (id: string): Promise<VaultAuctionBatchHistory | undefined> {
     return await this.database.get(VaultAuctionHistoryMapping, id)
   }
 
-  async put (vaultAuctionHistory: VaultAuctionHistory): Promise<void> {
-    return await this.database.put(VaultAuctionHistoryMapping, vaultAuctionHistory)
+  async put (VaultAuctionBatchHistory: VaultAuctionBatchHistory): Promise<void> {
+    return await this.database.put(VaultAuctionHistoryMapping, VaultAuctionBatchHistory)
   }
 
   async delete (id: string): Promise<void> {
@@ -56,7 +56,7 @@ export class VaultAuctionHistoryMapper {
   }
 }
 
-export interface VaultAuctionHistory extends Model {
+export interface VaultAuctionBatchHistory extends Model {
   id: string // -----------------------| vaultId-batchIndex-txId
   key: string // ----------------------| vaultId-batchIndex
   sort: string // ---------------------| height-txId

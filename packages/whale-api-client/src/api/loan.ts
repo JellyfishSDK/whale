@@ -101,7 +101,7 @@ export class Loan {
    * @param {string} next set of auction batch index history
    * @return {Promise<ApiPagedResponse<VaultAuctionBatchHistory>>}
    */
-  async listVaultAuctionHistory (id: string, batch: number, index: number, size: number = 30, next?: string): Promise<ApiPagedResponse<VaultAuctionHistory>> {
+  async listVaultAuctionHistory (id: string, batch: number, index: number, size: number = 30, next?: string): Promise<ApiPagedResponse<VaultAuctionBatchHistory>> {
     return await this.client.requestList('GET', `loans/vaults/${id}/auctions/${batch}/history/${index}`, size, next)
   }
 
@@ -199,7 +199,7 @@ export interface HighestBid {
   amount: LoanVaultTokenAmount
 }
 
-export interface VaultAuctionHistory {
+export interface VaultAuctionBatchHistory {
   id: string
   key: string
   sort: string

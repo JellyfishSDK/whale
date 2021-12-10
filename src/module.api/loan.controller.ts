@@ -30,7 +30,7 @@ import { mapTokenData } from '@src/module.api/token.controller'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { LoanVaultService } from '@src/module.api/loan.vault.service'
 import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
-import { VaultAuctionHistoryMapper, VaultAuctionHistory } from '@src/module.model/vault.auction.history'
+import { VaultAuctionHistoryMapper, VaultAuctionBatchHistory } from '@src/module.model/vault.auction.history'
 import { ActivePrice } from '@whale-api-client/api/prices'
 import { NetworkName } from '@defichain/jellyfish-network'
 
@@ -192,15 +192,15 @@ export class LoanController {
    * @param {PaginationQuery} query
    * @return {Promise<ApiPagedResponse<VaultAuctionBatchHistory>>}
    */
-  @Get('/vaults/:id/auctions/:height/history/:batchIndex')
+  @Get('/vaults/:id/auctions/:height/batches/:batchIndex/history')
   async listVaultAuctionHistory (
     @Param('id') id: string,
       @Param('height', ParseIntPipe) height: number, // liquidationHeight
       @Param('batchIndex', ParseIntPipe) batchIndex: number, // batch index
       @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<VaultAuctionHistory>> {
-    let history: VaultAuctionHistory[] = []
-    const loop = async (next = `${height}-${'f'.repeat(64)}`): Promise<VaultAuctionHistory[]> => {
+  ): Promise<ApiPagedResponse<VaultAuctionBatchHistory>> {
+    let history: VaultAuctionBatchHistory[] = []
+    const loop = async (next = `${height}-${'f'.repeat(64)}`): Promise<VaultAuctionBatchHistory[]> => {
       const list = await this.vaultAuctionHistoryMapper.query(
         `${id}-${batchIndex}`,
         100,
