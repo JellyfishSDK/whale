@@ -5,6 +5,7 @@ import { TestingGroup, Testing } from '@defichain/jellyfish-testing'
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { RegTestFoundationKeys } from '@defichain/jellyfish-network'
 import { VaultLiquidation } from '@defichain/jellyfish-api-core/dist/category/loan'
+import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 const tGroup = TestingGroup.create(2, i => new MasterNodeRegTestContainer(RegTestFoundationKeys[i]))
 const alice = tGroup.get(0)
@@ -168,7 +169,7 @@ it('should listVaultAuctionHistory', async () => {
       {
         id: expect.any(String),
         key: `${vaultId}-0`,
-        sort: `${list[0].block.height}-${list[0].id.split('-')[2]}`,
+        sort: `${HexEncoder.encodeHeight(list[0].block.height)}-${list[0].id.split('-')[2]}`,
         vaultId: vaultId,
         index: 0,
         from: expect.any(String),
@@ -179,7 +180,7 @@ it('should listVaultAuctionHistory', async () => {
       {
         id: expect.any(String),
         key: `${vaultId}-0`,
-        sort: `${list[1].block.height}-${list[1].id.split('-')[2]}`,
+        sort: `${HexEncoder.encodeHeight(list[1].block.height)}-${list[1].id.split('-')[2]}`,
         vaultId: vaultId,
         index: 0,
         from: expect.any(String),
@@ -190,7 +191,7 @@ it('should listVaultAuctionHistory', async () => {
       {
         id: expect.any(String),
         key: `${vaultId}-0`,
-        sort: `${list[2].block.height}-${list[2].id.split('-')[2]}`,
+        sort: `${HexEncoder.encodeHeight(list[2].block.height)}-${list[2].id.split('-')[2]}`,
         vaultId: vaultId,
         index: 0,
         from: expect.any(String),
@@ -208,7 +209,7 @@ it('should listVaultAuctionHistory', async () => {
       {
         id: expect.any(String),
         key: `${vaultId}-0`,
-        sort: `${list[0].block.height}-${list[0].id.split('-')[2]}`,
+        sort: `${HexEncoder.encodeHeight(list[0].block.height)}-${list[0].id.split('-')[2]}`,
         vaultId: vaultId,
         index: 0,
         from: expect.any(String),
@@ -219,7 +220,7 @@ it('should listVaultAuctionHistory', async () => {
       {
         id: expect.any(String),
         key: `${vaultId}-0`,
-        sort: `${list[1].block.height}-${list[1].id.split('-')[2]}`,
+        sort: `${HexEncoder.encodeHeight(list[1].block.height)}-${list[1].id.split('-')[2]}`,
         vaultId: vaultId,
         index: 0,
         from: expect.any(String),
@@ -240,7 +241,7 @@ it('should listVaultAuctionHistory with pagination', async () => {
     {
       id: expect.any(String),
       key: `${vaultId}-0`,
-      sort: `${first[0].block.height}-${first[0].id.split('-')[2]}`,
+      sort: `${HexEncoder.encodeHeight(first[0].block.height)}-${first[0].id.split('-')[2]}`,
       vaultId: vaultId,
       index: 0,
       from: expect.any(String),
@@ -258,7 +259,7 @@ it('should listVaultAuctionHistory with pagination', async () => {
     {
       id: expect.any(String),
       key: `${vaultId}-0`,
-      sort: `${next[0].block.height}-${next[0].id.split('-')[2]}`,
+      sort: `${HexEncoder.encodeHeight(next[0].block.height)}-${next[0].id.split('-')[2]}`,
       vaultId: vaultId,
       index: 0,
       from: expect.any(String),
@@ -276,7 +277,7 @@ it('should listVaultAuctionHistory with pagination', async () => {
     {
       id: expect.any(String),
       key: `${vaultId}-0`,
-      sort: `${last[0].block.height}-${last[0].id.split('-')[2]}`,
+      sort: `${HexEncoder.encodeHeight(last[0].block.height)}-${last[0].id.split('-')[2]}`,
       vaultId: vaultId,
       index: 0,
       from: expect.any(String),

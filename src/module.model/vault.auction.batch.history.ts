@@ -59,7 +59,7 @@ export class VaultAuctionHistoryMapper {
 export interface VaultAuctionBatchHistory extends Model {
   id: string // -----------------------| vaultId-batchIndex-txId
   key: string // ----------------------| vaultId-batchIndex
-  sort: string // ---------------------| height-txId
+  sort: string // ---------------------| hexEncodedHeight-txId
 
   vaultId: string
   index: number

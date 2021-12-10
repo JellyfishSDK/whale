@@ -33,6 +33,7 @@ import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { VaultAuctionHistoryMapper, VaultAuctionBatchHistory } from '@src/module.model/vault.auction.batch.history'
 import { ActivePrice } from '@whale-api-client/api/prices'
 import { NetworkName } from '@defichain/jellyfish-network'
+import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 @Controller('/loans')
 export class LoanController {
@@ -200,19 +201,18 @@ export class LoanController {
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<VaultAuctionBatchHistory>> {
     let history: VaultAuctionBatchHistory[] = []
-    const loop = async (next = `${height}-${'f'.repeat(64)}`): Promise<VaultAuctionBatchHistory[]> => {
-      const list = await this.vaultAuctionHistoryMapper.query(
-        `${id}-${batchIndex}`,
-        100,
-        next,
-        `${(height - this.liqBlockExpiry)}-${'0'.repeat(64)}`
-      )
+    const loop = async (
+      nextStart = `${HexEncoder.encodeHeight(height)}-${'f'.repeat(64)}`,
+      nextEnd = `${HexEncoder.encodeHeight(height - this.liqBlockExpiry)}-${'0'.repeat(64)}`
+    ): Promise<VaultAuctionBatchHistory[]> => {
+      const list = await this.vaultAuctionHistoryMapper.query(`${id}-${batchIndex}`, 100, nextStart, nextEnd)
       if (list.length === 0) {
         return history
       }
       history = history.concat(list)
       if (history.length < query.size) {
-        return await loop(history[history.length - 1].sort)
+        const last = history[history.length - 1]
+        return await loop(last.sort, `${HexEncoder.encodeHeight(last.block.height - this.liqBlockExpiry)}-${'0'.repeat(64)}`)
       }
       return history
     }

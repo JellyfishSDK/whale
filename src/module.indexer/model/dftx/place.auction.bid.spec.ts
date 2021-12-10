@@ -5,6 +5,7 @@ import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e
 import { VaultAuctionHistoryMapper } from '@src/module.model/vault.auction.batch.history'
 import BigNumber from 'bignumber.js'
 import { RegTestFoundationKeys } from '@defichain/jellyfish-network'
+import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 let app: NestFastifyApplication
 const tGroup = TestingGroup.create(2, i => new MasterNodeRegTestContainer(RegTestFoundationKeys[i]))
@@ -135,7 +136,7 @@ it('should index placeAuctionBid', async () => {
       {
         id: expect.any(String),
         key: `${vaultId}-0`,
-        sort: `${history[0].block.height}-${history[0].id.split('-')[2]}`,
+        sort: `${HexEncoder.encodeHeight(history[0].block.height)}-${history[0].id.split('-')[2]}`,
         vaultId: vaultId,
         index: 0,
         from: expect.any(String),
@@ -146,7 +147,7 @@ it('should index placeAuctionBid', async () => {
       {
         id: expect.any(String),
         key: `${vaultId}-0`,
-        sort: `${history[1].block.height}-${history[1].id.split('-')[2]}`,
+        sort: `${HexEncoder.encodeHeight(history[1].block.height)}-${history[1].id.split('-')[2]}`,
         vaultId: vaultId,
         index: 0,
         from: expect.any(String),
@@ -157,7 +158,7 @@ it('should index placeAuctionBid', async () => {
       {
         id: expect.any(String),
         key: `${vaultId}-0`,
-        sort: `${history[2].block.height}-${history[2].id.split('-')[2]}`,
+        sort: `${HexEncoder.encodeHeight(history[2].block.height)}-${history[2].id.split('-')[2]}`,
         vaultId: vaultId,
         index: 0,
         from: expect.any(String),
@@ -173,7 +174,7 @@ it('should index placeAuctionBid', async () => {
         {
           id: expect.any(String),
           key: `${vaultId}-1`,
-          sort: `${history[0].block.height}-${history[0].id.split('-')[2]}`,
+          sort: `${HexEncoder.encodeHeight(history[0].block.height)}-${history[0].id.split('-')[2]}`,
           vaultId: vaultId,
           index: 1,
           from: expect.any(String),
@@ -184,7 +185,7 @@ it('should index placeAuctionBid', async () => {
         {
           id: expect.any(String),
           key: `${vaultId}-1`,
-          sort: `${history[1].block.height}-${history[1].id.split('-')[2]}`,
+          sort: `${HexEncoder.encodeHeight(history[1].block.height)}-${history[1].id.split('-')[2]}`,
           vaultId: vaultId,
           index: 1,
           from: expect.any(String),
@@ -195,7 +196,7 @@ it('should index placeAuctionBid', async () => {
         {
           id: expect.any(String),
           key: `${vaultId}-1`,
-          sort: `${history[2].block.height}-${history[2].id.split('-')[2]}`,
+          sort: `${HexEncoder.encodeHeight(history[2].block.height)}-${history[2].id.split('-')[2]}`,
           vaultId: vaultId,
           index: 1,
           from: expect.any(String),
@@ -212,7 +213,7 @@ it('should index placeAuctionBid', async () => {
         {
           id: expect.any(String),
           key: `${vaultId}-2`,
-          sort: `${history[0].block.height}-${history[0].id.split('-')[2]}`,
+          sort: `${HexEncoder.encodeHeight(history[0].block.height)}-${history[0].id.split('-')[2]}`,
           vaultId: vaultId,
           index: 2,
           from: expect.any(String),

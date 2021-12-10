@@ -4,6 +4,7 @@ import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable, Logger } from '@nestjs/common'
 import { VaultAuctionHistoryMapper } from '@src/module.model/vault.auction.batch.history'
 import { toBuffer } from '@defichain/jellyfish-transaction/dist/script/_buffer'
+import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 @Injectable()
 export class PlaceAuctionBidIndexer extends DfTxIndexer<PlaceAuctionBid> {
@@ -22,7 +23,7 @@ export class PlaceAuctionBidIndexer extends DfTxIndexer<PlaceAuctionBid> {
     await this.vaultAuctionHistoryMapper.put({
       id: `${data.vaultId}-${data.index}-${transaction.txn.txid}`,
       key: `${data.vaultId}-${data.index}`,
-      sort: `${block.height}-${transaction.txn.txid}`,
+      sort: `${HexEncoder.encodeHeight(block.height)}-${transaction.txn.txid}`,
       vaultId: data.vaultId,
       index: data.index,
       from: toBuffer(data.from.stack).toString('hex'),
