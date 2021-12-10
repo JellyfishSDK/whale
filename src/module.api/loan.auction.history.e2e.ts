@@ -159,55 +159,74 @@ afterAll(async () => {
 })
 
 it('should listVaultAuctionHistory', async () => {
-  const result = await controller.listVaultAuctionHistory(vaultId, batch, 0, { size: 30 })
-  expect(result.data.length).toStrictEqual(3)
-  expect(result.data).toStrictEqual([
-    {
-      id: vaultId,
-      index: 0,
-      from: expect.any(String),
-      amount: '5408.55',
-      symbol: 'AAPL',
-      sort: '0000008a'
-    },
-    {
-      id: vaultId,
-      index: 0,
-      from: expect.any(String),
-      amount: '5355',
-      symbol: 'AAPL',
-      sort: '00000089'
-    },
-    {
-      id: vaultId,
-      index: 0,
-      from: expect.any(String),
-      amount: '5300',
-      symbol: 'AAPL',
-      sort: '00000088'
-    }
-  ])
+  {
+    const list = await controller.listVaultAuctionHistory(vaultId, batch, 0, { size: 30 })
+    expect(list.data.length).toStrictEqual(3)
+    expect(list.data).toStrictEqual([
+      {
+        id: expect.any(String),
+        key: `${vaultId}-0`,
+        sort: `${list.data[0].block.height}-${list.data[0].id.split('-')[2]}`,
+        vaultId: vaultId,
+        index: 0,
+        from: expect.any(String),
+        amount: '5408.55',
+        tokenId: 2,
+        block: expect.any(Object)
+      },
+      {
+        id: expect.any(String),
+        key: `${vaultId}-0`,
+        sort: `${list.data[1].block.height}-${list.data[1].id.split('-')[2]}`,
+        vaultId: vaultId,
+        index: 0,
+        from: expect.any(String),
+        amount: '5355',
+        tokenId: 2,
+        block: expect.any(Object)
+      },
+      {
+        id: expect.any(String),
+        key: `${vaultId}-0`,
+        sort: `${list.data[2].block.height}-${list.data[2].id.split('-')[2]}`,
+        vaultId: vaultId,
+        index: 0,
+        from: expect.any(String),
+        amount: '5300',
+        tokenId: 2,
+        block: expect.any(Object)
+      }
+    ])
+  }
 
-  const result1 = await controller.listVaultAuctionHistory(vaultId, batch1, 0, { size: 30 })
-  expect(result1.data.length).toStrictEqual(2)
-  expect(result1.data).toStrictEqual([
-    {
-      id: vaultId,
-      index: 0,
-      from: expect.any(String),
-      amount: '5355.123',
-      symbol: 'MSFT',
-      sort: '000000c8'
-    },
-    {
-      id: vaultId,
-      index: 0,
-      from: expect.any(String),
-      amount: '5300.123',
-      symbol: 'MSFT',
-      sort: '000000c7'
-    }
-  ])
+  {
+    const list = await controller.listVaultAuctionHistory(vaultId, batch1, 0, { size: 30 })
+    expect(list.data.length).toStrictEqual(2)
+    expect(list.data).toStrictEqual([
+      {
+        id: expect.any(String),
+        key: `${vaultId}-0`,
+        sort: `${list.data[0].block.height}-${list.data[0].id.split('-')[2]}`,
+        vaultId: vaultId,
+        index: 0,
+        from: expect.any(String),
+        amount: '5355.123',
+        tokenId: 4,
+        block: expect.any(Object)
+      },
+      {
+        id: expect.any(String),
+        key: `${vaultId}-0`,
+        sort: `${list.data[1].block.height}-${list.data[1].id.split('-')[2]}`,
+        vaultId: vaultId,
+        index: 0,
+        from: expect.any(String),
+        amount: '5300.123',
+        tokenId: 4,
+        block: expect.any(Object)
+      }
+    ])
+  }
 })
 
 it('should listVaultAuctionHistory with pagination', async () => {
@@ -215,38 +234,47 @@ it('should listVaultAuctionHistory with pagination', async () => {
   expect(first.data.length).toStrictEqual(1)
   expect(first.data).toStrictEqual([
     {
-      id: vaultId,
+      id: expect.any(String),
+      key: `${vaultId}-0`,
+      sort: `${first.data[0].block.height}-${first.data[0].id.split('-')[2]}`,
+      vaultId: vaultId,
       index: 0,
       from: expect.any(String),
       amount: '5408.55',
-      symbol: 'AAPL',
-      sort: '0000008a'
+      tokenId: 2,
+      block: expect.any(Object)
     }
   ])
-  expect(first.page).toStrictEqual({ next: '0000008a' })
+  expect(first.page).toStrictEqual({ next: first.data[0].sort })
 
   const next = await controller.listVaultAuctionHistory(vaultId, batch, 0, { size: 1, next: first?.page?.next })
   expect(next.data).toStrictEqual([
     {
-      id: vaultId,
+      id: expect.any(String),
+      key: `${vaultId}-0`,
+      sort: `${next.data[0].block.height}-${next.data[0].id.split('-')[2]}`,
+      vaultId: vaultId,
       index: 0,
       from: expect.any(String),
       amount: '5355',
-      symbol: 'AAPL',
-      sort: '00000089'
+      tokenId: 2,
+      block: expect.any(Object)
     }
   ])
-  expect(next.page).toStrictEqual({ next: '00000089' })
+  expect(next.page).toStrictEqual({ next: next.data[0].sort })
 
   const last = await controller.listVaultAuctionHistory(vaultId, batch, 0, { size: 2, next: next?.page?.next })
   expect(last.data).toStrictEqual([
     {
-      id: vaultId,
+      id: expect.any(String),
+      key: `${vaultId}-0`,
+      sort: `${last.data[0].block.height}-${last.data[0].id.split('-')[2]}`,
+      vaultId: vaultId,
       index: 0,
       from: expect.any(String),
       amount: '5300',
-      symbol: 'AAPL',
-      sort: '00000088'
+      tokenId: 2,
+      block: expect.any(Object)
     }
   ])
   expect(last.page).toStrictEqual(undefined)

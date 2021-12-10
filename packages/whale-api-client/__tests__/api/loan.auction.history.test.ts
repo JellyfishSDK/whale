@@ -161,100 +161,128 @@ afterAll(async () => {
 })
 
 it('should listVaultAuctionHistory', async () => {
-  const result = await client.loan.listVaultAuctionHistory(vaultId, batch, 0)
-  expect(result.length).toStrictEqual(3)
-  expect([...result]).toStrictEqual([
-    {
-      id: vaultId,
-      index: 0,
-      from: expect.any(String),
-      amount: '5408.55',
-      symbol: 'AAPL',
-      sort: '0000008a'
-    },
-    {
-      id: vaultId,
-      index: 0,
-      from: expect.any(String),
-      amount: '5355',
-      symbol: 'AAPL',
-      sort: '00000089'
-    },
-    {
-      id: vaultId,
-      index: 0,
-      from: expect.any(String),
-      amount: '5300',
-      symbol: 'AAPL',
-      sort: '00000088'
-    }
-  ])
+  {
+    const list = await client.loan.listVaultAuctionHistory(vaultId, batch, 0)
+    expect(list.length).toStrictEqual(3)
+    expect([...list]).toStrictEqual([
+      {
+        id: expect.any(String),
+        key: `${vaultId}-0`,
+        sort: `${list[0].block.height}-${list[0].id.split('-')[2]}`,
+        vaultId: vaultId,
+        index: 0,
+        from: expect.any(String),
+        amount: '5408.55',
+        tokenId: 2,
+        block: expect.any(Object)
+      },
+      {
+        id: expect.any(String),
+        key: `${vaultId}-0`,
+        sort: `${list[1].block.height}-${list[1].id.split('-')[2]}`,
+        vaultId: vaultId,
+        index: 0,
+        from: expect.any(String),
+        amount: '5355',
+        tokenId: 2,
+        block: expect.any(Object)
+      },
+      {
+        id: expect.any(String),
+        key: `${vaultId}-0`,
+        sort: `${list[2].block.height}-${list[2].id.split('-')[2]}`,
+        vaultId: vaultId,
+        index: 0,
+        from: expect.any(String),
+        amount: '5300',
+        tokenId: 2,
+        block: expect.any(Object)
+      }
+    ])
+  }
 
-  const result1 = await client.loan.listVaultAuctionHistory(vaultId, batch1, 0)
-  expect(result1.length).toStrictEqual(2)
-  expect([...result1]).toStrictEqual([
-    {
-      id: vaultId,
-      index: 0,
-      from: expect.any(String),
-      amount: '5355.123',
-      symbol: 'MSFT',
-      sort: '000000c8'
-    },
-    {
-      id: vaultId,
-      index: 0,
-      from: expect.any(String),
-      amount: '5300.123',
-      symbol: 'MSFT',
-      sort: '000000c7'
-    }
-  ])
+  {
+    const list = await client.loan.listVaultAuctionHistory(vaultId, batch1, 0)
+    expect(list.length).toStrictEqual(2)
+    expect([...list]).toStrictEqual([
+      {
+        id: expect.any(String),
+        key: `${vaultId}-0`,
+        sort: `${list[0].block.height}-${list[0].id.split('-')[2]}`,
+        vaultId: vaultId,
+        index: 0,
+        from: expect.any(String),
+        amount: '5355.123',
+        tokenId: 4,
+        block: expect.any(Object)
+      },
+      {
+        id: expect.any(String),
+        key: `${vaultId}-0`,
+        sort: `${list[1].block.height}-${list[1].id.split('-')[2]}`,
+        vaultId: vaultId,
+        index: 0,
+        from: expect.any(String),
+        amount: '5300.123',
+        tokenId: 4,
+        block: expect.any(Object)
+      }
+    ])
+  }
 })
 
 it('should listVaultAuctionHistory with pagination', async () => {
   const first = await client.loan.listVaultAuctionHistory(vaultId, batch, 0, 1)
   expect(first.length).toStrictEqual(1)
   expect(first.hasNext).toStrictEqual(true)
-  expect(first.nextToken).toStrictEqual('0000008a')
+  expect(first.nextToken).toStrictEqual(first[0].sort)
   expect([...first]).toStrictEqual([
     {
-      id: vaultId,
+      id: expect.any(String),
+      key: `${vaultId}-0`,
+      sort: `${first[0].block.height}-${first[0].id.split('-')[2]}`,
+      vaultId: vaultId,
       index: 0,
       from: expect.any(String),
       amount: '5408.55',
-      symbol: 'AAPL',
-      sort: '0000008a'
+      tokenId: 2,
+      block: expect.any(Object)
     }
   ])
 
   const next = await client.paginate(first)
   expect(next.length).toStrictEqual(1)
   expect(next.hasNext).toStrictEqual(true)
-  expect(next.nextToken).toStrictEqual('00000089')
+  expect(next.nextToken).toStrictEqual(next[0].sort)
   expect([...next]).toStrictEqual([
     {
-      id: vaultId,
+      id: expect.any(String),
+      key: `${vaultId}-0`,
+      sort: `${next[0].block.height}-${next[0].id.split('-')[2]}`,
+      vaultId: vaultId,
       index: 0,
       from: expect.any(String),
       amount: '5355',
-      symbol: 'AAPL',
-      sort: '00000089'
+      tokenId: 2,
+      block: expect.any(Object)
     }
   ])
 
   const last = await client.paginate(next)
   expect(last.length).toStrictEqual(1)
   expect(last.hasNext).toStrictEqual(true)
-  expect(last.nextToken).toStrictEqual('00000088')
+  expect(last.nextToken).toStrictEqual(last[0].sort)
   expect([...last]).toStrictEqual([
     {
-      id: vaultId,
+      id: expect.any(String),
+      key: `${vaultId}-0`,
+      sort: `${last[0].block.height}-${last[0].id.split('-')[2]}`,
+      vaultId: vaultId,
       index: 0,
       from: expect.any(String),
       amount: '5300',
-      symbol: 'AAPL',
-      sort: '00000088'
+      tokenId: 2,
+      block: expect.any(Object)
     }
   ])
 

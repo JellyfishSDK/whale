@@ -135,31 +135,34 @@ it('should index placeAuctionBid', async () => {
       {
         id: expect.any(String),
         key: `${vaultId}-0`,
-        sort: '0000008a',
+        sort: `${history[0].block.height}-${history[0].id.split('-')[2]}`,
         vaultId: vaultId,
         index: 0,
         from: expect.any(String),
-        amount: { token: '5408.55', currency: 'AAPL' },
+        amount: '5408.55',
+        tokenId: 2,
         block: expect.any(Object)
       },
       {
         id: expect.any(String),
         key: `${vaultId}-0`,
-        sort: '00000089',
+        sort: `${history[1].block.height}-${history[1].id.split('-')[2]}`,
         vaultId: vaultId,
         index: 0,
         from: expect.any(String),
-        amount: { token: '5355', currency: 'AAPL' },
+        amount: '5355',
+        tokenId: 2,
         block: expect.any(Object)
       },
       {
         id: expect.any(String),
         key: `${vaultId}-0`,
-        sort: '00000088',
+        sort: `${history[2].block.height}-${history[2].id.split('-')[2]}`,
         vaultId: vaultId,
         index: 0,
         from: expect.any(String),
-        amount: { token: '5300', currency: 'AAPL' },
+        amount: '5300',
+        tokenId: 2,
         block: expect.any(Object)
       }
     ])
@@ -170,31 +173,34 @@ it('should index placeAuctionBid', async () => {
         {
           id: expect.any(String),
           key: `${vaultId}-1`,
-          sort: '0000008d',
+          sort: `${history[0].block.height}-${history[0].id.split('-')[2]}`,
           vaultId: vaultId,
           index: 1,
           from: expect.any(String),
-          amount: { token: '2760.0666069', currency: 'AAPL' },
+          amount: '2760.0666069',
+          tokenId: 2,
           block: expect.any(Object)
         },
         {
           id: expect.any(String),
           key: `${vaultId}-1`,
-          sort: '0000008c',
+          sort: `${history[1].block.height}-${history[1].id.split('-')[2]}`,
           vaultId: vaultId,
           index: 1,
           from: expect.any(String),
-          amount: { token: '2730', currency: 'AAPL' },
+          amount: '2730',
+          tokenId: 2,
           block: expect.any(Object)
         },
         {
           id: expect.any(String),
           key: `${vaultId}-1`,
-          sort: '0000008b',
+          sort: `${history[2].block.height}-${history[2].id.split('-')[2]}`,
           vaultId: vaultId,
           index: 1,
           from: expect.any(String),
-          amount: { token: '2700.00012', currency: 'AAPL' },
+          amount: '2700.00012',
+          tokenId: 2,
           block: expect.any(Object)
         }
       ])
@@ -206,11 +212,12 @@ it('should index placeAuctionBid', async () => {
         {
           id: expect.any(String),
           key: `${vaultId}-2`,
-          sort: '0000008e',
+          sort: `${history[0].block.height}-${history[0].id.split('-')[2]}`,
           vaultId: vaultId,
           index: 2,
           from: expect.any(String),
-          amount: { token: '2625.00499422', currency: 'TSLA' },
+          amount: '2625.00499422',
+          tokenId: 3,
           block: expect.any(Object)
         }
       ])

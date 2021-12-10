@@ -24,8 +24,7 @@ import {
   LoanScheme,
   LoanToken,
   LoanVaultActive,
-  LoanVaultLiquidated,
-  VaultAuctionBatchHistory
+  LoanVaultLiquidated
 } from '@whale-api-client/api/loan'
 import { mapTokenData } from '@src/module.api/token.controller'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
@@ -188,49 +187,42 @@ export class LoanController {
    * List vault auction history.
    *
    * @param {string} id vaultId
-   * @param {number} batch liquidation height
-   * @param {number} index batch index
+   * @param {number} height liquidation height
+   * @param {number} batchIndex batch index
    * @param {PaginationQuery} query
    * @return {Promise<ApiPagedResponse<VaultAuctionBatchHistory>>}
    */
-  @Get('/vaults/:id/auctions/:batch/history/:index')
+  @Get('/vaults/:id/auctions/:height/history/:batchIndex')
   async listVaultAuctionHistory (
     @Param('id') id: string,
-      @Param('batch', ParseIntPipe) batch: number, // liquidationHeight
-      @Param('index', ParseIntPipe) index: number,
+      @Param('height', ParseIntPipe) height: number, // liquidationHeight
+      @Param('batchIndex', ParseIntPipe) batchIndex: number, // batch index
       @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<VaultAuctionBatchHistory>> {
+  ): Promise<ApiPagedResponse<VaultAuctionHistory>> {
     let history: VaultAuctionHistory[] = []
-    const loop = async (next?: string): Promise<VaultAuctionHistory[]> => {
-      const list = await this.vaultAuctionHistoryMapper.query(`${id}-${index}`, 100, next)
-      const filtered = list.filter(each => each.block.height >= batch - this.liqBlockExpiry && each.block.height <= batch)
-      if (filtered.length === 0) {
+    const loop = async (next = `${height}-${'f'.repeat(64)}`): Promise<VaultAuctionHistory[]> => {
+      const list = await this.vaultAuctionHistoryMapper.query(
+        `${id}-${batchIndex}`,
+        100,
+        next,
+        `${(height - this.liqBlockExpiry)}-${'0'.repeat(64)}`
+      )
+      if (list.length === 0) {
         return history
       }
-      history = history.concat(filtered)
+      history = history.concat(list)
       if (history.length < query.size) {
         return await loop(history[history.length - 1].sort)
       }
       return history
     }
 
-    let filtered = await loop(query.next)
-    if (filtered.length > query.size) {
-      filtered = filtered.splice(0, query.size)
+    let list = await loop(query.next)
+    if (list.length > query.size) {
+      list = list.splice(0, query.size)
     }
 
-    const remap = filtered.map(f => {
-      return {
-        id: f.vaultId,
-        index: f.index,
-        from: f.from,
-        amount: f.amount.token,
-        symbol: f.amount.currency,
-        sort: f.sort
-      }
-    })
-
-    return ApiPagedResponse.of(remap, query.size, item => {
+    return ApiPagedResponse.of(list, query.size, item => {
       return item.sort
     })
   }

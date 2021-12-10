@@ -33,12 +33,13 @@ export class VaultAuctionHistoryMapper {
     return latest[0]
   }
 
-  async query (key: string, limit: number, lt?: string): Promise<VaultAuctionHistory[]> {
+  async query (key: string, limit: number, lt?: string, gt?: string): Promise<VaultAuctionHistory[]> {
     return await this.database.query(VaultAuctionHistoryMapping.index.vault_auction_history_key_sort, {
       partitionKey: key,
       limit: limit,
       order: SortOrder.DESC,
-      lt: lt
+      lt: lt,
+      gt: gt
     })
   }
 
@@ -56,17 +57,15 @@ export class VaultAuctionHistoryMapper {
 }
 
 export interface VaultAuctionHistory extends Model {
-  id: string // -----------------------| vaultId:batchIndex:txId
-  key: string // ----------------------| vaultId:batchIndex
-  sort: string // ---------------------| hex encoded height
+  id: string // -----------------------| vaultId-batchIndex-txId
+  key: string // ----------------------| vaultId-batchIndex
+  sort: string // ---------------------| height-txId
 
   vaultId: string
   index: number
   from: string
-  amount: {
-    token: string // ------------------| stringified bignumber
-    currency: string
-  }
+  amount: string // -------------------| stringified bignumber
+  tokenId: number // ------------------| tokenId
 
   block: {
     hash: string
