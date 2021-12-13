@@ -42,6 +42,7 @@ export class RPCBlockProvider {
     while (this.indexing) {
       if (!this.running) {
         this.indexing = false
+        return
       }
 
       try {
