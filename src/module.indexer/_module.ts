@@ -44,4 +44,14 @@ import { NetworkName } from '@defichain/jellyfish-network'
   ]
 })
 export class IndexerModule {
+  constructor (private readonly provider: RPCBlockProvider) {
+  }
+
+  async onApplicationBootstrap (): Promise<void> {
+    await this.provider.start()
+  }
+
+  async beforeApplicationShutdown (): Promise<void> {
+    await this.provider.stop()
+  }
 }
