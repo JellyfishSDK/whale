@@ -200,27 +200,9 @@ export class LoanController {
       @Param('batchIndex', ParseIntPipe) batchIndex: number, // batch index
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<VaultAuctionBatchHistory>> {
-    let history: VaultAuctionBatchHistory[] = []
-    const loop = async (
-      nextStart = `${HexEncoder.encodeHeight(height)}-${'f'.repeat(64)}`,
-      nextEnd = `${HexEncoder.encodeHeight(height - this.liqBlockExpiry)}-${'0'.repeat(64)}`
-    ): Promise<VaultAuctionBatchHistory[]> => {
-      const list = await this.vaultAuctionHistoryMapper.query(`${id}-${batchIndex}`, 100, nextStart, nextEnd)
-      if (list.length === 0) {
-        return history
-      }
-      history = history.concat(list)
-      if (history.length < query.size) {
-        const last = history[history.length - 1]
-        return await loop(last.sort, `${HexEncoder.encodeHeight(last.block.height - this.liqBlockExpiry)}-${'0'.repeat(64)}`)
-      }
-      return history
-    }
-
-    let list = await loop(query.next)
-    if (list.length > query.size) {
-      list = list.splice(0, query.size)
-    }
+    const lt = query.next ?? `${HexEncoder.encodeHeight(height)}-${'f'.repeat(64)}`
+    const gt = `${HexEncoder.encodeHeight(height - this.liqBlockExpiry)}-${'0'.repeat(64)}`
+    const list = await this.vaultAuctionHistoryMapper.query(`${id}-${batchIndex}`, query.size, lt, gt)
 
     return ApiPagedResponse.of(list, query.size, item => {
       return item.sort
