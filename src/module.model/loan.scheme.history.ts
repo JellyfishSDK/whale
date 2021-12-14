@@ -66,7 +66,7 @@ export class LoanSchemeHistoryMapper {
 export interface LoanSchemeHistory extends Model {
   id: string // -------------------------| loanSchemeId-txid
   loanSchemeId: string // ---------------| partition key
-  sort: string // -----------------------| medianTime-encodedHeight
+  sort: string // -----------------------| encodedHeight-txid
   minColRatio: number
   interestRate: string // ---------------| stringified bignumber
   activateAfterBlock: string // ---------| stringified bignumber

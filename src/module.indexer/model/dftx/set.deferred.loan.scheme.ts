@@ -23,7 +23,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   }
 
   async indexBlockStart (block: RawBlock): Promise<void> {
-    const loop = async (activeAfterBlock: number, next?: number): Promise<void> => {
+    const loop = async (activeAfterBlock: number, next?: string): Promise<void> => {
       const list = await this.deferredLoanSchemeMapper.query(activeAfterBlock, 100)
       const pending = list.filter(each => !each.activated)
       if (pending.length === 0) {
@@ -38,7 +38,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
         await this.loanSchemeMapper.put(this.mapLoanScheme(each))
         await this.deferredLoanSchemeMapper.put({ ...each, activated: true })
       }
-      return await loop(activeAfterBlock, list[list.length - 1].block.height)
+      return await loop(activeAfterBlock, list[list.length - 1].sort)
     }
 
     return await loop(block.height)
@@ -60,13 +60,14 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
 
   async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>): Promise<void> {
     const data = transaction.dftx.data
+    const txid = transaction.txn.txid
 
-    const previous = await this.getPrevious(data.identifier, block)
+    const previous = await this.getPrevious(data.identifier, block.height, txid)
     if (previous === undefined) {
       throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
     }
 
-    const prevDeferred = await this.getPrevDeferred(data.identifier, block)
+    const prevDeferred = await this.getPrevDeferred(data.identifier, block.height, txid)
     if (prevDeferred === undefined) {
       throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
     }
@@ -84,7 +85,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
 
     await this.loanSchemeMapper.put({
       id: previous.loanSchemeId,
-      sort: previous.sort.split('-')[1],
+      sort: previous.sort.split('-')[0],
       minColRatio: previous.minColRatio,
       interestRate: previous.interestRate,
       activateAfterBlock: previous.activateAfterBlock,
@@ -95,7 +96,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   /**
    * Get previous active loan scheme
    */
-  private async getPrevious (id: string, block: RawBlock): Promise<LoanSchemeHistory | undefined> {
+  private async getPrevious (id: string, height: number, txid: string): Promise<LoanSchemeHistory | undefined> {
     const findInNextPage = async (next: string, height: number): Promise<LoanSchemeHistory | undefined> => {
       const list = await this.loanSchemeHistoryMapper.query(id, 100, next)
       if (list.length === 0) {
@@ -113,13 +114,14 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       const last = list[list.length - 1]
       return await findInNextPage(last.sort, last.block.height)
     }
-    return await findInNextPage(`${HexEncoder.encodeHeight(block.mediantime)}-${HexEncoder.encodeHeight(block.height)}`, block.height)
+
+    return await findInNextPage(`${HexEncoder.encodeHeight(height)}-${txid}`, height)
   }
 
   /**
    * Get prev deferred loan scheme
    */
-  private async getPrevDeferred (id: string, block: RawBlock): Promise<LoanSchemeHistory | undefined> {
+  private async getPrevDeferred (id: string, height: number, txid: string): Promise<LoanSchemeHistory | undefined> {
     const findInNextPage = async (next: string, height: number): Promise<LoanSchemeHistory | undefined> => {
       const list = await this.loanSchemeHistoryMapper.query(id, 100, next)
       if (list.length === 0) {
@@ -138,6 +140,6 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       return await findInNextPage(last.sort, last.block.height)
     }
 
-    return await findInNextPage(`${HexEncoder.encodeHeight(block.mediantime)}-${HexEncoder.encodeHeight(block.height)}`, block.height)
+    return await findInNextPage(`${HexEncoder.encodeHeight(height)}-${txid}`, height)
   }
 }

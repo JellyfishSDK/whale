@@ -37,7 +37,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   private async create (block: RawBlock, data: SetLoanScheme, txid: string): Promise<void> {
     const loanScheme = {
       id: data.identifier,
-      sort: HexEncoder.encodeHeight(block.height),
+      sort: `${HexEncoder.encodeHeight(block.height)}-${txid}`,
       minColRatio: data.ratio,
       interestRate: data.rate.toString(),
       activateAfterBlock: data.update.toString(),
@@ -54,7 +54,6 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     await this.loanSchemeHistoryMapper.put({
       ...loanScheme,
       id: `${data.identifier}-${txid}`,
-      sort: `${HexEncoder.encodeHeight(block.mediantime)}-${HexEncoder.encodeHeight(block.height)}`,
       loanSchemeId: data.identifier,
       event: LoanSchemeHistoryEvent.CREATE
     })
@@ -63,7 +62,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   private async update (block: RawBlock, data: SetLoanScheme, txid: string): Promise<void> {
     const loanScheme = {
       id: data.identifier,
-      sort: HexEncoder.encodeHeight(block.height),
+      sort: `${HexEncoder.encodeHeight(block.height)}-${txid}`,
       minColRatio: data.ratio,
       interestRate: data.rate.toString(),
       activateAfterBlock: data.update.toString(),
@@ -82,7 +81,6 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
         ...loanScheme,
         loanSchemeId: data.identifier,
         id: `${data.identifier}-${txid}`,
-        sort: `${HexEncoder.encodeHeight(block.mediantime)}-${HexEncoder.encodeHeight(block.height)}`,
         activated: false
       })
     }
@@ -90,6 +88,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     await this.loanSchemeHistoryMapper.put({
       ...loanScheme,
       id: `${data.identifier}-${txid}`,
+      sort: `${HexEncoder.encodeHeight(block.height)}-${txid}`,
       loanSchemeId: data.identifier,
       event: LoanSchemeHistoryEvent.UPDATE
     })
@@ -100,13 +99,13 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     const txid = transaction.txn.txid
 
     if (this.isActive(data, block.height)) {
-      const previous = await this.getPrevious(data.identifier, block)
+      const previous = await this.getPrevious(data.identifier, block.height, txid)
       if (previous === undefined) {
         throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
       }
       await this.loanSchemeMapper.put({
         id: previous.loanSchemeId,
-        sort: previous.sort.split('-')[1], // grab the encodedHeight only
+        sort: previous.sort,
         minColRatio: previous.minColRatio,
         interestRate: previous.interestRate,
         activateAfterBlock: previous.activateAfterBlock,
@@ -128,7 +127,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   /**
    * Get previous active loan scheme
    */
-  private async getPrevious (id: string, block: RawBlock): Promise<LoanSchemeHistory | undefined> {
+  private async getPrevious (id: string, height: number, txid: string): Promise<LoanSchemeHistory | undefined> {
     const findInNextPage = async (next: string, height: number): Promise<LoanSchemeHistory | undefined> => {
       const list = await this.loanSchemeHistoryMapper.query(id, 100, next)
       if (list.length === 0) {
@@ -147,6 +146,6 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       return await findInNextPage(last.sort, last.block.height)
     }
 
-    return await findInNextPage(`${HexEncoder.encodeHeight(block.mediantime)}-${HexEncoder.encodeHeight(block.height)}`, block.height)
+    return await findInNextPage(`${HexEncoder.encodeHeight(height)}-${txid}`, height)
   }
 }
