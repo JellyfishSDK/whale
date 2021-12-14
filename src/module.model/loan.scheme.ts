@@ -42,8 +42,8 @@ export class LoanSchemeMapper {
 }
 
 export interface LoanScheme extends Model {
-  id: string // -------------------------| loanSchemeId-height
-  sort: string // -----------------------| encoded height
+  id: string // -------------------------| loanSchemeId
+  sort: string // -----------------------| encodedHeight
   minColRatio: number
   interestRate: string // ---------------| stringified bignumber
   activateAfterBlock: string // ---------| stringified bignumber

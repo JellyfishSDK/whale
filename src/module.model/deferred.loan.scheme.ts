@@ -47,9 +47,9 @@ export class DeferredLoanSchemeMapper {
 }
 
 export interface DeferredLoanScheme extends Model {
-  id: string // -------------------------| loanSchemeId-height
+  id: string // -------------------------| loanSchemeId-txid
   loanSchemeId: string
-  sort: string // -----------------------| encoded height
+  sort: string // -----------------------| medianTime-encodedHeight
   minColRatio: number
   interestRate: string // ---------------| stringified bignumber
   activateAfterBlock: string // ---------| stringified bignumber, partition key
