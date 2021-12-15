@@ -24,12 +24,12 @@ export class DeferredLoanSchemeMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async query (activateAfterBlock: number, limit: number, lt?: string): Promise<DeferredLoanScheme[]> {
+  async query (activateAfterBlock: number, limit: number, gt?: string): Promise<DeferredLoanScheme[]> {
     return await this.database.query(DeferredLoanSchemeMapping.index.key_sort, {
       partitionKey: activateAfterBlock,
       limit: limit,
-      order: SortOrder.DESC,
-      lt: lt
+      order: SortOrder.ASC, // FIFO
+      gt: gt
     })
   }
 
@@ -47,9 +47,9 @@ export class DeferredLoanSchemeMapper {
 }
 
 export interface DeferredLoanScheme extends Model {
-  id: string // -------------------------| loanSchemeId-height
+  id: string // -------------------------| loanSchemeId-txid
   loanSchemeId: string
-  sort: string // -----------------------| encoded height
+  sort: string // -----------------------| encodedHeight-txIndex-txid
   minColRatio: number
   interestRate: string // ---------------| stringified bignumber
   activateAfterBlock: string // ---------| stringified bignumber, partition key

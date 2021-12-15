@@ -25,9 +25,10 @@ import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { OraclePriceActiveMapper } from './oracle.price.active'
 import { LoanSchemeMapper } from '@src/module.model/loan.scheme'
 import { LoanSchemeHistoryMapper } from '@src/module.model/loan.scheme.history'
-import { DeferredLoanSchemeMapper } from './deferred.loan.scheme'
 import { DeferredDestroyLoanSchemeMapper } from './deferred.destroy.loan.scheme'
 import { DefaultLoanSchemeMapper } from './default.loan.scheme'
+import { DeferredLoanSchemeMapper } from '@src/module.model/deferred.loan.scheme'
+import { VaultAuctionHistoryMapper } from '@src/module.model/vault.auction.batch.history'
 
 @Global()
 @Module({
@@ -58,7 +59,8 @@ import { DefaultLoanSchemeMapper } from './default.loan.scheme'
     LoanSchemeHistoryMapper,
     DeferredLoanSchemeMapper,
     DeferredDestroyLoanSchemeMapper,
-    DefaultLoanSchemeMapper
+    DefaultLoanSchemeMapper,
+    VaultAuctionHistoryMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -87,7 +89,8 @@ import { DefaultLoanSchemeMapper } from './default.loan.scheme'
     LoanSchemeHistoryMapper,
     DeferredLoanSchemeMapper,
     DeferredDestroyLoanSchemeMapper,
-    DefaultLoanSchemeMapper
+    DefaultLoanSchemeMapper,
+    VaultAuctionHistoryMapper
   ]
 })
 export class ModelModule {

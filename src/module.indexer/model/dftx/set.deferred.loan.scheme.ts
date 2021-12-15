@@ -23,7 +23,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   }
 
   async indexBlockStart (block: RawBlock): Promise<void> {
-    const loop = async (activeAfterBlock: number, next?: number): Promise<void> => {
+    const loop = async (activeAfterBlock: number, next?: string): Promise<void> => {
       const list = await this.deferredLoanSchemeMapper.query(activeAfterBlock, 100)
       const pending = list.filter(each => !each.activated)
       if (pending.length === 0) {
@@ -38,7 +38,7 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
         await this.loanSchemeMapper.put(this.mapLoanScheme(each))
         await this.deferredLoanSchemeMapper.put({ ...each, activated: true })
       }
-      return await loop(activeAfterBlock, list[list.length - 1].block.height)
+      return await loop(activeAfterBlock, list[list.length - 1].sort)
     }
 
     return await loop(block.height)
@@ -58,78 +58,88 @@ export class SetDeferredLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   async indexTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>): Promise<void> {
   }
 
-  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>): Promise<void> {
+  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>, txIndex = 0): Promise<void> {
     const data = transaction.dftx.data
-    const prevDeferredLoanScheme = await this.getPrevDeferredLoanScheme(data.identifier, block.height)
-    if (prevDeferredLoanScheme === undefined) {
+    const txid = transaction.txn.txid
+
+    const previous = await this.getPrevious(data.identifier, block.height, txid, txIndex)
+    if (previous === undefined) {
       throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
     }
-    const prevLoanScheme = await this.getPrevLoanScheme(data.identifier, block.height)
-    if (prevLoanScheme === undefined) {
+
+    const prevDeferred = await this.getPrevDeferred(data.identifier, block.height, txid, txIndex)
+    if (prevDeferred === undefined) {
       throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
     }
+
     await this.deferredLoanSchemeMapper.put({
-      id: prevDeferredLoanScheme.id,
-      sort: prevDeferredLoanScheme.sort,
-      loanSchemeId: prevDeferredLoanScheme.loanSchemeId,
-      minColRatio: prevDeferredLoanScheme.minColRatio,
-      interestRate: prevDeferredLoanScheme.interestRate,
-      activateAfterBlock: prevDeferredLoanScheme.activateAfterBlock,
-      block: prevDeferredLoanScheme.block,
-      activated: false
+      id: prevDeferred.id,
+      sort: prevDeferred.sort,
+      loanSchemeId: prevDeferred.loanSchemeId,
+      minColRatio: prevDeferred.minColRatio,
+      interestRate: prevDeferred.interestRate,
+      activateAfterBlock: prevDeferred.activateAfterBlock,
+      activated: false,
+      block: prevDeferred.block
     })
+
     await this.loanSchemeMapper.put({
-      id: prevLoanScheme.loanSchemeId,
-      sort: prevLoanScheme.sort,
-      minColRatio: prevLoanScheme.minColRatio,
-      interestRate: prevLoanScheme.interestRate,
-      activateAfterBlock: prevLoanScheme.activateAfterBlock,
-      block: prevLoanScheme.block
+      id: previous.loanSchemeId,
+      sort: previous.sort.split('-')[0],
+      minColRatio: previous.minColRatio,
+      interestRate: previous.interestRate,
+      activateAfterBlock: previous.activateAfterBlock,
+      block: previous.block
     })
   }
 
   /**
    * Get previous active loan scheme
    */
-  private async getPrevLoanScheme (id: string, height: number): Promise<LoanSchemeHistory | undefined> {
-    const findInNextPage = async (height: number): Promise<LoanSchemeHistory | undefined> => {
-      const list = await this.loanSchemeHistoryMapper.query(id, 100, HexEncoder.encodeHeight(height))
+  private async getPrevious (id: string, height: number, txid: string, txIndex: number): Promise<LoanSchemeHistory | undefined> {
+    const findInNextPage = async (next: string, height: number): Promise<LoanSchemeHistory | undefined> => {
+      const list = await this.loanSchemeHistoryMapper.query(id, 100, next)
       if (list.length === 0) {
         return undefined
       }
 
-      const prevActiveLoanScheme = list.find(each => new BigNumber(height).gte(each.activateAfterBlock))
+      // get the closest activateAfterBlock against height
+      // ensure its queried by DESC height
+      // looking for the first height >= activateHeight
+      const prevActiveLoanScheme = list.find(each => new BigNumber(height).gte(new BigNumber(each.activateAfterBlock)))
       if (prevActiveLoanScheme !== undefined) {
         return prevActiveLoanScheme
       }
 
-      return await findInNextPage(list[list.length - 1].block.height)
+      const last = list[list.length - 1]
+      return await findInNextPage(last.sort, last.block.height)
     }
 
-    return await findInNextPage(height)
+    return await findInNextPage(`${HexEncoder.encodeHeight(height)}-${txIndex}-${txid}`, height)
   }
 
   /**
    * Get prev deferred loan scheme
    */
-  private async getPrevDeferredLoanScheme (id: string, height: number): Promise<LoanSchemeHistory | undefined> {
-    const findInNextPage = async (height: number): Promise<LoanSchemeHistory | undefined> => {
-      const list = await this.loanSchemeHistoryMapper.query(id, 100, HexEncoder.encodeHeight(height))
+  private async getPrevDeferred (id: string, height: number, txid: string, txIndex: number): Promise<LoanSchemeHistory | undefined> {
+    const findInNextPage = async (next: string, height: number): Promise<LoanSchemeHistory | undefined> => {
+      const list = await this.loanSchemeHistoryMapper.query(id, 100, next)
       if (list.length === 0) {
         return undefined
       }
 
-      const prevDeferredLoanScheme = list.find(each =>
+      const prevDeferred = list.find(each =>
         each.event === LoanSchemeHistoryEvent.UPDATE &&
         new BigNumber(height).eq(each.activateAfterBlock))
 
-      if (prevDeferredLoanScheme !== undefined) {
-        return prevDeferredLoanScheme
+      if (prevDeferred !== undefined) {
+        return prevDeferred
       }
 
-      return await findInNextPage(list[list.length - 1].block.height)
+      const last = list[list.length - 1]
+      return await findInNextPage(last.sort, last.block.height)
     }
 
-    return await findInNextPage(height)
+    return await findInNextPage(`${HexEncoder.encodeHeight(height)}-${txIndex}-${txid}`, height)
   }
 }
