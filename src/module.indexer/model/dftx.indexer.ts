@@ -20,6 +20,7 @@ import { SetLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.loan.sc
 import { SetDeferredLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.deferred.loan.scheme'
 import { DestroyLoanSchemeIndexer } from '@src/module.indexer/model/dftx/destroy.loan.scheme'
 import { DestroyDeferredLoanSchemeIndexer } from '@src/module.indexer/model/dftx/destroy.deferred.loan.scheme'
+import { PlaceAuctionBidIndexer } from './dftx/place.auction.bid'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
@@ -42,7 +43,8 @@ export class MainDfTxIndexer extends Indexer {
     private readonly setLoanScheme: SetLoanSchemeIndexer,
     private readonly setDeferredLoanScheme: SetDeferredLoanSchemeIndexer,
     private readonly destroyLoanScheme: DestroyLoanSchemeIndexer,
-    private readonly destroyDeferredLoanScheme: DestroyDeferredLoanSchemeIndexer
+    private readonly destroyDeferredLoanScheme: DestroyDeferredLoanSchemeIndexer,
+    private readonly placeAuctionBidIndexer: PlaceAuctionBidIndexer
   ) {
     super()
     this.indexers = [
@@ -61,7 +63,8 @@ export class MainDfTxIndexer extends Indexer {
       setLoanScheme,
       setDeferredLoanScheme,
       destroyLoanScheme,
-      destroyDeferredLoanScheme
+      destroyDeferredLoanScheme,
+      placeAuctionBidIndexer
     ]
   }
 
@@ -71,10 +74,11 @@ export class MainDfTxIndexer extends Indexer {
     }
 
     const transactions = this.getDfTxTransactions(block)
-    for (const transaction of transactions) {
+    for (let i = 0; i < transactions.length; i += 1) {
+      const transaction = transactions[i]
       const filtered = this.indexers.filter(value => transaction.dftx.type === value.OP_CODE)
       for (const indexer of filtered) {
-        await indexer.indexTransaction(block, transaction)
+        await indexer.indexTransaction(block, transaction, i)
       }
     }
 
@@ -91,10 +95,11 @@ export class MainDfTxIndexer extends Indexer {
 
     // Invalidate backwards
     const transactions = this.getDfTxTransactions(block).reverse()
-    for (const transaction of transactions) {
+    for (let i = 0; i < transactions.length; i += 1) {
+      const transaction = transactions[i]
       const filtered = this.indexers.filter(value => transaction.dftx.type === value.OP_CODE).reverse()
       for (const indexer of filtered) {
-        await indexer.invalidateTransaction(block, transaction)
+        await indexer.invalidateTransaction(block, transaction, i)
       }
     }
 
