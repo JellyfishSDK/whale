@@ -219,9 +219,9 @@ it('test same block deferred model', async () => {
   expect(s150?.activateAfterBlock).toStrictEqual(120)
 
   const history = await loanSchemeHistoryMapper.query('s150', 100)
-  expect(history[0].sort.split('-')[1]).toStrictEqual(4)
-  expect(history[1].sort.split('-')[1]).toStrictEqual(3)
-  expect(history[2].sort.split('-')[1]).toStrictEqual(2)
+  expect(history[0].sort.split('-')[1]).toStrictEqual('4')
+  expect(history[1].sort.split('-')[1]).toStrictEqual('3')
+  expect(history[2].sort.split('-')[1]).toStrictEqual('2')
 
   expect(history[0].event).toStrictEqual('update')
   expect(history[1].event).toStrictEqual('update')
