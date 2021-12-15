@@ -22,22 +22,22 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     super()
   }
 
-  async indexTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>): Promise<void> {
+  async indexTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>, txIndex = 0): Promise<void> {
     const data = transaction.dftx.data
     const txid = transaction.txn.txid
 
     const loanScheme = await this.loanSchemeMapper.get(data.identifier)
     if (loanScheme !== undefined) {
-      return await this.update(block, data, txid)
+      return await this.update(block, data, txid, txIndex)
     }
 
-    return await this.create(block, data, txid)
+    return await this.create(block, data, txid, txIndex)
   }
 
-  private async create (block: RawBlock, data: SetLoanScheme, txid: string): Promise<void> {
+  private async create (block: RawBlock, data: SetLoanScheme, txid: string, txIndex: number): Promise<void> {
     const loanScheme = {
       id: data.identifier,
-      sort: `${HexEncoder.encodeHeight(block.height)}-${txid}`,
+      sort: `${HexEncoder.encodeHeight(block.height)}-${txIndex}-${txid}`,
       minColRatio: data.ratio,
       interestRate: data.rate.toString(),
       activateAfterBlock: data.update.toString(),
@@ -59,10 +59,10 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     })
   }
 
-  private async update (block: RawBlock, data: SetLoanScheme, txid: string): Promise<void> {
+  private async update (block: RawBlock, data: SetLoanScheme, txid: string, txIndex = 0): Promise<void> {
     const loanScheme = {
       id: data.identifier,
-      sort: `${HexEncoder.encodeHeight(block.height)}-${txid}`,
+      sort: `${HexEncoder.encodeHeight(block.height)}-${txIndex}-${txid}`,
       minColRatio: data.ratio,
       interestRate: data.rate.toString(),
       activateAfterBlock: data.update.toString(),
@@ -79,8 +79,8 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     } else {
       await this.deferredLoanSchemeMapper.put({
         ...loanScheme,
-        loanSchemeId: data.identifier,
         id: `${data.identifier}-${txid}`,
+        loanSchemeId: data.identifier,
         activated: false
       })
     }
@@ -88,18 +88,17 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
     await this.loanSchemeHistoryMapper.put({
       ...loanScheme,
       id: `${data.identifier}-${txid}`,
-      sort: `${HexEncoder.encodeHeight(block.height)}-${txid}`,
       loanSchemeId: data.identifier,
       event: LoanSchemeHistoryEvent.UPDATE
     })
   }
 
-  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>): Promise<void> {
+  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetLoanScheme>, txIndex = 0): Promise<void> {
     const data = transaction.dftx.data
     const txid = transaction.txn.txid
 
     if (this.isActive(data, block.height)) {
-      const previous = await this.getPrevious(data.identifier, block.height, txid)
+      const previous = await this.getPrevious(data.identifier, block.height, txid, txIndex)
       if (previous === undefined) {
         throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
       }
@@ -127,7 +126,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   /**
    * Get previous active loan scheme
    */
-  private async getPrevious (id: string, height: number, txid: string): Promise<LoanSchemeHistory | undefined> {
+  private async getPrevious (id: string, height: number, txid: string, txIndex: number): Promise<LoanSchemeHistory | undefined> {
     const findInNextPage = async (next: string, height: number): Promise<LoanSchemeHistory | undefined> => {
       const list = await this.loanSchemeHistoryMapper.query(id, 100, next)
       if (list.length === 0) {
@@ -146,6 +145,6 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
       return await findInNextPage(last.sort, last.block.height)
     }
 
-    return await findInNextPage(`${HexEncoder.encodeHeight(height)}-${txid}`, height)
+    return await findInNextPage(`${HexEncoder.encodeHeight(height)}-${txIndex}-${txid}`, height)
   }
 }

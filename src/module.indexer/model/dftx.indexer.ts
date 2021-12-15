@@ -65,10 +65,11 @@ export class MainDfTxIndexer extends Indexer {
     }
 
     const transactions = this.getDfTxTransactions(block)
-    for (const transaction of transactions) {
+    for (let i = 0; i < transactions.length; i += 1) {
+      const transaction = transactions[i]
       const filtered = this.indexers.filter(value => transaction.dftx.type === value.OP_CODE)
       for (const indexer of filtered) {
-        await indexer.indexTransaction(block, transaction)
+        await indexer.indexTransaction(block, transaction, i)
       }
     }
 
@@ -85,10 +86,11 @@ export class MainDfTxIndexer extends Indexer {
 
     // Invalidate backwards
     const transactions = this.getDfTxTransactions(block).reverse()
-    for (const transaction of transactions) {
+    for (let i = 0; i < transactions.length; i += 1) {
+      const transaction = transactions[i]
       const filtered = this.indexers.filter(value => transaction.dftx.type === value.OP_CODE).reverse()
       for (const indexer of filtered) {
-        await indexer.invalidateTransaction(block, transaction)
+        await indexer.invalidateTransaction(block, transaction, i)
       }
     }
 
