@@ -18,6 +18,7 @@ import { SetDeferredLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set
 import { DestroyLoanSchemeIndexer } from '@src/module.indexer/model/dftx/destroy.loan.scheme'
 import { DestroyDeferredLoanSchemeIndexer } from '@src/module.indexer/model/dftx/destroy.deferred.loan.scheme'
 import { SetDefaultLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.default.loan.scheme'
+import { PlaceAuctionBidIndexer } from './place.auction.bid'
 
 const indexers = [
   AppointOracleIndexer,
@@ -36,7 +37,8 @@ const indexers = [
   SetDeferredLoanSchemeIndexer,
   DestroyLoanSchemeIndexer,
   DestroyDeferredLoanSchemeIndexer,
-  SetDefaultLoanSchemeIndexer
+  SetDefaultLoanSchemeIndexer,
+  PlaceAuctionBidIndexer
 ]
 
 @Module({

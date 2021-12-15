@@ -7,11 +7,11 @@ export abstract class DfTxIndexer<T> {
 
   async indexBlockStart (_: RawBlock): Promise<void> {}
   async indexBlockEnd (_: RawBlock): Promise<void> {}
-  abstract indexTransaction (block: RawBlock, txns: DfTxTransaction<T>): Promise<void>
+  abstract indexTransaction (block: RawBlock, txns: DfTxTransaction<T>, txIndex?: number): Promise<void>
 
   async invalidateBlockStart (_: RawBlock): Promise<void> {}
   async invalidateBlockEnd (_: RawBlock): Promise<void> {}
-  abstract invalidateTransaction (block: RawBlock, txns: DfTxTransaction<T>): Promise<void>
+  abstract invalidateTransaction (block: RawBlock, txns: DfTxTransaction<T>, txIndex?: number): Promise<void>
 }
 
 export interface DfTxTransaction<T> {
