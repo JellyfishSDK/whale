@@ -23,6 +23,8 @@ import { TokenMapper } from '@src/module.model/token'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { OraclePriceActiveMapper } from './oracle.price.active'
+import { SupplyStatMapper } from './supply.stat'
+import { SupplyStatAggregationMapper } from './supply.stat.aggregation'
 
 @Global()
 @Module({
@@ -48,7 +50,9 @@ import { OraclePriceActiveMapper } from './oracle.price.active'
     MasternodeStatsMapper,
     TokenMapper,
     PoolPairMapper,
-    PoolPairTokenMapper
+    PoolPairTokenMapper,
+    SupplyStatMapper,
+    SupplyStatAggregationMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -72,7 +76,9 @@ import { OraclePriceActiveMapper } from './oracle.price.active'
     MasternodeStatsMapper,
     TokenMapper,
     PoolPairMapper,
-    PoolPairTokenMapper
+    PoolPairTokenMapper,
+    SupplyStatMapper,
+    SupplyStatAggregationMapper
   ]
 })
 export class ModelModule {

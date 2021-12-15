@@ -68,7 +68,11 @@ export async function waitForIndexedHeight (app: NestFastifyApplication, height:
   const blockMapper = app.get(BlockMapper)
   await waitForExpect(async () => {
     const block = await blockMapper.getHighest()
-    await expect(block?.height).toBeGreaterThan(height)
+    if (height === 0) {
+      await expect(block?.height).toBeGreaterThanOrEqual(height)
+    } else {
+      await expect(block?.height).toBeGreaterThan(height)
+    }
   }, timeout)
   await new Promise((resolve) => setTimeout(resolve, 1000))
 }

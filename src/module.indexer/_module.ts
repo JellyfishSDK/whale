@@ -15,6 +15,7 @@ import { MainDfTxIndexer } from '@src/module.indexer/model/dftx.indexer'
 import { BlockMintedIndexer } from '@src/module.indexer/model/block.minted'
 import { ConfigService } from '@nestjs/config'
 import { NetworkName } from '@defichain/jellyfish-network'
+import { SupplyStatIndexer } from './model/supply.stat'
 
 @Module({
   providers: [
@@ -31,6 +32,7 @@ import { NetworkName } from '@defichain/jellyfish-network'
     TransactionVoutIndexer,
     MainDfTxIndexer,
     BlockMintedIndexer,
+    SupplyStatIndexer,
     {
       provide: 'NETWORK',
       useFactory: (configService: ConfigService): NetworkName => {
