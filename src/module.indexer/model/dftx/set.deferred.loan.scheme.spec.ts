@@ -188,7 +188,7 @@ it('should deferred model serves pending state', async () => {
   expect(activated.length).toStrictEqual(6)
 })
 
-it('test same block deferred model', async () => {
+it.only('test same block deferred model', async () => {
   const loanSchemeMapper = app.get(LoanSchemeMapper)
   const loanSchemeHistoryMapper = app.get(LoanSchemeHistoryMapper)
   const deferredMapper = app.get(DeferredLoanSchemeMapper)
@@ -215,7 +215,7 @@ it('test same block deferred model', async () => {
   const s150 = await loanSchemeMapper.get('s150')
   // flaky here as the result is too random, so inspect the tx index is enough
   // the latest update must be the latest tx index
-  expect(s150?.sort.split('-')[1]).toStrictEqual(4)
+  expect(s150?.sort.split('-')[1]).toStrictEqual('4')
   expect(s150?.activateAfterBlock).toStrictEqual(120)
 
   const history = await loanSchemeHistoryMapper.query('s150', 100)
