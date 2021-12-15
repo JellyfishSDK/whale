@@ -15,6 +15,7 @@ import { SetLoanTokenIndexer } from '@src/module.indexer/model/dftx/set.loan.tok
 import { ActivePriceIndexer } from '@src/module.indexer/model/dftx/active.price'
 import { SetLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.loan.scheme'
 import { SetDeferredLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.deferred.loan.scheme'
+import { PlaceAuctionBidIndexer } from './place.auction.bid'
 
 const indexers = [
   AppointOracleIndexer,
@@ -30,7 +31,8 @@ const indexers = [
   SetLoanTokenIndexer,
   ActivePriceIndexer,
   SetLoanSchemeIndexer,
-  SetDeferredLoanSchemeIndexer
+  SetDeferredLoanSchemeIndexer,
+  PlaceAuctionBidIndexer
 ]
 
 @Module({

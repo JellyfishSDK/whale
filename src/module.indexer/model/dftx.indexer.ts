@@ -18,6 +18,7 @@ import { SetLoanTokenIndexer } from './dftx/set.loan.token'
 import { ActivePriceIndexer } from './dftx/active.price'
 import { SetLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.loan.scheme'
 import { SetDeferredLoanSchemeIndexer } from '@src/module.indexer/model/dftx/set.deferred.loan.scheme'
+import { PlaceAuctionBidIndexer } from './dftx/place.auction.bid'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
@@ -38,7 +39,8 @@ export class MainDfTxIndexer extends Indexer {
     private readonly setLoanToken: SetLoanTokenIndexer,
     private readonly activePriceIndexer: ActivePriceIndexer,
     private readonly setLoanScheme: SetLoanSchemeIndexer,
-    private readonly setDeferredLoanScheme: SetDeferredLoanSchemeIndexer
+    private readonly setDeferredLoanScheme: SetDeferredLoanSchemeIndexer,
+    private readonly placeAuctionBidIndexer: PlaceAuctionBidIndexer
   ) {
     super()
     this.indexers = [
@@ -55,7 +57,8 @@ export class MainDfTxIndexer extends Indexer {
       setLoanToken,
       activePriceIndexer,
       setLoanScheme,
-      setDeferredLoanScheme
+      setDeferredLoanScheme,
+      placeAuctionBidIndexer
     ]
   }
 
