@@ -21,6 +21,8 @@ import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { OraclePriceActiveMapper } from './oracle.price.active'
 import { VaultAuctionHistoryMapper } from './vault.auction.batch.history'
+import { SupplyStatMapper } from './supply.stat'
+import { SupplyStatAggregationMapper } from './supply.stat.aggregation'
 
 @Global()
 @Module({
@@ -46,7 +48,9 @@ import { VaultAuctionHistoryMapper } from './vault.auction.batch.history'
     TokenMapper,
     PoolPairMapper,
     PoolPairTokenMapper,
-    VaultAuctionHistoryMapper
+    VaultAuctionHistoryMapper,
+    SupplyStatMapper,
+    SupplyStatAggregationMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -70,7 +74,9 @@ import { VaultAuctionHistoryMapper } from './vault.auction.batch.history'
     TokenMapper,
     PoolPairMapper,
     PoolPairTokenMapper,
-    VaultAuctionHistoryMapper
+    VaultAuctionHistoryMapper,
+    SupplyStatMapper,
+    SupplyStatAggregationMapper
   ]
 })
 export class ModelModule {
