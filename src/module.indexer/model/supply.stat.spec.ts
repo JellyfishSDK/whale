@@ -1,4 +1,4 @@
-// Notes: this is e2e test case, each `it` cannot be ran individually
+// Notes: this is e2e test case, each (some) `it` cannot be ran individually
 // requires the indexed data pile up since genesis
 
 import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
@@ -8,14 +8,18 @@ import { SupplyStatMapper } from '@src/module.model/supply.stat'
 import { SupplyStatAggregationMapper } from '@src/module.model/supply.stat.aggregation'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import BigNumber from 'bignumber.js'
+import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
+import { MasternodeTimeLock } from '@defichain/jellyfish-api-core/dist/category/masternode'
 
 const container = new MasterNodeRegTestContainer()
+let client: JsonRpcClient
 let app: NestFastifyApplication
 let supplyStatMapper: SupplyStatMapper
 let supplyStatAggregationMapper: SupplyStatAggregationMapper
 
 beforeAll(async () => {
   await container.start()
+  client = new JsonRpcClient(await container.getCachedRpcUrl())
   app = await createTestingApp(container)
 
   supplyStatMapper = app.get(SupplyStatMapper)
@@ -297,10 +301,90 @@ it('should index block 55, 60 - post Eunos subsidy reduction', async () => {
   }
 })
 
-it('should account time locked masternode tvl under as `locked` instead of `circulating', async () => {
+it('should account time locked masternode tvl under as `locked` instead of `circulating`', async () => {
+  await container.waitForWalletCoinbaseMaturity() // height = 100
+
   // TODO:
+  const owner = await container.getNewAddress()
+  await client.masternode.createMasternode(owner)
+  await client.masternode.createMasternode(await container.getNewAddress(), undefined, { timelock: MasternodeTimeLock.FIVE_YEAR, utxos: [] })
+  await client.masternode.createMasternode(await container.getNewAddress(), undefined, { timelock: MasternodeTimeLock.TEN_YEAR, utxos: [] })
+
+  await container.generate(3) // height = 103
+  await waitForIndexedHeight(app, 102)
+
+  { // single block
+    const stats = await supplyStatAggregationMapper.query(2, HexEncoder.encodeHeight(103))
+    expect(stats.length).toStrictEqual(2)
+    const [after, before] = stats
+
+    expect(after.id).toStrictEqual('00000066')
+    expect(after.burned).toStrictEqual(3) // 3 new MN, each burn 1 DFI as fee
+    expect(after.locked).toStrictEqual(4) // 2 locked MN, each has 2 DFI collateral
+    expect(after.block.height).toStrictEqual(102)
+
+    expect(before.id).toStrictEqual('00000065')
+    expect(before.burned).toStrictEqual(0)
+    expect(before.locked).toStrictEqual(0)
+    expect(before.block.height).toStrictEqual(101)
+  }
+
+  { // aggregated
+    const stats = await supplyStatAggregationMapper.query(2, HexEncoder.encodeHeight(103))
+    expect(stats.length).toStrictEqual(2)
+    const [after, before] = stats
+
+    expect(after.id).toStrictEqual('00000066')
+    expect(after.burned).toStrictEqual(3) // 3 new MN, each burn 1 DFI as fee
+    expect(after.locked).toStrictEqual(4) // 2 locked MN, each has 2 DFI collateral
+    expect(after.block.height).toStrictEqual(102)
+
+    expect(before.id).toStrictEqual('00000065')
+    expect(before.burned).toStrictEqual(0)
+    expect(before.locked).toStrictEqual(0)
+    expect(before.block.height).toStrictEqual(101)
+  }
 })
 
-it('should index burn history', async () => {
-  // TODO:
+it('should account/consolidate burn history (other than masternode fee burn)', async () => {
+  const burnAddress = 'mfburnZSAM7Gs1hpDeNaMotJXSGA7edosG' // from ain
+
+  await client.wallet.sendToAddress(burnAddress, 1.2)
+  await container.generate(3) // height = 106
+
+  // actual ain behavior, burn tx broadcasted into 104 mempool (103 minted)
+  // history only appear on 105
+  await waitForIndexedHeight(app, 105)
+
+  { // single block
+    const stats = await supplyStatMapper.query(2, HexEncoder.encodeHeight(106))
+    expect(stats.length).toStrictEqual(2)
+    const [after, before] = stats
+
+    expect(after.id).toStrictEqual('00000069')
+    expect(after.burned).toStrictEqual(1.2)
+    expect(after.locked).toStrictEqual(0)
+    expect(after.block.height).toStrictEqual(105)
+
+    expect(before.id).toStrictEqual('00000068')
+    expect(before.burned).toStrictEqual(0)
+    expect(before.locked).toStrictEqual(0)
+    expect(before.block.height).toStrictEqual(104)
+  }
+
+  { // aggregated
+    const stats = await supplyStatAggregationMapper.query(2, HexEncoder.encodeHeight(106))
+    expect(stats.length).toStrictEqual(2)
+    const [after, before] = stats
+
+    expect(after.id).toStrictEqual('00000069')
+    expect(after.burned).toStrictEqual(4.2) // 3 new MN fee + 1.2 manually burned
+    expect(after.locked).toStrictEqual(4)
+    expect(after.block.height).toStrictEqual(105)
+
+    expect(before.id).toStrictEqual('00000068')
+    expect(before.burned).toStrictEqual(3)
+    expect(before.locked).toStrictEqual(4)
+    expect(before.block.height).toStrictEqual(104)
+  }
 })
