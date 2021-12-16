@@ -176,10 +176,10 @@ export class SupplyStatIndexer extends Indexer {
 
   // TODO: extract by interpreting block data (another huge indexer) without relying on rpc
   private async _extractBurnHistory (block: RawBlock): Promise<BurnHistory[]> {
-    return await this.rpc.account.listBurnHistory({
+    return (await this.rpc.account.listBurnHistory({
       maxBlockHeight: block.height,
       depth: 1
-    })
+    })).filter(b => b.blockHeight === block.height)
   }
 
   private async _calculateLockedMasternodeValue (height: number): Promise<number> {
