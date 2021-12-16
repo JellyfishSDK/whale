@@ -21,6 +21,15 @@ export class SupplyStatAggregationMapper {
   public constructor (protected readonly database: Database) {
   }
 
+  async getLatest (): Promise<SupplyStatAggregation> {
+    const [latest] = await this.query(1)
+    if (latest === undefined) {
+      // only happen when not even genesis block indexed
+      throw new Error('No data indexed')
+    }
+    return latest
+  }
+
   async query (limit: number, lt?: string): Promise<SupplyStatAggregation[]> {
     return await this.database.query(SupplyStatAggregationMapping.index.height, {
       limit: limit,
