@@ -191,18 +191,12 @@ export class SupplyStatIndexer extends Indexer {
     const currentTotalLocked = thisBlockMnStat.stats.locked
     const prevMnStats = (await this.masternodeStats.query(1, height))[0]?.stats.locked ?? []
 
-    const currentLockedSum = currentTotalLocked.reduce((sum, tls) => {
-      if (tls.weeks === 0) {
-        return sum
-      }
-      return sum + Number(tls.tvl)
-    }, 0)
-    const prevLockedSum = prevMnStats.reduce((sum, tls) => {
-      if (tls.weeks === 0) {
-        return sum
-      }
-      return sum + Number(tls.tvl)
-    }, 0)
+    const currentLockedSum = currentTotalLocked.reduce((sum, tls) => (
+      tls.weeks === 0 ? sum : sum + Number(tls.tvl)
+    ), 0)
+    const prevLockedSum = prevMnStats.reduce((sum, tls) => (
+      tls.weeks === 0 ? sum : sum + Number(tls.tvl)
+    ), 0)
 
     return currentLockedSum - prevLockedSum
   }
