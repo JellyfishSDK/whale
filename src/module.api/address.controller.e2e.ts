@@ -5,10 +5,91 @@ import { createTestingApp, stopTestingApp, waitForAddressTxCount, waitForIndexed
 import { createSignedTxnHex, createToken, mintTokens, sendTokensToAddress } from '@defichain/testing'
 import { WIF } from '@defichain/jellyfish-crypto'
 import { RpcApiError } from '@defichain/jellyfish-api-core'
+import { Testing } from '@defichain/jellyfish-testing'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
 let controller: AddressController
+const testing = Testing.create(container)
+let colAddr: string
+let catAddr: string
+let poolAddr: string
+
+describe('listAccountHistory', () => {
+  beforeAll(async () => {
+    await container.start()
+    await container.waitForReady()
+    await container.waitForWalletCoinbaseMaturity()
+
+    colAddr = await testing.generateAddress()
+    catAddr = await testing.generateAddress()
+    poolAddr = await testing.generateAddress()
+
+    await testing.token.dfi({
+      address: colAddr,
+      amount: 30000
+    })
+    await testing.generate(1)
+
+    await testing.token.create({
+      symbol: 'CAT',
+      collateralAddress: colAddr
+    })
+    await testing.generate(1)
+
+    await testing.token.mint({
+      symbol: 'CAT',
+      amount: 5000
+    })
+    await testing.generate(1)
+
+    await testing.rpc.account.accountToAccount(colAddr, { [catAddr]: '1@CAT' })
+    await testing.generate(1)
+
+    await testing.rpc.poolpair.createPoolPair({
+      tokenA: 'DFI',
+      tokenB: 'CAT',
+      commission: 0,
+      status: true,
+      ownerAddress: poolAddr
+    })
+    await testing.generate(1)
+
+    await testing.rpc.poolpair.addPoolLiquidity({
+      [colAddr]: '10000@DFI',
+      [catAddr]: '1@CAT'
+    }, poolAddr)
+    await testing.generate(1)
+
+    app = await createTestingApp(container)
+    controller = app.get(AddressController)
+
+    const height = await testing.container.getBlockCount()
+    await testing.generate(1)
+    await waitForIndexedHeight(app, height - 1)
+  })
+
+  afterAll(async () => {
+    await stopTestingApp(container, app)
+  })
+
+  it('should listAccountHistory', async () => {
+    const history = await controller.listAccountHistory(colAddr)
+
+    for (let i = 0; i < history.length; i += 1) {
+      const accountHistory = history[i]
+      expect(typeof accountHistory.owner).toStrictEqual('string')
+      expect(typeof accountHistory.blockHeight).toStrictEqual('number')
+      expect(typeof accountHistory.blockHash).toStrictEqual('string')
+      expect(typeof accountHistory.blockTime).toStrictEqual('number')
+      expect(typeof accountHistory.type).toStrictEqual('string')
+      expect(typeof accountHistory.txn).toStrictEqual('number')
+      expect(typeof accountHistory.txid).toStrictEqual('string')
+      expect(accountHistory.amounts.length).toBeGreaterThan(0)
+      expect(typeof accountHistory.amounts[0]).toStrictEqual('string')
+    }
+  })
+})
 
 describe('getBalance', () => {
   beforeAll(async () => {

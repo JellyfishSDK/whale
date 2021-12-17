@@ -16,6 +16,7 @@ import { toBuffer } from '@defichain/jellyfish-transaction/dist/script/_buffer'
 import { LoanVaultActive, LoanVaultLiquidated } from '@whale-api-client/api/loan'
 import { LoanVaultService } from '@src/module.api/loan.vault.service'
 import { parseDisplaySymbol } from '@src/module.api/token.controller'
+import { AccountHistory } from '@defichain/jellyfish-api-core/dist/category/account'
 
 @Controller('/address/:address')
 export class AddressController {
@@ -28,6 +29,11 @@ export class AddressController {
     protected readonly vaultService: LoanVaultService,
     @Inject('NETWORK') protected readonly network: NetworkName
   ) {
+  }
+
+  @Get('history')
+  async listAccountHistory (@Param('address') address: string): Promise<AccountHistory[]> {
+    return await this.rpcClient.account.listAccountHistory(address)
   }
 
   @Get('/balance')
