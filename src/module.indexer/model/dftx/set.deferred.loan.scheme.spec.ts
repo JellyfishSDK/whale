@@ -216,7 +216,7 @@ it.only('test same block deferred model', async () => {
   // flaky here as the result is too random, so inspect the tx index is enough
   // the latest update must be the latest tx index
   expect(s150?.sort.split('-')[1]).toStrictEqual('4')
-  expect(s150?.activateAfterBlock).toStrictEqual(120)
+  expect(s150?.activateAfterBlock).toStrictEqual('120')
 
   const history = await loanSchemeHistoryMapper.query('s150', 100)
   expect(history[0].sort.split('-')[1]).toStrictEqual('4')
