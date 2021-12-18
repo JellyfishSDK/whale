@@ -180,3 +180,16 @@ export interface AddressUnspent {
     tokenId?: number
   }
 }
+
+export interface AddressHistory {
+  owner: string
+  txid: string
+  txn: number
+  type: string
+  amounts: string[]
+  block: {
+    height: number
+    hash: string
+    time: number
+  }
+}

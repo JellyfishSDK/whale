@@ -4,7 +4,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
-import { AddressToken } from '@whale-api-client/api/address'
+import { AddressToken, AddressHistory } from '@whale-api-client/api/address'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { ScriptActivity, ScriptActivityMapper } from '@src/module.model/script.activity'
 import { ScriptAggregation, ScriptAggregationMapper } from '@src/module.model/script.aggregation'
@@ -31,9 +31,49 @@ export class AddressController {
   ) {
   }
 
+  /**
+   * @param {string} address to list participate account history
+   * @param {PaginationQuery} query
+   */
   @Get('history')
-  async listAccountHistory (@Param('address') address: string): Promise<AccountHistory[]> {
-    return await this.rpcClient.account.listAccountHistory(address)
+  async listAccountHistory (
+    @Param('address') address: string,
+      query: PaginationQuery): Promise<ApiPagedResponse<AddressHistory>> {
+    const limit = query.size > 30 ? 30 : query.size
+    const next = query.next ?? undefined
+    let list: AccountHistory[]
+
+    if (next !== undefined) {
+      const [txid, txType, maxBlockHeight] = next.split('-')
+      // NOTE(canonbrother): filter refers to block, size refers to tx, block has many txs
+      // set limit at depth for easier
+      list = await this.rpcClient.account.listAccountHistory(address, { maxBlockHeight: Number(maxBlockHeight), depth: limit })
+      const prev = list.findIndex(each => each.txid === txid && each.type === txType)
+      const start = prev + 1 // plus 1 to exclude the prev txid
+      const size = start + limit
+      list = list.slice(start, size)
+    } else {
+      list = await this.rpcClient.account.listAccountHistory(address, { limit: limit })
+    }
+
+    const history: AddressHistory[] = list.map(each => {
+      return {
+        owner: each.owner,
+        txid: each.txid,
+        txn: each.txn,
+        type: each.type,
+        amounts: each.amounts,
+        block: {
+          height: each.blockHeight,
+          hash: each.blockHash,
+          time: each.blockTime
+        }
+      }
+    })
+
+    return ApiPagedResponse.of(history, query.size, item => {
+      return `${item.txid}-${item.type}-${item.block.height}`
+    })
   }
 
   @Get('/balance')
