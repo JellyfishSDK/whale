@@ -35,10 +35,10 @@ export class AddressController {
    * @param {string} address to list participate account history
    * @param {PaginationQuery} query
    */
-  @Get('history')
+  @Get('/history')
   async listAccountHistory (
     @Param('address') address: string,
-      query: PaginationQuery): Promise<ApiPagedResponse<AddressHistory>> {
+      @Query() query: PaginationQuery): Promise<ApiPagedResponse<AddressHistory>> {
     const limit = query.size > 30 ? 30 : query.size
     const next = query.next ?? undefined
     let list: AccountHistory[]
