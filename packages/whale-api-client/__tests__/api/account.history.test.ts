@@ -2,7 +2,7 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { Testing } from '@defichain/jellyfish-testing'
 import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
-import { WhaleApiClient } from '../../src'
+import { WhaleApiClient, WhaleApiException } from '../../src'
 
 let container: MasterNodeRegTestContainer
 let service: StubService
@@ -99,6 +99,12 @@ afterAll(async () => {
   } finally {
     await testing.container.stop()
   }
+})
+
+it('should not listAccountHistory with mine filter', async () => {
+  const promise = client.address.listAccountHistory('mine')
+  await expect(promise).rejects.toThrow(WhaleApiException)
+  await expect(promise).rejects.toThrow('mine is not allowed')
 })
 
 it('should listAccountHistory', async () => {

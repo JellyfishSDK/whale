@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js'
-import { ConflictException, Controller, Get, Inject, Param, Query } from '@nestjs/common'
+import { ConflictException, Controller, ForbiddenException, Get, Inject, Param, Query } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
@@ -39,6 +39,10 @@ export class AddressController {
   async listAccountHistory (
     @Param('address') address: string,
       @Query() query: PaginationQuery): Promise<ApiPagedResponse<AddressHistory>> {
+    if (address === 'mine') {
+      throw new ForbiddenException('mine is not allowed')
+    }
+
     const limit = query.size > 30 ? 30 : query.size
     const next = query.next ?? undefined
     let list: AccountHistory[]
@@ -56,20 +60,7 @@ export class AddressController {
       list = await this.rpcClient.account.listAccountHistory(address, { limit: limit })
     }
 
-    const history: AddressHistory[] = list.map(each => {
-      return {
-        owner: each.owner,
-        txid: each.txid,
-        txn: each.txn,
-        type: each.type,
-        amounts: each.amounts,
-        block: {
-          height: each.blockHeight,
-          hash: each.blockHash,
-          time: each.blockTime
-        }
-      }
-    })
+    const history = mapAddressHistory(list)
 
     return ApiPagedResponse.of(history, query.size, item => {
       return `${item.txid}-${item.type}-${item.block.height}`
@@ -180,4 +171,21 @@ function mapAddressToken (id: string, tokenInfo: TokenInfo, value: BigNumber): A
     isLPS: tokenInfo.isLPS,
     displaySymbol: parseDisplaySymbol(tokenInfo)
   }
+}
+
+function mapAddressHistory (list: AccountHistory[]): AddressHistory[] {
+  return list.map(each => {
+    return {
+      owner: each.owner,
+      txid: each.txid,
+      txn: each.txn,
+      type: each.type,
+      amounts: each.amounts,
+      block: {
+        height: each.blockHeight,
+        hash: each.blockHash,
+        time: each.blockTime
+      }
+    }
+  })
 }

@@ -6,6 +6,7 @@ import { createSignedTxnHex, createToken, mintTokens, sendTokensToAddress } from
 import { WIF } from '@defichain/jellyfish-crypto'
 import { RpcApiError } from '@defichain/jellyfish-api-core'
 import { Testing } from '@defichain/jellyfish-testing'
+import { ForbiddenException } from '@nestjs/common'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -96,6 +97,12 @@ describe('listAccountHistory', () => {
 
   afterAll(async () => {
     await stopTestingApp(container, app)
+  })
+
+  it('should not listAccountHistory with mine filter', async () => {
+    const promise = controller.listAccountHistory('mine', { size: 30 })
+    await expect(promise).rejects.toThrow(ForbiddenException)
+    await expect(promise).rejects.toThrow('mine is not allowed')
   })
 
   it('should listAccountHistory', async () => {
