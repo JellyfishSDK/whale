@@ -43,19 +43,29 @@ export class AddressController {
       throw new ForbiddenException('mine is not allowed')
     }
 
-    const limit = query.size > 30 ? 30 : query.size
+    const limit = query.size > 100 ? 100 : query.size
     const next = query.next ?? undefined
     let list: AccountHistory[]
 
     if (next !== undefined) {
       const [txid, txType, maxBlockHeight] = next.split('-')
-      // NOTE(canonbrother): filter refers to block, size refers to tx, block has many txs
-      // set limit at depth for easier
-      list = await this.rpcClient.account.listAccountHistory(address, { limit: Number.MAX_SAFE_INTEGER, maxBlockHeight: Number(maxBlockHeight), depth: limit })
-      const prev = list.findIndex(each => each.txid === txid && each.type === txType)
-      const start = prev + 1 // plus 1 to exclude the prev txid
-      const size = start + limit
-      list = list.slice(start, size)
+      const loop = async (maxBlockHeight: number, limit: number): Promise<AccountHistory[]> => {
+        const list = await this.rpcClient.account.listAccountHistory(address, { limit: limit, maxBlockHeight: maxBlockHeight })
+        const foundIndex = list.findIndex(each => each.txid === txid && each.type === txType)
+        if (foundIndex === -1) {
+          // if not found, extend the size till grab the 'next'
+          return await loop(list[list.length - 1].blockHeight, limit * 2)
+        }
+        const start = foundIndex + 1 // plus 1 to exclude the prev txid
+        const size = start + query.size
+        const sliced = list.slice(start, size)
+        if (sliced.length !== query.size) {
+          // need a bigger volume to achieve the size
+          return await loop(list[list.length - 1].blockHeight, limit * 2)
+        }
+        return sliced
+      }
+      list = await loop(Number(maxBlockHeight), limit)
     } else {
       list = await this.rpcClient.account.listAccountHistory(address, { limit: limit })
     }
