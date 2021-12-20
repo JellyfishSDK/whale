@@ -43,7 +43,7 @@ export class AddressController {
       throw new ForbiddenException('mine is not allowed')
     }
 
-    const limit = query.size > 100 ? 100 : query.size
+    const limit = query.size > 200 ? 200 : query.size
     const next = query.next ?? undefined
     let list: AccountHistory[]
 
