@@ -51,7 +51,7 @@ export class AddressController {
       const [txid, txType, maxBlockHeight] = next.split('-')
       // NOTE(canonbrother): filter refers to block, size refers to tx, block has many txs
       // set limit at depth for easier
-      list = await this.rpcClient.account.listAccountHistory(address, { maxBlockHeight: Number(maxBlockHeight), depth: limit })
+      list = await this.rpcClient.account.listAccountHistory(address, { limit: Number.MAX_SAFE_INTEGER, maxBlockHeight: Number(maxBlockHeight), depth: limit })
       const prev = list.findIndex(each => each.txid === txid && each.type === txType)
       const start = prev + 1 // plus 1 to exclude the prev txid
       const size = start + limit
