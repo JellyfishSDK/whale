@@ -12,6 +12,7 @@ let testing: Testing
 let colAddr: string
 let usdcAddr: string
 let poolAddr: string
+let emptyAddr: string
 
 beforeAll(async () => {
   container = new MasterNodeRegTestContainer()
@@ -26,6 +27,7 @@ beforeAll(async () => {
   colAddr = await testing.generateAddress()
   usdcAddr = await testing.generateAddress()
   poolAddr = await testing.generateAddress()
+  emptyAddr = await testing.generateAddress()
 
   await testing.token.dfi({ address: colAddr, amount: 20000 })
   await testing.generate(1)
@@ -105,6 +107,11 @@ it('should not listAccountHistory with mine filter', async () => {
   const promise = client.address.listAccountHistory('mine')
   await expect(promise).rejects.toThrow(WhaleApiException)
   await expect(promise).rejects.toThrow('mine is not allowed')
+})
+
+it('should list empty account history', async () => {
+  const history = await client.address.listAccountHistory(emptyAddr)
+  expect(history.length).toStrictEqual(0)
 })
 
 it('should listAccountHistory', async () => {

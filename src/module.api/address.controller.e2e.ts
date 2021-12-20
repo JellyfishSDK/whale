@@ -15,6 +15,7 @@ const testing = Testing.create(container)
 let colAddr: string
 let usdcAddr: string
 let poolAddr: string
+let emptyAddr: string
 
 describe('listAccountHistory', () => {
   beforeAll(async () => {
@@ -25,6 +26,7 @@ describe('listAccountHistory', () => {
     colAddr = await testing.generateAddress()
     usdcAddr = await testing.generateAddress()
     poolAddr = await testing.generateAddress()
+    emptyAddr = await testing.generateAddress()
 
     await testing.token.dfi({ address: colAddr, amount: 20000 })
     await testing.generate(1)
@@ -103,6 +105,11 @@ describe('listAccountHistory', () => {
     const promise = controller.listAccountHistory('mine', { size: 30 })
     await expect(promise).rejects.toThrow(ForbiddenException)
     await expect(promise).rejects.toThrow('mine is not allowed')
+  })
+
+  it('should list empty account history', async () => {
+    const history = await controller.listAccountHistory(emptyAddr, { size: 30 })
+    expect(history.data.length).toStrictEqual(0)
   })
 
   it('should listAccountHistory', async () => {
