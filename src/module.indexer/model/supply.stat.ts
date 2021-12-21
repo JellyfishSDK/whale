@@ -14,7 +14,6 @@ type EmissionRateBound = 'GENESIS' | 'POST_GENESIS' | 'EUNOS'
 @Injectable()
 export class EmissionCalculator {
   constructor (
-    private readonly rpc: JsonRpcClient,
     private readonly network: NetworkName
   ) { }
 
@@ -34,11 +33,15 @@ export class EmissionCalculator {
       const params = EmissionConsensusParams[this.network]
       const reductionCount = Math.floor((currentHeight - eunosHeight) / params.EMISSION_REDUCTION_PERIOD)
 
-      let subsidy = new BigNumber(params.EUNOS_BASE_BLOCK_SUBSIDY)
+      let subsidySatoshi = params.EUNOS_BASE_BLOCK_SUBSIDY_SATOSHI
+
       for (let i = 0; i < reductionCount; i++) {
-        subsidy = subsidy.minus(subsidy.times(params.EMISSION_REDUCE_RATIO))
+        // no float/decimal operation
+        const reduceAmount = subsidySatoshi * params.EMISSION_REDUCTION / BigInt(100_000)
+        subsidySatoshi -= reduceAmount
       }
-      return subsidy.dp(8).toNumber()
+
+      return Number(subsidySatoshi) / 100_000_000
     }
   }
 
@@ -65,6 +68,8 @@ interface EmissionConsensusParamsI {
   PRE_EUNOS_BASE_BLOCK_SUBSIDY: number
   EUNOS_HEIGHT: number
   EUNOS_BASE_BLOCK_SUBSIDY: number
+  EUNOS_BASE_BLOCK_SUBSIDY_SATOSHI: bigint
+  EMISSION_REDUCTION: bigint
   EMISSION_REDUCTION_PERIOD: number
   EMISSION_REDUCE_RATIO: number
 }
@@ -74,6 +79,8 @@ const EmissionConsensusParams: { [key in NetworkName]: EmissionConsensusParamsI 
     EUNOS_HEIGHT: 894000,
     PRE_EUNOS_BASE_BLOCK_SUBSIDY: 200,
     EUNOS_BASE_BLOCK_SUBSIDY: 405.04,
+    EUNOS_BASE_BLOCK_SUBSIDY_SATOSHI: BigInt(40504000000),
+    EMISSION_REDUCTION: BigInt(1658), // 1.658%, 10000x magnified, as int
     EMISSION_REDUCTION_PERIOD: 32690, // 2 weeks
     EMISSION_REDUCE_RATIO: 0.01658 // reduced by 1.658%
   },
@@ -81,6 +88,8 @@ const EmissionConsensusParams: { [key in NetworkName]: EmissionConsensusParamsI 
     EUNOS_HEIGHT: 354950,
     PRE_EUNOS_BASE_BLOCK_SUBSIDY: 200,
     EUNOS_BASE_BLOCK_SUBSIDY: 405.04,
+    EUNOS_BASE_BLOCK_SUBSIDY_SATOSHI: BigInt(40504000000),
+    EMISSION_REDUCTION: BigInt(1658), // 1.658%, 10000x magnified, as int
     EMISSION_REDUCTION_PERIOD: 32690, // 2 weeks
     EMISSION_REDUCE_RATIO: 0.01658 // reduced by 1.658%
   },
@@ -88,6 +97,8 @@ const EmissionConsensusParams: { [key in NetworkName]: EmissionConsensusParamsI 
     EUNOS_HEIGHT: 50,
     PRE_EUNOS_BASE_BLOCK_SUBSIDY: 200,
     EUNOS_BASE_BLOCK_SUBSIDY: 405.04,
+    EUNOS_BASE_BLOCK_SUBSIDY_SATOSHI: BigInt(40504000000),
+    EMISSION_REDUCTION: BigInt(1658), // 1.658%, 10000x magnified, as int
     EMISSION_REDUCTION_PERIOD: 5,
     EMISSION_REDUCE_RATIO: 0.01658 // reduced by 1.658%
   }
@@ -107,7 +118,7 @@ export class SupplyStatIndexer extends Indexer {
     @Inject('NETWORK') protected readonly network: NetworkName
   ) {
     super()
-    this.emissionCalculator = new EmissionCalculator(rpc, network)
+    this.emissionCalculator = new EmissionCalculator(network)
   }
 
   async index (block: RawBlock): Promise<void> {
@@ -131,7 +142,11 @@ export class SupplyStatIndexer extends Indexer {
       total: this.emissionCalculator.calculate(block.height)
     }
 
-    currentBlockStat.circulating = currentBlockStat.total - currentBlockStat.burned - currentBlockStat.locked
+    currentBlockStat.circulating = new BigNumber(currentBlockStat.total)
+      .minus(currentBlockStat.burned)
+      .minus(currentBlockStat.locked)
+      .dp(8)
+      .toNumber()
 
     const encodedHeight = HexEncoder.encodeHeight(block.height)
     await this.mapper.put({

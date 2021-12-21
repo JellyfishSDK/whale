@@ -25,7 +25,14 @@ export class SupplyStatAggregationMapper {
     const [latest] = await this.query(1)
     if (latest === undefined) {
       // only happen when not even genesis block indexed
-      throw new Error('No data indexed')
+      return {
+        id: 'n/a',
+        circulating: 0,
+        burned: 0,
+        locked: 0,
+        total: 1_200_000_000,
+        block: { time: 0, medianTime: 0, height: -1, hash: 'n/a' }
+      }
     }
     return latest
   }
