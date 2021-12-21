@@ -67,40 +67,32 @@ export class EmissionCalculator {
 interface EmissionConsensusParamsI {
   PRE_EUNOS_BASE_BLOCK_SUBSIDY: number
   EUNOS_HEIGHT: number
-  EUNOS_BASE_BLOCK_SUBSIDY: number
   EUNOS_BASE_BLOCK_SUBSIDY_SATOSHI: bigint
   EMISSION_REDUCTION: bigint
   EMISSION_REDUCTION_PERIOD: number
-  EMISSION_REDUCE_RATIO: number
 }
 
 const EmissionConsensusParams: { [key in NetworkName]: EmissionConsensusParamsI } = {
   mainnet: {
     EUNOS_HEIGHT: 894000,
     PRE_EUNOS_BASE_BLOCK_SUBSIDY: 200,
-    EUNOS_BASE_BLOCK_SUBSIDY: 405.04,
     EUNOS_BASE_BLOCK_SUBSIDY_SATOSHI: BigInt(40504000000),
     EMISSION_REDUCTION: BigInt(1658), // 1.658%, 10000x magnified, as int
-    EMISSION_REDUCTION_PERIOD: 32690, // 2 weeks
-    EMISSION_REDUCE_RATIO: 0.01658 // reduced by 1.658%
+    EMISSION_REDUCTION_PERIOD: 32690 // 2 weeks
   },
   testnet: {
     EUNOS_HEIGHT: 354950,
     PRE_EUNOS_BASE_BLOCK_SUBSIDY: 200,
-    EUNOS_BASE_BLOCK_SUBSIDY: 405.04,
     EUNOS_BASE_BLOCK_SUBSIDY_SATOSHI: BigInt(40504000000),
     EMISSION_REDUCTION: BigInt(1658), // 1.658%, 10000x magnified, as int
-    EMISSION_REDUCTION_PERIOD: 32690, // 2 weeks
-    EMISSION_REDUCE_RATIO: 0.01658 // reduced by 1.658%
+    EMISSION_REDUCTION_PERIOD: 32690 // 2 weeks
   },
   regtest: {
     EUNOS_HEIGHT: 50,
     PRE_EUNOS_BASE_BLOCK_SUBSIDY: 200,
-    EUNOS_BASE_BLOCK_SUBSIDY: 405.04,
     EUNOS_BASE_BLOCK_SUBSIDY_SATOSHI: BigInt(40504000000),
     EMISSION_REDUCTION: BigInt(1658), // 1.658%, 10000x magnified, as int
-    EMISSION_REDUCTION_PERIOD: 5,
-    EMISSION_REDUCE_RATIO: 0.01658 // reduced by 1.658%
+    EMISSION_REDUCTION_PERIOD: 5
   }
 }
 
@@ -172,21 +164,21 @@ export class SupplyStatIndexer extends Indexer {
   }
 
   private async _calculateTotalBurned (block: RawBlock): Promise<number> {
-    let sum = 0
+    let sum = new BigNumber(0)
     const burns = await this._extractBurnHistory(block)
     for (const burn of burns) {
       for (const amount of burn.amounts) {
         const [value, token] = amount.split('@')
         if (token === 'DFI') {
-          const burnedAmt = Number(value)
-          if (Number.isNaN(burnedAmt)) {
+          const burnedAmt = new BigNumber(value)
+          if (burnedAmt.isNaN()) {
             throw new Error('Invalid burn history')
           }
-          sum += burnedAmt
+          sum = sum.plus(burnedAmt)
         }
       }
     }
-    return sum
+    return sum.toNumber()
   }
 
   // TODO: extract by interpreting block data (another huge indexer) without relying on rpc
@@ -207,12 +199,12 @@ export class SupplyStatIndexer extends Indexer {
     const prevMnStats = (await this.masternodeStats.query(1, height))[0]?.stats.locked ?? []
 
     const currentLockedSum = currentTotalLocked.reduce((sum, tls) => (
-      tls.weeks === 0 ? sum : sum + Number(tls.tvl)
-    ), 0)
+      tls.weeks === 0 ? sum : sum.plus(tls.tvl)
+    ), new BigNumber(0))
     const prevLockedSum = prevMnStats.reduce((sum, tls) => (
-      tls.weeks === 0 ? sum : sum + Number(tls.tvl)
-    ), 0)
+      tls.weeks === 0 ? sum : sum.plus(tls.tvl)
+    ), new BigNumber(0))
 
-    return currentLockedSum - prevLockedSum
+    return currentLockedSum.minus(prevLockedSum).toNumber()
   }
 }
