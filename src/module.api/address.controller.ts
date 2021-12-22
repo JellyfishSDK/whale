@@ -49,6 +49,7 @@ export class AddressController {
 
     if (next !== undefined) {
       const [txid, txType, maxBlockHeight] = next.split('-')
+
       const loop = async (maxBlockHeight: number, limit: number): Promise<AccountHistory[]> => {
         const list = await this.rpcClient.account.listAccountHistory(address, { limit: limit, maxBlockHeight: maxBlockHeight })
         if (list.length === 0) {
@@ -57,14 +58,14 @@ export class AddressController {
         const foundIndex = list.findIndex(each => each.txid === txid && each.type === txType)
         if (foundIndex === -1) {
           // if not found, extend the size till grab the 'next'
-          return await loop(list[list.length - 1].blockHeight, limit * 2)
+          return await loop(Number(maxBlockHeight), limit * 2)
         }
         const start = foundIndex + 1 // plus 1 to exclude the prev txid
         const size = start + query.size
         const sliced = list.slice(start, size)
         if (sliced.length !== query.size) {
           // need a bigger volume to achieve the size
-          return await loop(list[list.length - 1].blockHeight, limit * 2)
+          return await loop(Number(maxBlockHeight), limit * 2)
         }
         return sliced
       }
