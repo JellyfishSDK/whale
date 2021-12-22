@@ -47,9 +47,9 @@ export class DeferredDestroyLoanSchemeMapper {
 }
 
 export interface DeferredDestroyLoanScheme extends Model {
-  id: string // ----------------------| loanSchemeId-height
-  sort: string // --------------------| Hex encoded height
+  id: string // ----------------------| loanSchemeId-txid
   loanSchemeId: string
+  sort: string // --------------------| encodedHeight-txIndex-txid
   activateAfterBlock: string // ------| stringified bignumber
   activated: boolean
 
