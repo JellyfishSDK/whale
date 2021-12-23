@@ -75,7 +75,10 @@ export class AddressController {
       }
       list = await loop(Number(maxBlockHeight), limit)
     } else {
-      list = await this.rpcClient.account.listAccountHistory(address, { limit: limit })
+      list = await this.rpcClient.account.listAccountHistory(address, {
+        limit: limit,
+        no_rewards: true
+      })
     }
 
     const history = mapAddressHistory(list)

@@ -125,6 +125,12 @@ describe('listAccountHistory', () => {
     expect(history.data.length).toStrictEqual(0)
   })
 
+  it('should list account history without rewards', async () => {
+    const history = await controller.listAccountHistory(poolAddr, { size: 30 })
+    expect(history.data.length).toStrictEqual(4)
+    expect(history.data.every(history => !(['Rewards', 'Commission'].includes(history.type))))
+  })
+
   // skip test, API currently no included rewards (missing txid/txn will crash query with `next`)
   // rewards listing requires extra implementation for pagination
   it.skip('should list account history include rewards', async () => {
@@ -147,11 +153,6 @@ describe('listAccountHistory', () => {
         next = history.page.next
       }
     }
-
-    console.time('listrewards')
-    const history = await controller.listAccountHistory(poolAddr, { size: 30 })
-    console.timeEnd('listrewards')
-    console.log(history)
   })
 
   it('should listAccountHistory', async () => {
