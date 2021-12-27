@@ -38,5 +38,6 @@ export class DefaultLoanSchemeMapper {
 }
 
 export interface DefaultLoanScheme extends Model {
-  id: string // -------------------------| loanSchemeId
+  id: 'defaultLoanScheme'
+  loanSchemeId: string
 }

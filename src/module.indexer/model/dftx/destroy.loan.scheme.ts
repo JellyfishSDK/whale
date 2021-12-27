@@ -39,9 +39,6 @@ export class DestroyLoanSchemeIndexer extends DfTxIndexer<DestroyLoanScheme> {
       }
     }
 
-    const histories = await this.loanSchemeHistoryMapper.query('s250', 30)
-    console.log('histories: ', histories)
-
     const loanScheme = await this.loanSchemeMapper.get(data.identifier)
     if (loanScheme !== undefined) {
       if (this.isActive(data.height)) {
