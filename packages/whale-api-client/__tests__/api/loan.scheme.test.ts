@@ -71,21 +71,21 @@ describe('list', () => {
         id: 'default',
         minColRatio: 100,
         interestRate: '6.5',
-        sort: '00000066',
+        sort: expect.any(String),
         default: true
       },
       {
         id: 'scheme1',
         minColRatio: 150,
         interestRate: '5.5',
-        sort: '00000067',
+        sort: expect.any(String),
         default: false
       },
       {
         id: 'scheme2',
         minColRatio: 200,
         interestRate: '4.5',
-        sort: '00000068',
+        sort: expect.any(String),
         default: false
       },
 
@@ -93,7 +93,7 @@ describe('list', () => {
         id: 'scheme3',
         minColRatio: 250,
         interestRate: '3.5',
-        sort: '00000069',
+        sort: expect.any(String),
         default: false
       }
     ])
@@ -104,7 +104,7 @@ describe('list', () => {
 
     expect(first.length).toStrictEqual(2)
     expect(first.hasNext).toStrictEqual(true)
-    expect(first.nextToken).toStrictEqual('00000067')
+    expect(typeof first.nextToken).toStrictEqual('string')
 
     expect(first[0].id).toStrictEqual('default')
     expect(first[1].id).toStrictEqual('scheme1')
@@ -113,7 +113,7 @@ describe('list', () => {
 
     expect(next.length).toStrictEqual(2)
     expect(next.hasNext).toStrictEqual(true)
-    expect(next.nextToken).toStrictEqual('00000069')
+    expect(typeof next.nextToken).toStrictEqual('string')
 
     expect(next[0].id).toStrictEqual('scheme2')
     expect(next[1].id).toStrictEqual('scheme3')
@@ -122,7 +122,7 @@ describe('list', () => {
 
     expect(last.length).toStrictEqual(0)
     expect(last.hasNext).toStrictEqual(false)
-    expect(last.nextToken).toBeUndefined()
+    expect(last.nextToken).toStrictEqual(undefined)
   })
 })
 
@@ -131,7 +131,7 @@ describe('get', () => {
     const data = await client.loan.getScheme('scheme1')
     expect(data).toStrictEqual({
       id: 'scheme1',
-      sort: '00000067',
+      sort: expect.any(String),
       minColRatio: 150,
       interestRate: '5.5',
       default: false

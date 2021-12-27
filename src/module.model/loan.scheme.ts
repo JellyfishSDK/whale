@@ -9,7 +9,7 @@ const LoanSchemeMapping: ModelMapping<LoanScheme> = {
       name: 'loan_scheme_id',
       partition: {
         type: 'string',
-        key: (ls: LoanScheme) => ls.id
+        key: (ls: LoanScheme) => ls.sort
       }
     }
   }

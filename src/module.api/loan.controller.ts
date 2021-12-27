@@ -74,7 +74,7 @@ export class LoanController {
             interestRate: scheme.interestRate,
             minColRatio: scheme.minColRatio,
             sort: scheme.sort,
-            default: defaultScheme.id === scheme.id
+            default: defaultScheme.loanSchemeId === scheme.id
           }
         })
 
@@ -112,7 +112,7 @@ export class LoanController {
         interestRate: scheme.interestRate,
         minColRatio: scheme.minColRatio,
         sort: scheme.sort,
-        default: defaultScheme.id === scheme.id
+        default: defaultScheme.loanSchemeId === scheme.id
       }
     } catch (err) {
       if (err instanceof NotFoundException) {
