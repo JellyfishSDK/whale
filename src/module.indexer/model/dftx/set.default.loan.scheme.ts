@@ -21,45 +21,41 @@ export class SetDefaultLoanSchemeIndexer extends DfTxIndexer<SetDefaultLoanSchem
     super()
   }
 
-  async indexTransaction (block: RawBlock, transaction: DfTxTransaction<SetDefaultLoanScheme>): Promise<void> {
+  async indexTransaction (block: RawBlock, transaction: DfTxTransaction<SetDefaultLoanScheme>, txIndex = 0): Promise<void> {
     const data = transaction.dftx.data
+    const txid = transaction.txn.txid
 
     const loanScheme = await this.loanSchemeMapper.get(data.identifier)
     if (loanScheme === undefined) {
       throw new NotFoundIndexerError('index', 'LoanScheme', data.identifier)
     }
-
-    await this.defaultLoanSchemeMapper.put({ id: loanScheme.id })
+    await this.defaultLoanSchemeMapper.put({ id: 'defaultLoanScheme', loanSchemeId: loanScheme.id })
 
     await this.loanSchemeHistoryMapper.put({
       ...loanScheme,
-      id: `${data.identifier}-${block.height}`,
+      id: `${data.identifier}-${txid}`,
       loanSchemeId: data.identifier,
-      sort: HexEncoder.encodeHeight(block.height),
+      sort: `${HexEncoder.encodeHeight(block.height)}-${txIndex}-${txid}`,
       event: LoanSchemeHistoryEvent.SET_DEFAULT
     })
   }
 
-  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetDefaultLoanScheme>): Promise<void> {
+  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<SetDefaultLoanScheme>, txIndex = 0): Promise<void> {
     const data = transaction.dftx.data
-    // delete the new set_default
-    // find the prev latest set_default in history
+    const txid = transaction.txn.txid
 
-    const prevDefault = await this.getPrevious(data.identifier, block.height)
+    const prevDefault = await this.getPrevious(data.identifier, block.height, txid, txIndex)
     if (prevDefault === undefined) {
       throw new NotFoundIndexerError('index', 'LoanSchemeHistory', data.identifier)
     }
-
-    await this.defaultLoanSchemeMapper.put({ id: prevDefault.id })
-    await this.loanSchemeHistoryMapper.delete(`${data.identifier}-${block.height}`)
   }
 
   /**
    * Get previous default loan scheme
    */
-  private async getPrevious (id: string, height: number): Promise<LoanSchemeHistory | undefined> {
-    const findInNextPage = async (height: number): Promise<LoanSchemeHistory | undefined> => {
-      const list = await this.loanSchemeHistoryMapper.query(id, 100, HexEncoder.encodeHeight(height))
+  private async getPrevious (id: string, height: number, txid: string, txIndex: number): Promise<LoanSchemeHistory | undefined> {
+    const findInNextPage = async (next: string): Promise<LoanSchemeHistory | undefined> => {
+      const list = await this.loanSchemeHistoryMapper.query(id, 100, next)
       if (list.length === 0) {
         return undefined
       }
@@ -71,8 +67,10 @@ export class SetDefaultLoanSchemeIndexer extends DfTxIndexer<SetDefaultLoanSchem
         return prevDefaultLoanScheme
       }
 
-      return await findInNextPage(list[list.length - 1].block.height)
+      return await findInNextPage(list[list.length - 1].sort)
     }
-    return await findInNextPage(height)
+
+    const sort = `${HexEncoder.encodeHeight(height)}-${txIndex}-${txid}`
+    return await findInNextPage(sort)
   }
 }

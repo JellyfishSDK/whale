@@ -23,13 +23,11 @@ afterEach(async () => {
 })
 
 async function createLoanScheme (nameAsId: string, minColRatio: number, interestRate: BigNumber): Promise<string> {
-  const loanSchemeId = await testing.rpc.loan.createLoanScheme({
+  return await testing.rpc.loan.createLoanScheme({
     id: nameAsId,
     minColRatio: minColRatio,
     interestRate: interestRate
   })
-  await testing.generate(1)
-  return loanSchemeId
 }
 
 async function updateLoanScheme (nameAsId: string, minColRatio: number, interestRate: BigNumber, activateAfterBlock?: number): Promise<string> {
@@ -41,31 +39,34 @@ async function updateLoanScheme (nameAsId: string, minColRatio: number, interest
   if (activateAfterBlock !== undefined) {
     payload.activateAfterBlock = activateAfterBlock
   }
-  const loanSchemeId = await testing.rpc.loan.updateLoanScheme(payload)
-  await testing.generate(1)
-  return loanSchemeId
+  return await testing.rpc.loan.updateLoanScheme(payload)
 }
 
-async function destroyLoanScheme (nameAsId: string, activateAfterBlock?: number): Promise<void> {
+async function destroyLoanScheme (nameAsId: string, activateAfterBlock?: number): Promise<string> {
   const payload: any = {
     id: nameAsId
   }
   if (activateAfterBlock !== undefined) {
     payload.activateAfterBlock = activateAfterBlock
   }
-  await testing.rpc.loan.destroyLoanScheme(payload)
-  await testing.generate(1)
+  return await testing.rpc.loan.destroyLoanScheme(payload)
 }
 
 it('should index destroyLoanScheme', async () => {
   await createLoanScheme('default', 100, new BigNumber(3))
+  await testing.generate(1)
 
-  await createLoanScheme('s150', 150, new BigNumber(3))
-  await destroyLoanScheme('s150')
+  const txidS150 = await createLoanScheme('s150', 150, new BigNumber(3))
+  await testing.generate(1)
+  const txidS150d = await destroyLoanScheme('s150')
+  await testing.generate(1)
 
-  await createLoanScheme('s200', 200, new BigNumber(3))
-  await updateLoanScheme('s200', 202, new BigNumber(3.3))
-  await destroyLoanScheme('s200')
+  const txidS200 = await createLoanScheme('s200', 200, new BigNumber(3))
+  await testing.generate(1)
+  const txidS200u = await updateLoanScheme('s200', 202, new BigNumber(3.3))
+  await testing.generate(1)
+  const txidS200d = await destroyLoanScheme('s200')
+  await testing.generate(1)
 
   {
     const height = await testing.container.call('getblockcount')
@@ -83,9 +84,9 @@ it('should index destroyLoanScheme', async () => {
     const history = await loanSchemeHistoryMapper.query('s150', 100)
     expect(history).toStrictEqual([
       {
-        id: 's150-104',
+        id: `s150-${txidS150d}`,
         loanSchemeId: 's150',
-        sort: '00000068',
+        sort: `00000068-0-${txidS150d}`,
         minColRatio: 150,
         interestRate: '3',
         activateAfterBlock: '0',
@@ -93,9 +94,9 @@ it('should index destroyLoanScheme', async () => {
         block: expect.any(Object)
       },
       {
-        id: 's150-103',
+        id: `s150-${txidS150}`,
         loanSchemeId: 's150',
-        sort: '00000067',
+        sort: `00000067-0-${txidS150}`,
         minColRatio: 150,
         interestRate: '3',
         activateAfterBlock: '0',
@@ -112,9 +113,9 @@ it('should index destroyLoanScheme', async () => {
     const history = await loanSchemeHistoryMapper.query('s200', 100)
     expect(history).toStrictEqual([
       {
-        id: 's200-107',
+        id: `s200-${txidS200d}`,
         loanSchemeId: 's200',
-        sort: '0000006b',
+        sort: `0000006b-0-${txidS200d}`,
         minColRatio: 202,
         interestRate: '3.3',
         activateAfterBlock: '0',
@@ -122,9 +123,9 @@ it('should index destroyLoanScheme', async () => {
         block: expect.any(Object)
       },
       {
-        id: 's200-106',
+        id: `s200-${txidS200u}`,
         loanSchemeId: 's200',
-        sort: '0000006a',
+        sort: `0000006a-0-${txidS200u}`,
         minColRatio: 202,
         interestRate: '3.3',
         activateAfterBlock: '18446744073709551615',
@@ -132,9 +133,9 @@ it('should index destroyLoanScheme', async () => {
         block: expect.any(Object)
       },
       {
-        id: 's200-105',
+        id: `s200-${txidS200}`,
         loanSchemeId: 's200',
-        sort: '00000069',
+        sort: `00000069-0-${txidS200}`,
         minColRatio: 200,
         interestRate: '3',
         activateAfterBlock: '0',
@@ -147,13 +148,19 @@ it('should index destroyLoanScheme', async () => {
 
 it('should index destroyLoanScheme with activateAfterBlock', async () => {
   await createLoanScheme('default', 100, new BigNumber(3))
+  await testing.generate(1)
 
-  await createLoanScheme('s150', 150, new BigNumber(3))
-  await destroyLoanScheme('s150', 110)
+  const txidS150 = await createLoanScheme('s150', 150, new BigNumber(3))
+  await testing.generate(1)
+  const txidS150d = await destroyLoanScheme('s150', 110)
+  await testing.generate(1)
 
-  await createLoanScheme('s200', 200, new BigNumber(3))
-  await updateLoanScheme('s200', 202, new BigNumber(3.3), 109)
-  await destroyLoanScheme('s200', 110)
+  const txidS200 = await createLoanScheme('s200', 200, new BigNumber(3))
+  await testing.generate(1)
+  const txidS200u = await updateLoanScheme('s200', 202, new BigNumber(3.3), 109)
+  await testing.generate(1)
+  const txidS200d = await destroyLoanScheme('s200', 110)
+  await testing.generate(1)
 
   {
     const height = await testing.container.call('getblockcount')
@@ -168,7 +175,7 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
   const s150Before = await loanSchemeMapper.get('s150')
   expect(s150Before).toStrictEqual({
     id: 's150',
-    sort: '00000067',
+    sort: `00000067-0-${txidS150}`,
     minColRatio: 150,
     interestRate: '3',
     activateAfterBlock: '0',
@@ -178,7 +185,7 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
   const s200Before = await loanSchemeMapper.get('s200')
   expect(s200Before).toStrictEqual({
     id: 's200',
-    sort: '00000069',
+    sort: `00000069-0-${txidS200}`,
     minColRatio: 200,
     interestRate: '3',
     activateAfterBlock: '0',
@@ -188,16 +195,16 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
   const deferredBefore = await deferredDestroyLoanSchemeMapper.query(110, 100)
   expect(deferredBefore).toStrictEqual([
     {
-      id: 's200-107',
-      sort: '0000006b',
+      id: `s200-${txidS200d}`,
+      sort: `0000006b-0-${txidS200d}`,
       loanSchemeId: 's200',
       activateAfterBlock: '110',
       block: expect.any(Object),
       activated: false
     },
     {
-      id: 's150-104',
-      sort: '00000068',
+      id: `s150-${txidS150d}`,
+      sort: `00000068-0-${txidS150d}`,
       loanSchemeId: 's150',
       activateAfterBlock: '110',
       block: expect.any(Object),
@@ -208,9 +215,9 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
   const s150History = await loanSchemeHistoryMapper.query('s150', 100)
   expect(s150History).toStrictEqual([
     {
-      id: 's150-104',
+      id: `s150-${txidS150d}`,
       loanSchemeId: 's150',
-      sort: '00000068',
+      sort: `00000068-0-${txidS150d}`,
       minColRatio: 150,
       interestRate: '3',
       activateAfterBlock: '110',
@@ -218,9 +225,9 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
       block: expect.any(Object)
     },
     {
-      id: 's150-103',
+      id: `s150-${txidS150}`,
       loanSchemeId: 's150',
-      sort: '00000067',
+      sort: `00000067-0-${txidS150}`,
       minColRatio: 150,
       interestRate: '3',
       activateAfterBlock: '0',
@@ -232,9 +239,9 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
   const s200History = await loanSchemeHistoryMapper.query('s200', 100)
   expect(s200History).toStrictEqual([
     {
-      id: 's200-107',
+      id: `s200-${txidS200d}`,
       loanSchemeId: 's200',
-      sort: '0000006b',
+      sort: `0000006b-0-${txidS200d}`,
       minColRatio: 200,
       interestRate: '3',
       activateAfterBlock: '110',
@@ -243,20 +250,19 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
 
     },
     {
-      id: 's200-106',
+      id: `s200-${txidS200u}`,
       loanSchemeId: 's200',
-      sort: '0000006a',
+      sort: `0000006a-0-${txidS200u}`,
       minColRatio: 202,
       interestRate: '3.3',
       activateAfterBlock: '109',
       event: 'update',
       block: expect.any(Object)
-
     },
     {
-      id: 's200-105',
+      id: `s200-${txidS200}`,
       loanSchemeId: 's200',
-      sort: '00000069',
+      sort: `00000069-0-${txidS200}`,
       minColRatio: 200,
       interestRate: '3',
       activateAfterBlock: '0',
@@ -281,10 +287,14 @@ it('should index destroyLoanScheme with activateAfterBlock', async () => {
 
 it('test destroy before update', async () => {
   await createLoanScheme('default', 100, new BigNumber(3))
+  await testing.generate(1)
 
-  await createLoanScheme('s250', 250, new BigNumber(3))
-  await updateLoanScheme('s250', 255, new BigNumber(3.3), 111) // id-104
-  await destroyLoanScheme('s250', 110) // id-105
+  const txidS250 = await createLoanScheme('s250', 250, new BigNumber(3))
+  await testing.generate(1)
+  const txidS250u = await updateLoanScheme('s250', 255, new BigNumber(3.3), 111)
+  await testing.generate(1)
+  const txidS250d = await destroyLoanScheme('s250', 110)
+  await testing.generate(1)
 
   {
     const height = await testing.container.call('getblockcount')
@@ -300,7 +310,7 @@ it('test destroy before update', async () => {
   const s250Before = await loanSchemeMapper.get('s250')
   expect(s250Before).toStrictEqual({
     id: 's250',
-    sort: '00000067',
+    sort: `00000067-0-${txidS250}`,
     minColRatio: 250,
     interestRate: '3',
     activateAfterBlock: '0',
@@ -310,9 +320,9 @@ it('test destroy before update', async () => {
   const s250History = await loanSchemeHistoryMapper.query('s250', 100)
   expect(s250History).toStrictEqual([
     {
-      id: 's250-105',
+      id: `s250-${txidS250d}`,
       loanSchemeId: 's250',
-      sort: '00000069',
+      sort: `00000069-0-${txidS250d}`,
       minColRatio: 250,
       interestRate: '3',
       activateAfterBlock: '110',
@@ -320,9 +330,9 @@ it('test destroy before update', async () => {
       block: expect.any(Object)
     },
     {
-      id: 's250-104',
+      id: `s250-${txidS250u}`,
       loanSchemeId: 's250',
-      sort: '00000068',
+      sort: `00000068-0-${txidS250u}`,
       minColRatio: 255,
       interestRate: '3.3',
       activateAfterBlock: '111',
@@ -330,9 +340,9 @@ it('test destroy before update', async () => {
       block: expect.any(Object)
     },
     {
-      id: 's250-103',
+      id: `s250-${txidS250}`,
       loanSchemeId: 's250',
-      sort: '00000067',
+      sort: `00000067-0-${txidS250}`,
       minColRatio: 250,
       interestRate: '3',
       activateAfterBlock: '0',
@@ -344,8 +354,8 @@ it('test destroy before update', async () => {
   const deferredDestroy110 = await deferredDestroyLoanSchemeMapper.query(110, 100)
   expect(deferredDestroy110).toStrictEqual([
     {
-      id: 's250-105',
-      sort: '00000069',
+      id: `s250-${txidS250d}`,
+      sort: `00000069-0-${txidS250d}`,
       loanSchemeId: 's250',
       activateAfterBlock: '110',
       block: expect.any(Object),
@@ -356,8 +366,8 @@ it('test destroy before update', async () => {
   const deferred111 = await deferredLoanSchemeMapper.query(111, 100)
   expect(deferred111).toStrictEqual([
     {
-      id: 's250-104',
-      sort: '00000068',
+      id: `s250-${txidS250u}`,
+      sort: `00000068-0-${txidS250u}`,
       minColRatio: 255,
       interestRate: '3.3',
       activateAfterBlock: '111',
@@ -384,4 +394,9 @@ it('test destroy before update', async () => {
     const s250After = await loanSchemeMapper.get('s250')
     expect(s250After).toStrictEqual(undefined)
   }
+})
+
+// it will hit error on rpc first
+// `RpcApiError: 'DestroyLoanSchemeTx: Cannot find existing loan scheme with id s250 (code 16)', code: -26, method: destroyloanscheme`
+it.skip('should same block indexing', async () => {
 })

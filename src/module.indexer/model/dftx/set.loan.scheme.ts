@@ -39,7 +39,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
   private async create (block: RawBlock, data: SetLoanScheme, txid: string, txIndex: number): Promise<void> {
     const isFirst = await this.first()
     if (isFirst) {
-      await this.defaultLoanSchemeMapper.put({ id: data.identifier })
+      await this.defaultLoanSchemeMapper.put({ id: 'defaultLoanScheme', loanSchemeId: data.identifier })
     }
 
     const loanScheme = {
@@ -55,6 +55,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
         time: block.time
       }
     }
+
     await this.loanSchemeMapper.put(loanScheme)
 
     await this.loanSchemeHistoryMapper.put({
