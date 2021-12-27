@@ -154,7 +154,7 @@ it('should index setLoanScheme in UPDATE event', async () => {
   const defaultLoanSchemeMapper = app.get(DefaultLoanSchemeMapper)
 
   const defaultLoanScheme = await defaultLoanSchemeMapper.get() as DefaultLoanScheme
-  expect(defaultLoanScheme).toStrictEqual({ id: 's150' })
+  expect(defaultLoanScheme).toStrictEqual({ id: 'defaultLoanScheme', loanSchemeId: 's150' })
 
   // loanSchemeMapper
   {
@@ -255,7 +255,7 @@ it('test update loanScheme with activateAfterBlock', async () => {
   const defaultLoanSchemeMapper = app.get(DefaultLoanSchemeMapper)
 
   const defaultLoanScheme = await defaultLoanSchemeMapper.get() as DefaultLoanScheme
-  expect(defaultLoanScheme).toStrictEqual({ id: 's150' })
+  expect(defaultLoanScheme).toStrictEqual({ id: 'defaultLoanScheme', loanSchemeId: 's150' })
 
   const s150Before = await loanSchemeMapper.get('s150')
   expect(s150Before).toStrictEqual({

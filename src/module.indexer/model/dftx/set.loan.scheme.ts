@@ -55,6 +55,7 @@ export class SetLoanSchemeIndexer extends DfTxIndexer<SetLoanScheme> {
         time: block.time
       }
     }
+
     await this.loanSchemeMapper.put(loanScheme)
 
     await this.loanSchemeHistoryMapper.put({
