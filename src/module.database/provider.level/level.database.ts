@@ -122,32 +122,32 @@ export abstract class LevelUpDatabase extends Database {
 
     const locked = this.locks.get(model.id)
     if (locked !== undefined) {
-      console.log('acquire')
+      // console.log('acquire')
       const release = await locked.acquire()
       try {
-        console.log('before delete')
+        // console.log('before delete')
         await this.delete(mapping, model.id)
-        console.log('after delete')
+        // console.log('after delete')
         const subRoot = this.subRoot(mapping)
         await subRoot.put(model.id, model)
 
         for (const index of Object.values(mapping.index)) {
-          console.log('index: ', index)
+          // console.log('index: ', index)
           const subIndex = this.subIndex(index, index.partition.key(model))
-          console.log('subIndex: ', subIndex)
+          // console.log('subIndex: ', subIndex)
           const key = index.sort !== undefined ? index.sort.key(model) : index.partition.key(model)
-          console.log('key: ', key)
-          console.log('subIndex before put')
+          // console.log('key: ', key)
+          // console.log('subIndex before put')
           await subIndex.put(key, model)
-          console.log('subIndex after put')
+          // console.log('subIndex after put')
         }
       } catch (err) {
         console.log('err: ', err)
       } finally {
         release()
-        console.log('after release')
+        // console.log('after release')
         this.locks.delete(model.id)
-        console.log('after locks delete')
+        // console.log('after locks delete')
       }
     }
 
