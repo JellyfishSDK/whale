@@ -251,12 +251,14 @@ describe('get', () => {
     try {
       await controller.get('999')
     } catch (err) {
-      expect(err).toBeInstanceOf(NotFoundException)
-      expect(err.response).toStrictEqual({
-        statusCode: 404,
-        message: 'Unable to find poolpair',
-        error: 'Not Found'
-      })
+      if (err instanceof NotFoundException) {
+        expect(err).toBeInstanceOf(NotFoundException)
+        expect(err.getResponse()).toStrictEqual({
+          statusCode: 404,
+          message: 'Unable to find poolpair',
+          error: 'Not Found'
+        })
+      }
     }
   })
 })

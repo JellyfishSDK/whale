@@ -5,12 +5,16 @@ import lexicographic from 'lexicographic-integer-encoding'
 import { Inject } from '@nestjs/common'
 import { Database, QueryOptions, SortOrder } from '@src/module.database/database'
 import { Model, ModelIndex, ModelKey, ModelMapping } from '@src/module.database/model'
+import { Mutex, MutexInterface } from 'async-mutex'
 
 const lexint = lexicographic('hex')
 
 export abstract class LevelUpDatabase extends Database {
+  private readonly locks: Map<string, MutexInterface>
+
   protected constructor (protected readonly root: LevelUp) {
     super()
+    this.locks = new Map()
   }
 
   /**
@@ -75,10 +79,9 @@ export abstract class LevelUpDatabase extends Database {
       const key = index.sort !== undefined ? sortKey : partitionKey
       return await this.subIndex(index, partitionKey).get(key)
     } catch (err) {
-      if (err.type === 'NotFoundError') {
+      if (err instanceof Error && err.name === 'NotFoundError') {
         return undefined
       }
-      throw err
     }
   }
 
@@ -112,16 +115,52 @@ export abstract class LevelUpDatabase extends Database {
   async put<M extends Model> (mapping: ModelMapping<M>, model: M): Promise<void> {
     // TODO(fuxingloh): check before deleting for better performance
     // TODO(fuxingloh): block writing race condition
-    await this.delete(mapping, model.id)
 
-    const subRoot = this.subRoot(mapping)
-    await subRoot.put(model.id, model)
-
-    for (const index of Object.values(mapping.index)) {
-      const subIndex = this.subIndex(index, index.partition.key(model))
-      const key = index.sort !== undefined ? index.sort.key(model) : index.partition.key(model)
-      await subIndex.put(key, model)
+    if (!this.locks.has(model.id)) {
+      this.locks.set(model.id, new Mutex())
     }
+
+    const locked = this.locks.get(model.id)
+    if (locked !== undefined) {
+      console.log('acquire')
+      const release = await locked.acquire()
+      try {
+        console.log('before delete')
+        await this.delete(mapping, model.id)
+        console.log('after delete')
+        const subRoot = this.subRoot(mapping)
+        await subRoot.put(model.id, model)
+
+        for (const index of Object.values(mapping.index)) {
+          console.log('index: ', index)
+          const subIndex = this.subIndex(index, index.partition.key(model))
+          console.log('subIndex: ', subIndex)
+          const key = index.sort !== undefined ? index.sort.key(model) : index.partition.key(model)
+          console.log('key: ', key)
+          console.log('subIndex before put')
+          await subIndex.put(key, model)
+          console.log('subIndex after put')
+        }
+      } catch (err) {
+        console.log('err: ', err)
+      } finally {
+        release()
+        console.log('after release')
+        this.locks.delete(model.id)
+        console.log('after locks delete')
+      }
+    }
+
+    // await this.delete(mapping, model.id)
+
+    // const subRoot = this.subRoot(mapping)
+    // await subRoot.put(model.id, model)
+
+    // for (const index of Object.values(mapping.index)) {
+    //   const subIndex = this.subIndex(index, index.partition.key(model))
+    //   const key = index.sort !== undefined ? index.sort.key(model) : index.partition.key(model)
+    //   await subIndex.put(key, model)
+    // }
   }
 
   async delete<M extends Model> (mapping: ModelMapping<M>, id: string): Promise<void> {
