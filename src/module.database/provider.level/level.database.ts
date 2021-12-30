@@ -79,7 +79,7 @@ export abstract class LevelUpDatabase extends Database {
       const key = index.sort !== undefined ? sortKey : partitionKey
       return await this.subIndex(index, partitionKey).get(key)
     } catch (err) {
-      if (err instanceof Error && err.name === 'NotFoundError') {
+      if (err.type === 'NotFoundError') {
         return undefined
       }
       throw err
