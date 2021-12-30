@@ -82,6 +82,7 @@ export abstract class LevelUpDatabase extends Database {
       if (err instanceof Error && err.name === 'NotFoundError') {
         return undefined
       }
+      throw err
     }
   }
 
