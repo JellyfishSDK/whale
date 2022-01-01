@@ -68,7 +68,7 @@
     "@nestjs/testing": "^8.2.4",
     "@types/cache-manager": "^3.4.2",
     "@types/cron": "^1.7.3",
-    "@types/jest": "^27.0.3",
+    "@types/jest": "^27.4.0",
     "@types/level": "^6.0.0",
     "@types/lossless-json": "^1.0.1",
     "@types/memdown": "^3.0.0",
