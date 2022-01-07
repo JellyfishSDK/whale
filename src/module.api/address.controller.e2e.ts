@@ -125,50 +125,28 @@ describe('listAccountHistory', () => {
     expect(history.data.length).toStrictEqual(0)
   })
 
-  it('should list account history without rewards', async () => {
-    const history = await controller.listAccountHistory(poolAddr, { size: 30 })
-    expect(history.data.length).toStrictEqual(4)
-    expect(history.data.every(history => !(['Rewards', 'Commission'].includes(history.type))))
-  })
-
-  // skip test, API currently no included rewards (missing txid/txn will crash query with `next`)
-  // rewards listing requires extra implementation for pagination
-  it.skip('should list account history include rewards', async () => {
-    // benchmarking `listaccounthistory` with `no_rewards` false
-    // generate couple hundred blocks to check RPC resource impact
-
-    let page = 0
-    let next: string | undefined
-
-    while (page >= 0) {
-      console.log('benchmarking, page: ', page)
-      console.time('listrewards')
-      const history = await controller.listAccountHistory(poolAddr, { size: 30, next })
-      console.timeEnd('listrewards')
-
-      if (history.page?.next === undefined) {
-        page = -1
-      } else {
-        page += 1
-        next = history.page.next
-      }
+  it('should listAccountHistory without rewards (default)', async () => {
+    {
+      const history = await controller.listAccountHistory(poolAddr, { size: 30 })
+      expect(history.data.length).toStrictEqual(4)
+      expect(history.data.every(history => !(['Rewards', 'Commission'].includes(history.type))))
     }
-  })
 
-  it('should listAccountHistory', async () => {
-    const history = await controller.listAccountHistory(colAddr, { size: 30 })
-    expect(history.data.length).toStrictEqual(30)
-    for (let i = 0; i < history.data.length; i += 1) {
-      const accountHistory = history.data[i]
-      expect(typeof accountHistory.owner).toStrictEqual('string')
-      expect(typeof accountHistory.block.height).toStrictEqual('number')
-      expect(typeof accountHistory.block.hash).toStrictEqual('string')
-      expect(typeof accountHistory.block.time).toStrictEqual('number')
-      expect(typeof accountHistory.type).toStrictEqual('string')
-      expect(typeof accountHistory.txn).toStrictEqual('number')
-      expect(typeof accountHistory.txid).toStrictEqual('string')
-      expect(accountHistory.amounts.length).toBeGreaterThan(0)
-      expect(typeof accountHistory.amounts[0]).toStrictEqual('string')
+    {
+      const history = await controller.listAccountHistory(colAddr, { size: 30 })
+      expect(history.data.length).toStrictEqual(30)
+      for (let i = 0; i < history.data.length; i += 1) {
+        const accountHistory = history.data[i]
+        expect(typeof accountHistory.owner).toStrictEqual('string')
+        expect(typeof accountHistory.block.height).toStrictEqual('number')
+        expect(typeof accountHistory.block.hash).toStrictEqual('string')
+        expect(typeof accountHistory.block.time).toStrictEqual('number')
+        expect(typeof accountHistory.type).toStrictEqual('string')
+        expect(typeof accountHistory.txn).toStrictEqual('number')
+        expect(typeof accountHistory.txid).toStrictEqual('string')
+        expect(accountHistory.amounts.length).toBeGreaterThan(0)
+        expect(typeof accountHistory.amounts[0]).toStrictEqual('string')
+      }
     }
   })
 
@@ -207,24 +185,35 @@ describe('listAccountHistory', () => {
     expect(forth.data[2]).toStrictEqual(full.data[11])
   })
 
-  it.only('should listAccountHistory pagination include rewards', async () => {
-    const full = await controller.listAccountHistory(poolAddr, { size: 100, no_rewards: false })
-    console.log('full: ', full.data.length, full)
-    // const next = { size: 10, no_rewards: false }
+  it('should listAccountHistory pagination with rewards', async () => {
+    const full = await controller.listAccountHistory(colAddr, { size: 100, no_rewards: false })
+    const next = { size: 10, no_rewards: false }
 
-    // const first = await controller.listAccountHistory(poolAddr, next)
-    // for (let i = 0; i < first.data.length; i += 1) {
-    //   expect(first.data[i]).toStrictEqual(full.data[i])
-    // }
+    const first = await controller.listAccountHistory(colAddr, next)
+    for (let i = 0; i < first.data.length; i += 1) {
+      expect(first.data[i]).toStrictEqual(full.data[i])
+    }
 
-    // const firstLast = first.data[first.data.length - 1]
-    // const secondToken = `${firstLast.txid}-${firstLast.type}-${firstLast.block.height}`
-    // console.log('secondToken: ', secondToken)
-    // const second = await controller.listAccountHistory(colAddr, { ...next, next: secondToken })
-    // // console.log('second: ', second)
-    // for (let i = 0; i < second.data.length; i += 1) {
-    //   expect(second.data[i]).toStrictEqual(full.data[i + 10])
-    // }
+    const firstLast = first.data[first.data.length - 1]
+    const secondToken = `${firstLast.txid}-${firstLast.type}-${firstLast.block.height}`
+    const second = await controller.listAccountHistory(colAddr, { ...next, next: secondToken })
+    for (let i = 0; i < second.data.length; i += 1) {
+      expect(second.data[i]).toStrictEqual(full.data[i + 10])
+    }
+
+    const secondLast = second.data[second.data.length - 1]
+    const thirdToken = `${secondLast.txid}-${secondLast.type}-${secondLast.block.height}`
+    const third = await controller.listAccountHistory(colAddr, { ...next, next: thirdToken })
+    for (let i = 0; i < third.data.length; i += 1) {
+      expect(third.data[i]).toStrictEqual(full.data[i + 20])
+    }
+
+    const thirdLast = third.data[third.data.length - 1]
+    const forthToken = `${thirdLast.txid}-${thirdLast.type}-${thirdLast.block.height}`
+    const forth = await controller.listAccountHistory(colAddr, { ...next, next: forthToken })
+    for (let i = 0; i < forth.data.length; i += 1) {
+      expect(forth.data[i]).toStrictEqual(full.data[i + 30])
+    }
   })
 })
 

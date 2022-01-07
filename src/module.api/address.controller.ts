@@ -77,18 +77,10 @@ export class AddressController {
       }
       list = await loop(Number(maxBlockHeight), limit)
     } else {
-      const norewards = query.no_rewards !== undefined ? query.no_rewards : true
-      console.log('norewards: ', norewards)
       list = await this.rpcClient.account.listAccountHistory(address, {
         limit: limit,
-        // no_rewards: query.no_rewards !== undefined ? query.no_rewards : true
-        no_rewards: norewards
+        no_rewards: query.no_rewards !== undefined ? query.no_rewards : true
       })
-      console.log('list', query.no_rewards, list.length, list)
-      const list1 = await this.rpcClient.account.listAccountHistory(address, {
-        limit: limit
-      })
-      console.log('list1: ', query.no_rewards, list1.length, list1)
     }
 
     const history = mapAddressHistory(list)
