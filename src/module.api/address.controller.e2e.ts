@@ -104,10 +104,6 @@ describe('listAccountHistory', () => {
     controller = app.get(AddressController)
 
     await testing.generate(1)
-
-    // to test rewards listing (only needed if `no_rewards` flag disabled)
-    // const height = await testing.container.getBlockCount()
-    // await testing.container.waitForBlockHeight(Math.max(500, height))
   })
 
   afterAll(async () => {

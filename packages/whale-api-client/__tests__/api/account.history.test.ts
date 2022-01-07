@@ -166,3 +166,33 @@ it('test listAccountHistory pagination', async () => {
   expect(forth[1]).toStrictEqual(full[10])
   expect(forth[2]).toStrictEqual(full[11])
 })
+
+it('should listAccountHistory pagination with rewards', async () => {
+  const full = await client.address.listAccountHistory(colAddr, 100, undefined, { no_rewards: false })
+
+  const first = await client.address.listAccountHistory(colAddr, 10, undefined, { no_rewards: false })
+  for (let i = 0; i < first.length; i += 1) {
+    expect(first[i]).toStrictEqual(full[i])
+  }
+
+  const firstLast = first[first.length - 1]
+  const secondToken = `${firstLast.txid}-${firstLast.type}-${firstLast.block.height}`
+  const second = await client.address.listAccountHistory(colAddr, 10, secondToken, { no_rewards: false })
+  for (let i = 0; i < second.length; i += 1) {
+    expect(second[i]).toStrictEqual(full[i + 10])
+  }
+
+  const secondLast = second[second.length - 1]
+  const thirdToken = `${secondLast.txid}-${secondLast.type}-${secondLast.block.height}`
+  const third = await client.address.listAccountHistory(colAddr, 10, thirdToken, { no_rewards: false })
+  for (let i = 0; i < third.length; i += 1) {
+    expect(third[i]).toStrictEqual(full[i + 20])
+  }
+
+  const thirdLast = third[third.length - 1]
+  const forthToken = `${thirdLast.txid}-${thirdLast.type}-${thirdLast.block.height}`
+  const forth = await client.address.listAccountHistory(colAddr, 10, forthToken, { no_rewards: false })
+  for (let i = 0; i < forth.length; i += 1) {
+    expect(forth[i]).toStrictEqual(full[i + 30])
+  }
+})

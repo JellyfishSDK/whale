@@ -5,7 +5,7 @@ import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import { AddressToken, AddressHistory } from '@whale-api-client/api/address'
-import { PaginationQuery } from '@src/module.api/_core/api.query'
+import { PaginationQuery, AccountHistoryQuery } from '@src/module.api/_core/api.query'
 import { ScriptActivity, ScriptActivityMapper } from '@src/module.model/script.activity'
 import { ScriptAggregation, ScriptAggregationMapper } from '@src/module.model/script.aggregation'
 import { ScriptUnspent, ScriptUnspentMapper } from '@src/module.model/script.unspent'
@@ -211,8 +211,4 @@ function mapAddressHistory (list: AccountHistory[]): AddressHistory[] {
       }
     }
   })
-}
-
-export interface AccountHistoryQuery extends PaginationQuery {
-  no_rewards?: boolean
 }

@@ -111,15 +111,23 @@ export class WhaleApiClient {
    * @param {string} path to request
    * @param {number} [size] of the list
    * @param {string} [next] token for pagination
+   * @param {Record<string, any>} [filter] for data
    * @return {ApiPagedResponse} data list in the JSON response body for pagination query
    * @see {paginate(ApiPagedResponse)} for pagination query chaining
    */
-  async requestList<T> (method: Method, path: string, size: number, next?: string): Promise<ApiPagedResponse<T>> {
+  async requestList<T> (method: Method, path: string, size: number, next?: string, filter?: Record<string, any>): Promise<ApiPagedResponse<T>> {
     const params = new URLSearchParams()
     params.set('size', size.toString())
 
     if (next !== undefined) {
       params.set('next', next)
+    }
+
+    if (filter !== undefined) {
+      const keyValuePairs = Object.entries(filter)
+      for (const ky of keyValuePairs) {
+        params.set(ky[0], ky[1])
+      }
     }
 
     const endpoint = `${path}?${params.toString()}`
@@ -169,7 +177,7 @@ export class WhaleApiClient {
       const response = await _fetch(method, url, controller, body)
       clearTimeout(id)
       return response
-    } catch (err) {
+    } catch (err: any) {
       if (err.type === 'aborted') {
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
         throw new WhaleClientTimeoutException(timeout!)

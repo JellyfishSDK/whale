@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString, Min } from 'class-validator'
+import { IsBoolean, IsInt, IsOptional, IsString, Min } from 'class-validator'
 import { Transform, Type } from 'class-transformer'
 
 /**
@@ -19,4 +19,11 @@ export class PaginationQuery {
   @IsOptional()
   @IsString()
   next?: string
+}
+
+export class AccountHistoryQuery extends PaginationQuery {
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => Boolean(value))
+  no_rewards?: boolean
 }

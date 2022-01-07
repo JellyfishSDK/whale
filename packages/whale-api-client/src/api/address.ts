@@ -15,10 +15,11 @@ export class Address {
    * @param {string} address to list account history
    * @param {string} size of account history
    * @param {string} next set of account history
+   * @param {Record<string, any>} filter of account history
    * @return {Promise<ApiPagedResponse<AddressHistory>>}
    */
-  async listAccountHistory (address: string, size: number = 30, next?: string): Promise<ApiPagedResponse<AddressHistory>> {
-    return await this.client.requestList('GET', `address/${address}/history`, size, next)
+  async listAccountHistory (address: string, size: number = 30, next?: string, filter?: Record<string, any>): Promise<ApiPagedResponse<AddressHistory>> {
+    return await this.client.requestList('GET', `address/${address}/history`, size, next, filter)
   }
 
   /**
