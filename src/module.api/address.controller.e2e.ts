@@ -206,6 +206,26 @@ describe('listAccountHistory', () => {
     expect(forth.data[1]).toStrictEqual(full.data[10])
     expect(forth.data[2]).toStrictEqual(full.data[11])
   })
+
+  it.only('should listAccountHistory pagination include rewards', async () => {
+    const full = await controller.listAccountHistory(poolAddr, { size: 100, no_rewards: false })
+    console.log('full: ', full.data.length, full)
+    // const next = { size: 10, no_rewards: false }
+
+    // const first = await controller.listAccountHistory(poolAddr, next)
+    // for (let i = 0; i < first.data.length; i += 1) {
+    //   expect(first.data[i]).toStrictEqual(full.data[i])
+    // }
+
+    // const firstLast = first.data[first.data.length - 1]
+    // const secondToken = `${firstLast.txid}-${firstLast.type}-${firstLast.block.height}`
+    // console.log('secondToken: ', secondToken)
+    // const second = await controller.listAccountHistory(colAddr, { ...next, next: secondToken })
+    // // console.log('second: ', second)
+    // for (let i = 0; i < second.data.length; i += 1) {
+    //   expect(second.data[i]).toStrictEqual(full.data[i + 10])
+    // }
+  })
 })
 
 describe('getBalance', () => {

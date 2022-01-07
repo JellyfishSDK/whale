@@ -33,17 +33,17 @@ export class AddressController {
 
   /**
    * @param {string} address to list participate account history
-   * @param {PaginationQuery} query
+   * @param {AccountHistoryQuery} query
    */
   @Get('/history')
   async listAccountHistory (
     @Param('address') address: string,
-      @Query() query: PaginationQuery): Promise<ApiPagedResponse<AddressHistory>> {
+      @Query() query: AccountHistoryQuery): Promise<ApiPagedResponse<AddressHistory>> {
     if (address === 'mine') {
       throw new ForbiddenException('mine is not allowed')
     }
 
-    const limit = query.size > 200 ? 200 : query.size
+    const limit = query.size > 100 ? 100 : query.size
     const next = query.next ?? undefined
     let list: AccountHistory[]
 
@@ -54,12 +54,14 @@ export class AddressController {
         const list = await this.rpcClient.account.listAccountHistory(address, {
           limit: limit,
           maxBlockHeight: maxBlockHeight,
-          no_rewards: true
+          no_rewards: query.no_rewards !== undefined ? query.no_rewards : true
         })
         if (list.length === 0) {
           return []
         }
-        const foundIndex = list.findIndex(each => each.txid === txid && each.type === txType)
+        const foundIndex = txType === 'Rewards'
+          ? list.findIndex(each => each.blockHeight === maxBlockHeight) // one block one reward
+          : list.findIndex(each => each.txid === txid && each.type === txType)
         if (foundIndex === -1) {
           // if not found, extend the size till grab the 'next'
           return await loop(Number(maxBlockHeight), limit * 2)
@@ -75,10 +77,18 @@ export class AddressController {
       }
       list = await loop(Number(maxBlockHeight), limit)
     } else {
+      const norewards = query.no_rewards !== undefined ? query.no_rewards : true
+      console.log('norewards: ', norewards)
       list = await this.rpcClient.account.listAccountHistory(address, {
         limit: limit,
-        no_rewards: true
+        // no_rewards: query.no_rewards !== undefined ? query.no_rewards : true
+        no_rewards: norewards
       })
+      console.log('list', query.no_rewards, list.length, list)
+      const list1 = await this.rpcClient.account.listAccountHistory(address, {
+        limit: limit
+      })
+      console.log('list1: ', query.no_rewards, list1.length, list1)
     }
 
     const history = mapAddressHistory(list)
@@ -209,4 +219,8 @@ function mapAddressHistory (list: AccountHistory[]): AddressHistory[] {
       }
     }
   })
+}
+
+export interface AccountHistoryQuery extends PaginationQuery {
+  no_rewards?: boolean
 }
