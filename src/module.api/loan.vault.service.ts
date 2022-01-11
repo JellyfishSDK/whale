@@ -24,12 +24,14 @@ import { parseDisplaySymbol } from '@src/module.api/token.controller'
 import { ActivePrice } from '@whale-api-client/api/prices'
 import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { RpcApiError } from '@defichain/jellyfish-api-core'
+import { VaultAuctionBatchBidMapper } from '@src/module.model/vault.auction.batch.bid'
 
 @Injectable()
 export class LoanVaultService {
   constructor (
     private readonly client: JsonRpcClient,
     private readonly deFiDCache: DeFiDCache,
+    private readonly vaultAuctionBatchBidderMapper: VaultAuctionBatchBidMapper,
     private readonly activePriceMapper: OraclePriceActiveMapper
   ) {
   }
@@ -139,20 +141,23 @@ export class LoanVaultService {
       batchCount: data.batchCount,
       liquidationHeight: data.liquidationHeight,
       liquidationPenalty: data.liquidationPenalty,
-      batches: await this.mapLiquidationBatches(data.batches)
+      batches: await this.mapLiquidationBatches(data.vaultId, data.batches)
     }
   }
 
-  private async mapLiquidationBatches (batches: VaultLiquidationBatch[]): Promise<LoanVaultLiquidationBatch[]> {
+  private async mapLiquidationBatches (vaultId: string, batches: VaultLiquidationBatch[]): Promise<LoanVaultLiquidationBatch[]> {
     if (batches.length === 0) {
       return []
     }
 
     const items = batches.map(async batch => {
+      const bid = await this.vaultAuctionBatchBidderMapper.get(`${vaultId}-${batch.index}`)
+
       return {
         index: batch.index,
         collaterals: await this.mapTokenAmounts(batch.collaterals),
         loan: (await this.mapTokenAmounts([batch.loan]))[0],
+        froms: bid !== undefined ? bid.froms : [],
         highestBid: batch.highestBid !== undefined
           ? {
               owner: batch.highestBid.owner,
