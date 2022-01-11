@@ -142,7 +142,6 @@ describe('listTokens', () => {
     const response = await controller.listTokens(address, {
       size: 30
     })
-    console.log(response)
 
     expect(response.data.length).toStrictEqual(7)
     expect(response.page).toBeUndefined()
