@@ -549,7 +549,7 @@ describe('listTransactionsUnspent', () => {
       size: 30
     })
 
-    expect(response.data.length).toStrictEqual(5)
+    expect(response.data.length).toStrictEqual(4)
     expect(response.page).toBeUndefined()
 
     expect(response.data[3]).toStrictEqual({
@@ -589,7 +589,7 @@ describe('listTransactionsUnspent', () => {
       next: first.page?.next
     })
 
-    expect(next.data.length).toStrictEqual(3)
+    expect(next.data.length).toStrictEqual(2)
     expect(next.page?.next).toBeUndefined()
     expect(next.data[0].vout.value).toStrictEqual('1.32412313')
     expect(next.data[1].vout.value).toStrictEqual('2.93719381')
