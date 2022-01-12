@@ -415,6 +415,7 @@ describe('get', () => {
       batches: [
         {
           index: 0,
+          froms: [],
           collaterals: [
             {
               amount: '10000.00000000',
@@ -460,7 +461,7 @@ describe('get', () => {
     expect.assertions(4)
     try {
       await client.loan.getVault('0530ab29a9f09416a014a4219f186f1d5d530e9a270a9f941275b3972b43ebb7')
-    } catch (err) {
+    } catch (err: any) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
         code: 404,
@@ -473,7 +474,7 @@ describe('get', () => {
 
     try {
       await client.loan.getVault('999')
-    } catch (err) {
+    } catch (err: any) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
         code: 404,
@@ -489,7 +490,7 @@ describe('get', () => {
     expect.assertions(2)
     try {
       await client.loan.getVault('$*@')
-    } catch (err) {
+    } catch (err: any) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
         at: expect.any(Number),
