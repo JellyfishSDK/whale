@@ -365,7 +365,7 @@ afterAll(async () => {
 })
 
 describe('list', () => {
-  it.only('should listAuctions', async () => {
+  it('should listAuctions', async () => {
     const result = await controller.listAuction({ size: 100 })
     expect(result.data.length).toStrictEqual(4)
 
