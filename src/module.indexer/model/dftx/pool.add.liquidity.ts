@@ -49,7 +49,7 @@ export class PoolAddLiquidityIndexer extends DfTxIndexer<PoolAddLiquidity> {
       totalLiquidity = new BigNumber(MINIMUM_LIQUIDITY)
     } else {
       const liqA = tokenA.balances[0].amount.times(totalLiquidity.dividedBy(poolPair.tokenA.reserve))
-      const liqB = tokenB.balances[0].amount.times(totalLiquidity.dividedBy(poolPair.tokenA.reserve))
+      const liqB = tokenB.balances[0].amount.times(totalLiquidity.dividedBy(poolPair.tokenB.reserve))
       liquidity = BigNumber.min(liqA, liqB)
     }
 
