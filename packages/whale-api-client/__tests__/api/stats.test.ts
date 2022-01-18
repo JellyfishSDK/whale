@@ -162,7 +162,11 @@ describe('loan - stats', () => {
 
     { // DEX setup
       await testing.fixture.createPoolPair({
-        a: { amount: 1000, symbol: 'DUSD' },
+        a: { amount: 2000, symbol: 'DUSD' },
+        b: { amount: 2000, symbol: 'DFI' }
+      })
+      await testing.fixture.createPoolPair({
+        a: { amount: 1000, symbol: 'USDT' },
         b: { amount: 2000, symbol: 'DFI' }
       })
     }
@@ -353,17 +357,17 @@ describe('loan - stats', () => {
 
     expect(data).toStrictEqual({
       count: {
-        blocks: 134,
+        blocks: 137,
         prices: 4,
-        tokens: 6,
+        tokens: 8,
         masternodes: 8
       },
       burned: expect.any(Object),
       tvl: {
-        dex: 2000,
+        dex: 6000,
         loan: 20000,
         masternodes: 40,
-        total: 22040
+        total: 26040
       },
       price: {
         usd: 0.5,
@@ -376,12 +380,12 @@ describe('loan - stats', () => {
           collateralTokens: 1,
           loanTokens: 3,
           openAuctions: 1,
-          openVaults: 2,
+          openVaults: 4,
           schemes: 2
         },
         value: {
           collateral: 20000,
-          loan: 60.0001824
+          loan: 60.00018272
         }
       },
       blockchain: {

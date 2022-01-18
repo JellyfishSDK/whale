@@ -46,6 +46,7 @@ describe('list', () => {
       tradeable: true,
       isDAT: true,
       isLPS: false,
+      isLoanToken: false,
       finalized: true,
       minted: '0',
       creation: {
@@ -70,6 +71,7 @@ describe('list', () => {
       tradeable: true,
       isDAT: true,
       isLPS: false,
+      isLoanToken: false,
       finalized: false,
       minted: '0',
       creation: {
@@ -95,6 +97,7 @@ describe('list', () => {
       tradeable: true,
       isDAT: true,
       isLPS: false,
+      isLoanToken: false,
       finalized: false,
       minted: '0',
       creation: {
@@ -112,7 +115,7 @@ describe('list', () => {
       id: '3',
       symbol: 'DBTC-DETH',
       symbolKey: 'DBTC-DETH',
-      displaySymbol: 'DBTC-DETH',
+      displaySymbol: 'dDBTC-dDETH',
       name: 'DBTC-DETH',
       decimal: 8,
       limit: '0',
@@ -120,6 +123,7 @@ describe('list', () => {
       tradeable: true,
       isDAT: true,
       isLPS: true,
+      isLoanToken: false,
       finalized: true,
       minted: '0',
       creation: {
@@ -186,6 +190,7 @@ describe('get', () => {
       tradeable: true,
       isDAT: true,
       isLPS: false,
+      isLoanToken: false,
       finalized: true,
       minted: '0',
       creation: {
@@ -214,6 +219,7 @@ describe('get', () => {
       tradeable: true,
       isDAT: true,
       isLPS: false,
+      isLoanToken: false,
       finalized: false,
       minted: '0',
       creation: {
@@ -242,6 +248,7 @@ describe('get', () => {
       tradeable: true,
       isDAT: true,
       isLPS: false,
+      isLoanToken: false,
       finalized: false,
       minted: '0',
       creation: {
@@ -262,7 +269,7 @@ describe('get', () => {
       id: '3',
       symbol: 'DBTC-DETH',
       symbolKey: 'DBTC-DETH',
-      displaySymbol: 'DBTC-DETH',
+      displaySymbol: 'dDBTC-dDETH',
       name: 'DBTC-DETH',
       decimal: 8,
       limit: '0',
@@ -270,6 +277,7 @@ describe('get', () => {
       tradeable: true,
       isDAT: true,
       isLPS: true,
+      isLoanToken: false,
       finalized: true,
       minted: '0',
       creation: {

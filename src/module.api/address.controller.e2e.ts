@@ -5,10 +5,209 @@ import { createTestingApp, stopTestingApp, waitForAddressTxCount, waitForIndexed
 import { createSignedTxnHex, createToken, mintTokens, sendTokensToAddress } from '@defichain/testing'
 import { WIF } from '@defichain/jellyfish-crypto'
 import { RpcApiError } from '@defichain/jellyfish-api-core'
+import { Testing } from '@defichain/jellyfish-testing'
+import { ForbiddenException } from '@nestjs/common'
+import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
 let controller: AddressController
+const testing = Testing.create(container)
+let colAddr: string
+let usdcAddr: string
+let poolAddr: string
+let emptyAddr: string
+let dfiUsdc
+
+describe('listAccountHistory', () => {
+  beforeAll(async () => {
+    await container.start()
+    await container.waitForReady()
+    await container.waitForWalletCoinbaseMaturity()
+
+    colAddr = await testing.generateAddress()
+    usdcAddr = await testing.generateAddress()
+    poolAddr = await testing.generateAddress()
+    emptyAddr = await testing.generateAddress()
+
+    await testing.token.dfi({ address: colAddr, amount: 20000 })
+    await testing.generate(1)
+
+    await testing.token.create({ symbol: 'USDC', collateralAddress: colAddr })
+    await testing.generate(1)
+
+    await testing.token.mint({ symbol: 'USDC', amount: 10000 })
+    await testing.generate(1)
+
+    await testing.rpc.account.accountToAccount(colAddr, { [usdcAddr]: '10000@USDC' })
+    await testing.generate(1)
+
+    await testing.rpc.poolpair.createPoolPair({
+      tokenA: 'DFI',
+      tokenB: 'USDC',
+      commission: 0,
+      status: true,
+      ownerAddress: poolAddr
+    })
+    await testing.generate(1)
+
+    const poolPairsKeys = Object.keys(await testing.rpc.poolpair.listPoolPairs())
+    expect(poolPairsKeys.length).toStrictEqual(1)
+    dfiUsdc = poolPairsKeys[0]
+
+    // set LP_SPLIT, make LM gain rewards, MANDATORY
+    // ensure `no_rewards` flag turned on
+    // ensure do not get response without txid
+    await testing.container.call('setgov', [{ LP_SPLITS: { [dfiUsdc]: 1.0 } }])
+    await container.generate(1)
+
+    await testing.rpc.poolpair.addPoolLiquidity({
+      [colAddr]: '5000@DFI',
+      [usdcAddr]: '5000@USDC'
+    }, poolAddr)
+    await testing.generate(1)
+
+    await testing.rpc.poolpair.poolSwap({
+      from: colAddr,
+      tokenFrom: 'DFI',
+      amountFrom: 555,
+      to: usdcAddr,
+      tokenTo: 'USDC'
+    })
+    await testing.generate(1)
+
+    await testing.rpc.poolpair.removePoolLiquidity(poolAddr, '2@DFI-USDC')
+    await testing.generate(1)
+
+    // for testing same block pagination
+    await testing.token.create({ symbol: 'APE', collateralAddress: colAddr })
+    await testing.generate(1)
+
+    await testing.token.create({ symbol: 'CAT', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'DOG', collateralAddress: colAddr })
+    await testing.generate(1)
+
+    await testing.token.create({ symbol: 'ELF', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'FOX', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'RAT', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'BEE', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'COW', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'OWL', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'ELK', collateralAddress: colAddr })
+    await testing.generate(1)
+
+    await testing.token.create({ symbol: 'PIG', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'KOI', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'FLY', collateralAddress: colAddr })
+    await testing.generate(1)
+
+    app = await createTestingApp(container)
+    controller = app.get(AddressController)
+
+    await testing.generate(1)
+
+    // to test rewards listing (only needed if `no_rewards` flag disabled)
+    // const height = await testing.container.getBlockCount()
+    // await testing.container.waitForBlockHeight(Math.max(500, height))
+  })
+
+  afterAll(async () => {
+    await stopTestingApp(container, app)
+  })
+
+  it('should not listAccountHistory with mine filter', async () => {
+    const promise = controller.listAccountHistory('mine', { size: 30 })
+    await expect(promise).rejects.toThrow(ForbiddenException)
+    await expect(promise).rejects.toThrow('mine is not allowed')
+  })
+
+  it('should list empty account history', async () => {
+    const history = await controller.listAccountHistory(emptyAddr, { size: 30 })
+    expect(history.data.length).toStrictEqual(0)
+  })
+
+  it('should list account history without rewards', async () => {
+    const history = await controller.listAccountHistory(poolAddr, { size: 30 })
+    expect(history.data.length).toStrictEqual(4)
+    expect(history.data.every(history => !(['Rewards', 'Commission'].includes(history.type))))
+  })
+
+  // skip test, API currently no included rewards (missing txid/txn will crash query with `next`)
+  // rewards listing requires extra implementation for pagination
+  it.skip('should list account history include rewards', async () => {
+    // benchmarking `listaccounthistory` with `no_rewards` false
+    // generate couple hundred blocks to check RPC resource impact
+
+    let page = 0
+    let next: string | undefined
+
+    while (page >= 0) {
+      console.log('benchmarking, page: ', page)
+      console.time('listrewards')
+      const history = await controller.listAccountHistory(poolAddr, { size: 30, next })
+      console.timeEnd('listrewards')
+
+      if (history.page?.next === undefined) {
+        page = -1
+      } else {
+        page += 1
+        next = history.page.next
+      }
+    }
+  })
+
+  it('should listAccountHistory', async () => {
+    const history = await controller.listAccountHistory(colAddr, { size: 30 })
+    expect(history.data.length).toStrictEqual(30)
+    for (let i = 0; i < history.data.length; i += 1) {
+      const accountHistory = history.data[i]
+      expect(typeof accountHistory.owner).toStrictEqual('string')
+      expect(typeof accountHistory.block.height).toStrictEqual('number')
+      expect(typeof accountHistory.block.hash).toStrictEqual('string')
+      expect(typeof accountHistory.block.time).toStrictEqual('number')
+      expect(typeof accountHistory.type).toStrictEqual('string')
+      expect(typeof accountHistory.txn).toStrictEqual('number')
+      expect(typeof accountHistory.txid).toStrictEqual('string')
+      expect(accountHistory.amounts.length).toBeGreaterThan(0)
+      expect(typeof accountHistory.amounts[0]).toStrictEqual('string')
+    }
+  })
+
+  it('should listAccountHistory with size', async () => {
+    const history = await controller.listAccountHistory(colAddr, { size: 10 })
+    expect(history.data.length).toStrictEqual(10)
+  })
+
+  it('test listAccountHistory pagination', async () => {
+    const full = await controller.listAccountHistory(colAddr, { size: 12 })
+
+    const first = await controller.listAccountHistory(colAddr, { size: 3 })
+    expect(first.data[0]).toStrictEqual(full.data[0])
+    expect(first.data[1]).toStrictEqual(full.data[1])
+    expect(first.data[2]).toStrictEqual(full.data[2])
+
+    const firstLast = first.data[first.data.length - 1]
+    const secondToken = `${firstLast.txid}-${firstLast.type}-${firstLast.block.height}`
+    const second = await controller.listAccountHistory(colAddr, { size: 3, next: secondToken })
+    expect(second.data[0]).toStrictEqual(full.data[3])
+    expect(second.data[1]).toStrictEqual(full.data[4])
+    expect(second.data[2]).toStrictEqual(full.data[5])
+
+    const secondLast = second.data[second.data.length - 1]
+    const thirdToken = `${secondLast.txid}-${secondLast.type}-${secondLast.block.height}`
+    const third = await controller.listAccountHistory(colAddr, { size: 3, next: thirdToken })
+    expect(third.data[0]).toStrictEqual(full.data[6])
+    expect(third.data[1]).toStrictEqual(full.data[7])
+    expect(third.data[2]).toStrictEqual(full.data[8])
+
+    const thirdLast = third.data[third.data.length - 1]
+    const forthToken = `${thirdLast.txid}-${thirdLast.type}-${thirdLast.block.height}`
+    const forth = await controller.listAccountHistory(colAddr, { size: 3, next: forthToken })
+    expect(forth.data[0]).toStrictEqual(full.data[9])
+    expect(forth.data[1]).toStrictEqual(full.data[10])
+    expect(forth.data[2]).toStrictEqual(full.data[11])
+  })
+})
 
 describe('getBalance', () => {
   beforeAll(async () => {
@@ -438,6 +637,75 @@ describe('listTransactionsUnspent', () => {
 })
 
 describe('listTokens', () => {
+  async function setupLoanToken (): Promise<void> {
+    const oracleId = await testing.rpc.oracle.appointOracle(await testing.generateAddress(), [
+      { token: 'DFI', currency: 'USD' },
+      { token: 'LOAN', currency: 'USD' }
+    ], { weightage: 1 })
+    await testing.generate(1)
+
+    await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
+      prices: [
+        { tokenAmount: '2@DFI', currency: 'USD' },
+        { tokenAmount: '2@LOAN', currency: 'USD' }
+      ]
+    })
+    await testing.generate(1)
+
+    await testing.rpc.loan.setCollateralToken({
+      token: 'DFI',
+      factor: new BigNumber(1),
+      fixedIntervalPriceId: 'DFI/USD'
+    })
+    await testing.rpc.loan.setLoanToken({
+      symbol: 'LOAN',
+      name: 'LOAN',
+      fixedIntervalPriceId: 'LOAN/USD',
+      mintable: true,
+      interest: new BigNumber(0.02)
+    })
+    await testing.generate(1)
+
+    await testing.token.dfi({
+      address: await testing.address('DFI'),
+      amount: 100
+    })
+
+    await testing.rpc.loan.createLoanScheme({
+      id: 'scheme',
+      minColRatio: 110,
+      interestRate: new BigNumber(1)
+    })
+    await testing.generate(1)
+
+    const vaultId = await testing.rpc.loan.createVault({
+      ownerAddress: await testing.address('VAULT'),
+      loanSchemeId: 'scheme'
+    })
+    await testing.generate(1)
+
+    await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
+      prices: [
+        { tokenAmount: '2@DFI', currency: 'USD' },
+        { tokenAmount: '2@LOAN', currency: 'USD' }
+      ]
+    })
+    await testing.generate(1)
+
+    await testing.rpc.loan.depositToVault({
+      vaultId: vaultId,
+      from: await testing.address('DFI'),
+      amount: '100@DFI'
+    })
+    await testing.generate(1)
+    await testing.rpc.loan.takeLoan({
+      vaultId: vaultId,
+      amounts: '10@LOAN',
+      to: address
+    })
+    await testing.generate(1)
+  }
+
   beforeAll(async () => {
     await container.start()
     await container.waitForWalletCoinbaseMaturity()
@@ -455,6 +723,8 @@ describe('listTokens', () => {
       await sendTokensToAddress(container, address, 10, token)
     }
     await container.generate(1)
+
+    await setupLoanToken()
   })
 
   afterAll(async () => {
@@ -469,7 +739,7 @@ describe('listTokens', () => {
       size: 30
     })
 
-    expect(response.data.length).toStrictEqual(6)
+    expect(response.data.length).toStrictEqual(7)
     expect(response.page).toBeUndefined()
 
     expect(response.data[5]).toStrictEqual({
@@ -480,7 +750,20 @@ describe('listTokens', () => {
       symbolKey: 'F',
       name: 'F',
       isDAT: true,
-      isLPS: false
+      isLPS: false,
+      isLoanToken: false
+    })
+
+    expect(response.data[6]).toStrictEqual({
+      id: '7',
+      amount: '10.00000000',
+      symbol: 'LOAN',
+      displaySymbol: 'dLOAN',
+      symbolKey: 'LOAN',
+      name: 'LOAN',
+      isDAT: true,
+      isLPS: false,
+      isLoanToken: true
     })
   })
 
@@ -498,12 +781,13 @@ describe('listTokens', () => {
       next: first.page?.next
     })
 
-    expect(next.data.length).toStrictEqual(4)
+    expect(next.data.length).toStrictEqual(5)
     expect(next.page?.next).toBeUndefined()
     expect(next.data[0].symbol).toStrictEqual('C')
     expect(next.data[1].symbol).toStrictEqual('D')
     expect(next.data[2].symbol).toStrictEqual('E')
     expect(next.data[3].symbol).toStrictEqual('F')
+    expect(next.data[4].symbol).toStrictEqual('LOAN')
   })
 
   it('should listTokens with undefined next pagination', async () => {
