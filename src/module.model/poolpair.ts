@@ -64,12 +64,10 @@ export interface PoolPair extends Model {
   tokenA: {
     id: number // ------------| numerical id
     symbol: string // --------| string
-    reserve: string // -------| bignumber
   }
   tokenB: {
     id: number // ------------| numerical id
     symbol: string // --------| string
-    reserve: string // -------| bignumber
   }
   block: {
     hash: string
@@ -79,7 +77,6 @@ export interface PoolPair extends Model {
   }
   status: boolean // ---------| active / not active
   commission: string // ------| bignumber
-  totalLiquidity: string // --| bignumber
   creationHeight: number // --| number
   creationTx: string // ------| txid string
   customRewards: string[] // -| array of strings
