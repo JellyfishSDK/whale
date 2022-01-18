@@ -38,6 +38,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
   }
 
   async indexSwap (poolPair: PoolPair, fromTokenId: number, fromAmount: BigNumber): Promise<void> {
+    // !TODO: Put poolswap mapper
   }
 
   async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
