@@ -2,10 +2,11 @@ import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_ab
 import { PoolSwap, CPoolSwap } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Inject, Injectable } from '@nestjs/common'
-import { PoolPairMapper } from '@src/module.model/poolpair'
+import { PoolPairMapper, PoolPair } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { IndexerError } from '@src/module.indexer/error'
+import BigNumber from 'bignumber.js'
 
 @Injectable()
 export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
@@ -30,14 +31,13 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
 
     if (poolPair !== undefined) {
-      // const forward = data.fromTokenId === poolPair.tokenA.id
-      // let fromAmount = data.fromAmount
-
       poolPair.id = `${poolPair.poolPairId}-${block.height}`
       poolPair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
-
-      await this.poolPairMapper.put(poolPair)
+      await this.indexSwap(poolPair, data.fromTokenId, data.fromAmount)
     }
+  }
+
+  async indexSwap (poolPair: PoolPair, fromTokenId: number, fromAmount: BigNumber): Promise<void> {
   }
 
   async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {

@@ -14,6 +14,7 @@ import { ConfigService } from '@nestjs/config'
 import { PoolAddLiquidityIndexer } from './pool.add.liquidity'
 import { PoolRemoveLiquidityIndexer } from './pool.remove.liquidity'
 import { PoolSwapIndexer } from './poolswap'
+import { CompositeSwapIndexer } from './compositeswap'
 import { SetLoanTokenIndexer } from './set.loan.token'
 import { ActivePriceIndexer } from './active.price'
 import { PlaceAuctionBidIndexer } from './place.auction.bid'
@@ -32,6 +33,7 @@ const indexers = [
   PoolAddLiquidityIndexer,
   PoolRemoveLiquidityIndexer,
   PoolSwapIndexer,
+  CompositeSwapIndexer,
   SetLoanTokenIndexer,
   ActivePriceIndexer,
   PlaceAuctionBidIndexer

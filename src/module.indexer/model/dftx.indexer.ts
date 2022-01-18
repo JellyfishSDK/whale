@@ -16,6 +16,7 @@ import { CreateTokenIndexer } from './dftx/create.token'
 import { PoolSwapIndexer } from './dftx/poolswap'
 import { SetLoanTokenIndexer } from './dftx/set.loan.token'
 import { UpdatePoolPairIndexer } from './dftx/update.poolpair'
+import { CompositeSwapIndexer } from './dftx/compositeswap'
 import { ActivePriceIndexer } from './dftx/active.price'
 import { PlaceAuctionBidIndexer } from './dftx/place.auction.bid'
 
@@ -36,6 +37,7 @@ export class MainDfTxIndexer extends Indexer {
     createPoolPair: CreatePoolPairIndexer,
     updatePoolPair: UpdatePoolPairIndexer,
     poolSwapIndexer: PoolSwapIndexer,
+    compositeSwapIndexer: CompositeSwapIndexer,
     setLoanToken: SetLoanTokenIndexer,
     activePriceIndexer: ActivePriceIndexer,
     placeAuctionBidIndexer: PlaceAuctionBidIndexer
@@ -53,6 +55,7 @@ export class MainDfTxIndexer extends Indexer {
       createPoolPair,
       updatePoolPair,
       poolSwapIndexer,
+      compositeSwapIndexer,
       setLoanToken,
       activePriceIndexer,
       placeAuctionBidIndexer
