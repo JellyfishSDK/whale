@@ -77,6 +77,7 @@ import { PoolSwapMapper } from './poolswap'
     TokenMapper,
     PoolPairMapper,
     PoolPairTokenMapper,
+    PoolSwapMapper,
     VaultAuctionHistoryMapper
   ]
 })
