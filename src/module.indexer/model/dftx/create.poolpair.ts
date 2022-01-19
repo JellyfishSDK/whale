@@ -7,7 +7,6 @@ import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { MAX_TOKEN_SYMBOL_LENGTH, TokenMapper } from '@src/module.model/token'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { IndexerError } from '@src/module.indexer/error'
-import { toBuffer } from '@defichain/jellyfish-transaction/dist/script/_buffer'
 import { NetworkName } from '@defichain/jellyfish-network'
 
 const ConsensusParams = {
@@ -40,7 +39,6 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
 
   async indexTransaction (block: RawBlock, transaction: DfTxTransaction<PoolCreatePair>): Promise<void> {
     const data = transaction.dftx.data
-    const txn = transaction.txn
     const tokenId = await this.tokenMapper.getNextTokenID(true)
 
     const tokenA = await this.tokenMapper.get(`${data.tokenA}`)
@@ -69,24 +67,15 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
       poolPairId: `${tokenId}`,
       tokenA: {
         id: data.tokenA,
-        symbol: tokenA.symbol,
-        reserve: '0'
+        symbol: tokenA.symbol
       },
       tokenB: {
         id: data.tokenB,
-        symbol: tokenB.symbol,
-        reserve: '0'
+        symbol: tokenB.symbol
       },
       block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
       status: data.status,
-      commission: data.commission.toFixed(8),
-      totalLiquidity: '0',
-      creationHeight: block.height,
-      creationTx: txn.txid,
-      customRewards: data.customRewards.map(x => {
-        return `${x.amount.toFixed(8)}@${~~x.token}`
-      }),
-      ownerScript: toBuffer(data.ownerAddress.stack).toString('hex')
+      commission: data.commission.toFixed(8)
     })
 
     await this.poolPairTokenMapper.put({

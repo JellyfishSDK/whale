@@ -77,8 +77,4 @@ export interface PoolPair extends Model {
   }
   status: boolean // ---------| active / not active
   commission: string // ------| bignumber
-  creationHeight: number // --| number
-  creationTx: string // ------| txid string
-  customRewards: string[] // -| array of strings
-  ownerScript: string // -----| hex string
 }

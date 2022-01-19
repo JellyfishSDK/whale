@@ -202,13 +202,11 @@ describe('add liquidity and remove liquidity', () => {
       sort: '00000003'
     })
 
-    const removeMsg = await removePoolLiquidity(container, {
+    await removePoolLiquidity(container, {
       address: ownerAddress,
       tokenLP: result?.poolPairId ?? '',
       amountLP: new BigNumber(20)
     })
-
-    console.log(removeMsg)
 
     await waitForIndexedHeightLatest(app, container)
 
