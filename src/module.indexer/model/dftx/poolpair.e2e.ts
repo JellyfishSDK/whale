@@ -78,26 +78,19 @@ describe('index poolswap and add liquidity', () => {
 
     expect(result).toStrictEqual({
       commission: '0.00000000',
-      creationHeight: 108,
-      creationTx: expect.any(String),
-      customRewards: expect.any(Array),
       id: '3-110',
       name: 'A-Default Defi token',
-      ownerScript: expect.any(String),
       pairSymbol: 'A-DFI',
       poolPairId: '3',
       status: true,
       tokenA: {
         id: 1,
-        symbol: 'A',
-        reserve: '100.00000000'
+        symbol: 'A'
       },
       tokenB: {
         id: 0,
-        symbol: 'DFI',
-        reserve: '200.00000000'
+        symbol: 'DFI'
       },
-      totalLiquidity: '141.42135623',
       block: expect.any(Object),
       sort: '00000003'
     })
@@ -115,26 +108,19 @@ describe('index poolswap and add liquidity', () => {
     const resultPostSwap = await poolPairMapper.getLatest('3')
     expect(resultPostSwap).toStrictEqual({
       commission: '0.00000000',
-      creationHeight: 108,
-      creationTx: expect.any(String),
-      customRewards: expect.any(Array),
-      id: '3-115',
+      id: '3-113',
       name: 'A-Default Defi token',
-      ownerScript: expect.any(String),
       pairSymbol: 'A-DFI',
       poolPairId: '3',
       status: true,
       tokenA: {
         id: 1,
-        symbol: 'A',
-        reserve: '200.00000000'
+        symbol: 'A'
       },
       tokenB: {
         id: 0,
-        symbol: 'DFI',
-        reserve: '100.00000000'
+        symbol: 'DFI'
       },
-      totalLiquidity: '141.42135623',
       block: expect.any(Object),
       sort: '00000003'
     })
@@ -178,26 +164,19 @@ describe('add liquidity and remove liquidity', () => {
 
     expect(result).toStrictEqual({
       commission: '0.00000000',
-      creationHeight: 108,
-      creationTx: expect.any(String),
-      customRewards: expect.any(Array),
       id: '3-110',
       name: 'A-Default Defi token',
-      ownerScript: expect.any(String),
       pairSymbol: 'A-DFI',
       poolPairId: '3',
       status: true,
       tokenA: {
         id: 1,
-        symbol: 'A',
-        reserve: '100.00000000'
+        symbol: 'A'
       },
       tokenB: {
         id: 0,
-        symbol: 'DFI',
-        reserve: '200.00000000'
+        symbol: 'DFI'
       },
-      totalLiquidity: '141.42135623',
       block: expect.any(Object),
       sort: '00000003'
     })
@@ -213,26 +192,19 @@ describe('add liquidity and remove liquidity', () => {
     const resultPostRemove = await poolPairMapper.getLatest('3')
     expect(resultPostRemove).toStrictEqual({
       commission: '0.00000000',
-      creationHeight: 108,
-      creationTx: expect.any(String),
-      customRewards: expect.any(Array),
       id: '3-115',
       name: 'A-Default Defi token',
-      ownerScript: expect.any(String),
       pairSymbol: 'A-DFI',
       poolPairId: '3',
       status: true,
       tokenA: {
         id: 1,
-        symbol: 'A',
-        reserve: '85.85786437'
+        symbol: 'A'
       },
       tokenB: {
         id: 0,
-        symbol: 'DFI',
-        reserve: '171.71572875'
+        symbol: 'DFI'
       },
-      totalLiquidity: '121.42135623',
       block: expect.any(Object),
       sort: '00000003'
     })

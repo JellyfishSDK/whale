@@ -71,26 +71,19 @@ describe('set loan token', () => {
     expect(poolPairs[0]).toStrictEqual({
       commission: '0.00000000',
       status: true,
-      creationHeight: 111,
-      creationTx: expect.any(String),
-      customRewards: expect.any(Array),
       id: '8-111',
       name: 'USDT-Default Defi token',
-      ownerScript: expect.any(String),
       pairSymbol: 'USDT-DFI',
       poolPairId: '8',
       sort: '00000008',
       tokenA: {
         id: 2,
-        reserve: '0',
         symbol: 'USDT'
       },
       tokenB: {
         id: 0,
-        reserve: '0',
         symbol: 'DFI'
       },
-      totalLiquidity: '0',
       block: expect.any(Object)
     })
   })

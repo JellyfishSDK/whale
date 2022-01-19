@@ -52,34 +52,27 @@ describe('composite swap', () => {
     }))
 
     expect(poolPairs[0]).toStrictEqual({
-      id: '2-104',
+      id: '2-103',
       sort: '00000002',
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
       poolPairId: '2',
       tokenA: {
         id: 1,
-        symbol: 'B',
-        reserve: '100.00000000'
+        symbol: 'B'
       },
       tokenB: {
         id: 0,
-        symbol: 'DFI',
-        reserve: '200.00000000'
+        symbol: 'DFI'
       },
       block: {
         hash: expect.any(String),
-        height: 104,
+        height: 103,
         medianTime: expect.any(Number),
         time: expect.any(Number)
       },
       status: true,
-      commission: '0.00000000',
-      totalLiquidity: '141.42135623',
-      creationHeight: 103,
-      creationTx: expect.any(String),
-      customRewards: [],
-      ownerScript: expect.any(String)
+      commission: '0.00000000'
     })
 
     await testing.rpc.poolpair.compositeSwap({
@@ -97,65 +90,51 @@ describe('composite swap', () => {
     }))
 
     expect(poolPairsAfterSwap[0]).toStrictEqual({
-      id: '2-111',
+      id: '2-110',
       sort: '00000002',
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
       poolPairId: '2',
       tokenA: {
         id: 1,
-        symbol: 'B',
-        reserve: '110.00000000'
+        symbol: 'B'
       },
       tokenB: {
         id: 0,
-        symbol: 'DFI',
-        reserve: '181.81818181'
+        symbol: 'DFI'
       },
       block: {
         hash: expect.any(String),
-        height: 111,
+        height: 110,
         medianTime: expect.any(Number),
         time: expect.any(Number)
       },
       status: true,
-      commission: '0.00000000',
-      totalLiquidity: '141.42135623',
-      creationHeight: 103,
-      creationTx: expect.any(String),
-      customRewards: [],
-      ownerScript: expect.any(String)
+      commission: '0.00000000'
     })
 
     expect(poolPairsAfterSwap[1]).toStrictEqual({
-      id: '4-111',
+      id: '4-110',
       sort: '00000004',
       pairSymbol: 'C-DFI',
       name: 'C-Default Defi token',
       poolPairId: '4',
       tokenA: {
         id: 3,
-        symbol: 'C',
-        reserve: '91.66666666'
+        symbol: 'C'
       },
       tokenB: {
         id: 0,
-        symbol: 'DFI',
-        reserve: '218.18181819'
+        symbol: 'DFI'
       },
       block: {
         hash: expect.any(String),
-        height: 111,
+        height: 110,
         medianTime: expect.any(Number),
         time: expect.any(Number)
       },
       status: true,
-      commission: '0.00000000',
-      totalLiquidity: '141.42135623',
-      creationHeight: 105,
-      creationTx: expect.any(String),
-      customRewards: [],
-      ownerScript: expect.any(String)
+      commission: '0.00000000'
     })
   })
 })
@@ -174,34 +153,27 @@ describe('invalidate', () => {
     }))
 
     const preSwapPool = {
-      id: '2-104',
+      id: '2-103',
       sort: '00000002',
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
       poolPairId: '2',
       tokenA: {
         id: 1,
-        symbol: 'B',
-        reserve: '100.00000000'
+        symbol: 'B'
       },
       tokenB: {
         id: 0,
-        symbol: 'DFI',
-        reserve: '200.00000000'
+        symbol: 'DFI'
       },
       block: {
         hash: expect.any(String),
-        height: 104,
+        height: 103,
         medianTime: expect.any(Number),
         time: expect.any(Number)
       },
       status: true,
-      commission: '0.00000000',
-      totalLiquidity: '141.42135623',
-      creationHeight: 103,
-      creationTx: expect.any(String),
-      customRewards: [],
-      ownerScript: expect.any(String)
+      commission: '0.00000000'
     }
 
     expect(poolPairs[0]).toStrictEqual(preSwapPool)
@@ -222,34 +194,27 @@ describe('invalidate', () => {
     }))
 
     expect(poolPairsAfterSwap[0]).toStrictEqual({
-      id: '2-111',
+      id: '2-110',
       sort: '00000002',
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
       poolPairId: '2',
       tokenA: {
         id: 1,
-        symbol: 'B',
-        reserve: '110.00000000'
+        symbol: 'B'
       },
       tokenB: {
         id: 0,
-        symbol: 'DFI',
-        reserve: '181.81818181'
+        symbol: 'DFI'
       },
       block: {
         hash: expect.any(String),
-        height: 111,
+        height: 110,
         medianTime: expect.any(Number),
         time: expect.any(Number)
       },
       status: true,
-      commission: '0.00000000',
-      totalLiquidity: '141.42135623',
-      creationHeight: 103,
-      creationTx: expect.any(String),
-      customRewards: [],
-      ownerScript: expect.any(String)
+      commission: '0.00000000'
     })
 
     await invalidateFromHeight(app, container, height - 1)

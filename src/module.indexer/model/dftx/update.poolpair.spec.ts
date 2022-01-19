@@ -52,27 +52,20 @@ describe('update poolpair', () => {
 
     expect(poolPairs[1]).toStrictEqual({
       commission: '0.50000000',
-      creationHeight: 121,
-      creationTx: expect.any(String),
-      customRewards: expect.any(Array),
       id: '8-127',
       name: 'B-Default Defi token',
       sort: '00000008',
-      ownerScript: expect.any(String),
       pairSymbol: 'B-DFI',
       poolPairId: '8',
       status: false,
       tokenA: {
         id: 2,
-        reserve: '0',
         symbol: 'B'
       },
       tokenB: {
         id: 0,
-        reserve: '0',
         symbol: 'DFI'
       },
-      totalLiquidity: '0',
       block: expect.any(Object)
     })
   })
@@ -96,10 +89,6 @@ describe('invalidate', () => {
     const poolPair = await poolPairMapper.getLatest('8')
     expect(poolPair).toStrictEqual({
       commission: '0.75000000',
-      creationTx: expect.any(String),
-      customRewards: expect.any(Array),
-      ownerScript: expect.any(String),
-      creationHeight: 121,
       name: 'B-Default Defi token',
       id: '8-130',
       sort: '00000008',
@@ -108,15 +97,12 @@ describe('invalidate', () => {
       status: true,
       tokenA: {
         id: 2,
-        reserve: '0',
         symbol: 'B'
       },
       tokenB: {
         id: 0,
-        reserve: '0',
         symbol: 'DFI'
       },
-      totalLiquidity: '0',
       block: expect.any(Object)
     })
 
@@ -127,27 +113,20 @@ describe('invalidate', () => {
     const poolPairInvalidated = await poolPairMapper.getLatest('8')
     expect(poolPairInvalidated).toStrictEqual({
       commission: '0.50000000',
-      creationHeight: 121,
-      creationTx: expect.any(String),
-      customRewards: expect.any(Array),
       id: '8-127',
       name: 'B-Default Defi token',
       sort: '00000008',
-      ownerScript: expect.any(String),
       pairSymbol: 'B-DFI',
       poolPairId: '8',
       status: false,
       tokenA: {
         id: 2,
-        reserve: '0',
         symbol: 'B'
       },
       tokenB: {
         id: 0,
-        reserve: '0',
         symbol: 'DFI'
       },
-      totalLiquidity: '0',
       block: expect.any(Object)
     })
   })

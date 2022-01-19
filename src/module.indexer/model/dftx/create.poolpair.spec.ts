@@ -50,36 +50,25 @@ describe('create poolpair', () => {
 
     expect(poolPairs[0]).toStrictEqual({
       commission: '0.00000000',
-      creationHeight: 108,
-      creationTx: expect.any(String),
-      customRewards: expect.any(Array),
       id: '7-108',
       name: 'USDT-Default Defi token',
-      ownerScript: expect.any(String),
       pairSymbol: 'USDT-DFI',
       poolPairId: '7',
       status: true,
       tokenA: {
         id: 1,
-        symbol: 'USDT',
-        reserve: '0'
+        symbol: 'USDT'
       },
       tokenB: {
         id: 0,
-        symbol: 'DFI',
-        reserve: '0'
+        symbol: 'DFI'
       },
-      totalLiquidity: '0',
       block: expect.any(Object),
       sort: '00000007'
     })
 
     expect(poolPairs[1]).toStrictEqual({
       commission: '0.00000000',
-      creationHeight: 109,
-      creationTx: expect.any(String),
-      customRewards: expect.any(Array),
-      ownerScript: expect.any(String),
       id: '8-109',
       name: 'B-Default Defi token',
       pairSymbol: 'B-DFI',
@@ -87,15 +76,12 @@ describe('create poolpair', () => {
       status: true,
       tokenA: {
         id: 2,
-        symbol: 'B',
-        reserve: '0'
+        symbol: 'B'
       },
       tokenB: {
         id: 0,
-        symbol: 'DFI',
-        reserve: '0'
+        symbol: 'DFI'
       },
-      totalLiquidity: '0',
       block: expect.any(Object),
       sort: '00000008'
     })
@@ -119,10 +105,6 @@ describe('invalidate', () => {
     const poolPair = await poolPairMapper.getLatest('14')
     expect(poolPair).toStrictEqual({
       commission: '0.00000000',
-      creationHeight: 116,
-      creationTx: expect.any(String),
-      customRewards: expect.any(Array),
-      ownerScript: expect.any(String),
       name: 'G-Default Defi token',
       sort: '0000000e',
       id: '14-116',
@@ -131,15 +113,12 @@ describe('invalidate', () => {
       status: true,
       tokenA: {
         id: 13,
-        symbol: 'G',
-        reserve: '0'
+        symbol: 'G'
       },
       tokenB: {
         id: 0,
-        symbol: 'DFI',
-        reserve: '0'
+        symbol: 'DFI'
       },
-      totalLiquidity: '0',
       block: expect.any(Object)
     })
 
