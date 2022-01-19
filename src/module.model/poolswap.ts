@@ -49,5 +49,5 @@ export interface PoolSwap extends Model {
 
   poolPairId: string // ------| poolPairId (decimal encoded integer as string)
   fromAmount: string // ------| bignumber
-  fromToken: number // -------| number
+  fromTokenId: number // -------| number
 }

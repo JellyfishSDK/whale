@@ -7,6 +7,8 @@ import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { IndexerError } from '@src/module.indexer/error'
 import BigNumber from 'bignumber.js'
+import { PoolSwapMapper } from '@src/module.model/poolswap'
+import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 @Injectable()
 export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
@@ -15,6 +17,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
   constructor (
     private readonly poolPairMapper: PoolPairMapper,
     private readonly poolPairTokenMapper: PoolPairTokenMapper,
+    private readonly poolSwapMapper: PoolSwapMapper,
     @Inject('NETWORK') protected readonly network: NetworkName
   ) {
     super()
@@ -33,12 +36,19 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     if (poolPair !== undefined) {
       poolPair.id = `${poolPair.poolPairId}-${block.height}`
       poolPair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
-      await this.indexSwap(poolPair, data.fromTokenId, data.fromAmount)
+      await this.indexSwap(poolPair, data.fromTokenId, data.fromAmount, block, transaction.txn.txid)
     }
   }
 
-  async indexSwap (poolPair: PoolPair, fromTokenId: number, fromAmount: BigNumber): Promise<void> {
-    // !TODO: Put poolswap mapper
+  async indexSwap (poolPair: PoolPair, fromTokenId: number, fromAmount: BigNumber, block: RawBlock, txid: string): Promise<void> {
+    await this.poolSwapMapper.put({
+      id: `${poolPair.id}-${txid}`,
+      key: poolPair.id,
+      sort: HexEncoder.encodeHeight(block.height) + txid,
+      poolPairId: poolPair.id,
+      fromAmount: fromAmount.toFixed(8),
+      fromTokenId: fromTokenId
+    })
   }
 
   async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
