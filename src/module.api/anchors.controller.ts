@@ -21,7 +21,7 @@ export class AnchorsController {
     @Query() query: PaginationQuery): Promise<ApiPagedResponse<AnchorData>> {
     const result = await this.rpcClient.spv.listAnchors({
       limit: Number(query.size),
-      ...(query.next !== undefined) && { startBTCHeight: Number(query.next) }
+      ...(query.next !== undefined) && { maxBtcHeight: Number(query.next) - 1 }
     })
 
     const anchors = result
