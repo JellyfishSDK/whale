@@ -108,7 +108,7 @@ describe('index poolswap and add liquidity', () => {
     const resultPostSwap = await poolPairMapper.getLatest('3')
     expect(resultPostSwap).toStrictEqual({
       commission: '0.00000000',
-      id: '3-113',
+      id: '3-108',
       name: 'A-Default Defi token',
       pairSymbol: 'A-DFI',
       poolPairId: '3',
@@ -192,7 +192,7 @@ describe('add liquidity and remove liquidity', () => {
     const resultPostRemove = await poolPairMapper.getLatest('3')
     expect(resultPostRemove).toStrictEqual({
       commission: '0.00000000',
-      id: '3-115',
+      id: '3-108',
       name: 'A-Default Defi token',
       pairSymbol: 'A-DFI',
       poolPairId: '3',
