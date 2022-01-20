@@ -26,28 +26,30 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
   async indexTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
     const data = transaction.dftx.data
     const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(data.fromTokenId, data.toTokenId)
-
     if (poolPairToken === undefined) {
       throw new IndexerError(`Pool for pair ${data.fromTokenId}, ${data.toTokenId} not found`)
     }
 
     const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
-
     if (poolPair !== undefined) {
-      poolPair.id = `${poolPair.poolPairId}-${block.height}`
-      poolPair.block = { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
       await this.indexSwap(poolPair, data.fromTokenId, data.fromAmount, block, transaction.txn.txid)
     }
   }
 
   async indexSwap (poolPair: PoolPair, fromTokenId: number, fromAmount: BigNumber, block: RawBlock, txid: string): Promise<void> {
     await this.poolSwapMapper.put({
-      id: `${poolPair.id}-${txid}`,
-      key: poolPair.id,
+      id: `${poolPair.poolPairId}-${txid}`,
+      key: poolPair.poolPairId,
       sort: HexEncoder.encodeHeight(block.height) + txid,
-      poolPairId: poolPair.id,
+      poolPairId: poolPair.poolPairId,
       fromAmount: fromAmount.toFixed(8),
-      fromTokenId: fromTokenId
+      fromTokenId: fromTokenId,
+      block: {
+        hash: block.hash,
+        height: block.height,
+        time: block.time,
+        medianTime: block.mediantime
+      }
     })
   }
 

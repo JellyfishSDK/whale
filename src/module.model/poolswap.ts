@@ -24,12 +24,13 @@ export class PoolSwapMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async query (key: string, limit: number, lt?: string): Promise<PoolSwap[]> {
+  async query (key: string, limit: number, lt?: string, gt?: string): Promise<PoolSwap[]> {
     return await this.database.query(PoolSwapMapping.index.key_sort, {
       partitionKey: key,
       limit: limit,
       order: SortOrder.DESC,
-      lt: lt
+      lt: lt,
+      gt: gt
     })
   }
 
@@ -50,4 +51,11 @@ export interface PoolSwap extends Model {
   poolPairId: string // ------| poolPairId (decimal encoded integer as string)
   fromAmount: string // ------| bignumber
   fromTokenId: number // -------| number
+
+  block: {
+    hash: string
+    height: number
+    time: number
+    medianTime: number
+  }
 }
