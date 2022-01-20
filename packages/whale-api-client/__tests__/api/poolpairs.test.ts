@@ -145,7 +145,8 @@ describe('poolpair info', () => {
       },
       apr: {
         reward: 0,
-        total: 0
+        total: 0,
+        commission: 0
       },
       commission: '0',
       totalLiquidity: {
@@ -224,7 +225,8 @@ describe('poolpair info', () => {
       },
       apr: {
         reward: 0,
-        total: 0
+        total: 0,
+        commission: 0
       },
       commission: '0',
       totalLiquidity: {
@@ -273,7 +275,8 @@ describe('poolpair info', () => {
       },
       apr: {
         reward: 0,
-        total: 0
+        total: 0,
+        commission: 0
       },
       commission: '0',
       totalLiquidity: {

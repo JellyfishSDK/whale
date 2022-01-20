@@ -110,7 +110,8 @@ describe('list', () => {
       },
       apr: {
         reward: 2229.42,
-        total: 2229.42
+        total: 2229.42,
+        commission: 0
       },
       commission: '0',
       totalLiquidity: {
@@ -191,7 +192,8 @@ describe('get', () => {
       },
       apr: {
         reward: 0,
-        total: 0
+        total: 0,
+        commission: 0
       },
       commission: '0',
       totalLiquidity: {
