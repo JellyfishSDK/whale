@@ -2,17 +2,20 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
 import { ApiPagedResponse, WhaleApiClient, WhaleApiException } from '../../src'
-import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens } from '@defichain/testing'
-import { PoolPairData } from '../../src/api/poolpairs'
+import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens, poolSwap } from '@defichain/testing'
+import { PoolPairData, PoolSwap } from '../../src/api/poolpairs'
+import { Testing } from '@defichain/jellyfish-testing'
 
 let container: MasterNodeRegTestContainer
 let service: StubService
 let client: WhaleApiClient
+let testing: Testing
 
-beforeAll(async () => {
+beforeEach(async () => {
   container = new MasterNodeRegTestContainer()
   service = new StubService(container)
   client = new StubWhaleApiClient(service)
+  testing = Testing.create(container)
 
   await container.start()
   await container.waitForWalletCoinbaseMaturity()
@@ -21,7 +24,7 @@ beforeAll(async () => {
   await setup()
 })
 
-afterAll(async () => {
+afterEach(async () => {
   try {
     await service.stop()
   } finally {
@@ -34,8 +37,12 @@ async function setup (): Promise<void> {
 
   for (const token of tokens) {
     await container.waitForWalletBalanceGTE(110)
-    await createToken(container, token)
-    await mintTokens(container, token)
+    await createToken(container, token, {
+      collateralAddress: await testing.address('swap')
+    })
+    await mintTokens(container, token, {
+      mintAmount: 10000
+    })
   }
   await createPoolPair(container, 'A', 'DFI')
   await createPoolPair(container, 'B', 'DFI')
@@ -90,9 +97,26 @@ async function setup (): Promise<void> {
     amountB: 31.51288,
     shareAddress: await getNewAddress(container)
   })
+
+  await createToken(container, 'DUSD')
+  await createToken(container, 'TSLA', {
+    collateralAddress: await testing.address('swap')
+  })
+  await createPoolPair(container, 'TSLA', 'DUSD', {
+    commission: 0.002
+  })
+  await mintTokens(container, 'DUSD')
+  await mintTokens(container, 'TSLA')
+  await addPoolLiquidity(container, {
+    tokenA: 'TSLA',
+    amountA: 20,
+    tokenB: 'DUSD',
+    amountB: 100,
+    shareAddress: await getNewAddress(container)
+  })
 }
 
-describe('list', () => {
+describe('poolpair info', () => {
   it('should list', async () => {
     const response: ApiPagedResponse<PoolPairData> = await client.poolpairs.list(30)
 
@@ -138,6 +162,9 @@ describe('list', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
+      },
+      volume: {
+        h24: 0
       }
     })
   })
@@ -171,9 +198,7 @@ describe('list', () => {
     expect(last[0].symbol).toStrictEqual('USDT-DFI')
     expect(last[1].symbol).toStrictEqual('USDC-H')
   })
-})
 
-describe('get', () => {
   it('should get 9', async () => {
     const response: PoolPairData = await client.poolpairs.get('9')
 
@@ -216,6 +241,9 @@ describe('get', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
+      },
+      volume: {
+        h24: 0
       }
     })
   })
@@ -262,6 +290,9 @@ describe('get', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
+      },
+      volume: {
+        h24: 0
       }
     })
   })
@@ -296,5 +327,139 @@ describe('get', () => {
         url: '/v0.0/regtest/poolpairs/999'
       })
     }
+  })
+})
+
+describe('poolswap', () => {
+  it('should show volume and swaps', async () => {
+    await poolSwap(container, {
+      from: await testing.address('swap'),
+      tokenFrom: 'A',
+      amountFrom: 25,
+      to: await testing.address('swap'),
+      tokenTo: 'DFI'
+    })
+
+    await poolSwap(container, {
+      from: await testing.address('swap'),
+      tokenFrom: 'A',
+      amountFrom: 50,
+      to: await testing.address('swap'),
+      tokenTo: 'DFI'
+    })
+
+    await poolSwap(container, {
+      from: await testing.address('swap'),
+      tokenFrom: 'TSLA',
+      amountFrom: 10,
+      to: await testing.address('swap'),
+      tokenTo: 'DUSD'
+    })
+
+    const height = await container.getBlockCount()
+    await container.generate(1)
+    await service.waitForIndexedHeight(height)
+
+    const response: ApiPagedResponse<PoolSwap> = await client.poolpairs.listPoolSwaps('9')
+    expect(response.length).toStrictEqual(2)
+    expect(response.hasNext).toStrictEqual(false)
+    expect(response[0].fromAmount).toStrictEqual('50.00000000')
+    expect(response[1].fromAmount).toStrictEqual('25.00000000')
+    expect(response[0].fromTokenId).toStrictEqual(1)
+    expect(response[1].fromTokenId).toStrictEqual(1)
+
+    const poolPair: PoolPairData = await client.poolpairs.get('9')
+    expect(poolPair).toStrictEqual({
+      id: '9',
+      symbol: 'A-DFI',
+      displaySymbol: 'dA-DFI',
+      name: 'A-Default Defi token',
+      status: true,
+      tokenA: {
+        id: expect.any(String),
+        symbol: 'A',
+        reserve: '175',
+        blockCommission: '0',
+        displaySymbol: 'dA'
+      },
+      tokenB: {
+        id: '0',
+        symbol: 'DFI',
+        reserve: '114.28571428',
+        blockCommission: '0',
+        displaySymbol: 'DFI'
+      },
+      apr: {
+        reward: 0,
+        total: 0,
+        commission: 0
+      },
+      commission: '0',
+      totalLiquidity: {
+        token: '141.42135623',
+        usd: '529.69781240365293383563596592'
+      },
+      tradeEnabled: true,
+      ownerAddress: expect.any(String),
+      priceRatio: {
+        ab: '1.53125',
+        ba: '0.65306122'
+      },
+      rewardPct: '0',
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(Number)
+      },
+      volume: {
+        h24: 113.50667408649706
+      }
+    })
+
+    const dusdPoolPair: PoolPairData = await client.poolpairs.get('23')
+    expect(dusdPoolPair).toStrictEqual({
+      id: '23',
+      symbol: 'TSLA-DUSD',
+      displaySymbol: 'dTSLA-DUSD',
+      name: 'TSLA-DUSD',
+      status: true,
+      tokenA: {
+        id: expect.any(String),
+        symbol: 'TSLA',
+        reserve: '29.98',
+        blockCommission: '0',
+        displaySymbol: 'dTSLA'
+      },
+      tokenB: {
+        id: expect.any(String),
+        symbol: 'DUSD',
+        reserve: '66.71114076',
+        blockCommission: '0',
+        displaySymbol: 'DUSD'
+      },
+      apr: {
+        reward: 0,
+        total: 0.12174783188792529,
+        commission: 0.12174783188792529
+      },
+      commission: '0.002',
+      totalLiquidity: {
+        token: '44.72135954',
+        usd: '133.42228152'
+      },
+      tradeEnabled: true,
+      ownerAddress: expect.any(String),
+      priceRatio: {
+        ab: '0.4494002',
+        ba: '2.22518815'
+      },
+      rewardPct: '0',
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(Number)
+      },
+      volume: {
+        h24: 22.251881507671783
+      }
+    })
   })
 })
