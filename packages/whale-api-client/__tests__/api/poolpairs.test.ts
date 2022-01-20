@@ -120,7 +120,7 @@ describe('poolpair info', () => {
   it('should list', async () => {
     const response: ApiPagedResponse<PoolPairData> = await client.poolpairs.list(30)
 
-    expect(response.length).toStrictEqual(10)
+    expect(response.length).toStrictEqual(11)
     expect(response.hasNext).toStrictEqual(false)
 
     expect(response[1]).toStrictEqual({
@@ -192,7 +192,7 @@ describe('poolpair info', () => {
     expect(next[3].symbol).toStrictEqual('H-DFI')
 
     const last = await client.paginate(next)
-    expect(last.length).toStrictEqual(2)
+    expect(last.length).toStrictEqual(3)
     expect(last.hasNext).toStrictEqual(false)
     expect(last.nextToken).toBeUndefined()
 

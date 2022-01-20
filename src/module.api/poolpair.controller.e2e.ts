@@ -129,6 +129,9 @@ describe('list', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
+      },
+      volume: {
+        h24: 0
       }
     })
   })
@@ -211,6 +214,9 @@ describe('get', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
+      },
+      volume: {
+        h24: 0
       }
     })
   })
