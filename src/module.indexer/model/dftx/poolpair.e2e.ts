@@ -78,7 +78,7 @@ describe('index poolswap and add liquidity', () => {
 
     expect(result).toStrictEqual({
       commission: '0.00000000',
-      id: '3-110',
+      id: '3-108',
       name: 'A-Default Defi token',
       pairSymbol: 'A-DFI',
       poolPairId: '3',
@@ -164,7 +164,7 @@ describe('add liquidity and remove liquidity', () => {
 
     expect(result).toStrictEqual({
       commission: '0.00000000',
-      id: '3-110',
+      id: '3-108',
       name: 'A-Default Defi token',
       pairSymbol: 'A-DFI',
       poolPairId: '3',

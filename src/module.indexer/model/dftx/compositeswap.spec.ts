@@ -90,7 +90,7 @@ describe('composite swap', () => {
     }))
 
     expect(poolPairsAfterSwap[0]).toStrictEqual({
-      id: '2-110',
+      id: '2-103',
       sort: '00000002',
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
@@ -105,7 +105,7 @@ describe('composite swap', () => {
       },
       block: {
         hash: expect.any(String),
-        height: 110,
+        height: 103,
         medianTime: expect.any(Number),
         time: expect.any(Number)
       },
@@ -194,7 +194,7 @@ describe('invalidate', () => {
     }))
 
     expect(poolPairsAfterSwap[0]).toStrictEqual({
-      id: '2-110',
+      id: '2-103',
       sort: '00000002',
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
@@ -209,7 +209,7 @@ describe('invalidate', () => {
       },
       block: {
         hash: expect.any(String),
-        height: 110,
+        height: 103,
         medianTime: expect.any(Number),
         time: expect.any(Number)
       },
