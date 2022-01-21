@@ -21,16 +21,15 @@ export class AnchorsController {
     @Query() query: PaginationQuery): Promise<ApiPagedResponse<AnchorData>> {
     const result = await this.rpcClient.spv.listAnchors({
       limit: Number(query.size),
-      ...(query.next !== undefined) && { maxBtcHeight: Number(query.next) - 1 }
+      ...(query.next !== undefined) && { maxBtcHeight: Number(query.next) }
     })
 
     const anchors = result
       .map((anchor) => {
         return mapAnchors(anchor)
       })
-      .sort((a, b) => a.id.localeCompare(b.id))
 
-    return ApiPagedResponse.of(anchors, query.size, item => (Number(item.id)).toString())
+    return ApiPagedResponse.of(anchors, query.size, item => (Number(item.id) - 1).toString())
   }
 }
 

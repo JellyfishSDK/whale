@@ -121,16 +121,16 @@ describe('list', () => {
     expect(response.data.length).toStrictEqual(4)
 
     expect(response.data[0]).toStrictEqual({
-      id: '1',
+      id: '4',
       btc: {
         block: {
-          height: 1,
+          height: 4,
           hash: '0000000000000001000000000000000100000000000000010000000000000001'
         },
         txn: {
           hash: expect.any(String)
         },
-        confirmations: 6
+        confirmations: 3
       },
       dfi: {
         block: {
@@ -141,15 +141,23 @@ describe('list', () => {
       previousAnchor: '0000000000000000000000000000000000000000000000000000000000000000',
       rewardAddress: expect.any(String),
       signatures: 2,
-      active: true,
+      active: false,
       anchorCreationHeight: 90
     })
   })
 
-  // it('should list anchors with pagination (startBtcHeight)', async () => {
-  //   const first = await controller.list({ size: 2 })
-  //
-  //   expect(first.data.length).toStrictEqual(2)
-  //   expect(first.page?.next).toStrictEqual('3')
-  // })
+  it('should test pagination with maxBtcHeight', async () => {
+    const firstRequest = await controller.list({ size: 3 })
+
+    expect(firstRequest.data.length).toStrictEqual(3)
+    expect(firstRequest.page?.next).toStrictEqual('1')
+
+    const lastRequest = await controller.list({
+      size: 2,
+      next: '1'
+    })
+
+    expect(lastRequest.data.length).toStrictEqual(1)
+    expect(lastRequest.page?.next).toStrictEqual(undefined)
+  })
 })
