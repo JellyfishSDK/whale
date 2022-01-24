@@ -99,16 +99,16 @@ async function setup (): Promise<void> {
   })
 
   await createToken(container, 'DUSD')
-  await createToken(container, 'TSLA', {
+  await createToken(container, 'TEST', {
     collateralAddress: await testing.address('swap')
   })
-  await createPoolPair(container, 'TSLA', 'DUSD', {
+  await createPoolPair(container, 'TEST', 'DUSD', {
     commission: 0.002
   })
   await mintTokens(container, 'DUSD')
-  await mintTokens(container, 'TSLA')
+  await mintTokens(container, 'TEST')
   await addPoolLiquidity(container, {
-    tokenA: 'TSLA',
+    tokenA: 'TEST',
     amountA: 20,
     tokenB: 'DUSD',
     amountB: 100,
@@ -353,7 +353,7 @@ describe('poolswap', () => {
 
     await poolSwap(container, {
       from: await testing.address('swap'),
-      tokenFrom: 'TSLA',
+      tokenFrom: 'TEST',
       amountFrom: 10,
       to: await testing.address('swap'),
       tokenTo: 'DUSD'
@@ -421,16 +421,16 @@ describe('poolswap', () => {
     const dusdPoolPair: PoolPairData = await client.poolpairs.get('23')
     expect(dusdPoolPair).toStrictEqual({
       id: '23',
-      symbol: 'TSLA-DUSD',
-      displaySymbol: 'dTSLA-DUSD',
-      name: 'TSLA-DUSD',
+      symbol: 'TEST-DUSD',
+      displaySymbol: 'dTEST-DUSD',
+      name: 'TEST-DUSD',
       status: true,
       tokenA: {
         id: expect.any(String),
-        symbol: 'TSLA',
+        symbol: 'TEST',
         reserve: '29.98',
         blockCommission: '0',
-        displaySymbol: 'dTSLA'
+        displaySymbol: 'dTEST'
       },
       tokenB: {
         id: expect.any(String),
