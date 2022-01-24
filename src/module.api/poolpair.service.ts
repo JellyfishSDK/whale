@@ -137,16 +137,6 @@ export class PoolPairService {
         return new BigNumber(1)
       }
 
-      const dfiPair = await this.getPoolPair(token, 'DFI')
-      if (dfiPair !== undefined) {
-        const dfiPrice = await this.getUSD_PER_DFI() ?? 0
-        if (dfiPair.idTokenA === '0') {
-          return dfiPair.reserveA.div(dfiPair.reserveB).times(dfiPrice)
-        } else if (dfiPair.idTokenB === '0') {
-          return dfiPair.reserveB.div(dfiPair.reserveA).times(dfiPrice)
-        }
-      }
-
       const dusdPair = await this.getPoolPair(token, 'DUSD')
       if (dusdPair !== undefined) {
         // Intentionally only checking against first symbol, to avoid issues
@@ -155,6 +145,15 @@ export class PoolPairService {
           return dusdPair.reserveB.div(dusdPair.reserveA)
         }
         return dusdPair.reserveA.div(dusdPair.reserveB)
+      }
+
+      const dfiPair = await this.getPoolPair(token, 'DFI')
+      if (dfiPair !== undefined) {
+        const dfiPrice = await this.getUSD_PER_DFI() ?? 0
+        if (dfiPair.idTokenA === '0') {
+          return dfiPair.reserveA.div(dfiPair.reserveB).times(dfiPrice)
+        }
+        return dfiPair.reserveB.div(dfiPair.reserveA).times(dfiPrice)
       }
     }, {
       ttl: 3600 // 60 minutes
