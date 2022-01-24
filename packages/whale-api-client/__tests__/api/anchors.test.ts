@@ -146,16 +146,20 @@ describe('list', () => {
   })
 
   it('should test pagination with maxBtcHeight', async () => {
-    const firstRequest = await client.anchors.list(3)
+    const firstRequest = await client.anchors.list(1)
+    expect(firstRequest.length).toStrictEqual(1)
+    expect(firstRequest.nextToken).toStrictEqual('3')
 
-    expect(firstRequest.length).toStrictEqual(3)
-    expect(firstRequest.hasNext).toStrictEqual(true)
-    expect(firstRequest.nextToken).toStrictEqual('1')
+    const secondRequest = await client.anchors.list(1, firstRequest.nextToken)
+    expect(secondRequest.length).toStrictEqual(1)
+    expect(secondRequest.nextToken).toStrictEqual('2')
 
-    const lastRequest = await client.paginate(firstRequest)
+    const thirdRequest = await client.anchors.list(1, secondRequest.nextToken)
+    expect(thirdRequest.length).toStrictEqual(1)
+    expect(thirdRequest.nextToken).toStrictEqual('1')
 
+    const lastRequest = await client.anchors.list(2, thirdRequest.nextToken)
     expect(lastRequest.length).toStrictEqual(1)
-    expect(lastRequest.hasNext).toStrictEqual(false)
     expect(lastRequest.nextToken).toStrictEqual(undefined)
   })
 })

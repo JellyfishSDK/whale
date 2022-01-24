@@ -147,14 +147,28 @@ describe('list', () => {
   })
 
   it('should test pagination with maxBtcHeight', async () => {
-    const firstRequest = await controller.list({ size: 3 })
+    const firstRequest = await controller.list({ size: 1 })
+    expect(firstRequest.data.length).toStrictEqual(1)
+    expect(firstRequest.page?.next).toStrictEqual('3')
 
-    expect(firstRequest.data.length).toStrictEqual(3)
-    expect(firstRequest.page?.next).toStrictEqual('1')
+    const secondRequest = await controller.list({
+      size: 1,
+      next:
+      firstRequest.page?.next
+    })
+    expect(secondRequest.data.length).toStrictEqual(1)
+    expect(secondRequest.page?.next).toStrictEqual('2')
+
+    const thirdRequest = await controller.list({
+      size: 1,
+      next: secondRequest.page?.next
+    })
+    expect(thirdRequest.data.length).toStrictEqual(1)
+    expect(thirdRequest.page?.next).toStrictEqual('1')
 
     const lastRequest = await controller.list({
       size: 2,
-      next: '1'
+      next: thirdRequest.page?.next
     })
 
     expect(lastRequest.data.length).toStrictEqual(1)
