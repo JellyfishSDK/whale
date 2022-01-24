@@ -15,7 +15,6 @@ export class AnchorsController {
   /**
    *  List anchors
    */
-
   @Get('')
   async list (
     @Query() query: PaginationQuery): Promise<ApiPagedResponse<AnchorData>> {
