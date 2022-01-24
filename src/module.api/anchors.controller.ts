@@ -13,7 +13,12 @@ export class AnchorsController {
   }
 
   /**
-   *  List anchors
+   *  List Anchors
+   *
+   * @param {PaginationQuery} query
+   * @param {number} query.size query limit size. Default = 30
+   * @param {string} [query.next] max BTC height
+   * @return {Promise<ApiPagedResponse<AnchorData>>}
    */
   @Get('')
   async list (
