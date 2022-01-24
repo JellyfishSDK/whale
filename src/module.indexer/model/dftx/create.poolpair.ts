@@ -89,7 +89,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
       id: `${tokenId}`,
       sort: HexEncoder.encodeHeight(tokenId),
       symbol: data.pairSymbol,
-      name: `${tokenA.symbol}-${tokenA.symbol} LP Token`,
+      name: `${tokenA.symbol}-${tokenB.symbol} LP Token`,
       isDAT: true,
       isLPS: true,
       limit: '0.0',

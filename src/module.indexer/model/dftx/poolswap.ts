@@ -66,6 +66,6 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
       throw new IndexerError(`Pool with id ${poolPairToken.poolPairId} not found`)
     }
 
-    await this.poolPairMapper.delete(`${poolPair.poolPairId}-${block.height}`)
+    await this.poolSwapMapper.delete(poolSwap.id)
   }
 }
