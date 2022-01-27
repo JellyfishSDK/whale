@@ -13,6 +13,7 @@ import { NotFoundIndexerError } from '@src/module.indexer/error'
 import { blockchain as defid } from '@defichain/jellyfish-api-core'
 import { MainDfTxIndexer } from '@src/module.indexer/model/dftx.indexer'
 import { BlockMintedIndexer } from '@src/module.indexer/model/block.minted'
+import { isNil } from 'lodash'
 
 /**
  * This is a deterministic log based indexer.
@@ -56,7 +57,7 @@ export class MainIndexer {
 
   async invalidate (hash: string): Promise<void> {
     const block = await this.rawBlock.get(hash)
-    if (block === undefined) {
+    if (isNil(block)) {
       throw new NotFoundIndexerError('invalidate', 'RawBlock', hash)
     }
     for (const indexer of this.indexers) {

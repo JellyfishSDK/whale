@@ -5,6 +5,7 @@ import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { TransactionVout } from '@src/module.model/transaction.vout'
 import { VoutFinder } from '@src/module.indexer/model/_vout_finder'
 import { NotFoundIndexerError } from '@src/module.indexer/error'
+import { isNil } from 'lodash'
 
 @Injectable()
 export class ScriptActivityIndexer extends Indexer {
@@ -18,12 +19,12 @@ export class ScriptActivityIndexer extends Indexer {
   async index (block: RawBlock): Promise<void> {
     for (const txn of block.tx) {
       for (const vin of txn.vin) {
-        if (vin.coinbase !== undefined) {
+        if (!isNil(vin.coinbase)) {
           continue
         }
 
         const vout = await this.voutFinder.findVout(block, vin.txid, vin.vout)
-        if (vout === undefined) {
+        if (isNil(vout)) {
           throw new NotFoundIndexerError('index', 'TransactionVout', `${vin.txid} - ${vin.vout}`)
         }
         await this.mapper.put(this.mapVin(block, txn, vin, vout))
@@ -41,7 +42,7 @@ export class ScriptActivityIndexer extends Indexer {
   async invalidate (block: RawBlock): Promise<void> {
     for (const txn of block.tx) {
       for (const vin of txn.vin) {
-        if (vin.coinbase !== undefined) {
+        if (!isNil(vin.coinbase)) {
           continue
         }
 

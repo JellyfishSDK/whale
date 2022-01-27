@@ -3,6 +3,7 @@ import { PoolUpdatePair, CPoolUpdatePair } from '@defichain/jellyfish-transactio
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable, Logger } from '@nestjs/common'
 import { PoolPairMapper } from '@src/module.model/poolpair'
+import { isNil } from 'lodash'
 
 @Injectable()
 export class UpdatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
@@ -18,7 +19,7 @@ export class UpdatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
   async indexTransaction (block: RawBlock, transaction: DfTxTransaction<PoolUpdatePair>): Promise<void> {
     const data = transaction.dftx.data
     const poolPair = await this.poolPairMapper.getLatest(`${data.poolId}`)
-    if (poolPair !== undefined) {
+    if (!isNil(poolPair)) {
       await this.poolPairMapper.put({
         ...poolPair,
         id: `${data.poolId}-${block.height}`,
@@ -32,7 +33,7 @@ export class UpdatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
   async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<PoolUpdatePair>): Promise<void> {
     const data = transaction.dftx.data
     const poolPair = await this.poolPairMapper.getLatest(`${data.poolId}`)
-    if (poolPair !== undefined) {
+    if (!isNil(poolPair)) {
       await this.poolPairMapper.delete(`${data.poolId}-${block.height}`)
     }
   }

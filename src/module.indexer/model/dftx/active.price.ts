@@ -4,10 +4,11 @@ import { Inject, Injectable, Logger } from '@nestjs/common'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { OraclePriceActive, OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { OraclePriceAggregated, OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
-import { PriceTickerMapper, PriceTicker } from '@src/module.model/price.ticker'
+import { PriceTicker, PriceTickerMapper } from '@src/module.model/price.ticker'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import BigNumber from 'bignumber.js'
 import { DfTxIndexer, DfTxTransaction } from './_abstract'
+import { isNil } from 'lodash'
 
 @Injectable()
 export class ActivePriceIndexer extends DfTxIndexer<SetLoanToken> {
@@ -64,22 +65,26 @@ export class ActivePriceIndexer extends DfTxIndexer<SetLoanToken> {
     previousActive?: OraclePriceActive
   ): OraclePriceActive {
     const nextPrice = this.isAggregateValid(aggregatedPrice, block) ? aggregatedPrice.aggregated : undefined
-    const activePrice = previousActive?.next !== undefined ? previousActive.next : previousActive?.active
+    const activePrice = !isNil(previousActive?.next) ? previousActive?.next : previousActive?.active
 
     return {
       id: `${tickerId}-${block.height}`,
       key: tickerId,
       isLive: this.isLive(activePrice, nextPrice),
-      block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
+      block: {
+        hash: block.hash,
+        height: block.height,
+        medianTime: block.mediantime,
+        time: block.time
+      },
       active: activePrice,
       next: nextPrice,
       sort: HexEncoder.encodeHeight(block.height)
     }
   }
 
-  private isLive (active: OraclePriceActive['active'],
-    next: OraclePriceActive['next']): boolean {
-    if (active === undefined || next === undefined) {
+  private isLive (active: OraclePriceActive['active'], next: OraclePriceActive['next']): boolean {
+    if (isNil(active) || isNil(next)) {
       return false
     }
 
@@ -108,7 +113,7 @@ export class ActivePriceIndexer extends DfTxIndexer<SetLoanToken> {
       return false
     }
 
-    if (aggregate.aggregated.oracles === undefined) {
+    if (isNil(aggregate.aggregated.oracles)) {
       return false
     }
 

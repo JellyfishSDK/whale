@@ -7,6 +7,7 @@ import { IndexStatusMapper, Status } from '@src/module.indexer/status'
 import { TokenMapper } from '@src/module.model/token'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { waitForCondition } from '@defichain/testcontainers/dist/utils'
+import { isNil } from 'lodash'
 
 @Injectable()
 export class RPCBlockProvider {
@@ -74,7 +75,7 @@ export class RPCBlockProvider {
    */
   private async synchronize (): Promise<boolean> {
     const indexed = await this.blockMapper.getHighest()
-    if (indexed === undefined) {
+    if (isNil(indexed)) {
       return await this.indexGenesis()
     }
 
@@ -133,7 +134,7 @@ export class RPCBlockProvider {
    */
   private async cleanup (): Promise<void> {
     const status = await this.statusMapper.get()
-    if (status === undefined) {
+    if (isNil(status)) {
       return
     }
     switch (status.status) {

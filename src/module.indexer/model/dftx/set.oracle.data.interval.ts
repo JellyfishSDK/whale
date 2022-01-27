@@ -9,6 +9,7 @@ import {
 } from '@src/module.model/oracle.price.aggregated.interval'
 import BigNumber from 'bignumber.js'
 import { mapPriceFeeds } from './set.oracle.data'
+import { isNil } from 'lodash'
 
 @Injectable()
 export class SetOracleDataIntervalIndexer extends DfTxIndexer<SetOracleData> {
@@ -37,7 +38,7 @@ export class SetOracleDataIntervalIndexer extends DfTxIndexer<SetOracleData> {
 
     for (const [token, currency] of pairs) {
       const aggregated = await this.aggregatedMapper.get(`${token}-${currency}-${block.height}`)
-      if (aggregated === undefined) {
+      if (isNil(aggregated)) {
         continue
       }
 
@@ -114,7 +115,7 @@ export class SetOracleDataIntervalIndexer extends DfTxIndexer<SetOracleData> {
 
     for (const [token, currency] of pairs) {
       const aggregated = await this.aggregatedMapper.get(`${token}-${currency}-${block.height}`)
-      if (aggregated === undefined) {
+      if (isNil(aggregated)) {
         continue
       }
 

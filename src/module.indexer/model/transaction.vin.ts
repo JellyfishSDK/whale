@@ -5,6 +5,7 @@ import { TransactionVout } from '@src/module.model/transaction.vout'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { VoutFinder } from '@src/module.indexer/model/_vout_finder'
 import { NotFoundIndexerError } from '@src/module.indexer/error'
+import { isNil } from 'lodash'
 
 @Injectable()
 export class TransactionVinIndexer extends Indexer {
@@ -18,11 +19,11 @@ export class TransactionVinIndexer extends Indexer {
   async index (block: RawBlock): Promise<void> {
     for (const txn of block.tx) {
       for (const vin of txn.vin) {
-        if (vin.coinbase !== undefined) {
+        if (!isNil(vin.coinbase)) {
           await this.vinMapper.put(this.map(txn, vin, undefined))
         } else {
           const vout = await this.voutFinder.findVout(block, vin.txid, vin.vout)
-          if (vout === undefined) {
+          if (isNil(vout)) {
             throw new NotFoundIndexerError('index', 'TransactionVout', `${vin.txid} - ${vin.vout}`)
           }
           await this.vinMapper.put(this.map(txn, vin, vout))
@@ -44,7 +45,7 @@ export class TransactionVinIndexer extends Indexer {
       id: this.mapId(txn, vin),
       txid: txn.txid,
       coinbase: vin.coinbase,
-      vout: vout !== undefined
+      vout: !isNil(vout)
         ? {
             id: vout.id,
             txid: vout.txid,
@@ -56,7 +57,7 @@ export class TransactionVinIndexer extends Indexer {
             }
           }
         : undefined,
-      script: vin.scriptSig !== undefined
+      script: !isNil(vin.scriptSig)
         ? {
             hex: vin.scriptSig.hex
           }
@@ -71,7 +72,7 @@ export class TransactionVinIndexer extends Indexer {
    *     coinbase: txn.txid + '00'
    */
   mapId (txn: defid.Transaction, vin: defid.Vin): string {
-    if (vin.coinbase !== undefined) {
+    if (!isNil(vin.coinbase)) {
       return txn.txid + '00'
     }
     return txn.txid + vin.txid + HexEncoder.encodeVoutIndex(vin.vout)
