@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import BigNumber from 'bignumber.js'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
@@ -123,6 +123,54 @@ export class PoolPairService {
     })
   }
 
+  private async getPriceForToken (id: number): Promise<BigNumber | undefined> {
+    return await this.cache.get<BigNumber>(`PRICE_FOR_TOKEN_${id}`, async () => {
+      const tokenInfo = await this.tokenMapper.get(`${id}`)
+      const token = tokenInfo?.symbol
+
+      if (token === undefined) {
+        throw new NotFoundException('Unable to find token symbol')
+      }
+
+      if (['DUSD', 'USDT', 'USDC'].includes(token)) {
+        return new BigNumber(1)
+      }
+
+      const dusdPair = await this.getPoolPair(token, 'DUSD')
+      if (dusdPair !== undefined) {
+        // Intentionally only checking against first symbol, to avoid issues
+        // with symbol name truncation
+        if (dusdPair.symbol.split('-')[0] !== 'DUSD') {
+          return dusdPair.reserveB.div(dusdPair.reserveA)
+        }
+        return dusdPair.reserveA.div(dusdPair.reserveB)
+      }
+
+      const dfiPair = await this.getPoolPair(token, 'DFI')
+      if (dfiPair !== undefined) {
+        const dfiPrice = await this.getUSD_PER_DFI() ?? 0
+        if (dfiPair.idTokenA === '0') {
+          return dfiPair.reserveA.div(dfiPair.reserveB).times(dfiPrice)
+        }
+        return dfiPair.reserveB.div(dfiPair.reserveA).times(dfiPrice)
+      }
+    }, {
+      ttl: 3600 // 60 minutes
+    })
+  }
+
+  public async getUSDVolume (id: string): Promise<PoolPairData['volume'] | undefined> {
+    // const block = await this.blockMapper.getHighest()
+    // const height = block?.height ?? 0
+    return await this.cache.get<PoolPairData['volume']>(`H24_VOLUME_${id}`, async () => {
+      return {
+        h24: 0
+      }
+    }, {
+      ttl: 3600 // 60 minutes
+    })
+  }
+
   private async getLoanTokenSplits (): Promise<Record<string, number> | undefined> {
     return await this.cache.get<Record<string, number>>('LP_LOAN_TOKEN_SPLITS', async () => {
       const result = await this.rpcClient.masternode.getGov('LP_LOAN_TOKEN_SPLITS')
@@ -225,11 +273,15 @@ export class PoolPairService {
 
     const yearlyUSD = customUSD.plus(pctUSD).plus(loanUSD)
     // 1 == 100%, 0.1 = 10%
-    const reward = yearlyUSD.div(totalLiquidityUSD)
+    const apr = yearlyUSD.div(totalLiquidityUSD)
+
+    const volume = await this.getUSDVolume(id)
+    const commission = info.commission.times(volume?.h24 ?? 0).times(365).div(totalLiquidityUSD)
 
     return {
-      reward: reward.toNumber(),
-      total: reward.toNumber()
+      reward: apr.toNumber(),
+      commission: commission.toNumber(),
+      total: apr.plus(commission).toNumber()
     }
   }
 }
