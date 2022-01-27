@@ -145,8 +145,7 @@ describe('poolpair info', () => {
       },
       apr: {
         reward: 0,
-        total: 0,
-        commission: 0
+        total: 0
       },
       commission: '0',
       totalLiquidity: {
@@ -163,9 +162,6 @@ describe('poolpair info', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
-      },
-      volume: {
-        h24: 0
       }
     })
   })
@@ -225,8 +221,7 @@ describe('poolpair info', () => {
       },
       apr: {
         reward: 0,
-        total: 0,
-        commission: 0
+        total: 0
       },
       commission: '0',
       totalLiquidity: {
@@ -243,9 +238,6 @@ describe('poolpair info', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
-      },
-      volume: {
-        h24: 0
       }
     })
   })
@@ -275,8 +267,7 @@ describe('poolpair info', () => {
       },
       apr: {
         reward: 0,
-        total: 0,
-        commission: 0
+        total: 0
       },
       commission: '0',
       totalLiquidity: {
@@ -293,9 +284,6 @@ describe('poolpair info', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
-      },
-      volume: {
-        h24: 0
       }
     })
   })
@@ -334,7 +322,7 @@ describe('poolpair info', () => {
 })
 
 describe('poolswap', () => {
-  it('should show volume and swaps', async () => {
+  it('should show swaps', async () => {
     await poolSwap(container, {
       from: await testing.address('swap'),
       tokenFrom: 'A',
@@ -394,8 +382,7 @@ describe('poolswap', () => {
       },
       apr: {
         reward: 0,
-        total: 0,
-        commission: 0
+        total: 0
       },
       commission: '0',
       totalLiquidity: {
@@ -412,9 +399,6 @@ describe('poolswap', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
-      },
-      volume: {
-        h24: 113.50667408649706
       }
     })
 
@@ -441,8 +425,7 @@ describe('poolswap', () => {
       },
       apr: {
         reward: 0,
-        total: 0.12174783188792529,
-        commission: 0.12174783188792529
+        total: 0
       },
       commission: '0.002',
       totalLiquidity: {
@@ -459,9 +442,6 @@ describe('poolswap', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
-      },
-      volume: {
-        h24: 22.251881507671783
       }
     })
   })

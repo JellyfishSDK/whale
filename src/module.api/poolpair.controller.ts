@@ -44,8 +44,7 @@ export class PoolPairController {
 
       const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
       const apr = await this.poolPairService.getAPR(id, info)
-      const volume = await this.poolPairService.getUSDVolume(id)
-      items.push(mapPoolPair(id, info, totalLiquidityUsd, apr, volume))
+      items.push(mapPoolPair(id, info, totalLiquidityUsd, apr))
     }
 
     return ApiPagedResponse.of(items, query.size, item => {
@@ -66,8 +65,7 @@ export class PoolPairController {
 
     const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
     const apr = await this.poolPairService.getAPR(id, info)
-    const volume = await this.poolPairService.getUSDVolume(id)
-    return mapPoolPair(String(id), info, totalLiquidityUsd, apr, volume)
+    return mapPoolPair(String(id), info, totalLiquidityUsd, apr)
   }
 
   /**
@@ -89,8 +87,7 @@ export class PoolPairController {
   }
 }
 
-function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr'],
-  volume?: PoolPairData['volume']): PoolPairData {
+function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr']): PoolPairData {
   const [symbolA, symbolB] = info.symbol.split('-')
 
   return {
@@ -130,7 +127,6 @@ function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNum
       tx: info.creationTx,
       height: info.creationHeight.toNumber()
     },
-    apr: apr,
-    volume: volume
+    apr: apr
   }
 }
