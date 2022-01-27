@@ -36,7 +36,7 @@ export class CompositeSwapIndexer extends DfTxIndexer<CompositeSwap> {
       poolIds.push({ id: poolPairToken.poolPairId })
     }
 
-    let swapAmount
+    let swapAmount: BigNumber|undefined
     for (const pool of poolIds) {
       const poolPair = await this.poolPairMapper.getLatest(`${pool.id}`)
 
