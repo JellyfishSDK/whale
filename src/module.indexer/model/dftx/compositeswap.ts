@@ -7,6 +7,7 @@ import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { IndexerError } from '@src/module.indexer/error'
+import BigNumber from 'bignumber.js'
 
 @Injectable()
 export class CompositeSwapIndexer extends DfTxIndexer<CompositeSwap> {
@@ -35,6 +36,7 @@ export class CompositeSwapIndexer extends DfTxIndexer<CompositeSwap> {
       poolIds.push({ id: poolPairToken.poolPairId })
     }
 
+    let swapAmount
     for (const pool of poolIds) {
       const poolPair = await this.poolPairMapper.getLatest(`${pool.id}`)
 
@@ -42,7 +44,14 @@ export class CompositeSwapIndexer extends DfTxIndexer<CompositeSwap> {
         throw new IndexerError(`Pool with id ${pool.id} not found`)
       }
 
-      await this.poolSwapIndexer.indexSwap(poolPair, poolSwap.fromTokenId, poolSwap.fromAmount, block, transaction.txn.txid)
+      if (swapAmount === undefined) {
+        swapAmount = poolSwap.fromAmount
+      } else {
+        const one = new BigNumber(1.0)
+        swapAmount = one.minus(poolPair.commission).times(swapAmount)
+      }
+
+      await this.poolSwapIndexer.indexSwap(poolPair, poolSwap.fromTokenId, swapAmount, block, transaction.txn.txid)
     }
   }
 
