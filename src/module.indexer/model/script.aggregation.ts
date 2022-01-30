@@ -5,7 +5,6 @@ import { VoutFinder } from '@src/module.indexer/model/_vout_finder'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import BigNumber from 'bignumber.js'
 import { NotFoundIndexerError } from '@src/module.indexer/error'
-import { isNil } from 'lodash'
 
 @Injectable()
 export class ScriptAggregationIndexer extends Indexer {
@@ -21,7 +20,7 @@ export class ScriptAggregationIndexer extends Indexer {
 
     function findScriptAggregation (hex: string, type: string): ScriptAggregation {
       const hid = HexEncoder.asSHA256(hex)
-      if (isNil(records[hid])) {
+      if (records[hid] === undefined) {
         records[hid] = ScriptAggregationIndexer.newScriptAggregation(block, hex, type)
       }
       return records[hid]
@@ -29,12 +28,12 @@ export class ScriptAggregationIndexer extends Indexer {
 
     for (const txn of block.tx) {
       for (const vin of txn.vin) {
-        if (!isNil(vin.coinbase)) {
+        if (vin.coinbase !== undefined) {
           continue
         }
 
         const vout = await this.voutFinder.findVout(block, vin.txid, vin.vout)
-        if (isNil(vout)) {
+        if (vout === undefined) {
           throw new NotFoundIndexerError('index', 'TransactionVout', `${vin.txid} - ${vin.vout}`)
         }
 
@@ -58,7 +57,7 @@ export class ScriptAggregationIndexer extends Indexer {
 
     for (const aggregation of Object.values(records)) {
       const latest = await this.mapper.getLatest(aggregation.hid)
-      if (!isNil(latest)) {
+      if (latest !== undefined) {
         aggregation.statistic.txInCount += latest.statistic.txInCount
         aggregation.statistic.txOutCount += latest.statistic.txOutCount
 
@@ -78,12 +77,12 @@ export class ScriptAggregationIndexer extends Indexer {
 
     for (const txn of block.tx) {
       for (const vin of txn.vin) {
-        if (!isNil(vin.coinbase)) {
+        if (vin.coinbase !== undefined) {
           continue
         }
 
         const vout = await this.voutFinder.findVout(block, vin.txid, vin.vout)
-        if (isNil(vout)) {
+        if (vout === undefined) {
           throw new NotFoundIndexerError('invalidate', 'TransactionVout', `${vin.txid} - ${vin.vout}`)
         }
         hidList.add(HexEncoder.asSHA256(vout.script.hex))

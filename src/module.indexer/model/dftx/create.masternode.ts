@@ -8,7 +8,6 @@ import { P2PKH, P2WPKH } from '@defichain/jellyfish-address'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { MasternodeStatsMapper, TimelockStats } from '@src/module.model/masternode.stats'
 import BigNumber from 'bignumber.js'
-import { isNil } from 'lodash'
 
 @Injectable()
 export class CreateMasternodeIndexer extends DfTxIndexer<CreateMasternode> {
@@ -30,7 +29,7 @@ export class CreateMasternodeIndexer extends DfTxIndexer<CreateMasternode> {
     let operatorAddress = ownerAddress
 
     // This is actually the operatorPubKeyHash but jellyfish deserializes like so
-    if (!isNil(data.operatorPubKeyHash)) {
+    if (data.operatorPubKeyHash !== undefined) {
       if (data.operatorType === MasternodeKeyType.PKHashType) {
         operatorAddress = P2PKH.to(this.network, data.operatorPubKeyHash).utf8String
       } else { // WitV0KeyHashType
@@ -74,7 +73,7 @@ export class CreateMasternodeIndexer extends DfTxIndexer<CreateMasternode> {
 
   mapTimelockStats (latest: TimelockStats[], lockStats: TimelockStats): TimelockStats[] {
     const existing = latest.find(x => x.weeks === lockStats.weeks)
-    if (isNil(existing)) {
+    if (existing === undefined) {
       return [...latest, lockStats]
     }
     return latest.map(x => ({

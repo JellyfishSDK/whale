@@ -6,7 +6,6 @@ import { Masternode, MasternodeMapper } from '@src/module.model/masternode'
 import { MasternodeStatsMapper, TimelockStats } from '@src/module.model/masternode.stats'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import BigNumber from 'bignumber.js'
-import { isNil } from 'lodash'
 
 @Injectable()
 export class ResignMasternodeIndexer extends DfTxIndexer<ResignMasternode> {
@@ -23,7 +22,7 @@ export class ResignMasternodeIndexer extends DfTxIndexer<ResignMasternode> {
     const txn = transaction.txn
     const data = transaction.dftx.data
     const mn = await this.masternodeMapper.get(data.nodeId)
-    if (!isNil(mn)) {
+    if (mn !== undefined) {
       await this.masternodeMapper.put({
         ...mn,
         resignHeight: block.height,
@@ -63,7 +62,7 @@ export class ResignMasternodeIndexer extends DfTxIndexer<ResignMasternode> {
   async invalidateTransaction (_: RawBlock, transaction: DfTxTransaction<ResignMasternode>): Promise<void> {
     const data = transaction.dftx.data
     const mn = await this.masternodeMapper.get(data.nodeId)
-    if (!isNil(mn)) {
+    if (mn !== undefined) {
       delete mn.resignTx
       await this.masternodeMapper.put({ ...mn, resignHeight: -1 })
     }

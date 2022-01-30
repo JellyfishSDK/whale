@@ -8,7 +8,6 @@ import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { OracleTokenCurrencyMapper } from '@src/module.model/oracle.token.currency'
 import BigNumber from 'bignumber.js'
 import { PriceTickerMapper } from '@src/module.model/price.ticker'
-import { isNil } from 'lodash'
 
 @Injectable()
 export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
@@ -34,7 +33,7 @@ export class SetOracleDataIndexer extends DfTxIndexer<SetOracleData> {
 
     for (const [token, currency] of pairs) {
       const aggregated = await this.mapPriceAggregated(block, token, currency)
-      if (isNil(aggregated)) {
+      if (aggregated === undefined) {
         continue
       }
 

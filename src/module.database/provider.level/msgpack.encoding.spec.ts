@@ -21,34 +21,3 @@ it('should encode and decode into the same json object', async () => {
 
   expect(decoded).toStrictEqual(obj)
 })
-
-it('should map undefined as null', () => {
-  const obj = {
-    foo: 'bar',
-    a: null,
-    b: undefined,
-    c: [null, 'a'],
-    d: {
-      number: 1,
-      bar: 'foo',
-      e: null,
-      f: undefined
-    }
-  }
-
-  const encoded = MsgpackEncoding.encode(obj)
-  const decoded = MsgpackEncoding.decode(encoded)
-
-  expect(decoded).toStrictEqual({
-    foo: 'bar',
-    a: null,
-    b: null,
-    c: [null, 'a'],
-    d: {
-      number: 1,
-      bar: 'foo',
-      e: null,
-      f: null
-    }
-  })
-})

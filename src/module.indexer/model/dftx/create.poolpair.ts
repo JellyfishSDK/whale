@@ -8,7 +8,6 @@ import { MAX_TOKEN_SYMBOL_LENGTH, TokenMapper } from '@src/module.model/token'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { IndexerError } from '@src/module.indexer/error'
 import { NetworkName } from '@defichain/jellyfish-network'
-import { isNil } from 'lodash'
 
 const ConsensusParams = {
   mainnet: {
@@ -45,7 +44,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
     const tokenA = await this.tokenMapper.get(`${data.tokenA}`)
     const tokenB = await this.tokenMapper.get(`${data.tokenB}`)
 
-    if (isNil(tokenA) || isNil(tokenB)) {
+    if (tokenA === undefined || tokenB === undefined) {
       throw new IndexerError(`Tokens (${data.tokenA}, ${data.tokenB}) referenced by PoolPair (${tokenId}) do not exist`)
     }
 
@@ -73,12 +72,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
         id: data.tokenB,
         symbol: tokenB.symbol
       },
-      block: {
-        hash: block.hash,
-        height: block.height,
-        medianTime: block.mediantime,
-        time: block.time
-      },
+      block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
       status: data.status,
       commission: data.commission.toFixed(8)
     })
@@ -87,12 +81,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
       id: `${data.tokenA}-${data.tokenB}-${tokenId}`,
       key: `${data.tokenA}-${data.tokenB}`,
       poolpairId: tokenId,
-      block: {
-        hash: block.hash,
-        height: block.height,
-        medianTime: block.mediantime,
-        time: block.time
-      }
+      block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
     })
 
     await this.tokenMapper.put({
@@ -106,12 +95,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
       mintable: false,
       decimal: 8,
       tradeable: true,
-      block: {
-        hash: block.hash,
-        height: block.height,
-        medianTime: block.mediantime,
-        time: block.time
-      }
+      block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time }
     })
   }
 

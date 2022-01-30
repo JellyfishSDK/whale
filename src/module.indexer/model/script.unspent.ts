@@ -5,7 +5,6 @@ import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { TransactionVout, TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { Transaction, TransactionMapper } from '@src/module.model/transaction'
 import { NotFoundIndexerError } from '@src/module.indexer/error'
-import { isNil } from 'lodash'
 
 @Injectable()
 export class ScriptUnspentIndexer extends Indexer {
@@ -20,7 +19,7 @@ export class ScriptUnspentIndexer extends Indexer {
   async index (block: RawBlock): Promise<void> {
     for (const txn of block.tx) {
       for (const vin of txn.vin) {
-        if (!isNil(vin.coinbase)) {
+        if (vin.coinbase !== undefined) {
           continue
         }
         await this.unspentMapper.delete(vin.txid + HexEncoder.encodeVoutIndex(vin.vout))
@@ -35,16 +34,16 @@ export class ScriptUnspentIndexer extends Indexer {
   async invalidate (block: RawBlock): Promise<void> {
     for (const txn of block.tx) {
       for (const vin of txn.vin) {
-        if (!isNil(vin.coinbase)) {
+        if (vin.coinbase !== undefined) {
           continue
         }
 
         const txn = await this.transactionMapper.get(vin.txid)
         const vout = await this.voutMapper.get(vin.txid, vin.vout)
-        if (isNil(txn)) {
+        if (txn === undefined) {
           throw new NotFoundIndexerError('invalidate', 'Transaction', vin.txid)
         }
-        if (isNil(vout)) {
+        if (vout === undefined) {
           throw new NotFoundIndexerError('invalidate', 'TransactionVout', `${vin.txid} - ${vin.vout}`)
         }
         await this.unspentMapper.put(this.mapInvalidated(txn, vout))
