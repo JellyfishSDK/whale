@@ -1,5 +1,5 @@
 import { CodecEncoder } from 'level-codec'
-import msgpack from 'msgpack-lite'
+import cbor from 'cbor'
 
 /**
  * Faster & Smaller Value Codec for level.database.ts
@@ -7,13 +7,13 @@ import msgpack from 'msgpack-lite'
  * @see https://msgpack.org/
  * @see https://github.com/kawanet/msgpack-lite
  */
-export const MsgpackEncoding: CodecEncoder = {
+export const CborEncoding: CodecEncoder = {
   encode (val: any): any {
-    return msgpack.encode(val)
+    return cbor.encode(val)
   },
   decode (val: any): any {
-    return msgpack.decode(val)
+    return cbor.decode(val)
   },
   buffer: true,
-  type: 'msgpack'
+  type: 'cbor'
 }

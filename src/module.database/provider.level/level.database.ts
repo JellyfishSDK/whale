@@ -5,7 +5,7 @@ import lexicographic from 'lexicographic-integer-encoding'
 import { Inject } from '@nestjs/common'
 import { Database, QueryOptions, SortOrder } from '@src/module.database/database'
 import { Model, ModelIndex, ModelKey, ModelMapping } from '@src/module.database/model'
-import { MsgpackEncoding } from '@src/module.database/provider.level/msgpack.encoding'
+import { CborEncoding } from '@src/module.database/provider.level/cbor.encoding'
 
 const lexint = lexicographic('hex')
 
@@ -31,7 +31,7 @@ export abstract class LevelUpDatabase extends Database {
   protected subIndex<M extends Model> (index: ModelIndex<M>, partitionKey?: ModelKey): LevelUp {
     if (index.sort === undefined) {
       return sub(this.root, index.name, {
-        valueEncoding: MsgpackEncoding,
+        valueEncoding: CborEncoding,
         keyEncoding: index.partition.type === 'number' ? lexint : 'binary'
       })
     }
@@ -41,7 +41,7 @@ export abstract class LevelUpDatabase extends Database {
     }
 
     return sub(sub(this.root, index.name), `${partitionKey as string}`, {
-      valueEncoding: MsgpackEncoding,
+      valueEncoding: CborEncoding,
       keyEncoding: index.sort.type === 'number' ? lexint : 'binary'
     })
   }
@@ -54,7 +54,7 @@ export abstract class LevelUpDatabase extends Database {
     //  We could allow a sub index to act as root. Need to revisit this in the future.
     //  Other providers like dynamodb where the indexes are manually setup it won't be such an issue.
     return sub(this.root, mapping.type, {
-      valueEncoding: MsgpackEncoding,
+      valueEncoding: CborEncoding,
       keyEncoding: 'binary'
     })
   }
