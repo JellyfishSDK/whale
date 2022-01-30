@@ -86,6 +86,9 @@ export class RPCBlockProvider {
       }
 
       const nextHash = await this.client.blockchain.getBlockHash(nextHeight)
+      // TODO(fuxingloh): nextHeight, getBlock
+      // TODO(fuxingloh): check prev block is indexed else invalidate current block
+
       await this.index(nextHash, nextHeight)
     } else {
       await this.invalidate(indexed.hash, indexed.height)
