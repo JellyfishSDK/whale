@@ -5,16 +5,17 @@ import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpa
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 import { PoolPairData } from '@whale-api-client/api/poolpairs'
 import { getBlockSubsidy } from '@src/module.api/subsidy'
-import { PoolSwapMapper } from '@src/module.model/poolswap'
 import { BlockMapper } from '@src/module.model/block'
 import { TokenMapper } from '@src/module.model/token'
+import { PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
+import { PoolSwapIntervalSeconds } from '@src/module.indexer/model/dftx/poolswap.interval'
 
 @Injectable()
 export class PoolPairService {
   constructor (
     protected readonly rpcClient: JsonRpcClient,
     protected readonly cache: SemaphoreCache,
-    protected readonly poolSwapMapper: PoolSwapMapper,
+    protected readonly poolSwapAggregatedMapper: PoolSwapAggregatedMapper,
     protected readonly tokenMapper: TokenMapper,
     protected readonly blockMapper: BlockMapper
   ) {
@@ -160,11 +161,31 @@ export class PoolPairService {
   }
 
   public async getUSDVolume (id: string): Promise<PoolPairData['volume'] | undefined> {
-    // const block = await this.blockMapper.getHighest()
-    // const height = block?.height ?? 0
-    return await this.cache.get<PoolPairData['volume']>(`H24_VOLUME_${id}`, async () => {
+    return await this.cache.get<PoolPairData['volume']>(`POOLPAIR_VOLUME_${id}`, async () => {
+      const gatherAmount = async (interval: PoolSwapIntervalSeconds, count: number): Promise<number> => {
+        const aggregated: Record<string, number> = {}
+        const swaps = await this.poolSwapAggregatedMapper.query(`${id}-${interval as number}`, count)
+        for (const swap of swaps) {
+          for (const tokenId in swap.aggregated.amounts) {
+            const fromAmount = new BigNumber(swap.aggregated.amounts[tokenId])
+            aggregated[tokenId] = aggregated[tokenId] === undefined
+              ? fromAmount.toNumber()
+              : aggregated[tokenId] + fromAmount.toNumber()
+          }
+        }
+
+        let volume = 0
+        for (const tokenId in aggregated) {
+          const tokenPrice = await this.getPriceForToken(parseInt(tokenId)) ?? new BigNumber(0)
+          volume += tokenPrice.toNumber() * aggregated[tokenId]
+        }
+
+        return volume
+      }
+
       return {
-        h24: 0
+        h24: await gatherAmount(PoolSwapIntervalSeconds.ONE_HOUR, 24),
+        d30: await gatherAmount(PoolSwapIntervalSeconds.ONE_DAY, 30)
       }
     }, {
       ttl: 3600 // 60 minutes
@@ -215,52 +236,6 @@ export class PoolPairService {
       return accum.plus(yearly)
     }, new BigNumber(0))
   }
-
-  /*
-
-  private async aggregateSum(block: RawBlock, poolPairId: number, interval: PoolSwapIntervalSeconds): Promise<PoolSwapAggregated> {
-    const aggregate:PoolSwapAggregated = {
-      id: `${poolPairId}-${interval as number}-${block.height}`,
-      key: `${poolPairId}-${interval as number}`,
-      sort: HexEncoder.encodeHeight(block.mediantime) + HexEncoder.encodeHeight(block.height),
-
-      aggregated: {
-        amounts: {}
-      },
-
-      block: {
-        hash: block.hash,
-        height: block.height,
-        time: block.time,
-        medianTime: block.mediantime
-      }
-    }
-
-    if(interval === PoolSwapIntervalSeconds.ONE_HOUR) {
-      const swaps = await this.poolSwapMapper.query(`${poolPairId}`, Number.MAX_SAFE_INTEGER, undefined,
-        HexEncoder.encodeHeight(block.height - 2880))
-      for(const swap of swaps) {
-        const fromAmount = new BigNumber(swap.fromAmount)
-        aggregate.aggregated.amounts[`${swap.fromTokenId}`] =
-          aggregate.aggregated.amounts[`${swap.fromTokenId}`] === undefined ?
-            fromAmount.toFixed(8) : fromAmount.plus(aggregate.aggregated.amounts[`${swap.fromTokenId}`]).toFixed(8)
-      }
-    } else {
-      const swaps = await this.aggregatedMapper.query(`${poolPairId}-${interval as number}`, Number.MAX_SAFE_INTEGER, undefined,
-        HexEncoder.encodeHeight(block.mediantime - (interval as number)) + HexEncoder.encodeHeight(0))
-      for(const swap of swaps) {
-        for(const tokenId in swap.aggregated.amounts) {
-          const fromAmount = new BigNumber(swap.aggregated.amounts[tokenId])
-          aggregate.aggregated.amounts[tokenId] =
-            aggregate.aggregated.amounts[tokenId] === undefined ?
-              fromAmount.toFixed(8) : fromAmount.plus(aggregate.aggregated.amounts[tokenId]).toFixed(8)
-        }
-      }
-    }
-
-    return aggregate
-  }
-  */
 
   private async getYearlyRewardPCTUSD (info: PoolPairInfo): Promise<BigNumber | undefined> {
     if (info.rewardPct === undefined) {
