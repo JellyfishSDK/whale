@@ -6,6 +6,8 @@ import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { PoolPairMapper } from '@src/module.model/poolpair'
 import { PoolSwapMapper } from '@src/module.model/poolswap'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
+import { PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
+import { PoolSwapIntervalSeconds } from './poolswap.interval'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -177,5 +179,22 @@ describe('index poolswap', () => {
         sort: expect.any(String)
       }
     ])
+
+    const aggregatedMapper = app.get(PoolSwapAggregatedMapper)
+    const aggregated = await aggregatedMapper.query(`3-${PoolSwapIntervalSeconds.ONE_HOUR}`, 1)
+    expect(aggregated[0]).toStrictEqual(
+      {
+        aggregated: {
+          amounts: {
+            0: '6.00000000',
+            1: '105.00000000'
+          }
+        },
+        block: expect.any(Object),
+        id: '3-3600-109',
+        key: '3-3600',
+        sort: expect.any(String)
+      }
+    )
   })
 })

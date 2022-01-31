@@ -417,8 +417,8 @@ describe('poolswap', () => {
         height: expect.any(Number)
       },
       volume: {
-        d30: 0,
-        h24: 113.50667408649706
+        d30: 113.50667410636073,
+        h24: 113.50667410636073
       }
     })
 
@@ -465,8 +465,8 @@ describe('poolswap', () => {
         height: expect.any(Number)
       },
       volume: {
-        d30: 0,
-        h24: 22.251881507671783
+        d30: 22.25188151100734,
+        h24: 22.25188151100734
       }
     })
   })

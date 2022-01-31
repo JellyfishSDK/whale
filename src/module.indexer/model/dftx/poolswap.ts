@@ -62,6 +62,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
           aggregate.aggregated.amounts[`${fromTokenId}`] === undefined
             ? fromAmount.toFixed(8)
             : fromAmount.plus(aggregate.aggregated.amounts[`${fromTokenId}`]).toFixed(8)
+      await this.aggregatedMapper.put(aggregate)
     }
   }
 

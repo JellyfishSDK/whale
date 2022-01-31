@@ -131,6 +131,7 @@ describe('list', () => {
         height: expect.any(Number)
       },
       volume: {
+        d30: 0,
         h24: 0
       }
     })
@@ -216,6 +217,7 @@ describe('get', () => {
         height: expect.any(Number)
       },
       volume: {
+        d30: 0,
         h24: 0
       }
     })
