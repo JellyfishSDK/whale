@@ -391,7 +391,7 @@ describe('poolswap', () => {
       tokenB: {
         id: '0',
         symbol: 'DFI',
-        reserve: '114.28571428',
+        reserve: '114.2857143',
         blockCommission: '0',
         displaySymbol: 'DFI'
       },
@@ -403,12 +403,12 @@ describe('poolswap', () => {
       commission: '0',
       totalLiquidity: {
         token: '141.42135623',
-        usd: '529.69781240365293383563596592'
+        usd: '529.6978124963500510109100852'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
-        ab: '1.53125',
+        ab: '1.53124999',
         ba: '0.65306122'
       },
       rewardPct: '0',
@@ -439,7 +439,7 @@ describe('poolswap', () => {
       tokenB: {
         id: expect.any(String),
         symbol: 'DUSD',
-        reserve: '66.71114076',
+        reserve: '66.71114077',
         blockCommission: '0',
         displaySymbol: 'DUSD'
       },
@@ -451,12 +451,12 @@ describe('poolswap', () => {
       commission: '0.002',
       totalLiquidity: {
         token: '44.72135954',
-        usd: '133.42228152'
+        usd: '133.42228154'
       },
       tradeEnabled: true,
       ownerAddress: expect.any(String),
       priceRatio: {
-        ab: '0.4494002',
+        ab: '0.44940019',
         ba: '2.22518815'
       },
       rewardPct: '0',
