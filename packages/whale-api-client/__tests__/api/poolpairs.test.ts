@@ -165,6 +165,7 @@ describe('poolpair info', () => {
         height: expect.any(Number)
       },
       volume: {
+        d30: 0,
         h24: 0
       }
     })
@@ -245,6 +246,7 @@ describe('poolpair info', () => {
         height: expect.any(Number)
       },
       volume: {
+        d30: 0,
         h24: 0
       }
     })
@@ -295,6 +297,7 @@ describe('poolpair info', () => {
         height: expect.any(Number)
       },
       volume: {
+        d30: 0,
         h24: 0
       }
     })
@@ -414,6 +417,7 @@ describe('poolswap', () => {
         height: expect.any(Number)
       },
       volume: {
+        d30: 0,
         h24: 113.50667408649706
       }
     })
@@ -461,6 +465,7 @@ describe('poolswap', () => {
         height: expect.any(Number)
       },
       volume: {
+        d30: 0,
         h24: 22.251881507671783
       }
     })
