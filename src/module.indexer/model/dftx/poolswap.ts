@@ -9,6 +9,8 @@ import { IndexerError } from '@src/module.indexer/error'
 import BigNumber from 'bignumber.js'
 import { PoolSwapMapper } from '@src/module.model/poolswap'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
+import { PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
+import { AggregationIntervals } from './poolswap.interval'
 
 @Injectable()
 export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
@@ -18,6 +20,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     private readonly poolPairMapper: PoolPairMapper,
     private readonly poolPairTokenMapper: PoolPairTokenMapper,
     private readonly poolSwapMapper: PoolSwapMapper,
+    private readonly aggregatedMapper: PoolSwapAggregatedMapper,
     @Inject('NETWORK') protected readonly network: NetworkName
   ) {
     super()
@@ -51,9 +54,18 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
         medianTime: block.mediantime
       }
     })
+
+    for (const interval of AggregationIntervals) {
+      const previous = await this.aggregatedMapper.query(`${poolPair.poolPairId}-${interval}`, 1)
+      const aggregate = previous[0]
+      aggregate.aggregated.amounts[`${fromTokenId}`] =
+          aggregate.aggregated.amounts[`${fromTokenId}`] === undefined
+            ? fromAmount.toFixed(8)
+            : fromAmount.plus(aggregate.aggregated.amounts[`${fromTokenId}`]).toFixed(8)
+    }
   }
 
-  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
+  async invalidateTransaction (_: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
     const data = transaction.dftx.data
     const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(data.fromTokenId, data.toTokenId)
 

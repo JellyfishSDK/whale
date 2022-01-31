@@ -216,6 +216,52 @@ export class PoolPairService {
     }, new BigNumber(0))
   }
 
+  /*
+
+  private async aggregateSum(block: RawBlock, poolPairId: number, interval: PoolSwapIntervalSeconds): Promise<PoolSwapAggregated> {
+    const aggregate:PoolSwapAggregated = {
+      id: `${poolPairId}-${interval as number}-${block.height}`,
+      key: `${poolPairId}-${interval as number}`,
+      sort: HexEncoder.encodeHeight(block.mediantime) + HexEncoder.encodeHeight(block.height),
+
+      aggregated: {
+        amounts: {}
+      },
+
+      block: {
+        hash: block.hash,
+        height: block.height,
+        time: block.time,
+        medianTime: block.mediantime
+      }
+    }
+
+    if(interval === PoolSwapIntervalSeconds.ONE_HOUR) {
+      const swaps = await this.poolSwapMapper.query(`${poolPairId}`, Number.MAX_SAFE_INTEGER, undefined,
+        HexEncoder.encodeHeight(block.height - 2880))
+      for(const swap of swaps) {
+        const fromAmount = new BigNumber(swap.fromAmount)
+        aggregate.aggregated.amounts[`${swap.fromTokenId}`] =
+          aggregate.aggregated.amounts[`${swap.fromTokenId}`] === undefined ?
+            fromAmount.toFixed(8) : fromAmount.plus(aggregate.aggregated.amounts[`${swap.fromTokenId}`]).toFixed(8)
+      }
+    } else {
+      const swaps = await this.aggregatedMapper.query(`${poolPairId}-${interval as number}`, Number.MAX_SAFE_INTEGER, undefined,
+        HexEncoder.encodeHeight(block.mediantime - (interval as number)) + HexEncoder.encodeHeight(0))
+      for(const swap of swaps) {
+        for(const tokenId in swap.aggregated.amounts) {
+          const fromAmount = new BigNumber(swap.aggregated.amounts[tokenId])
+          aggregate.aggregated.amounts[tokenId] =
+            aggregate.aggregated.amounts[tokenId] === undefined ?
+              fromAmount.toFixed(8) : fromAmount.plus(aggregate.aggregated.amounts[tokenId]).toFixed(8)
+        }
+      }
+    }
+
+    return aggregate
+  }
+  */
+
   private async getYearlyRewardPCTUSD (info: PoolPairInfo): Promise<BigNumber | undefined> {
     if (info.rewardPct === undefined) {
       return new BigNumber(0)
