@@ -53,6 +53,10 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     })
   }
 
+  async invalidateSwap (poolPairId: string, txid: string): Promise<void> {
+    await this.poolSwapMapper.delete(`${poolPairId}-${txid}`)
+  }
+
   async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
     const data = transaction.dftx.data
     const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(data.fromTokenId, data.toTokenId)
@@ -66,6 +70,6 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
       throw new IndexerError(`Pool with id ${poolPairToken.poolPairId} not found`)
     }
 
-    await this.poolSwapMapper.delete(`${poolPair.poolPairId}-${transaction.txn.txid}`)
+    await this.invalidateSwap(poolPair.poolPairId, transaction.txn.txid)
   }
 }
