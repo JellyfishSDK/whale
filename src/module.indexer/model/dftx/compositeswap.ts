@@ -55,7 +55,7 @@ export class CompositeSwapIndexer extends DfTxIndexer<CompositeSwap> {
     }
   }
 
-  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<CompositeSwap>): Promise<void> {
+  async invalidateTransaction (_: RawBlock, transaction: DfTxTransaction<CompositeSwap>): Promise<void> {
     const data = transaction.dftx.data
     const poolSwap = data.poolSwap
     const poolIds = data.pools
@@ -70,7 +70,7 @@ export class CompositeSwapIndexer extends DfTxIndexer<CompositeSwap> {
     }
 
     for (const pool of poolIds) {
-      await this.poolPairMapper.delete(`${pool.id}-${block.height}`)
+      await this.poolSwapIndexer.invalidateSwap(`${pool.id}`, transaction.txn.txid)
     }
   }
 }
