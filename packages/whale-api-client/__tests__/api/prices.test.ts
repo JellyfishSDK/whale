@@ -605,7 +605,6 @@ describe('active price', () => {
       const height = await container.getBlockCount()
       await container.generate(1)
       await service.waitForIndexedHeight(height)
-      await new Promise((resolve) => setTimeout(resolve, 500))
 
       const fixedIntervalPrice = await testing.rpc.oracle.getFixedIntervalPrice('S1/USD')
       const activePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)
@@ -642,7 +641,6 @@ describe('active price', () => {
       const height = await container.getBlockCount()
       await container.generate(1)
       await service.waitForIndexedHeight(height)
-      await new Promise((resolve) => setTimeout(resolve, 500))
 
       const fixedIntervalPrice = await testing.rpc.oracle.getFixedIntervalPrice('S1/USD')
       const activePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)
@@ -684,7 +682,6 @@ describe('active price', () => {
       const height = await container.getBlockCount()
       await container.generate(1)
       await service.waitForIndexedHeight(height)
-      await new Promise((resolve) => setTimeout(resolve, 500))
 
       const fixedIntervalPrice = await testing.rpc.oracle.getFixedIntervalPrice('S1/USD')
       const activePrice = await apiClient.prices.getFeedActive('S1', 'USD', 1)

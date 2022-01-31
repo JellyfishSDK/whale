@@ -44,10 +44,8 @@ export async function stopTestingApp (container: MasterNodeRegTestContainer | Te
     await indexer.stop()
     await app.close()
   } finally {
-    await new Promise((resolve) => {
-      // Wait 2000ms between indexer cycle time to prevent database error
-      setTimeout(_ => resolve(0), 500)
-    })
+    // Wait 500ms between indexer cycle time to prevent database error
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
     if (container instanceof MasterNodeRegTestContainer) {
       await container.stop()
@@ -76,7 +74,6 @@ export async function waitForIndexedHeight (app: NestFastifyApplication, height:
     const block = await blockMapper.getHighest()
     await expect(block?.height).toBeGreaterThan(height)
   }, timeout)
-  await new Promise((resolve) => setTimeout(resolve, 1000))
 }
 
 /**
