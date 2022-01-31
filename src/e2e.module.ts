@@ -44,9 +44,6 @@ export async function stopTestingApp (container: MasterNodeRegTestContainer | Te
     await indexer.stop()
     await app.close()
   } finally {
-    // Wait 500ms between indexer cycle time to prevent database error
-    await new Promise((resolve) => setTimeout(resolve, 500))
-
     if (container instanceof MasterNodeRegTestContainer) {
       await container.stop()
     } else {
