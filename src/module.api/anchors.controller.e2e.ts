@@ -78,22 +78,18 @@ async function setup (): Promise<void> {
   await tGroup.get(0).container.call('spv_setlastheight', [1])
   const anchor1 = await createAnchor()
   await tGroup.get(0).generate(1)
-  await tGroup.waitForSync()
 
   await tGroup.get(0).container.call('spv_setlastheight', [2])
   const anchor2 = await createAnchor()
   await tGroup.get(0).generate(1)
-  await tGroup.waitForSync()
 
   await tGroup.get(0).container.call('spv_setlastheight', [3])
   const anchor3 = await createAnchor()
   await tGroup.get(0).generate(1)
-  await tGroup.waitForSync()
 
   await tGroup.get(0).container.call('spv_setlastheight', [4])
   const anchor4 = await createAnchor()
   await tGroup.get(0).generate(1)
-  await tGroup.waitForSync()
 
   await tGroup.get(1).container.call('spv_sendrawtx', [anchor1.txHex])
   await tGroup.get(1).container.call('spv_sendrawtx', [anchor2.txHex])
