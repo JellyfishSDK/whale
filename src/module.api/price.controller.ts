@@ -96,7 +96,7 @@ class DeprecatedIntervalApiPagedResponse<T> extends ApiPagedResponse<T> {
       at: Date.now(),
       code: 410,
       type: 'Gone',
-      message: 'Oracle feed interval data has been deprecated with immediate effect. ',
+      message: 'Oracle feed interval data has been deprecated with immediate effect. See https://github.com/DeFiCh/whale/pull/749 for more information.',
       url: '/:key/feed/interval/:interval'
     }
   }
