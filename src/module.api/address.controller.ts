@@ -35,7 +35,7 @@ export class AddressController {
   async getAccountHistory (
     @Param('address') address: string,
       @Param('txidn') txidn: string
-  ): Promise<any> {
+  ): Promise<AddressHistory> {
     const list = await this.listAccountHistory(address, { size: 100 })
     const txid = txidn.split('-')[0]
     const n = Number(txidn.split('-')[1])
