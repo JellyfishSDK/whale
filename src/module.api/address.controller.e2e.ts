@@ -6,7 +6,7 @@ import { createSignedTxnHex, createToken, mintTokens, sendTokensToAddress } from
 import { WIF } from '@defichain/jellyfish-crypto'
 import { RpcApiError } from '@defichain/jellyfish-api-core'
 import { Testing } from '@defichain/jellyfish-testing'
-import { ForbiddenException } from '@nestjs/common'
+import { ForbiddenException, NotFoundException } from '@nestjs/common'
 import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
@@ -328,6 +328,12 @@ describe('getAccount', () => {
     expect(pacc3.owner).toStrictEqual(pdata3.owner)
     expect(pacc3.txid).toStrictEqual(pdata3.txid)
     expect(pacc3.txn).toStrictEqual(pdata3.txn)
+  })
+
+  it('should not getAccountHistory as not found', async () => {
+    const promise = controller.getAccountHistory(await container.getNewAddress(), `${'0'.repeat(64)}-1`)
+    await expect(promise).rejects.toThrow(NotFoundException)
+    await expect(promise).rejects.toThrow('Unable to find account history')
   })
 })
 

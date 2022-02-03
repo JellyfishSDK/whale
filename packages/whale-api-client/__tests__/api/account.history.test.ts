@@ -195,3 +195,9 @@ it('should getAccountHistory', async () => {
   expect(pacc3.txid).toStrictEqual(pdata3.txid)
   expect(pacc3.txn).toStrictEqual(pdata3.txn)
 })
+
+it('should not getAccountHistory as not found', async () => {
+  const promise = client.address.getAccountHistory(await container.getNewAddress(), '0'.repeat(64), 1)
+  await expect(promise).rejects.toThrow(WhaleApiException)
+  await expect(promise).rejects.toThrow('Unable to find account history')
+})
