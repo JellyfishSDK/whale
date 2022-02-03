@@ -11,7 +11,7 @@ export class WhaleRpcClient extends JsonRpcClient {
    * MainNet Edge:   https://ocean.defichain.com/v0.x/mainnet/rpc
    *
    * @param {string} url
-   * @param {ClientOptions} [options=undefined]
+   * @param {ClientOptions} [options]
    */
   constructor (url: string = 'https://ocean.defichain.com/v0/mainnet/rpc', options?: ClientOptions) {
     super(url, {
