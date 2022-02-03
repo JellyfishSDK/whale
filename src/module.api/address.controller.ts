@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js'
-import { ConflictException, Controller, ForbiddenException, Get, Inject, Param, Query } from '@nestjs/common'
+import { ConflictException, Controller, ForbiddenException, Get, Inject, NotFoundException, Param, Query } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
@@ -29,6 +29,21 @@ export class AddressController {
     protected readonly vaultService: LoanVaultService,
     @Inject('NETWORK') protected readonly network: NetworkName
   ) {
+  }
+
+  @Get('/history/:txidn')
+  async getAccountHistory (
+    @Param('address') address: string,
+      @Param('txidn') txidn: string
+  ): Promise<any> {
+    const list = await this.listAccountHistory(address, { size: 100 })
+    const txid = txidn.split('-')[0]
+    const n = Number(txidn.split('-')[1])
+    const found = list.data.find(each => each.txid === txid && each.txn === n)
+    if (found === undefined) {
+      throw new NotFoundException('Unable to find account history')
+    }
+    return found
   }
 
   /**
