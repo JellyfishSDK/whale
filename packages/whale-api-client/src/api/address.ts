@@ -104,6 +104,7 @@ export interface AddressToken {
   name: string
   isDAT: boolean
   isLPS: boolean
+  isLoanToken: boolean
 }
 
 export interface AddressAggregation {

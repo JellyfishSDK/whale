@@ -192,6 +192,7 @@ function mapAddressToken (id: string, tokenInfo: TokenInfo, value: BigNumber): A
     name: tokenInfo.name,
     isDAT: tokenInfo.isDAT,
     isLPS: tokenInfo.isLPS,
+    isLoanToken: tokenInfo.isLoanToken,
     displaySymbol: parseDisplaySymbol(tokenInfo)
   }
 }

@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   defi-blockchain:
-    image: defi/defichain:1.8.0
+    image: defi/defichain:2.6.0
     ports:
       - "19554:19554"
     command: >
@@ -29,6 +29,9 @@ services:
       -dakotacrescentheight=5
       -eunosheight=6
       -eunospayaheight=7
+      -fortcanningheight=8
+      -fortcanningmuseumheight=9
+      -fortcanninghillheight=10
 
   defi-whale:
     build: ../../..
