@@ -27,13 +27,13 @@ afterAll(async () => {
 it('should not be able to access wallet', async () => {
   return await expect(async () => {
     await client.wallet.getBalance()
-  }).rejects.toThrow('RpcApiError: \'undefined\', code: 422, method: getbalance')
+  }).rejects.toThrow('ClientApiError: 422 - Unprocessable Entity')
 })
 
 it('should not be able to access accounts', async () => {
   return await expect(async () => {
     await client.account.listAccountHistory()
-  }).rejects.toThrow('RpcApiError: \'undefined\', code: 422, method: listaccounthistory')
+  }).rejects.toThrow('ClientApiError: 422 - Unprocessable Entity')
 })
 
 describe('whitelisted rpc methods', () => {
