@@ -166,3 +166,32 @@ it('test listAccountHistory pagination', async () => {
   expect(forth[1]).toStrictEqual(full[10])
   expect(forth[2]).toStrictEqual(full[11])
 })
+
+it('should getAccountHistory', async () => {
+  const history = await client.address.listAccountHistory(colAddr, 30)
+
+  const data0 = history[0]
+  const acc = await client.address.getAccountHistory(colAddr, data0.txid, data0.txn)
+  expect(acc.owner).toStrictEqual(data0.owner)
+  expect(acc.txid).toStrictEqual(data0.txid)
+  expect(acc.txn).toStrictEqual(data0.txn)
+
+  const data3 = history[3]
+  const acc3 = await client.address.getAccountHistory(colAddr, data3.txid, data3.txn)
+  expect(acc3.owner).toStrictEqual(data3.owner)
+  expect(acc3.txid).toStrictEqual(data3.txid)
+  expect(acc3.txn).toStrictEqual(data3.txn)
+
+  const poolHistory = await client.address.listAccountHistory(poolAddr, 30)
+  const pdata0 = poolHistory[0]
+  const pacc = await client.address.getAccountHistory(poolAddr, pdata0.txid, pdata0.txn)
+  expect(pacc.owner).toStrictEqual(pdata0.owner)
+  expect(pacc.txid).toStrictEqual(pdata0.txid)
+  expect(pacc.txn).toStrictEqual(pdata0.txn)
+
+  const pdata3 = poolHistory[3]
+  const pacc3 = await client.address.getAccountHistory(poolAddr, pdata3.txid, pdata3.txn)
+  expect(pacc3.owner).toStrictEqual(pdata3.owner)
+  expect(pacc3.txid).toStrictEqual(pdata3.txid)
+  expect(pacc3.txn).toStrictEqual(pdata3.txn)
+})
