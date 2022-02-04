@@ -137,14 +137,6 @@ describe('stats', () => {
         protocolversion: expect.any(Number),
         subversion: expect.any(String),
         version: expect.any(Number)
-      },
-      supply: {
-        burned: 4, // burned fee
-        // genesis block mint + 122 or 123 blocks subsidy (random result)
-        // see L66, 1 block more/less indexed
-        circulating: expect.any(Number),
-        locked: 0, // no 5/10 years locked MN
-        total: expect.any(Number)
       }
     })
   })
@@ -403,12 +395,6 @@ describe('loan - stats', () => {
         protocolversion: expect.any(Number),
         subversion: expect.any(String),
         version: expect.any(Number)
-      },
-      supply: {
-        burned: expect.any(Number),
-        circulating: expect.any(Number),
-        locked: expect.any(Number),
-        total: expect.any(Number)
       }
     })
   })
