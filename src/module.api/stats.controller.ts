@@ -9,7 +9,6 @@ import { PriceTickerMapper } from '@src/module.model/price.ticker'
 import { MasternodeStats, MasternodeStatsMapper } from '@src/module.model/masternode.stats'
 import { BlockchainInfo } from '@defichain/jellyfish-api-core/dist/category/blockchain'
 import { getBlockSubsidy } from '@src/module.api/subsidy'
-import { SupplyStatAggregationMapper } from '@src/module.model/supply.stat.aggregation'
 
 @Controller('/stats')
 export class StatsController {
@@ -17,7 +16,6 @@ export class StatsController {
     protected readonly blockMapper: BlockMapper,
     protected readonly priceTickerMapper: PriceTickerMapper,
     protected readonly masternodeStatsMapper: MasternodeStatsMapper,
-    protected readonly supplyStatAggregationMapper: SupplyStatAggregationMapper,
     protected readonly poolPairService: PoolPairService,
     protected readonly rpcClient: JsonRpcClient,
     protected readonly cache: SemaphoreCache
@@ -42,8 +40,7 @@ export class StatsController {
       net: await this.cachedGet('net', this.getNet.bind(this), 1800),
       blockchain: {
         difficulty: block.difficulty
-      },
-      supply: await this.cachedGet('supply', this.getSupplyDetail.bind(this), 30)
+      }
     }
   }
 
@@ -183,11 +180,6 @@ export class StatsController {
       subversion: subversion,
       protocolversion: protocolversion
     }
-  }
-
-  private async getSupplyDetail (): Promise<StatsData['supply']> {
-    const { id, block, ...supplyStat } = await this.supplyStatAggregationMapper.getLatest()
-    return { ...supplyStat }
   }
 }
 
