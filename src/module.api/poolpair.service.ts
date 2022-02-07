@@ -5,18 +5,12 @@ import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpa
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 import { PoolPairData } from '@whale-api-client/api/poolpairs'
 import { getBlockSubsidy } from '@src/module.api/subsidy'
-import { PoolSwapMapper } from '@src/module.model/poolswap'
-import { BlockMapper } from '@src/module.model/block'
-import { TokenMapper } from '@src/module.model/token'
 
 @Injectable()
 export class PoolPairService {
   constructor (
     protected readonly rpcClient: JsonRpcClient,
-    protected readonly cache: SemaphoreCache,
-    protected readonly poolSwapMapper: PoolSwapMapper,
-    protected readonly tokenMapper: TokenMapper,
-    protected readonly blockMapper: BlockMapper
+    protected readonly cache: SemaphoreCache
   ) {
   }
 

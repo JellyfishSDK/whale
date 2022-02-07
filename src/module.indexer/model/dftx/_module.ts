@@ -10,8 +10,6 @@ import { CreatePoolPairIndexer } from '@src/module.indexer/model/dftx/create.poo
 import { UpdatePoolPairIndexer } from '@src/module.indexer/model/dftx/update.poolpair'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { ConfigService } from '@nestjs/config'
-import { PoolSwapIndexer } from './poolswap'
-import { CompositeSwapIndexer } from './compositeswap'
 import { SetLoanTokenIndexer } from './set.loan.token'
 import { ActivePriceIndexer } from './active.price'
 import { PlaceAuctionBidIndexer } from './place.auction.bid'
@@ -26,8 +24,6 @@ const indexers = [
   CreateTokenIndexer,
   CreatePoolPairIndexer,
   UpdatePoolPairIndexer,
-  PoolSwapIndexer,
-  CompositeSwapIndexer,
   SetLoanTokenIndexer,
   ActivePriceIndexer,
   PlaceAuctionBidIndexer
