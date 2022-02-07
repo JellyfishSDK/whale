@@ -46,8 +46,8 @@ export class PoolPairMapper {
     return await this.database.get(PoolPairMapping, id)
   }
 
-  async put (masternode: PoolPair): Promise<void> {
-    return await this.database.put(PoolPairMapping, masternode)
+  async put (poolPair: PoolPair): Promise<void> {
+    return await this.database.put(PoolPairMapping, poolPair)
   }
 
   async delete (id: string): Promise<void> {
