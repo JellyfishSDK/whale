@@ -8,9 +8,11 @@ import { PoolSwapMapper } from '@src/module.model/poolswap'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
 import { PoolSwapIntervalSeconds } from './poolswap.interval'
+import { Testing } from '@defichain/jellyfish-testing'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
+let testing: Testing
 
 beforeEach(async () => {
   await container.start()
@@ -18,6 +20,8 @@ beforeEach(async () => {
   await container.waitForWalletCoinbaseMaturity()
 
   app = await createTestingApp(container)
+
+  testing = Testing.create(container)
 })
 
 afterEach(async () => {
@@ -196,5 +200,79 @@ describe('index poolswap', () => {
         sort: expect.any(String)
       }
     )
+  })
+})
+
+describe('poolswap 30d', () => {
+  it('should index volume and swaps for 30d', async () => {
+    await testing.generate(1)
+
+    const tokens = ['A']
+
+    for (const token of tokens) {
+      await container.waitForWalletBalanceGTE(110)
+      await createToken(container, token, {
+        collateralAddress: await testing.address('swap')
+      })
+      await mintTokens(container, token)
+    }
+    await createPoolPair(container, 'A', 'DFI')
+
+    await addPoolLiquidity(container, {
+      tokenA: 'A',
+      amountA: 100,
+      tokenB: 'DFI',
+      amountB: 200,
+      shareAddress: await getNewAddress(container)
+    })
+
+    {
+      const fiveMinutes = 60 * 5
+      const numBlocks = 24 * 2 * 12
+      const timeNow = Math.floor(Date.now() / 1000)
+      for (let i = 0; i <= numBlocks; i++) {
+        const mockTime = timeNow + i * fiveMinutes
+        await testing.rpc.misc.setMockTime(mockTime)
+
+        await testing.rpc.poolpair.poolSwap({
+          from: await testing.address('swap'),
+          tokenFrom: 'A',
+          amountFrom: 0.1,
+          to: await testing.address('swap'),
+          tokenTo: 'DFI'
+        })
+
+        await testing.generate(1)
+      }
+
+      await waitForIndexedHeightLatest(app, container)
+    }
+
+    const aggregatedMapper = app.get(PoolSwapAggregatedMapper)
+    const aggregated = await aggregatedMapper.query(`2-${PoolSwapIntervalSeconds.ONE_DAY}`, 2)
+    expect(aggregated).toStrictEqual([
+      {
+        id: '2-86400-398',
+        key: '2-86400',
+        sort: expect.any(String),
+        aggregated: {
+          amounts: {
+            1: '28.70000000'
+          }
+        },
+        block: expect.any(Object)
+      },
+      {
+        id: '2-86400-107',
+        key: '2-86400',
+        sort: expect.any(String),
+        aggregated: {
+          amounts: {
+            1: '29.00000000'
+          }
+        },
+        block: expect.any(Object)
+      }
+    ])
   })
 })

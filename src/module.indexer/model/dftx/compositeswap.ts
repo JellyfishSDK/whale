@@ -69,8 +69,22 @@ export class CompositeSwapIndexer extends DfTxIndexer<CompositeSwap> {
       poolIds.push({ id: poolPairToken.poolPairId })
     }
 
+    let swapAmount: BigNumber|undefined
     for (const pool of poolIds) {
-      await this.poolSwapIndexer.invalidateSwap(`${pool.id}`, transaction.txn.txid)
+      const poolPair = await this.poolPairMapper.getLatest(`${pool.id}`)
+
+      if (poolPair === undefined) {
+        throw new IndexerError(`Pool with id ${pool.id} not found`)
+      }
+
+      if (swapAmount === undefined) {
+        swapAmount = poolSwap.fromAmount
+      } else {
+        const one = new BigNumber(1.0)
+        swapAmount = one.minus(poolPair.commission).times(swapAmount)
+      }
+
+      await this.poolSwapIndexer.invalidateSwap(poolPair.poolPairId, poolSwap.fromTokenId, swapAmount, transaction.txn.txid)
     }
   }
 }
