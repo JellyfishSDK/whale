@@ -4,8 +4,6 @@ import { createTestingApp, stopTestingApp, waitForIndexedHeightLatest } from '@s
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens, poolSwap, sendTokensToAddress } from '@defichain/testing'
 import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
 import { PoolPairMapper } from '@src/module.model/poolpair'
-import { PoolSwapMapper } from '@src/module.model/poolswap'
-import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -75,7 +73,6 @@ describe('index poolswap', () => {
     await waitForIndexedHeightLatest(app, container)
 
     const poolPairMapper = app.get(PoolPairMapper)
-    const poolSwapMapper = app.get(PoolSwapMapper)
     const result = await poolPairMapper.getLatest('3')
 
     expect(result).toStrictEqual({
@@ -127,17 +124,6 @@ describe('index poolswap', () => {
       sort: '00000003'
     })
 
-    const resultSwaps = await poolSwapMapper.query('3', Number.MAX_SAFE_INTEGER)
-    expect(resultSwaps).toStrictEqual([{
-      fromAmount: '100.00000000',
-      fromTokenId: 1,
-      id: expect.any(String),
-      key: '3',
-      poolPairId: '3',
-      sort: expect.any(String),
-      block: expect.any(Object)
-    }])
-
     await poolSwap(container, {
       from: ownerAddress,
       tokenFrom: 'A',
@@ -155,27 +141,5 @@ describe('index poolswap', () => {
     })
 
     await waitForIndexedHeightLatest(app, container)
-
-    const resultSwaps2 = await poolSwapMapper.query('3', Number.MAX_SAFE_INTEGER, undefined, HexEncoder.encodeHeight(118))
-    expect(resultSwaps2).toStrictEqual([
-      {
-        block: expect.any(Object),
-        fromAmount: '6.00000000',
-        fromTokenId: 0,
-        id: expect.any(String),
-        key: '3',
-        poolPairId: '3',
-        sort: expect.any(String)
-      },
-      {
-        block: expect.any(Object),
-        fromAmount: '5.00000000',
-        fromTokenId: 1,
-        id: expect.any(String),
-        key: '3',
-        poolPairId: '3',
-        sort: expect.any(String)
-      }
-    ])
   })
 })
