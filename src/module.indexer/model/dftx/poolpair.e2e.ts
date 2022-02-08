@@ -80,7 +80,8 @@ describe('index poolswap', () => {
 
     expect(result).toStrictEqual({
       commission: '0.00000000',
-      id: '3-108',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       name: 'A-Default Defi token',
       pairSymbol: 'A-DFI',
       poolPairId: '3',
@@ -93,8 +94,7 @@ describe('index poolswap', () => {
         id: 0,
         symbol: 'DFI'
       },
-      block: expect.any(Object),
-      sort: '00000003'
+      block: expect.any(Object)
     })
 
     await poolSwap(container, {
@@ -110,7 +110,8 @@ describe('index poolswap', () => {
     const resultPostSwap = await poolPairMapper.getLatest('3')
     expect(resultPostSwap).toStrictEqual({
       commission: '0.00000000',
-      id: '3-108',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       name: 'A-Default Defi token',
       pairSymbol: 'A-DFI',
       poolPairId: '3',
@@ -123,8 +124,7 @@ describe('index poolswap', () => {
         id: 0,
         symbol: 'DFI'
       },
-      block: expect.any(Object),
-      sort: '00000003'
+      block: expect.any(Object)
     })
 
     const resultSwaps = await poolSwapMapper.query('3', Number.MAX_SAFE_INTEGER)

@@ -90,8 +90,8 @@ describe('composite swap', () => {
     }))
 
     expect(poolPairsAfterSwap[0]).toStrictEqual({
-      id: '2-103',
-      sort: '00000002',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
       poolPairId: '2',
@@ -114,8 +114,8 @@ describe('composite swap', () => {
     })
 
     expect(poolPairsAfterSwap[1]).toStrictEqual({
-      id: '4-105',
-      sort: '00000004',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       pairSymbol: 'C-DFI',
       name: 'C-Default Defi token',
       poolPairId: '4',
@@ -153,8 +153,8 @@ describe('invalidate', () => {
     }))
 
     const preSwapPool = {
-      id: '2-103',
-      sort: '00000002',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
       poolPairId: '2',
@@ -194,8 +194,8 @@ describe('invalidate', () => {
     }))
 
     expect(poolPairsAfterSwap[0]).toStrictEqual({
-      id: '2-103',
-      sort: '00000002',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
       poolPairId: '2',
