@@ -10,10 +10,10 @@ import { CreateMasternodeIndexer } from '@src/module.indexer/model/dftx/create.m
 import { ResignMasternodeIndexer } from '@src/module.indexer/model/dftx/resign.masternode'
 import { Injectable, Logger } from '@nestjs/common'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
-import { CreatePoolPairIndexer } from './dftx/create.poolpair'
+import { CreatePoolPairIndexer } from './dftx/create.pool.pair'
 import { CreateTokenIndexer } from './dftx/create.token'
 import { SetLoanTokenIndexer } from './dftx/set.loan.token'
-import { UpdatePoolPairIndexer } from './dftx/update.poolpair'
+import { UpdatePoolPairIndexer } from './dftx/update.pool.pair'
 import { ActivePriceIndexer } from './dftx/active.price'
 import { PlaceAuctionBidIndexer } from './dftx/place.auction.bid'
 

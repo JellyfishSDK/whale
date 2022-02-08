@@ -2,8 +2,8 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { Testing } from '@defichain/jellyfish-testing'
-import { PoolPairMapper } from '@src/module.model/poolpair'
-import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
+import { PoolPairHistoryMapper } from '@src/module.model/pool.pair.history'
+import { PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -60,7 +60,7 @@ describe('set loan token', () => {
     await waitForIndexedHeight(app, height)
 
     const poolPairTokenMapper = app.get(PoolPairTokenMapper)
-    const poolPairMapper = app.get(PoolPairMapper)
+    const poolPairMapper = app.get(PoolPairHistoryMapper)
     const result = await poolPairTokenMapper.list(30)
     expect(result.length).toStrictEqual(6)
 

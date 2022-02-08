@@ -2,7 +2,7 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeightLatest } from '@src/e2e.module'
 import { createPoolPair, createToken, mintTokens } from '@defichain/testing'
-import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
+import { PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication

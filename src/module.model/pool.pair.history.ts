@@ -2,30 +2,30 @@ import { Model, ModelMapping } from '@src/module.database/model'
 import { Injectable } from '@nestjs/common'
 import { Database, SortOrder } from '@src/module.database/database'
 
-const PoolPairMapping: ModelMapping<PoolPair> = {
-  type: 'poolpair',
+const PoolPairHistoryMapping: ModelMapping<PoolPairHistory> = {
+  type: 'pool_pair_history',
   index: {
     poolpair_id: {
-      name: 'poolpair_key_sort',
+      name: 'pool_pair_history_sort',
       partition: {
         type: 'string',
-        key: (p: PoolPair) => p.poolPairId
+        key: (p: PoolPairHistory) => p.poolPairId
       },
       sort: {
-        type: 'number',
-        key: (p: PoolPair) => p.block.height
+        type: 'string',
+        key: (p: PoolPairHistory) => p.sort
       }
     }
   }
 }
 
 @Injectable()
-export class PoolPairMapper {
+export class PoolPairHistoryMapper {
   public constructor (protected readonly database: Database) {
   }
 
-  async getLatest (poolPairId: string): Promise<PoolPair | undefined> {
-    const latest = await this.database.query(PoolPairMapping.index.poolpair_id, {
+  async getLatest (poolPairId: string): Promise<PoolPairHistory | undefined> {
+    const latest = await this.database.query(PoolPairHistoryMapping.index.poolpair_id, {
       partitionKey: poolPairId,
       order: SortOrder.DESC,
       limit: 1
@@ -33,8 +33,8 @@ export class PoolPairMapper {
     return latest[0]
   }
 
-  async query (poolPairId: string, limit: number, lt?: string): Promise<PoolPair[]> {
-    return await this.database.query(PoolPairMapping.index.poolpair_id, {
+  async query (poolPairId: string, limit: number, lt?: string): Promise<PoolPairHistory[]> {
+    return await this.database.query(PoolPairHistoryMapping.index.poolpair_id, {
       partitionKey: poolPairId,
       limit: limit,
       order: SortOrder.DESC,
@@ -42,23 +42,25 @@ export class PoolPairMapper {
     })
   }
 
-  async get (id: string): Promise<PoolPair | undefined> {
-    return await this.database.get(PoolPairMapping, id)
+  async get (id: string): Promise<PoolPairHistory | undefined> {
+    return await this.database.get(PoolPairHistoryMapping, id)
   }
 
-  async put (poolPair: PoolPair): Promise<void> {
-    return await this.database.put(PoolPairMapping, poolPair)
+  async put (poolPair: PoolPairHistory): Promise<void> {
+    return await this.database.put(PoolPairHistoryMapping, poolPair)
   }
 
   async delete (id: string): Promise<void> {
-    return await this.database.delete(PoolPairMapping, id)
+    return await this.database.delete(PoolPairHistoryMapping, id)
   }
 }
 
-export interface PoolPair extends Model {
-  id: string // --------------| poolPairId-blockHeight
-  sort: string // ------------| poolPairId (hex encoded)
+export interface PoolPairHistory extends Model {
+  id: string // --------------| txid
+
   poolPairId: string // ------| poolPairId (decimal encoded integer as string)
+  sort: string // ------------| blockheight-txnNo
+
   pairSymbol: string // ------| string
   name: string // ------------| string
   tokenA: {
