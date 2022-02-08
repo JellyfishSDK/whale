@@ -2,8 +2,8 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, invalidateFromHeight, stopTestingApp, waitForIndexedHeight, waitForIndexedHeightLatest } from '@src/e2e.module'
 import { Testing } from '@defichain/jellyfish-testing'
-import { PoolPairMapper } from '@src/module.model/poolpair'
-import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
+import { PoolPairHistoryMapper } from '@src/module.model/pool.pair.history'
+import { PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
 
 const container = new MasterNodeRegTestContainer()
 let testing: Testing
@@ -43,7 +43,7 @@ describe('composite swap', () => {
     await waitForIndexedHeightLatest(app, container)
 
     const poolPairTokenMapper = app.get(PoolPairTokenMapper)
-    const poolPairMapper = app.get(PoolPairMapper)
+    const poolPairMapper = app.get(PoolPairHistoryMapper)
     const result = await poolPairTokenMapper.list(30)
     expect(result.length).toStrictEqual(3)
 
@@ -52,8 +52,8 @@ describe('composite swap', () => {
     }))
 
     expect(poolPairs[0]).toStrictEqual({
-      id: '2-103',
-      sort: '00000002',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
       poolPairId: '2',
@@ -90,8 +90,8 @@ describe('composite swap', () => {
     }))
 
     expect(poolPairsAfterSwap[0]).toStrictEqual({
-      id: '2-103',
-      sort: '00000002',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
       poolPairId: '2',
@@ -114,8 +114,8 @@ describe('composite swap', () => {
     })
 
     expect(poolPairsAfterSwap[1]).toStrictEqual({
-      id: '4-105',
-      sort: '00000004',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       pairSymbol: 'C-DFI',
       name: 'C-Default Defi token',
       poolPairId: '4',
@@ -144,7 +144,7 @@ describe('invalidate', () => {
     await waitForIndexedHeightLatest(app, container)
 
     const poolPairTokenMapper = app.get(PoolPairTokenMapper)
-    const poolPairMapper = app.get(PoolPairMapper)
+    const poolPairMapper = app.get(PoolPairHistoryMapper)
     const result = await poolPairTokenMapper.list(30)
     expect(result.length).toStrictEqual(3)
 
@@ -153,8 +153,8 @@ describe('invalidate', () => {
     }))
 
     const preSwapPool = {
-      id: '2-103',
-      sort: '00000002',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
       poolPairId: '2',
@@ -194,8 +194,8 @@ describe('invalidate', () => {
     }))
 
     expect(poolPairsAfterSwap[0]).toStrictEqual({
-      id: '2-103',
-      sort: '00000002',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
       poolPairId: '2',

@@ -5,6 +5,7 @@ import lexicographic from 'lexicographic-integer-encoding'
 import { Inject } from '@nestjs/common'
 import { Database, QueryOptions, SortOrder } from '@src/module.database/database'
 import { Model, ModelIndex, ModelKey, ModelMapping } from '@src/module.database/model'
+import { CborEncoding } from '@src/module.database/provider.level/cbor.encoding'
 
 const lexint = lexicographic('hex')
 
@@ -26,12 +27,11 @@ export abstract class LevelUpDatabase extends Database {
 
   /**
    * Sub index space for model indexes.
-   * @see https://github.com/kawanet/msgpack-lite for better valueEncoding
    */
   protected subIndex<M extends Model> (index: ModelIndex<M>, partitionKey?: ModelKey): LevelUp {
     if (index.sort === undefined) {
       return sub(this.root, index.name, {
-        valueEncoding: 'json',
+        valueEncoding: CborEncoding,
         keyEncoding: index.partition.type === 'number' ? lexint : 'binary'
       })
     }
@@ -41,7 +41,7 @@ export abstract class LevelUpDatabase extends Database {
     }
 
     return sub(sub(this.root, index.name), `${partitionKey as string}`, {
-      valueEncoding: 'json',
+      valueEncoding: CborEncoding,
       keyEncoding: index.sort.type === 'number' ? lexint : 'binary'
     })
   }
@@ -54,7 +54,7 @@ export abstract class LevelUpDatabase extends Database {
     //  We could allow a sub index to act as root. Need to revisit this in the future.
     //  Other providers like dynamodb where the indexes are manually setup it won't be such an issue.
     return sub(this.root, mapping.type, {
-      valueEncoding: 'json',
+      valueEncoding: CborEncoding,
       keyEncoding: 'binary'
     })
   }
@@ -110,14 +110,24 @@ export abstract class LevelUpDatabase extends Database {
   }
 
   async put<M extends Model> (mapping: ModelMapping<M>, model: M): Promise<void> {
-    // TODO(fuxingloh): check before deleting for better performance
-    // TODO(fuxingloh): block writing race condition
-    await this.delete(mapping, model.id)
+    const indexes = Object.values(mapping.index)
+    const persisted = await this.get(mapping, model.id) as M
+
+    if (persisted !== undefined) {
+      // Check before deleting for better performance, only delete secondary indexes that won't be present anymore
+      for (const index of indexes) {
+        if (isIndexModified(index, persisted, model)) {
+          const subIndex = this.subIndex(index, index.partition.key(persisted))
+          const key = index.sort !== undefined ? index.sort.key(persisted) : index.partition.key(persisted)
+          await subIndex.del(key)
+        }
+      }
+    }
 
     const subRoot = this.subRoot(mapping)
     await subRoot.put(model.id, model)
 
-    for (const index of Object.values(mapping.index)) {
+    for (const index of indexes) {
       const subIndex = this.subIndex(index, index.partition.key(model))
       const key = index.sort !== undefined ? index.sort.key(model) : index.partition.key(model)
       await subIndex.put(key, model)
@@ -139,6 +149,34 @@ export abstract class LevelUpDatabase extends Database {
     const subRoot = this.subRoot(mapping)
     await subRoot.del(model.id)
   }
+}
+
+/**
+ * Given the current persisted and soon to be overridden data, is the index we are writing to modified?
+ *
+ * If it's modified, we need to delete the previously indexed data. (delete and put)
+ * If it's not modified, we can just replace it via a simple put. (put)
+ *
+ * @param {ModelIndex<M>} index to write data into
+ * @param {M} persisted currently persisted
+ * @param {M} override to be overridden with
+ */
+function isIndexModified<M extends Model> (index: ModelIndex<M>, persisted: M, override: M): boolean {
+  const persistedPartitionKey = index.partition.key(persisted)
+  const overridePartitionKey = index.partition.key(override)
+
+  if (persistedPartitionKey !== overridePartitionKey) {
+    return true
+  }
+
+  if (index.sort === undefined) {
+    return false
+  }
+
+  const persistedSortKey = index.sort.key(persisted)
+  const overrideSortKey = index.sort.key(override)
+
+  return persistedSortKey !== overrideSortKey
 }
 
 /**

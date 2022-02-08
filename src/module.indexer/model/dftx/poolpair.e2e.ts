@@ -2,8 +2,8 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeightLatest } from '@src/e2e.module'
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens, poolSwap, sendTokensToAddress } from '@defichain/testing'
-import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
-import { PoolPairMapper } from '@src/module.model/poolpair'
+import { PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
+import { PoolPairHistoryMapper } from '@src/module.model/pool.pair.history'
 import { PoolSwapMapper } from '@src/module.model/poolswap'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
@@ -80,13 +80,14 @@ describe('index poolswap', () => {
 
     await waitForIndexedHeightLatest(app, container)
 
-    const poolPairMapper = app.get(PoolPairMapper)
+    const poolPairMapper = app.get(PoolPairHistoryMapper)
     const poolSwapMapper = app.get(PoolSwapMapper)
     const result = await poolPairMapper.getLatest('3')
 
     expect(result).toStrictEqual({
       commission: '0.00000000',
-      id: '3-108',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       name: 'A-Default Defi token',
       pairSymbol: 'A-DFI',
       poolPairId: '3',
@@ -99,8 +100,7 @@ describe('index poolswap', () => {
         id: 0,
         symbol: 'DFI'
       },
-      block: expect.any(Object),
-      sort: '00000003'
+      block: expect.any(Object)
     })
 
     await poolSwap(container, {
@@ -116,7 +116,8 @@ describe('index poolswap', () => {
     const resultPostSwap = await poolPairMapper.getLatest('3')
     expect(resultPostSwap).toStrictEqual({
       commission: '0.00000000',
-      id: '3-108',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       name: 'A-Default Defi token',
       pairSymbol: 'A-DFI',
       poolPairId: '3',
@@ -129,8 +130,7 @@ describe('index poolswap', () => {
         id: 0,
         symbol: 'DFI'
       },
-      block: expect.any(Object),
-      sort: '00000003'
+      block: expect.any(Object)
     })
 
     const resultSwaps = await poolSwapMapper.query('3', Number.MAX_SAFE_INTEGER)

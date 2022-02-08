@@ -57,7 +57,10 @@
       <w>getblockchaininfo</w>
       <w>getblockcount</w>
       <w>getblockhash</w>
+      <w>getblockstats</w>
+      <w>getburninfo</w>
       <w>getconnectioncount</w>
+      <w>getgov</w>
       <w>getmintinginfo</w>
       <w>getnetworkhashps</w>
       <w>getnewaddress</w>
@@ -92,6 +95,7 @@
       <w>lessthanorequal</w>
       <w>lexint</w>
       <w>libevent</w>
+      <w>listaccounthistory</w>
       <w>listaccounts</w>
       <w>listaddressgroupings</w>
       <w>listpoolpairs</w>
