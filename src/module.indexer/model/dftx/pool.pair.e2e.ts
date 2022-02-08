@@ -4,7 +4,7 @@ import { createTestingApp, stopTestingApp, waitForIndexedHeightLatest } from '@s
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens, poolSwap, sendTokensToAddress } from '@defichain/testing'
 import { PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
 import { PoolPairHistoryMapper } from '@src/module.model/pool.pair.history'
-import { PoolSwapMapper } from '@src/module.model/poolswap'
+import { PoolSwapMapper } from '@src/module.model/pool.swap'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 const container = new MasterNodeRegTestContainer()
