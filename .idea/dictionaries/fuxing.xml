@@ -58,6 +58,7 @@
       <w>getblockcount</w>
       <w>getblockhash</w>
       <w>getblockstats</w>
+      <w>getburninfo</w>
       <w>getconnectioncount</w>
       <w>getgov</w>
       <w>getmintinginfo</w>

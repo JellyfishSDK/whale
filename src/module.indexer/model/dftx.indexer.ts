@@ -10,7 +10,7 @@ import { CreateMasternodeIndexer } from '@src/module.indexer/model/dftx/create.m
 import { ResignMasternodeIndexer } from '@src/module.indexer/model/dftx/resign.masternode'
 import { Injectable, Logger } from '@nestjs/common'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
-import { CreatePoolPairIndexer } from './dftx/create.poolpair'
+import { CreatePoolPairIndexer } from './dftx/create.pool.pair'
 import { CreateTokenIndexer } from './dftx/create.token'
 import { PoolSwapIndexer } from './dftx/poolswap'
 import { SetLoanTokenIndexer } from './dftx/set.loan.token'
@@ -100,7 +100,8 @@ export class MainDfTxIndexer extends Indexer {
   private getDfTxTransactions (block: RawBlock): Array<DfTxTransaction<any>> {
     const transactions: Array<DfTxTransaction<any>> = []
 
-    for (const txn of block.tx) {
+    for (let i = 0; i < block.tx.length; i++) {
+      const txn = block.tx[i]
       for (const vout of txn.vout) {
         if (!vout.scriptPubKey.asm.startsWith('OP_RETURN 44665478')) {
           continue
@@ -111,7 +112,11 @@ export class MainDfTxIndexer extends Indexer {
           if (stack[1].type !== 'OP_DEFI_TX') {
             continue
           }
-          transactions.push({ txn: txn, dftx: (stack[1] as OP_DEFI_TX).tx })
+          transactions.push({
+            txn: txn,
+            txnNo: i,
+            dftx: (stack[1] as OP_DEFI_TX).tx
+          })
         } catch (err) {
           // TODO(fuxingloh): we can improve on this design by having separated indexing pipeline where
           //  a failed pipeline won't affect another indexer pipeline.

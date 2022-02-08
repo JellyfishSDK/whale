@@ -1,8 +1,9 @@
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
-import { PoolUpdatePair, CPoolUpdatePair } from '@defichain/jellyfish-transaction'
+import { CPoolUpdatePair, PoolUpdatePair } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable, Logger } from '@nestjs/common'
-import { PoolPairMapper } from '@src/module.model/poolpair'
+import { PoolPairHistoryMapper } from '@src/module.model/pool.pair.history'
+import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 @Injectable()
 export class UpdatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
@@ -10,19 +11,27 @@ export class UpdatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
   private readonly logger = new Logger(UpdatePoolPairIndexer.name)
 
   constructor (
-    private readonly poolPairMapper: PoolPairMapper
+    private readonly poolPairHistoryMapper: PoolPairHistoryMapper
   ) {
     super()
   }
 
   async indexTransaction (block: RawBlock, transaction: DfTxTransaction<PoolUpdatePair>): Promise<void> {
+    const txid = transaction.txn.txid
     const data = transaction.dftx.data
-    const poolPair = await this.poolPairMapper.getLatest(`${data.poolId}`)
+
+    const poolPair = await this.poolPairHistoryMapper.getLatest(`${data.poolId}`)
     if (poolPair !== undefined) {
-      await this.poolPairMapper.put({
+      await this.poolPairHistoryMapper.put({
         ...poolPair,
-        id: `${data.poolId}-${block.height}`,
-        block: { hash: block.hash, height: block.height, medianTime: block.mediantime, time: block.time },
+        id: txid,
+        sort: HexEncoder.encodeHeight(block.height) + HexEncoder.encodeHeight(transaction.txnNo),
+        block: {
+          hash: block.hash,
+          height: block.height,
+          medianTime: block.mediantime,
+          time: block.time
+        },
         status: data.status, // Always override status
         commission: data.commission.gte(0) ? data.commission.toFixed(8) : poolPair.commission
       })
@@ -30,10 +39,7 @@ export class UpdatePoolPairIndexer extends DfTxIndexer<PoolUpdatePair> {
   }
 
   async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<PoolUpdatePair>): Promise<void> {
-    const data = transaction.dftx.data
-    const poolPair = await this.poolPairMapper.getLatest(`${data.poolId}`)
-    if (poolPair !== undefined) {
-      await this.poolPairMapper.delete(`${data.poolId}-${block.height}`)
-    }
+    const txid = transaction.txn.txid
+    await this.poolPairHistoryMapper.delete(txid)
   }
 }
