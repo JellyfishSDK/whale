@@ -3,7 +3,7 @@ import { CPoolSwap, PoolSwap } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable } from '@nestjs/common'
 import { PoolSwapAggregated, PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
-import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
+import { PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 export enum PoolSwapIntervalSeconds {
@@ -31,7 +31,7 @@ export class PoolSwapIntervalIndexer extends DfTxIndexer<PoolSwap> {
     const poolPairs = await this.poolPairTokenMapper.list(Number.MAX_SAFE_INTEGER)
     for (const poolPair of poolPairs) {
       for (const interval of AggregationIntervals) {
-        const previous = await this.aggregatedMapper.query(`${poolPair.poolPairId}-${interval}`, 1)
+        const previous = await this.aggregatedMapper.query(`${poolPair.poolPairId}-${interval as number}`, 1)
         if (previous.length === 0 || (block.mediantime - previous[0].block.medianTime) > (interval as number)) {
           await this.startNewBucket(block, poolPair.poolPairId, interval)
         }
@@ -44,7 +44,7 @@ export class PoolSwapIntervalIndexer extends DfTxIndexer<PoolSwap> {
 
   private async startNewBucket (block: RawBlock, poolPairId: number, interval: PoolSwapIntervalSeconds): Promise<void> {
     const aggregate: PoolSwapAggregated = {
-      id: `${poolPairId}-${interval as number}-${block.height}`,
+      id: `${poolPairId}-${interval as number}-${block.hash}`,
       key: `${poolPairId}-${interval as number}`,
       sort: HexEncoder.encodeHeight(block.mediantime) + HexEncoder.encodeHeight(block.height),
 
@@ -71,8 +71,7 @@ export class PoolSwapIntervalIndexer extends DfTxIndexer<PoolSwap> {
 
     for (const poolPair of poolPairs) {
       for (const interval of AggregationIntervals) {
-        const previous = await this.aggregatedMapper.query(`${poolPair.poolPairId}-${interval}`, 1)
-
+        const previous = await this.aggregatedMapper.query(`${poolPair.poolPairId}-${interval as number}`, 1)
         if (previous.length !== 0 && previous[0].block.height === block.height) {
           await this.aggregatedMapper.delete(previous[0].id)
         }

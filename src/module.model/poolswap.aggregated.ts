@@ -48,7 +48,7 @@ export class PoolSwapAggregatedMapper {
 }
 
 export interface PoolSwapAggregated extends Model {
-  id: string // ---------| poolPairId-interval-height
+  id: string // ---------| poolPairId-interval-blockhash
   key: string // --------| poolPairId-interval
   sort: string // -------| medianTime-height
 
