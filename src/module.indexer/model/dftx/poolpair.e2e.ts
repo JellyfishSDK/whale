@@ -2,8 +2,8 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeightLatest } from '@src/e2e.module'
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens, poolSwap, sendTokensToAddress } from '@defichain/testing'
-import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
-import { PoolPairMapper } from '@src/module.model/poolpair'
+import { PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
+import { PoolPairHistoryMapper } from '@src/module.model/pool.pair.history'
 import { PoolSwapMapper } from '@src/module.model/poolswap'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 
@@ -74,7 +74,7 @@ describe('index poolswap', () => {
 
     await waitForIndexedHeightLatest(app, container)
 
-    const poolPairMapper = app.get(PoolPairMapper)
+    const poolPairMapper = app.get(PoolPairHistoryMapper)
     const poolSwapMapper = app.get(PoolSwapMapper)
     const result = await poolPairMapper.getLatest('3')
 
