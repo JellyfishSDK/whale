@@ -73,12 +73,10 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     await this.poolSwapMapper.delete(`${poolPairId}-${txid}`)
 
     for (const interval of AggregationIntervals) {
-      const previous = await this.aggregatedMapper.query(`${poolPairId}-${interval}`, 1)
+      const previous = await this.aggregatedMapper.query(`${poolPairId}-${interval as number}`, 1)
       const aggregate = previous[0]
-      const amount = aggregate.aggregated.amounts[`${fromTokenId}`]
-      aggregate.aggregated.amounts[`${fromTokenId}`] = amount === undefined
-        ? fromAmount.toFixed(8)
-        : fromAmount.minus(amount).toFixed(8)
+      const amount = new BigNumber(aggregate.aggregated.amounts[`${fromTokenId}`])
+      aggregate.aggregated.amounts[`${fromTokenId}`] = amount.minus(fromAmount).toFixed(8)
       await this.aggregatedMapper.put(aggregate)
     }
   }

@@ -68,13 +68,10 @@ export class PoolSwapIntervalIndexer extends DfTxIndexer<PoolSwap> {
 
   async invalidateBlockStart (block: RawBlock): Promise<void> {
     const poolPairs = await this.poolPairTokenMapper.list(Number.MAX_SAFE_INTEGER)
-
     for (const poolPair of poolPairs) {
       for (const interval of AggregationIntervals) {
-        const previous = await this.aggregatedMapper.query(`${poolPair.poolPairId}-${interval as number}`, 1)
-        if (previous.length !== 0 && previous[0].block.height === block.height) {
-          await this.aggregatedMapper.delete(previous[0].id)
-        }
+        // Delete internally checks for key existence, so we can always call it here
+        await this.aggregatedMapper.delete(`${poolPair.poolPairId}-${interval as number}-${block.hash}`)
       }
     }
   }

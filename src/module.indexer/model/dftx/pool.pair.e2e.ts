@@ -357,10 +357,10 @@ describe('poolswap invalidate', () => {
       const height = await testing.container.getBlockCount()
 
       // First test only a few blocks back to ensure reverse aggregate is working
-      await invalidateFromHeight(app, container, height - 5)
+      await invalidateFromHeight(app, container, height - 4)
 
       const resultSwaps = await poolSwapMapper.query('2', Number.MAX_SAFE_INTEGER)
-      expect(resultSwaps.length).toStrictEqual(numBlocks - 5)
+      expect(resultSwaps.length).toStrictEqual(numBlocks - 3)
 
       const aggregated = await aggregatedMapper.query(`2-${PoolSwapIntervalSeconds.ONE_HOUR}`, Number.MAX_SAFE_INTEGER)
       expect(aggregated).toStrictEqual([
@@ -370,7 +370,7 @@ describe('poolswap invalidate', () => {
           sort: expect.any(String),
           aggregated: {
             amounts: {
-              1: '0.00000000'
+              1: '0.10000000'
             }
           },
           block: expect.any(Object)
@@ -381,7 +381,7 @@ describe('poolswap invalidate', () => {
           sort: expect.any(String),
           aggregated: {
             amounts: {
-              1: '0.70000000'
+              1: '0.80000000'
             }
           },
           block: expect.any(Object)
