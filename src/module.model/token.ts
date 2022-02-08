@@ -46,7 +46,7 @@ export class TokenMapper {
     return await this.database.get(TokenMapping, txId)
   }
 
-  async getByTokenId(tokenId: string): Promise<Token | undefined> {
+  async getByTokenId (tokenId: string): Promise<Token | undefined> {
     return await this.database.get(TokenMapping.index.sort, tokenId)
   }
 

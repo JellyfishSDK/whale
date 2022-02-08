@@ -4,7 +4,6 @@ import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Injectable, Logger } from '@nestjs/common'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { MAX_TOKEN_NAME_LENGTH, MAX_TOKEN_SYMBOL_LENGTH, TokenMapper } from '@src/module.model/token'
-import BigNumber from 'bignumber.js'
 
 @Injectable()
 export class SetLoanTokenIndexer extends DfTxIndexer<SetLoanToken> {

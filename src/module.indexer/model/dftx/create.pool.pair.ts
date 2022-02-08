@@ -121,12 +121,11 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
 
     if (data.pairSymbol.length === 0) {
       return (tokenA?.symbol + '-' + tokenB?.symbol).trim().substr(0, MAX_TOKEN_SYMBOL_LENGTH)
-    } else {
-      const symbolLength = block.height >= ConsensusParams[this.network].FortCanningHeight
-        ? MAX_TOKEN_SYMBOL_LENGTH_POST_FC
-        : MAX_TOKEN_SYMBOL_LENGTH
-
-      return data.pairSymbol.trim().substr(0, symbolLength)
     }
+    const symbolLength = block.height >= ConsensusParams[this.network].FortCanningHeight
+      ? MAX_TOKEN_SYMBOL_LENGTH_POST_FC
+      : MAX_TOKEN_SYMBOL_LENGTH
+
+    return data.pairSymbol.trim().substr(0, symbolLength)
   }
 }
