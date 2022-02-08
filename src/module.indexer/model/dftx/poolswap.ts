@@ -2,8 +2,8 @@ import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_ab
 import { PoolSwap, CPoolSwap } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Inject, Injectable } from '@nestjs/common'
-import { PoolPairMapper, PoolPair } from '@src/module.model/poolpair'
-import { PoolPairTokenMapper } from '@src/module.model/poolpair.token'
+import { PoolPairHistoryMapper, PoolPairHistory } from '@src/module.model/pool.pair.history'
+import { PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { IndexerError } from '@src/module.indexer/error'
 import BigNumber from 'bignumber.js'
@@ -15,7 +15,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
   OP_CODE: number = CPoolSwap.OP_CODE
 
   constructor (
-    private readonly poolPairMapper: PoolPairMapper,
+    private readonly poolPairMapper: PoolPairHistoryMapper,
     private readonly poolPairTokenMapper: PoolPairTokenMapper,
     private readonly poolSwapMapper: PoolSwapMapper,
     @Inject('NETWORK') protected readonly network: NetworkName
@@ -25,7 +25,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
 
   async indexTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
     const data = transaction.dftx.data
-    const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(data.fromTokenId, data.toTokenId)
+    const poolPairToken = await this.poolPairTokenMapper.getPair(data.fromTokenId, data.toTokenId)
     if (poolPairToken === undefined) {
       throw new IndexerError(`Pool for pair ${data.fromTokenId}, ${data.toTokenId} not found`)
     }
@@ -36,7 +36,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     }
   }
 
-  async indexSwap (poolPair: PoolPair, fromTokenId: number, fromAmount: BigNumber, block: RawBlock, txid: string): Promise<void> {
+  async indexSwap (poolPair: PoolPairHistory, fromTokenId: number, fromAmount: BigNumber, block: RawBlock, txid: string): Promise<void> {
     await this.poolSwapMapper.put({
       id: `${poolPair.poolPairId}-${txid}`,
       key: poolPair.poolPairId,
@@ -59,7 +59,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
 
   async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
     const data = transaction.dftx.data
-    const poolPairToken = await this.poolPairTokenMapper.queryForTokenPair(data.fromTokenId, data.toTokenId)
+    const poolPairToken = await this.poolPairTokenMapper.getPair(data.fromTokenId, data.toTokenId)
 
     if (poolPairToken === undefined) {
       throw new IndexerError(`Pool for pair ${data.fromTokenId}, ${data.toTokenId} not found`)
