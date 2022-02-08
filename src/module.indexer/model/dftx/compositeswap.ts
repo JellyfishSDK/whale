@@ -25,15 +25,9 @@ export class CompositeSwapIndexer extends DfTxIndexer<CompositeSwap> {
   async indexTransaction (block: RawBlock, transaction: DfTxTransaction<CompositeSwap>): Promise<void> {
     const data = transaction.dftx.data
     const poolSwap = data.poolSwap
-    const poolIds = data.pools
-    if (poolIds.length === 0) {
-      const poolPairToken = await this.poolPairTokenMapper.getPair(poolSwap.fromTokenId, poolSwap.toTokenId)
-      if (poolPairToken === undefined) {
-        throw new IndexerError(`Pool for pair ${poolSwap.fromTokenId}, ${poolSwap.toTokenId} not found`)
-      }
-
-      poolIds.push({ id: poolPairToken.poolPairId })
-    }
+    const poolIds = data.pools.length > 0
+      ? data.pools
+      : await this.poolIdsForTokens(poolSwap.fromTokenId, poolSwap.toTokenId)
 
     await this.indexSwaps(poolIds, poolSwap, transaction, block)
   }
@@ -52,6 +46,15 @@ export class CompositeSwapIndexer extends DfTxIndexer<CompositeSwap> {
       const one = new BigNumber(1.0)
       swapAmount = one.minus(poolPair.commission).times(swapAmount)
     }
+  }
+
+  async poolIdsForTokens (fromTokenId: number, toTokenId: number): Promise<PoolId[]> {
+    const poolPairToken = await this.poolPairTokenMapper.getPair(fromTokenId, toTokenId)
+    if (poolPairToken === undefined) {
+      throw new IndexerError(`Pool for pair ${fromTokenId}, ${toTokenId} not found`)
+    }
+
+    return [{ id: poolPairToken.poolPairId }]
   }
 
   async invalidateTransaction (_: RawBlock, transaction: DfTxTransaction<CompositeSwap>): Promise<void> {
