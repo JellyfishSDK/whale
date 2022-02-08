@@ -14,7 +14,7 @@ export class PoolPairController {
   constructor (
     protected readonly rpcClient: JsonRpcClient,
     protected readonly deFiDCache: DeFiDCache,
-    private readonly poolPairService: PoolPairService,
+    private readonly poolPairService: PoolPairService
   ) {
   }
 
