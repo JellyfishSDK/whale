@@ -51,7 +51,8 @@ export class CompositeSwapIndexer extends DfTxIndexer<CompositeSwap> {
         swapAmount = one.minus(poolPair.commission).times(swapAmount)
       }
 
-      await this.poolSwapIndexer.indexSwap(poolPair, poolSwap.fromTokenId, swapAmount, block, transaction.txn.txid)
+      await this.poolSwapIndexer.indexSwap(poolPair, poolSwap.fromTokenId, swapAmount, block,
+        transaction.txn.txid, transaction.txnNo)
     }
   }
 
