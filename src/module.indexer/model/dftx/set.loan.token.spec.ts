@@ -60,22 +60,22 @@ describe('set loan token', () => {
     await waitForIndexedHeight(app, height)
 
     const poolPairTokenMapper = app.get(PoolPairTokenMapper)
-    const poolPairMapper = app.get(PoolPairHistoryMapper)
+    const poolPairHistoryMapper = app.get(PoolPairHistoryMapper)
     const result = await poolPairTokenMapper.list(30)
     expect(result.length).toStrictEqual(6)
 
     const poolPairs = await Promise.all(result.map(async x => {
-      return await poolPairMapper.getLatest(`${x.poolPairId}`)
+      return await poolPairHistoryMapper.getLatest(`${x.poolPairId}`)
     }))
 
     expect(poolPairs[0]).toStrictEqual({
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.stringMatching(/[0-f]{16}/),
       commission: '0.00000000',
       status: true,
-      id: '8-111',
       name: 'USDT-Default Defi token',
       pairSymbol: 'USDT-DFI',
       poolPairId: '8',
-      sort: '00000008',
       tokenA: {
         id: 2,
         symbol: 'USDT'

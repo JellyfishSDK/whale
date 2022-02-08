@@ -46,8 +46,8 @@ export class TokenMapper {
     return await this.database.get(TokenMapping, txId)
   }
 
-  async getByTokenId (tokenId: string): Promise<Token | undefined> {
-    return await this.database.get(TokenMapping.index.sort, tokenId)
+  async getByTokenId (tokenId: number): Promise<Token | undefined> {
+    return await this.database.get(TokenMapping.index.sort, HexEncoder.encodeHeight(tokenId))
   }
 
   async put (token: Token): Promise<void> {
@@ -65,7 +65,7 @@ export class TokenMapper {
         throw new Error('Latest DAT by ID not found')
       }
 
-      const latestId = new BigNumber(latest.id)
+      const latestId = new BigNumber(latest.tokenId)
       if (!latestId.lt(DCT_ID_START - 1)) {
         const latestDST = await this.getLatestDST()
         return latestDST !== undefined ? latestId.plus(1).toNumber() : DCT_ID_START
@@ -80,7 +80,7 @@ export class TokenMapper {
       return DCT_ID_START
     }
 
-    const latestId = new BigNumber(latest.id)
+    const latestId = new BigNumber(latest.tokenId)
     return latestId.plus(1).toNumber()
   }
 
@@ -100,7 +100,7 @@ export class TokenMapper {
       order: SortOrder.DESC
     })
 
-    if (latest.length === 0 || new BigNumber(latest[0].id).lt(DCT_ID_START)) {
+    if (latest.length === 0 || new BigNumber(latest[0].tokenId).lt(DCT_ID_START)) {
       return undefined
     }
 
@@ -111,6 +111,7 @@ export class TokenMapper {
 export interface Token extends Model {
   id: string // ---------| txid
   sort: string // -------| tokenId (hex encoded)
+  tokenId: number
 
   symbol: string
   name: string

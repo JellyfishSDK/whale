@@ -26,6 +26,7 @@ export class CreateTokenIndexer extends DfTxIndexer<TokenCreate> {
 
     await this.tokenMapper.put({
       id: txid,
+      tokenId: tokenId,
       sort: HexEncoder.encodeHeight(tokenId),
       symbol: symbol,
       name: name,

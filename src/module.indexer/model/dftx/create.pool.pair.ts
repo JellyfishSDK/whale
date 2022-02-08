@@ -42,8 +42,8 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
     const data = transaction.dftx.data
     const tokenId = await this.tokenMapper.getNextTokenID(true)
 
-    const tokenA = await this.tokenMapper.getByTokenId(`${data.tokenA}`)
-    const tokenB = await this.tokenMapper.getByTokenId(`${data.tokenB}`)
+    const tokenA = await this.tokenMapper.getByTokenId(data.tokenA)
+    const tokenB = await this.tokenMapper.getByTokenId(data.tokenB)
 
     if (tokenA === undefined || tokenB === undefined) {
       throw new IndexerError(`Tokens (${data.tokenA}, ${data.tokenB}) referenced by PoolPair (${tokenId}) do not exist`)
@@ -89,6 +89,7 @@ export class CreatePoolPairIndexer extends DfTxIndexer<PoolCreatePair> {
 
     await this.tokenMapper.put({
       id: txid,
+      tokenId: tokenId,
       sort: HexEncoder.encodeHeight(tokenId),
       symbol: data.pairSymbol,
       name: `${tokenA.symbol}-${tokenB.symbol} LP Token`,

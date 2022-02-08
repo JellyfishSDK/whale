@@ -44,17 +44,17 @@ describe('update poolpair', () => {
     await waitForIndexedHeight(app, height)
 
     const poolPairTokenMapper = app.get(PoolPairTokenMapper)
-    const poolPairMapper = app.get(PoolPairHistoryMapper)
+    const poolPairHistoryMapper = app.get(PoolPairHistoryMapper)
     const result = await poolPairTokenMapper.list(30)
     const poolPairs = await Promise.all(result.map(async x => {
-      return await poolPairMapper.getLatest(`${x.poolPairId}`)
+      return await poolPairHistoryMapper.getLatest(`${x.poolPairId}`)
     }))
 
     expect(poolPairs[1]).toStrictEqual({
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.stringMatching(/[0-f]{16}/),
       commission: '0.50000000',
-      id: '8-127',
       name: 'B-Default Defi token',
-      sort: '00000008',
       pairSymbol: 'B-DFI',
       poolPairId: '8',
       status: false,
@@ -85,13 +85,13 @@ describe('invalidate', () => {
     await container.generate(1)
     await waitForIndexedHeight(app, heightUpdated)
 
-    const poolPairMapper = app.get(PoolPairHistoryMapper)
-    const poolPair = await poolPairMapper.getLatest('8')
+    const poolPairHistoryMapper = app.get(PoolPairHistoryMapper)
+    const poolPair = await poolPairHistoryMapper.getLatest('8')
     expect(poolPair).toStrictEqual({
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.stringMatching(/[0-f]{16}/),
       commission: '0.75000000',
       name: 'B-Default Defi token',
-      id: '8-130',
-      sort: '00000008',
       pairSymbol: 'B-DFI',
       poolPairId: '8',
       status: true,
@@ -110,12 +110,12 @@ describe('invalidate', () => {
     await container.generate(2)
     await waitForIndexedHeight(app, heightUpdated)
 
-    const poolPairInvalidated = await poolPairMapper.getLatest('8')
+    const poolPairInvalidated = await poolPairHistoryMapper.getLatest('8')
     expect(poolPairInvalidated).toStrictEqual({
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.stringMatching(/[0-f]{16}/),
       commission: '0.50000000',
-      id: '8-127',
       name: 'B-Default Defi token',
-      sort: '00000008',
       pairSymbol: 'B-DFI',
       poolPairId: '8',
       status: false,
