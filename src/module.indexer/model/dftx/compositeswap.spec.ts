@@ -52,8 +52,8 @@ describe('composite swap', () => {
     }))
 
     expect(poolPairs[0]).toStrictEqual({
-      id: '2-103',
-      sort: '00000002',
+      id: expect.stringMatching(/[0-f]{64}/),
+      sort: expect.any(String),
       pairSymbol: 'B-DFI',
       name: 'B-Default Defi token',
       poolPairId: '2',
