@@ -1,5 +1,5 @@
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
-import { CompositeSwap, CCompositeSwap } from '@defichain/jellyfish-transaction'
+import { CompositeSwap, CCompositeSwap, PoolId, PoolSwap } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Inject, Injectable } from '@nestjs/common'
 import { PoolSwapIndexer } from './poolswap'
@@ -35,6 +35,10 @@ export class CompositeSwapIndexer extends DfTxIndexer<CompositeSwap> {
       poolIds.push({ id: poolPairToken.poolPairId })
     }
 
+    await this.indexSwaps(poolIds, poolSwap, transaction, block)
+  }
+
+  async indexSwaps (poolIds: PoolId[], poolSwap: PoolSwap, transaction: DfTxTransaction<CompositeSwap>, block: RawBlock): Promise<void> {
     let swapAmount: BigNumber = poolSwap.fromAmount
     for (const pool of poolIds) {
       const poolPair = await this.poolPairMapper.getLatest(`${pool.id}`)
