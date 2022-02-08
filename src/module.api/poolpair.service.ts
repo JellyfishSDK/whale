@@ -126,7 +126,7 @@ export class PoolPairService {
 
   private async getPriceForToken (id: number): Promise<BigNumber | undefined> {
     return await this.cache.get<BigNumber>(`PRICE_FOR_TOKEN_${id}`, async () => {
-      const tokenInfo = await this.tokenMapper.get(`${id}`)
+      const tokenInfo = await this.tokenMapper.getByTokenId(id)
       const token = tokenInfo?.symbol
 
       if (token === undefined) {
