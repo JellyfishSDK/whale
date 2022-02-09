@@ -8,7 +8,7 @@ import { PoolPairService } from './poolpair.service'
 import BigNumber from 'bignumber.js'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import { parseDATSymbol } from '@src/module.api/token.controller'
-import { PoolSwapMapper } from '@src/module.model/poolswap'
+import { PoolSwapMapper } from '@src/module.model/pool.swap'
 
 @Controller('/poolpairs')
 export class PoolPairController {

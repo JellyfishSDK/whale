@@ -4,7 +4,7 @@ import { createTestingApp, invalidateFromHeight, stopTestingApp, waitForIndexedH
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens, poolSwap, sendTokensToAddress } from '@defichain/testing'
 import { PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
 import { PoolPairHistoryMapper } from '@src/module.model/pool.pair.history'
-import { PoolSwapMapper } from '@src/module.model/poolswap'
+import { PoolSwapMapper } from '@src/module.model/pool.swap'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
 import { PoolSwapIntervalSeconds } from './poolswap.interval'
@@ -135,13 +135,14 @@ describe('index poolswap', () => {
 
     const resultSwaps = await poolSwapMapper.query('3', Number.MAX_SAFE_INTEGER)
     expect(resultSwaps).toStrictEqual([{
+      txid: expect.stringMatching(/[0-f]{64}/),
       fromAmount: '100.00000000',
       fromTokenId: 1,
       id: expect.any(String),
-      key: '3',
       poolPairId: '3',
       sort: expect.any(String),
-      block: expect.any(Object)
+      block: expect.any(Object),
+      txno: expect.any(Number)
     }])
 
     await poolSwap(container, {
@@ -165,15 +166,17 @@ describe('index poolswap', () => {
     const resultSwaps2 = await poolSwapMapper.query('3', Number.MAX_SAFE_INTEGER, undefined, HexEncoder.encodeHeight(118))
     expect(resultSwaps2).toStrictEqual([
       {
+        txid: expect.stringMatching(/[0-f]{64}/),
         block: expect.any(Object),
         fromAmount: '6.00000000',
         fromTokenId: 0,
         id: expect.any(String),
-        key: '3',
         poolPairId: '3',
-        sort: expect.any(String)
+        sort: expect.any(String),
+        txno: expect.any(Number)
       },
       {
+        txid: expect.stringMatching(/[0-f]{64}/),
         block: expect.any(Object),
         fromAmount: '5.00000000',
         fromTokenId: 1,

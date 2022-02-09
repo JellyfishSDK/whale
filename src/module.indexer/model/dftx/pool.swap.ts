@@ -2,12 +2,11 @@ import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_ab
 import { PoolSwap, CPoolSwap } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Inject, Injectable } from '@nestjs/common'
-import { PoolPairHistoryMapper, PoolPairHistory } from '@src/module.model/pool.pair.history'
-import { PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
+import { PoolPairToken, PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { IndexerError } from '@src/module.indexer/error'
 import BigNumber from 'bignumber.js'
-import { PoolSwapMapper } from '@src/module.model/poolswap'
+import { PoolSwapMapper } from '@src/module.model/pool.swap'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
 import { AggregationIntervals } from './poolswap.interval'
@@ -17,7 +16,6 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
   OP_CODE: number = CPoolSwap.OP_CODE
 
   constructor (
-    private readonly poolPairMapper: PoolPairHistoryMapper,
     private readonly poolPairTokenMapper: PoolPairTokenMapper,
     private readonly poolSwapMapper: PoolSwapMapper,
     private readonly aggregatedMapper: PoolSwapAggregatedMapper,
@@ -28,26 +26,17 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
 
   async indexTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
     const data = transaction.dftx.data
-
-    const poolPairToken = await this.poolPairTokenMapper.getPair(data.fromTokenId, data.toTokenId)
-    if (poolPairToken === undefined) {
-      throw new IndexerError(`Pool for pair ${data.fromTokenId}, ${data.toTokenId} not found`)
-    }
-
-    const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
-    if (poolPair !== undefined) {
-      await this.indexSwap(poolPair, data.fromTokenId, data.fromAmount, block,
-        transaction.txn.txid, transaction.txnNo)
-    }
+    const poolPair = await this.getPair(data.fromTokenId, data.toTokenId)
+    await this.indexSwap(block, transaction, `${poolPair.poolPairId}`, data.fromTokenId, data.fromAmount)
   }
 
-  async indexSwap (poolPair: PoolPairHistory, fromTokenId: number, fromAmount: BigNumber, block: RawBlock,
-    txid: string, txnNo: number): Promise<void> {
+  async indexSwap (block: RawBlock, transaction: DfTxTransaction<any>, poolPairId: string, fromTokenId: number, fromAmount: BigNumber): Promise<void> {
     await this.poolSwapMapper.put({
-      id: `${poolPair.poolPairId}-${txid}`,
-      key: poolPair.poolPairId,
-      sort: HexEncoder.encodeHeight(block.height) + HexEncoder.encodeHeight(txnNo),
-      poolPairId: poolPair.poolPairId,
+      id: `${poolPairId}-${transaction.txn.txid}`,
+      txid: transaction.txn.txid,
+      txno: transaction.txnNo,
+      poolPairId: poolPairId,
+      sort: HexEncoder.encodeHeight(block.height) + HexEncoder.encodeHeight(transaction.txnNo),
       fromAmount: fromAmount.toFixed(8),
       fromTokenId: fromTokenId,
       block: {
@@ -59,7 +48,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     })
 
     for (const interval of AggregationIntervals) {
-      const previous = await this.aggregatedMapper.query(`${poolPair.poolPairId}-${interval}`, 1)
+      const previous = await this.aggregatedMapper.query(`${poolPairId}-${interval}`, 1)
       const aggregate = previous[0]
       const amount = aggregate.aggregated.amounts[`${fromTokenId}`]
       aggregate.aggregated.amounts[`${fromTokenId}`] = amount === undefined
@@ -69,8 +58,8 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     }
   }
 
-  async invalidateSwap (poolPairId: string, fromTokenId: number, fromAmount: BigNumber, txid: string): Promise<void> {
-    await this.poolSwapMapper.delete(`${poolPairId}-${txid}`)
+  async invalidateSwap (transaction: DfTxTransaction<any>, poolPairId: string, fromTokenId: number, fromAmount: BigNumber): Promise<void> {
+    await this.poolSwapMapper.delete(`${poolPairId}-${transaction.txn.txid}`)
 
     for (const interval of AggregationIntervals) {
       const previous = await this.aggregatedMapper.query(`${poolPairId}-${interval as number}`, 1)
@@ -81,19 +70,20 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     }
   }
 
-  async invalidateTransaction (block: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
+  async invalidateTransaction (_: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
     const data = transaction.dftx.data
-    const poolPairToken = await this.poolPairTokenMapper.getPair(data.fromTokenId, data.toTokenId)
+    const poolPair = await this.getPair(data.fromTokenId, data.toTokenId)
+    await this.invalidateSwap(transaction, `${poolPair.poolPairId}`, data.fromTokenId, data.fromAmount)
+  }
 
+  async getPair (tokenA: number, tokenB: number): Promise<PoolPairToken> {
+    // TODO(fuxingloh): caching
+
+    const poolPairToken = await this.poolPairTokenMapper.getPair(tokenA, tokenB)
     if (poolPairToken === undefined) {
-      throw new IndexerError(`Pool for pair ${data.fromTokenId}, ${data.toTokenId} not found`)
+      throw new IndexerError(`Pool for pair ${tokenA}, ${tokenB} not found`)
     }
 
-    const poolPair = await this.poolPairMapper.getLatest(`${poolPairToken.poolPairId}`)
-    if (poolPair === undefined) {
-      throw new IndexerError(`Pool with id ${poolPairToken.poolPairId} not found`)
-    }
-
-    await this.invalidateSwap(poolPair.poolPairId, data.fromTokenId, data.fromAmount, transaction.txn.txid)
+    return poolPairToken
   }
 }
