@@ -6,10 +6,10 @@ const PoolSwapMapping: ModelMapping<PoolSwap> = {
   type: 'pool_swap',
   index: {
     key_sort: {
-      name: 'pool_swap_key_sort',
+      name: 'pool_swap_sort',
       partition: {
         type: 'string',
-        key: (b: PoolSwap) => b.key
+        key: (b: PoolSwap) => b.poolPairId
       },
       sort: {
         type: 'string',
@@ -45,11 +45,13 @@ export class PoolSwapMapper {
 
 export interface PoolSwap extends Model {
   id: string // ---------| poolpairId-txid
-  key: string // --------| poolpairId
-  sort: string // -------| height-txnNo
+  txid: string
+  txno: number
 
   poolPairId: string // ------| poolPairId (decimal encoded integer as string)
-  fromAmount: string // ------| bignumber
+  sort: string // ------------| height-txnNo
+
+  fromAmount: string // --------| bignumber
   fromTokenId: number // -------| number
 
   block: {
