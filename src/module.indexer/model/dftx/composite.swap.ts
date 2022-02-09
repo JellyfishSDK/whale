@@ -44,7 +44,7 @@ export class CompositeSwapIndexer extends DfTxIndexer<CompositeSwap> {
         throw new IndexerError(`Pool with id ${pool.id} not found`)
       }
 
-      await this.poolSwapIndexer.indexSwap(block, transaction, poolPair.id, poolSwap.fromTokenId, poolSwap.fromAmount)
+      await this.poolSwapIndexer.indexSwap(block, transaction, poolPair.poolPairId, poolSwap.fromTokenId, poolSwap.fromAmount)
       fromAmount = ONE.minus(poolPair.commission).times(fromAmount)
     }
   }
