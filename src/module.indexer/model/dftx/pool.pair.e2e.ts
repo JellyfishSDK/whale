@@ -181,9 +181,9 @@ describe('index poolswap', () => {
         fromAmount: '5.00000000',
         fromTokenId: 1,
         id: expect.any(String),
-        key: '3',
         poolPairId: '3',
-        sort: expect.any(String)
+        sort: expect.any(String),
+        txno: expect.any(Number)
       }
     ])
 
