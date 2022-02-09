@@ -255,7 +255,7 @@ describe('poolswap 30d', () => {
     const aggregated = await aggregatedMapper.query(`2-${PoolSwapIntervalSeconds.ONE_DAY}`, 2)
     expect(aggregated).toStrictEqual([
       {
-        id: '2-86400-398',
+        id: expect.any(String),
         key: '2-86400',
         sort: expect.any(String),
         aggregated: {
@@ -266,7 +266,7 @@ describe('poolswap 30d', () => {
         block: expect.any(Object)
       },
       {
-        id: '2-86400-107',
+        id: expect.any(String),
         key: '2-86400',
         sort: expect.any(String),
         aggregated: {
