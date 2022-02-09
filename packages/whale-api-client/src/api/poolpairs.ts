@@ -89,6 +89,7 @@ export interface PoolSwap {
   id: string
   sort: string
   txid: string
+  txno: number
 
   poolPairId: string
   fromAmount: string

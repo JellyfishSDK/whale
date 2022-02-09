@@ -46,6 +46,7 @@ export class PoolSwapMapper {
 export interface PoolSwap extends Model {
   id: string // ---------| poolpairId-txid
   txid: string
+  txno: number
 
   poolPairId: string // ------| poolPairId (decimal encoded integer as string)
   sort: string // ------------| height-txnNo

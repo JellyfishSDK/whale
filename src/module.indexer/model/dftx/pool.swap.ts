@@ -33,6 +33,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     await this.poolSwapMapper.put({
       id: `${poolPairId}-${transaction.txn.txid}`,
       txid: transaction.txn.txid,
+      txno: transaction.txnNo,
       poolPairId: poolPairId,
       sort: HexEncoder.encodeHeight(block.height) + HexEncoder.encodeHeight(transaction.txnNo),
       fromAmount: fromAmount.toFixed(8),
