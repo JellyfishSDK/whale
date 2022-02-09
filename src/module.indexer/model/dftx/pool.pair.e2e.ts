@@ -198,6 +198,120 @@ describe('index poolswap', () => {
           }
         },
         block: expect.any(Object),
+        id: expect.any(String),
+        key: '3-3600',
+        sort: expect.any(String)
+      }
+    )
+  })
+})
+
+describe('index composite swap', () => {
+  it('should index composite swap', async () => {
+    const ownerAddress = await getNewAddress(container)
+    const tokens = ['A', 'B']
+
+    for (const token of tokens) {
+      await container.waitForWalletBalanceGTE(110)
+      await createToken(container, token, { collateralAddress: ownerAddress })
+      await mintTokens(container, token)
+    }
+    await createPoolPair(container, 'A', 'DFI')
+    await createPoolPair(container, 'B', 'DFI')
+
+    await addPoolLiquidity(container, {
+      tokenA: 'A',
+      amountA: 100,
+      tokenB: 'DFI',
+      amountB: 200,
+      shareAddress: await getNewAddress(container)
+    })
+    await addPoolLiquidity(container, {
+      tokenA: 'B',
+      amountA: 50,
+      tokenB: 'DFI',
+      amountB: 300,
+      shareAddress: await getNewAddress(container)
+    })
+
+    await testing.rpc.poolpair.compositeSwap({
+      from: ownerAddress,
+      tokenFrom: 'A',
+      amountFrom: 5,
+      to: ownerAddress,
+      tokenTo: 'B'
+    })
+
+    await testing.rpc.poolpair.compositeSwap({
+      from: ownerAddress,
+      tokenFrom: 'B',
+      amountFrom: 6,
+      to: ownerAddress,
+      tokenTo: 'A'
+    })
+
+    await waitForIndexedHeightLatest(app, container)
+
+    const poolSwapMapper = app.get(PoolSwapMapper)
+    const resultSwaps = await poolSwapMapper.query('3', Number.MAX_SAFE_INTEGER)
+    expect(resultSwaps).toStrictEqual([
+      {
+        txid: expect.stringMatching(/[0-f]{64}/),
+        block: expect.any(Object),
+        fromAmount: '6.00000000',
+        fromTokenId: 2,
+        id: expect.any(String),
+        poolPairId: '3',
+        sort: expect.any(String),
+        txno: expect.any(Number)
+      },
+      {
+        txid: expect.stringMatching(/[0-f]{64}/),
+        block: expect.any(Object),
+        fromAmount: '5.00000000',
+        fromTokenId: 1,
+        id: expect.any(String),
+        poolPairId: '3',
+        sort: expect.any(String),
+        txno: expect.any(Number)
+      }
+    ])
+
+    const resultSwaps2 = await poolSwapMapper.query('4', Number.MAX_SAFE_INTEGER)
+    expect(resultSwaps2).toStrictEqual([
+      {
+        txid: expect.stringMatching(/[0-f]{64}/),
+        block: expect.any(Object),
+        fromAmount: '6.00000000',
+        fromTokenId: 2,
+        id: expect.any(String),
+        poolPairId: '4',
+        sort: expect.any(String),
+        txno: expect.any(Number)
+      },
+      {
+        txid: expect.stringMatching(/[0-f]{64}/),
+        block: expect.any(Object),
+        fromAmount: '5.00000000',
+        fromTokenId: 1,
+        id: expect.any(String),
+        poolPairId: '4',
+        sort: expect.any(String),
+        txno: expect.any(Number)
+      }
+    ])
+
+    const aggregatedMapper = app.get(PoolSwapAggregatedMapper)
+    const aggregated = await aggregatedMapper.query(`3-${PoolSwapIntervalSeconds.ONE_HOUR}`, 1)
+    expect(aggregated[0]).toStrictEqual(
+      {
+        aggregated: {
+          amounts: {
+            0: '6.00000000',
+            1: '105.00000000'
+          }
+        },
+        block: expect.any(Object),
         id: '3-3600-109',
         key: '3-3600',
         sort: expect.any(String)
