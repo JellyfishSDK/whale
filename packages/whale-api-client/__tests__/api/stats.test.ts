@@ -140,6 +140,11 @@ describe('stats', () => {
       }
     })
   })
+
+  it.only('should get stat supply', async () => {
+    const data = await client.stats.getSupply()
+    console.log('data: ', data)
+  })
 })
 
 describe('loan - stats', () => {
@@ -397,5 +402,10 @@ describe('loan - stats', () => {
         version: expect.any(Number)
       }
     })
+  })
+
+  it('should get stat supply', async () => {
+    const data = await client.stats.getSupply()
+    console.log('data: ', data)
   })
 })

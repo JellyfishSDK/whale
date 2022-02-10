@@ -1,4 +1,5 @@
 import { WhaleApiClient } from '../whale.api.client'
+import { BlockRewardDistribution } from '@defichain/jellyfish-network'
 
 export class Stats {
   constructor (private readonly client: WhaleApiClient) {
@@ -11,6 +12,15 @@ export class Stats {
    */
   async get (): Promise<StatsData> {
     return await this.client.requestData('GET', 'stats')
+  }
+
+  /**
+   * Get supply of DeFi Blockchain
+   *
+   * @return {Promise<BlockRewardDistribution}
+   */
+  async getSupply (): Promise<BlockRewardDistribution> {
+    return await this.client.requestData('GET', 'stats/supply')
   }
 }
 

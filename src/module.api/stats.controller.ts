@@ -9,6 +9,7 @@ import { PriceTickerMapper } from '@src/module.model/price.ticker'
 import { MasternodeStats, MasternodeStatsMapper } from '@src/module.model/masternode.stats'
 import { BlockchainInfo } from '@defichain/jellyfish-api-core/dist/category/blockchain'
 import { getBlockSubsidy } from '@src/module.api/subsidy'
+import { BlockRewardDistribution, BlockSubsidy, getBlockRewardDistribution } from '@defichain/jellyfish-network'
 
 @Controller('/stats')
 export class StatsController {
@@ -42,6 +43,14 @@ export class StatsController {
         difficulty: block.difficulty
       }
     }
+  }
+
+  @Get('/supply')
+  async getSupply (): Promise<BlockRewardDistribution> {
+    const block = requireValue(await this.blockMapper.getHighest(), 'block')
+    const blockSubsidy = new BlockSubsidy()
+    const subsidy = blockSubsidy.getSupply(block.height)
+    return getBlockRewardDistribution(subsidy)
   }
 
   private async cachedGet<T> (field: string, fetch: () => Promise<T>, ttl: number): Promise<T> {
