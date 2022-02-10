@@ -258,8 +258,8 @@ describe('index composite swap', () => {
       {
         txid: expect.stringMatching(/[0-f]{64}/),
         block: expect.any(Object),
-        fromAmount: '6.00000000',
-        fromTokenId: 2,
+        fromAmount: '5.00000000',
+        fromTokenId: 1,
         id: expect.any(String),
         poolPairId: '3',
         sort: expect.any(String),
@@ -268,8 +268,8 @@ describe('index composite swap', () => {
       {
         txid: expect.stringMatching(/[0-f]{64}/),
         block: expect.any(Object),
-        fromAmount: '5.00000000',
-        fromTokenId: 1,
+        fromAmount: '6.00000000',
+        fromTokenId: 2,
         id: expect.any(String),
         poolPairId: '3',
         sort: expect.any(String),
@@ -282,8 +282,8 @@ describe('index composite swap', () => {
       {
         txid: expect.stringMatching(/[0-f]{64}/),
         block: expect.any(Object),
-        fromAmount: '6.00000000',
-        fromTokenId: 2,
+        fromAmount: '5.00000000',
+        fromTokenId: 1,
         id: expect.any(String),
         poolPairId: '4',
         sort: expect.any(String),
@@ -292,8 +292,8 @@ describe('index composite swap', () => {
       {
         txid: expect.stringMatching(/[0-f]{64}/),
         block: expect.any(Object),
-        fromAmount: '5.00000000',
-        fromTokenId: 1,
+        fromAmount: '6.00000000',
+        fromTokenId: 2,
         id: expect.any(String),
         poolPairId: '4',
         sort: expect.any(String),
@@ -420,7 +420,15 @@ describe('poolswap invalidate', () => {
     const preSwapHeight = await testing.container.getBlockCount()
     const tenMinutes = 60 * 10
     const numBlocks = 12
-    const timeNow = Math.floor(Date.now() / 1000)
+
+    // Explicitly set minutes to 0 to avoid interval
+    // inconsistency based on local time
+    // Note: This is not an issue on a live blockchain as
+    // the block times won't change, it's only an issue
+    // in the test environment when using setMockTime
+    const dateNow = new Date()
+    dateNow.setMinutes(0)
+    const timeNow = Math.floor(dateNow.getTime() / 1000) + 60 * 60
     for (let i = 0; i < numBlocks; i++) {
       const mockTime = timeNow + i * tenMinutes
       await testing.rpc.misc.setMockTime(mockTime)
