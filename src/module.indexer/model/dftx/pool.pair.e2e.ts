@@ -348,7 +348,17 @@ describe('poolswap 30d', () => {
     {
       const fiveMinutes = 60 * 5
       const numBlocks = 24 * 2 * 12
-      const timeNow = Math.floor(Date.now() / 1000)
+
+      // Explicitly set minutes to 0 to avoid interval
+      // inconsistency based on local time
+      // Note: This is not an issue on a live blockchain as
+      // the block times won't change, it's only an issue
+      // in the test environment when using setMockTime
+      const dateNow = new Date()
+      dateNow.setUTCMinutes(0)
+      dateNow.setUTCHours(0)
+      dateNow.setUTCDate(dateNow.getUTCDate() + 1)
+      const timeNow = Math.floor(dateNow.getTime() / 1000)
       for (let i = 0; i <= numBlocks; i++) {
         const mockTime = timeNow + i * fiveMinutes
         await testing.rpc.misc.setMockTime(mockTime)
@@ -423,14 +433,11 @@ describe('poolswap invalidate', () => {
     const tenMinutes = 60 * 10
     const numBlocks = 12
 
-    // Explicitly set minutes to 0 to avoid interval
-    // inconsistency based on local time
-    // Note: This is not an issue on a live blockchain as
-    // the block times won't change, it's only an issue
-    // in the test environment when using setMockTime
     const dateNow = new Date()
-    dateNow.setMinutes(0)
-    const timeNow = Math.floor(dateNow.getTime() / 1000) + 60 * 60
+    dateNow.setUTCMinutes(0)
+    dateNow.setUTCHours(0)
+    dateNow.setUTCDate(dateNow.getUTCDate() + 1)
+    const timeNow = Math.floor(dateNow.getTime() / 1000)
     for (let i = 0; i < numBlocks; i++) {
       const mockTime = timeNow + i * tenMinutes
       await testing.rpc.misc.setMockTime(mockTime)
