@@ -242,6 +242,8 @@ describe('index composite swap', () => {
       tokenTo: 'B'
     })
 
+    await testing.generate(1)
+
     await testing.rpc.poolpair.compositeSwap({
       from: ownerAddress,
       tokenFrom: 'B',
@@ -258,8 +260,8 @@ describe('index composite swap', () => {
       {
         txid: expect.stringMatching(/[0-f]{64}/),
         block: expect.any(Object),
-        fromAmount: '5.00000000',
-        fromTokenId: 1,
+        fromAmount: '6.00000000',
+        fromTokenId: 2,
         id: expect.any(String),
         poolPairId: '3',
         sort: expect.any(String),
@@ -268,8 +270,8 @@ describe('index composite swap', () => {
       {
         txid: expect.stringMatching(/[0-f]{64}/),
         block: expect.any(Object),
-        fromAmount: '6.00000000',
-        fromTokenId: 2,
+        fromAmount: '5.00000000',
+        fromTokenId: 1,
         id: expect.any(String),
         poolPairId: '3',
         sort: expect.any(String),
@@ -282,8 +284,8 @@ describe('index composite swap', () => {
       {
         txid: expect.stringMatching(/[0-f]{64}/),
         block: expect.any(Object),
-        fromAmount: '5.00000000',
-        fromTokenId: 1,
+        fromAmount: '6.00000000',
+        fromTokenId: 2,
         id: expect.any(String),
         poolPairId: '4',
         sort: expect.any(String),
@@ -292,8 +294,8 @@ describe('index composite swap', () => {
       {
         txid: expect.stringMatching(/[0-f]{64}/),
         block: expect.any(Object),
-        fromAmount: '6.00000000',
-        fromTokenId: 2,
+        fromAmount: '5.00000000',
+        fromTokenId: 1,
         id: expect.any(String),
         poolPairId: '4',
         sort: expect.any(String),
