@@ -307,12 +307,12 @@ describe('index composite swap', () => {
       {
         aggregated: {
           amounts: {
-            0: '6.00000000',
-            1: '105.00000000'
+            1: '5.00000000',
+            2: '6.00000000'
           }
         },
         block: expect.any(Object),
-        id: '3-3600-109',
+        id: expect.any(String),
         key: '3-3600',
         sort: expect.any(String)
       }
