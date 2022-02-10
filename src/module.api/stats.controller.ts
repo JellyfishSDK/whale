@@ -19,7 +19,8 @@ export class StatsController {
     protected readonly masternodeStatsMapper: MasternodeStatsMapper,
     protected readonly poolPairService: PoolPairService,
     protected readonly rpcClient: JsonRpcClient,
-    protected readonly cache: SemaphoreCache
+    protected readonly cache: SemaphoreCache,
+    protected readonly blockSubsidy: BlockSubsidy
   ) {
   }
 
@@ -48,8 +49,7 @@ export class StatsController {
   @Get('/supply')
   async getSupply (): Promise<BlockRewardDistribution> {
     const block = requireValue(await this.blockMapper.getHighest(), 'block')
-    const blockSubsidy = new BlockSubsidy()
-    const subsidy = blockSubsidy.getSupply(block.height)
+    const subsidy = this.blockSubsidy.getSupply(block.height)
     return getBlockRewardDistribution(subsidy)
   }
 
