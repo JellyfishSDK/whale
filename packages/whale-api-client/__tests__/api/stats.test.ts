@@ -141,9 +141,17 @@ describe('stats', () => {
     })
   })
 
-  it.only('should get stat supply', async () => {
+  it('should get stat supply', async () => {
     const data = await client.stats.getSupply()
-    console.log('data: ', data)
+    expect(data).toStrictEqual({
+      masternode: expect.any(Number),
+      community: expect.any(Number),
+      anchor: expect.any(Number),
+      liquidity: expect.any(Number),
+      loan: expect.any(Number),
+      options: expect.any(Number),
+      unallocated: expect.any(Number)
+    })
   })
 })
 
@@ -406,6 +414,14 @@ describe('loan - stats', () => {
 
   it('should get stat supply', async () => {
     const data = await client.stats.getSupply()
-    console.log('data: ', data)
+    expect(data).toStrictEqual({
+      masternode: expect.any(Number),
+      community: expect.any(Number),
+      anchor: expect.any(Number),
+      liquidity: expect.any(Number),
+      loan: expect.any(Number),
+      options: expect.any(Number),
+      unallocated: expect.any(Number)
+    })
   })
 })
