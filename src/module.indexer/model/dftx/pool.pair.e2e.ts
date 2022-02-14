@@ -386,7 +386,7 @@ describe('poolswap 30d', () => {
         sort: expect.any(String),
         aggregated: {
           amounts: {
-            1: '28.70000000'
+            1: '16.60000000'
           }
         },
         block: expect.any(Object)
@@ -397,7 +397,7 @@ describe('poolswap 30d', () => {
         sort: expect.any(String),
         aggregated: {
           amounts: {
-            1: '29.00000000'
+            1: '28.90000000'
           }
         },
         block: expect.any(Object)
@@ -469,7 +469,7 @@ describe('poolswap invalidate', () => {
         sort: expect.any(String),
         aggregated: {
           amounts: {
-            1: '0.40000000'
+            1: '0.30000000'
           }
         },
         block: expect.any(Object)
@@ -480,7 +480,18 @@ describe('poolswap invalidate', () => {
         sort: expect.any(String),
         aggregated: {
           amounts: {
-            1: '0.80000000'
+            1: '0.70000000'
+          }
+        },
+        block: expect.any(Object)
+      },
+      {
+        id: expect.any(String),
+        key: '2-3600',
+        sort: expect.any(String),
+        aggregated: {
+          amounts: {
+            1: '0.20000000'
           }
         },
         block: expect.any(Object)
@@ -491,10 +502,10 @@ describe('poolswap invalidate', () => {
       const height = await testing.container.getBlockCount()
 
       // First test only a few blocks back to ensure reverse aggregate is working
-      await invalidateFromHeight(app, container, height - 4)
+      await invalidateFromHeight(app, container, height - 3)
 
       const resultSwaps = await poolSwapMapper.query('2', Number.MAX_SAFE_INTEGER)
-      expect(resultSwaps.length).toStrictEqual(numBlocks - 3)
+      expect(resultSwaps.length).toStrictEqual(numBlocks - 2)
 
       const aggregated = await aggregatedMapper.query(`2-${PoolSwapIntervalSeconds.ONE_HOUR}`, Number.MAX_SAFE_INTEGER)
       expect(aggregated).toStrictEqual([
@@ -515,7 +526,18 @@ describe('poolswap invalidate', () => {
           sort: expect.any(String),
           aggregated: {
             amounts: {
-              1: '0.80000000'
+              1: '0.70000000'
+            }
+          },
+          block: expect.any(Object)
+        },
+        {
+          id: expect.any(String),
+          key: '2-3600',
+          sort: expect.any(String),
+          aggregated: {
+            amounts: {
+              1: '0.20000000'
             }
           },
           block: expect.any(Object)
