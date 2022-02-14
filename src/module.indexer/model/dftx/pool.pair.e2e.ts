@@ -7,7 +7,7 @@ import { PoolPairHistoryMapper } from '@src/module.model/pool.pair.history'
 import { PoolSwapMapper } from '@src/module.model/pool.swap'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
-import { PoolSwapIntervalSeconds } from './poolswap.interval'
+import { PoolSwapIntervalSeconds } from './pool.swap.interval'
 import { Testing } from '@defichain/jellyfish-testing'
 
 const container = new MasterNodeRegTestContainer()
@@ -345,6 +345,8 @@ describe('poolswap 30d', () => {
       shareAddress: await getNewAddress(container)
     })
 
+    await testing.generate(1)
+
     {
       const fiveMinutes = 60 * 5
       const numBlocks = 24 * 2 * 12
@@ -355,7 +357,7 @@ describe('poolswap 30d', () => {
       // the block times won't change, it's only an issue
       // in the test environment when using setMockTime
       const dateNow = new Date()
-      dateNow.setUTCMinutes(0)
+      dateNow.setUTCMinutes(3)
       dateNow.setUTCHours(0)
       dateNow.setUTCDate(dateNow.getUTCDate() + 1)
       const timeNow = Math.floor(dateNow.getTime() / 1000)
@@ -386,7 +388,7 @@ describe('poolswap 30d', () => {
         sort: expect.any(String),
         aggregated: {
           amounts: {
-            1: '16.60000000'
+            1: '13.60000000'
           }
         },
         block: expect.any(Object)

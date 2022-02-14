@@ -9,7 +9,7 @@ import BigNumber from 'bignumber.js'
 import { PoolSwapMapper } from '@src/module.model/pool.swap'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
 import { PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
-import { AggregationIntervals } from './poolswap.interval'
+import { AggregationIntervals } from './pool.swap.interval'
 
 @Injectable()
 export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {

@@ -15,7 +15,7 @@ import { CompositeSwapIndexer } from './composite.swap'
 import { SetLoanTokenIndexer } from './set.loan.token'
 import { ActivePriceIndexer } from './active.price'
 import { PlaceAuctionBidIndexer } from './place.auction.bid'
-import { PoolSwapIntervalIndexer } from './poolswap.interval'
+import { PoolSwapIntervalIndexer } from './pool.swap.interval'
 
 const indexers = [
   AppointOracleIndexer,
