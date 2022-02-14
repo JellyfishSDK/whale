@@ -144,13 +144,19 @@ describe('stats', () => {
   it('should get stat supply', async () => {
     const data = await client.stats.getSupply()
     expect(data).toStrictEqual({
-      masternode: expect.any(Number),
-      community: expect.any(Number),
-      anchor: expect.any(Number),
-      liquidity: expect.any(Number),
-      loan: expect.any(Number),
-      options: expect.any(Number),
-      unallocated: expect.any(Number)
+      max: 120000000000000000,
+      total: expect.any(Number), // 59102443000000000
+      burned: expect.any(Number), // 732758000000
+      circulating: expect.any(Number), // 59101710242000000
+      blockReward: {
+        masternode: expect.any(Number), // 19698844251900000
+        community: expect.any(Number), // 2901929951300000
+        anchor: expect.any(Number), // 11820488600000
+        liquidity: expect.any(Number), // 15041571743500000
+        loan: expect.any(Number), // 14586482932400000
+        options: expect.any(Number), // 5839321368400000
+        unallocated: expect.any(Number) // 1022472263900000
+      }
     })
   })
 })
@@ -415,13 +421,19 @@ describe('loan - stats', () => {
   it('should get stat supply', async () => {
     const data = await client.stats.getSupply()
     expect(data).toStrictEqual({
-      masternode: expect.any(Number),
-      community: expect.any(Number),
-      anchor: expect.any(Number),
-      liquidity: expect.any(Number),
-      loan: expect.any(Number),
-      options: expect.any(Number),
-      unallocated: expect.any(Number)
+      max: 120000000000000000,
+      total: expect.any(Number), // 59102743000000000
+      burned: expect.any(Number), // 825368000000
+      circulating: expect.any(Number), // 59101917632000000
+      blockReward: {
+        masternode: expect.any(Number), // 19698944241900000
+        community: expect.any(Number), // 2901944681300000
+        anchor: expect.any(Number), // 11820488600000
+        liquidity: expect.any(Number), // 15041648093500000
+        loan: expect.any(Number), // 14586556972400000
+        options: expect.any(Number), // 5839351008400000
+        unallocated: expect.any(Number) // 1022477453900000
+      }
     })
   })
 })

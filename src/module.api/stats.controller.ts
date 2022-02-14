@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common'
-import { StatsData } from '@whale-api-client/api/stats'
+import { StatsData, SupplyData } from '@whale-api-client/api/stats'
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { BlockMapper } from '@src/module.model/block'
@@ -9,7 +9,7 @@ import { PriceTickerMapper } from '@src/module.model/price.ticker'
 import { MasternodeStats, MasternodeStatsMapper } from '@src/module.model/masternode.stats'
 import { BlockchainInfo } from '@defichain/jellyfish-api-core/dist/category/blockchain'
 import { getBlockSubsidy } from '@src/module.api/subsidy'
-import { BlockRewardDistribution, BlockSubsidy, getBlockRewardDistribution } from '@defichain/jellyfish-network'
+import { BlockSubsidy, getBlockRewardDistribution } from '@defichain/jellyfish-network'
 
 @Controller('/stats')
 export class StatsController {
@@ -47,10 +47,24 @@ export class StatsController {
   }
 
   @Get('/supply')
-  async getSupply (): Promise<BlockRewardDistribution> {
+  async getSupply (): Promise<SupplyData> {
     const block = requireValue(await this.blockMapper.getHighest(), 'block')
-    const subsidy = this.blockSubsidy.getSupply(block.height)
-    return getBlockRewardDistribution(subsidy)
+    const total = this.blockSubsidy.getSupply(block.height)
+    const max = 1200000000_00000000
+    const burned = (await this.getBurned()).total * 100000000
+    const circulating = total.toNumber() - burned
+
+    if (circulating > max) {
+      throw new Error(`Circulating ${circulating} should not greater than max supply ${max}`)
+    }
+
+    return {
+      max: max,
+      total: total.toNumber(),
+      burned: burned,
+      circulating: circulating,
+      blockReward: getBlockRewardDistribution(total)
+    }
   }
 
   private async cachedGet<T> (field: string, fetch: () => Promise<T>, ttl: number): Promise<T> {

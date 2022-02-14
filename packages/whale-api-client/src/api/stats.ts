@@ -90,7 +90,7 @@ export interface StatsData {
 export interface SupplyData {
   /**
    * The maximum supply of DFI that is allowed to exist at anytime.
-   * 1,200,000 as written in the white paper. Circulating amount will never be higher than this amount.
+   * 1,200,000,000 as written in the white paper. Circulating amount will never be higher than this amount.
    */
   max: number
 
