@@ -357,6 +357,7 @@ describe('poolswap 30d', () => {
       // the block times won't change, it's only an issue
       // in the test environment when using setMockTime
       const dateNow = new Date()
+      dateNow.setUTCSeconds(0)
       dateNow.setUTCMinutes(3)
       dateNow.setUTCHours(0)
       dateNow.setUTCDate(dateNow.getUTCDate() + 1)
@@ -439,6 +440,7 @@ describe('poolswap invalidate', () => {
     const numBlocks = 12
 
     const dateNow = new Date()
+    dateNow.setUTCSeconds(0)
     dateNow.setUTCMinutes(0)
     dateNow.setUTCHours(0)
     dateNow.setUTCDate(dateNow.getUTCDate() + 1)
