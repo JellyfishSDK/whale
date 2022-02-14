@@ -358,9 +358,9 @@ describe('poolswap 30d', () => {
       // in the test environment when using setMockTime
       const dateNow = new Date()
       dateNow.setUTCSeconds(0)
-      dateNow.setUTCMinutes(3)
+      dateNow.setUTCMinutes(2)
       dateNow.setUTCHours(0)
-      dateNow.setUTCDate(dateNow.getUTCDate() + 1)
+      dateNow.setUTCDate(dateNow.getUTCDate() + 2)
       const timeNow = Math.floor(dateNow.getTime() / 1000)
       await testing.rpc.misc.setMockTime(timeNow)
       await testing.generate(10)
@@ -392,7 +392,7 @@ describe('poolswap 30d', () => {
         sort: expect.any(String),
         aggregated: {
           amounts: {
-            1: '13.60000000'
+            1: '28.60000000'
           }
         },
         block: expect.any(Object)
@@ -403,7 +403,7 @@ describe('poolswap 30d', () => {
         sort: expect.any(String),
         aggregated: {
           amounts: {
-            1: '28.90000000'
+            1: '29.10000000'
           }
         },
         block: expect.any(Object)
@@ -441,9 +441,9 @@ describe('poolswap invalidate', () => {
 
     const dateNow = new Date()
     dateNow.setUTCSeconds(0)
-    dateNow.setUTCMinutes(0)
+    dateNow.setUTCMinutes(2)
     dateNow.setUTCHours(0)
-    dateNow.setUTCDate(dateNow.getUTCDate() + 1)
+    dateNow.setUTCDate(dateNow.getUTCDate() + 2)
     const timeNow = Math.floor(dateNow.getTime() / 1000)
     for (let i = 0; i < numBlocks; i++) {
       const mockTime = timeNow + i * tenMinutes

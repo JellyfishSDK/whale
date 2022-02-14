@@ -483,7 +483,12 @@ describe('poolswap 24h', () => {
 
     {
       const oneHour = 60 * 60
-      const timeNow = Math.floor(Date.now() / 1000)
+      const dateNow = new Date()
+      dateNow.setUTCSeconds(0)
+      dateNow.setUTCMinutes(2)
+      dateNow.setUTCHours(0)
+      dateNow.setUTCDate(dateNow.getUTCDate() + 2)
+      const timeNow = Math.floor(dateNow.getTime() / 1000)
       for (let i = 0; i <= 24; i++) {
         const mockTime = timeNow + i * oneHour
         await testing.rpc.misc.setMockTime(mockTime)
@@ -500,8 +505,9 @@ describe('poolswap 24h', () => {
       }
 
       const height = await container.getBlockCount()
-      await container.generate(1)
+      await testing.generate(1)
       await service.waitForIndexedHeight(height)
+      await testing.generate(1)
     }
 
     const poolPair: PoolPairData = await client.poolpairs.get('9')
@@ -548,7 +554,7 @@ describe('poolswap 24h', () => {
       },
       volume: {
         d30: 11.028806333434215,
-        h24: 11.028806333434213
+        h24: 11.028806333434215
       }
     })
   })
