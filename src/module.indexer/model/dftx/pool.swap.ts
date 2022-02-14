@@ -58,6 +58,12 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     }
   }
 
+  async invalidateTransaction (_: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
+    const data = transaction.dftx.data
+    const poolPair = await this.getPair(data.fromTokenId, data.toTokenId)
+    await this.invalidateSwap(transaction, `${poolPair.poolPairId}`, data.fromTokenId, data.fromAmount)
+  }
+
   async invalidateSwap (transaction: DfTxTransaction<any>, poolPairId: string, fromTokenId: number, fromAmount: BigNumber): Promise<void> {
     await this.poolSwapMapper.delete(`${poolPairId}-${transaction.txn.txid}`)
 
@@ -68,12 +74,6 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
       aggregate.aggregated.amounts[`${fromTokenId}`] = amount.minus(fromAmount).toFixed(8)
       await this.aggregatedMapper.put(aggregate)
     }
-  }
-
-  async invalidateTransaction (_: RawBlock, transaction: DfTxTransaction<PoolSwap>): Promise<void> {
-    const data = transaction.dftx.data
-    const poolPair = await this.getPair(data.fromTokenId, data.toTokenId)
-    await this.invalidateSwap(transaction, `${poolPair.poolPairId}`, data.fromTokenId, data.fromAmount)
   }
 
   async getPair (tokenA: number, tokenB: number): Promise<PoolPairToken> {
