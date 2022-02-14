@@ -361,6 +361,9 @@ describe('poolswap 30d', () => {
       dateNow.setUTCHours(0)
       dateNow.setUTCDate(dateNow.getUTCDate() + 1)
       const timeNow = Math.floor(dateNow.getTime() / 1000)
+      await testing.rpc.misc.setMockTime(timeNow)
+      await testing.generate(10)
+
       for (let i = 0; i <= numBlocks; i++) {
         const mockTime = timeNow + i * fiveMinutes
         await testing.rpc.misc.setMockTime(mockTime)

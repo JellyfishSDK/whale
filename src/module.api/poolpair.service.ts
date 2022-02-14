@@ -8,7 +8,7 @@ import { getBlockSubsidy } from '@src/module.api/subsidy'
 import { BlockMapper } from '@src/module.model/block'
 import { TokenMapper } from '@src/module.model/token'
 import { PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
-import { PoolSwapIntervalSeconds } from '@src/module.indexer/model/dftx/poolswap.interval'
+import { PoolSwapIntervalSeconds } from '@src/module.indexer/model/dftx/pool.swap.interval'
 
 @Injectable()
 export class PoolPairService {
