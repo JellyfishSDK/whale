@@ -1,4 +1,4 @@
-import { LoanMasterNodeRegTestContainer, MasterNodeRegTestContainer } from '@defichain/testcontainers'
+import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
 import { WhaleApiClient } from '../../src'
@@ -155,7 +155,7 @@ describe('stats', () => {
 })
 
 describe('loan - stats', () => {
-  const container = new LoanMasterNodeRegTestContainer()
+  const container = new MasterNodeRegTestContainer()
   const service = new StubService(container)
   const client = new StubWhaleApiClient(service)
   const testing = Testing.create(container)
