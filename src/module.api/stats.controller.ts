@@ -118,7 +118,7 @@ export class StatsController {
     const burnInfo = await this.rpcClient.account.getBurnInfo()
 
     /**
-     * getTokenBurn from BurnInfo amounts
+     * get toke burn from BurnInfo token amounts
      */
     function getTokenBurn (): BigNumber {
       for (const token of burnInfo.tokens) {
