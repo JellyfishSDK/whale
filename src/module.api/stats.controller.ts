@@ -9,7 +9,7 @@ import { PriceTickerMapper } from '@src/module.model/price.ticker'
 import { MasternodeStats, MasternodeStatsMapper } from '@src/module.model/masternode.stats'
 import { BlockchainInfo } from '@defichain/jellyfish-api-core/dist/category/blockchain'
 import { getBlockSubsidy } from '@src/module.api/subsidy'
-import { BlockSubsidy, getBlockRewardDistribution } from '@defichain/jellyfish-network'
+import { BlockSubsidy } from '@defichain/jellyfish-network'
 
 @Controller('/stats')
 export class StatsController {
@@ -48,22 +48,17 @@ export class StatsController {
 
   @Get('/supply')
   async getSupply (): Promise<SupplyData> {
-    const block = requireValue(await this.blockMapper.getHighest(), 'block')
-    const total = this.blockSubsidy.getSupply(block.height)
-    const max = 1200000000_00000000
-    const burned = (await this.getBurned()).total * 100000000
-    const circulating = total.toNumber() - burned
+    const height = requireValue(await this.blockMapper.getHighest(), 'block').height
 
-    if (circulating > max) {
-      throw new Error(`Circulating ${circulating} should not greater than max supply ${max}`)
-    }
+    const total = this.blockSubsidy.getSupply(height).div(100000000)
+    const burned = (await this.getBurned()).total
+    const circulating = total.minus(burned)
 
     return {
-      max: max,
+      max: 1200000000,
       total: total.toNumber(),
       burned: burned,
-      circulating: circulating,
-      blockReward: getBlockRewardDistribution(total)
+      circulating: circulating.toNumber()
     }
   }
 
@@ -120,16 +115,35 @@ export class StatsController {
   }
 
   private async getBurned (): Promise<StatsData['burned']> {
-    const {
-      emissionburn,
-      amount,
-      feeburn
-    } = await this.rpcClient.account.getBurnInfo()
+    const burnInfo = await this.rpcClient.account.getBurnInfo()
+
+    /**
+     * getTokenBurn from BurnInfo amounts
+     */
+    function getTokenBurn (): BigNumber {
+      for (const token of burnInfo.tokens) {
+        const [amount, symbol] = token.split('@')
+        if (symbol === 'DFI') {
+          return new BigNumber(amount)
+        }
+      }
+      return new BigNumber(0)
+    }
+
+    const address = burnInfo.amount.plus(getTokenBurn())
+
     return {
-      address: amount.toNumber(),
-      emission: emissionburn.toNumber(),
-      fee: feeburn.toNumber(),
-      total: amount.plus(emissionburn).plus(feeburn).toNumber()
+      address: address.toNumber(),
+      fee: burnInfo.feeburn.toNumber(),
+      auction: burnInfo.auctionburn.toNumber(),
+      payback: burnInfo.paybackburn.toNumber(),
+      emission: burnInfo.emissionburn.toNumber(),
+      total: address
+        .plus(burnInfo.feeburn)
+        .plus(burnInfo.auctionburn)
+        .plus(burnInfo.paybackburn)
+        .plus(burnInfo.emissionburn)
+        .toNumber()
     }
   }
 

@@ -1,5 +1,4 @@
 import { WhaleApiClient } from '../whale.api.client'
-import { BlockRewardDistribution } from '@defichain/jellyfish-network'
 
 export class Stats {
   constructor (private readonly client: WhaleApiClient) {
@@ -42,9 +41,11 @@ export interface StatsData {
   }
   burned: {
     total: number
-    fee: number
-    emission: number
     address: number
+    fee: number
+    auction: number
+    payback: number
+    emission: number
   }
   price: {
     usd: number
@@ -109,9 +110,4 @@ export interface SupplyData {
    * Total - Burned = Circulating
    */
   circulating: number
-
-  /**
-   * Current block reward distribution.
-   */
-  blockReward: BlockRewardDistribution
 }
