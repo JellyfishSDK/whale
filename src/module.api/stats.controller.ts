@@ -51,13 +51,13 @@ export class StatsController {
     const height = requireValue(await this.blockMapper.getHighest(), 'block').height
 
     const total = this.blockSubsidy.getSupply(height).div(100000000)
-    const burned = (await this.getBurned()).total
+    const burned = await this.getBurnedTotal()
     const circulating = total.minus(burned)
 
     return {
       max: 1200000000,
       total: total.toNumber(),
-      burned: burned,
+      burned: burned.toNumber(),
       circulating: circulating.toNumber()
     }
   }
@@ -117,20 +117,9 @@ export class StatsController {
   private async getBurned (): Promise<StatsData['burned']> {
     const burnInfo = await this.rpcClient.account.getBurnInfo()
 
-    /**
-     * get toke burn from BurnInfo token amounts
-     */
-    function getTokenBurn (): BigNumber {
-      for (const token of burnInfo.tokens) {
-        const [amount, symbol] = token.split('@')
-        if (symbol === 'DFI') {
-          return new BigNumber(amount)
-        }
-      }
-      return new BigNumber(0)
-    }
-
-    const address = burnInfo.amount.plus(getTokenBurn())
+    const utxo = burnInfo.amount
+    const account = findTokenBalance(burnInfo.tokens, 'DFI')
+    const address = utxo.plus(account)
 
     return {
       address: address.toNumber(),
@@ -145,6 +134,16 @@ export class StatsController {
         .plus(burnInfo.emissionburn)
         .toNumber()
     }
+  }
+
+  private async getBurnedTotal (): Promise<BigNumber> {
+    // 8defichainBurnAddressXXXXXXXdRQkSm, using the hex representation as it's applicable in all network
+    const address = '76a914f7874e8821097615ec345f74c7e5bcf61b12e2ee88ac'
+
+    const burnInfo = await this.rpcClient.account.getBurnInfo()
+    const utxo = burnInfo.amount
+    const tokens = await this.rpcClient.account.getAccount(address)
+    return utxo.plus(findTokenBalance(tokens, 'DFI'))
   }
 
   private async getPrice (): Promise<StatsData['price']> {
@@ -236,6 +235,16 @@ export function getEmission (eunosHeight: number, height: number): StatsData['em
     burned: burned.toNumber(),
     total: total.toNumber()
   }
+}
+
+function findTokenBalance (tokens: string[], symbol: string): BigNumber {
+  for (const token of tokens) {
+    const [amount, s] = token.split('@')
+    if (s === symbol) {
+      return new BigNumber(amount)
+    }
+  }
+  return new BigNumber(0)
 }
 
 function requireValue<T> (value: T | undefined, name: string): T {
