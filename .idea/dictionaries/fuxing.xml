@@ -177,6 +177,7 @@
       <w>txid</w>
       <w>txindex</w>
       <w>txinwitness</w>
+      <w>txno</w>
       <w>txnotokens</w>
       <w>txns</w>
       <w>uacomment</w>

@@ -1,5 +1,5 @@
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
-import { PoolSwap, CPoolSwap } from '@defichain/jellyfish-transaction'
+import { CPoolSwap, PoolSwap } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Inject, Injectable } from '@nestjs/common'
 import { PoolPairToken, PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
@@ -50,10 +50,9 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
     for (const interval of AggregatedIntervals) {
       const previous = await this.aggregatedMapper.query(`${poolPairId}-${interval}`, 1)
       const aggregate = previous[0]
-      const amount = aggregate.aggregated.amounts[`${fromTokenId}`]
-      aggregate.aggregated.amounts[`${fromTokenId}`] = amount === undefined
-        ? fromAmount.toFixed(8)
-        : fromAmount.plus(amount).toFixed(8)
+      const amount = new BigNumber(aggregate.aggregated.amounts[`${fromTokenId}`] ?? '0')
+
+      aggregate.aggregated.amounts[`${fromTokenId}`] = amount.plus(fromAmount).toFixed(8)
       await this.aggregatedMapper.put(aggregate)
     }
   }
@@ -71,6 +70,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
       const previous = await this.aggregatedMapper.query(`${poolPairId}-${interval as number}`, 1)
       const aggregate = previous[0]
       const amount = new BigNumber(aggregate.aggregated.amounts[`${fromTokenId}`])
+
       aggregate.aggregated.amounts[`${fromTokenId}`] = amount.minus(fromAmount).toFixed(8)
       await this.aggregatedMapper.put(aggregate)
     }
