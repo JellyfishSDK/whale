@@ -39,7 +39,7 @@
     "@defichain/jellyfish-wallet": "^2.18.3",
     "@defichain/testcontainers": "^2.18.3",
     "@defichain/testing": "^2.18.3",
-    "@nestjs/common": "^8.3.0",
+    "@nestjs/common": "^8.3.1",
     "@nestjs/config": "^1.2.0",
     "@nestjs/core": "^8.3.0",
     "@nestjs/platform-fastify": "^8.3.0",
