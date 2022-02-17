@@ -6,8 +6,8 @@ import { PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
 import { PoolPairHistoryMapper } from '@src/module.model/pool.pair.history'
 import { PoolSwapMapper } from '@src/module.model/pool.swap'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
-import { PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
-import { PoolSwapIntervalSeconds } from './pool.swap.interval'
+import { PoolSwapAggregatedMapper } from '@src/module.model/pool.swap.aggregated'
+import { PoolSwapAggregatedInterval } from './pool.swap.aggregated'
 import { Testing } from '@defichain/jellyfish-testing'
 
 const container = new MasterNodeRegTestContainer()
@@ -188,7 +188,7 @@ describe('index poolswap', () => {
     ])
 
     const aggregatedMapper = app.get(PoolSwapAggregatedMapper)
-    const aggregated = await aggregatedMapper.query(`3-${PoolSwapIntervalSeconds.ONE_HOUR}`, 1)
+    const aggregated = await aggregatedMapper.query(`3-${PoolSwapAggregatedInterval.ONE_HOUR}`, 1)
     expect(aggregated[0]).toStrictEqual(
       {
         aggregated: {
@@ -304,7 +304,7 @@ describe('index composite swap', () => {
     ])
 
     const aggregatedMapper = app.get(PoolSwapAggregatedMapper)
-    const aggregated = await aggregatedMapper.query(`3-${PoolSwapIntervalSeconds.ONE_HOUR}`, 1)
+    const aggregated = await aggregatedMapper.query(`3-${PoolSwapAggregatedInterval.ONE_HOUR}`, 1)
     expect(aggregated[0]).toStrictEqual(
       {
         aggregated: {
@@ -384,7 +384,7 @@ describe('poolswap 30d', () => {
     }
 
     const aggregatedMapper = app.get(PoolSwapAggregatedMapper)
-    const aggregated = await aggregatedMapper.query(`2-${PoolSwapIntervalSeconds.ONE_DAY}`, 2)
+    const aggregated = await aggregatedMapper.query(`2-${PoolSwapAggregatedInterval.ONE_DAY}`, 2)
     expect(aggregated).toStrictEqual([
       {
         id: expect.any(String),
@@ -468,7 +468,7 @@ describe('poolswap invalidate', () => {
     const resultSwaps = await poolSwapMapper.query('2', Number.MAX_SAFE_INTEGER)
     expect(resultSwaps.length).toStrictEqual(numBlocks)
 
-    const aggregated = await aggregatedMapper.query(`2-${PoolSwapIntervalSeconds.ONE_HOUR}`, Number.MAX_SAFE_INTEGER)
+    const aggregated = await aggregatedMapper.query(`2-${PoolSwapAggregatedInterval.ONE_HOUR}`, Number.MAX_SAFE_INTEGER)
     expect(aggregated).toStrictEqual([
       {
         id: expect.any(String),
@@ -514,7 +514,7 @@ describe('poolswap invalidate', () => {
       const resultSwaps = await poolSwapMapper.query('2', Number.MAX_SAFE_INTEGER)
       expect(resultSwaps.length).toStrictEqual(numBlocks - 2)
 
-      const aggregated = await aggregatedMapper.query(`2-${PoolSwapIntervalSeconds.ONE_HOUR}`, Number.MAX_SAFE_INTEGER)
+      const aggregated = await aggregatedMapper.query(`2-${PoolSwapAggregatedInterval.ONE_HOUR}`, Number.MAX_SAFE_INTEGER)
       expect(aggregated).toStrictEqual([
         {
           id: expect.any(String),
@@ -559,7 +559,7 @@ describe('poolswap invalidate', () => {
       const resultSwaps = await poolSwapMapper.query('2', Number.MAX_SAFE_INTEGER)
       expect(resultSwaps).toStrictEqual([])
 
-      const aggregated = await aggregatedMapper.query(`2-${PoolSwapIntervalSeconds.ONE_HOUR}`, Number.MAX_SAFE_INTEGER)
+      const aggregated = await aggregatedMapper.query(`2-${PoolSwapAggregatedInterval.ONE_HOUR}`, Number.MAX_SAFE_INTEGER)
       expect(aggregated).toStrictEqual([
         {
           id: expect.any(String),

@@ -8,8 +8,8 @@ import { IndexerError } from '@src/module.indexer/error'
 import BigNumber from 'bignumber.js'
 import { PoolSwapMapper } from '@src/module.model/pool.swap'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
-import { PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
-import { AggregationIntervals } from './pool.swap.interval'
+import { PoolSwapAggregatedMapper } from '@src/module.model/pool.swap.aggregated'
+import { AggregatedIntervals } from './pool.swap.aggregated'
 
 @Injectable()
 export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
@@ -47,7 +47,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
       }
     })
 
-    for (const interval of AggregationIntervals) {
+    for (const interval of AggregatedIntervals) {
       const previous = await this.aggregatedMapper.query(`${poolPairId}-${interval}`, 1)
       const aggregate = previous[0]
       const amount = aggregate.aggregated.amounts[`${fromTokenId}`]
@@ -67,7 +67,7 @@ export class PoolSwapIndexer extends DfTxIndexer<PoolSwap> {
   async invalidateSwap (transaction: DfTxTransaction<any>, poolPairId: string, fromTokenId: number, fromAmount: BigNumber): Promise<void> {
     await this.poolSwapMapper.delete(`${poolPairId}-${transaction.txn.txid}`)
 
-    for (const interval of AggregationIntervals) {
+    for (const interval of AggregatedIntervals) {
       const previous = await this.aggregatedMapper.query(`${poolPairId}-${interval as number}`, 1)
       const aggregate = previous[0]
       const amount = new BigNumber(aggregate.aggregated.amounts[`${fromTokenId}`])

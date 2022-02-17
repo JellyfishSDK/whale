@@ -6,14 +6,14 @@ const PoolSwapAggregatedMapping: ModelMapping<PoolSwapAggregated> = {
   type: 'pool_swap_aggregated',
   index: {
     key_sort: {
-      name: 'pool_swap_aggregated_key_sort',
+      name: 'pool_swap_aggregated_key_bucket',
       partition: {
         type: 'string',
         key: (b: PoolSwapAggregated) => b.key
       },
       sort: {
-        type: 'string',
-        key: (b: PoolSwapAggregated) => b.sort
+        type: 'number',
+        key: (b: PoolSwapAggregated) => b.bucket
       }
     }
   }
@@ -50,16 +50,13 @@ export class PoolSwapAggregatedMapper {
 export interface PoolSwapAggregated extends Model {
   id: string // ---------| poolPairId-interval-blockhash
   key: string // --------| poolPairId-interval
-  sort: string // -------| medianTime-height
+  bucket: number // -----| bucket = (medianTime - medianTime % interval)
 
   aggregated: {
     amounts: Record<string, string> // -----| amounts[tokenId] = BigNumber(volume)
   }
 
   block: {
-    hash: string
-    height: number
-    time: number
     medianTime: number
   }
 }

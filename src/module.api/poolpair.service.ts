@@ -7,8 +7,8 @@ import { PoolPairData } from '@whale-api-client/api/poolpairs'
 import { getBlockSubsidy } from '@src/module.api/subsidy'
 import { BlockMapper } from '@src/module.model/block'
 import { TokenMapper } from '@src/module.model/token'
-import { PoolSwapAggregatedMapper } from '@src/module.model/poolswap.aggregated'
-import { PoolSwapIntervalSeconds } from '@src/module.indexer/model/dftx/pool.swap.interval'
+import { PoolSwapAggregatedMapper } from '@src/module.model/pool.swap.aggregated'
+import { PoolSwapAggregatedInterval } from '@src/module.indexer/model/dftx/pool.swap.aggregated'
 
 @Injectable()
 export class PoolPairService {
@@ -162,7 +162,7 @@ export class PoolPairService {
 
   public async getUSDVolume (id: string): Promise<PoolPairData['volume'] | undefined> {
     return await this.cache.get<PoolPairData['volume']>(`POOLPAIR_VOLUME_${id}`, async () => {
-      const gatherAmount = async (interval: PoolSwapIntervalSeconds, count: number): Promise<number> => {
+      const gatherAmount = async (interval: PoolSwapAggregatedInterval, count: number): Promise<number> => {
         const aggregated: Record<string, number> = {}
         const swaps = await this.poolSwapAggregatedMapper.query(`${id}-${interval as number}`, count)
         for (const swap of swaps) {
@@ -184,8 +184,8 @@ export class PoolPairService {
       }
 
       return {
-        h24: await gatherAmount(PoolSwapIntervalSeconds.ONE_HOUR, 24),
-        d30: await gatherAmount(PoolSwapIntervalSeconds.ONE_DAY, 30)
+        h24: await gatherAmount(PoolSwapAggregatedInterval.ONE_HOUR, 24),
+        d30: await gatherAmount(PoolSwapAggregatedInterval.ONE_DAY, 30)
       }
     }, {
       ttl: 3600 // 60 minutes
