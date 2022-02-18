@@ -521,7 +521,7 @@ describe('poolswap invalidate', () => {
           bucket: expect.any(Number),
           aggregated: {
             amounts: {
-              1: '0.10000000'
+              1: '0.20000000'
             }
           },
           block: expect.any(Object)
@@ -532,7 +532,7 @@ describe('poolswap invalidate', () => {
           bucket: expect.any(Number),
           aggregated: {
             amounts: {
-              1: '0.70000000'
+              1: '0.60000000'
             }
           },
           block: expect.any(Object)
