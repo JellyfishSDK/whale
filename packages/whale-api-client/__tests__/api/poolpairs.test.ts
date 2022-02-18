@@ -114,11 +114,6 @@ async function setup (): Promise<void> {
     amountB: 100,
     shareAddress: await getNewAddress(container)
   })
-
-  await testing.token.dfi({
-    address: await testing.address('swap'),
-    amount: 20
-  })
 }
 
 describe('poolpair info', () => {
@@ -150,8 +145,7 @@ describe('poolpair info', () => {
       },
       apr: {
         reward: 0,
-        total: 0,
-        commission: 0
+        total: 0
       },
       commission: '0',
       totalLiquidity: {
@@ -168,10 +162,6 @@ describe('poolpair info', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
-      },
-      volume: {
-        d30: 0,
-        h24: 0
       }
     })
   })
@@ -231,8 +221,7 @@ describe('poolpair info', () => {
       },
       apr: {
         reward: 0,
-        total: 0,
-        commission: 0
+        total: 0
       },
       commission: '0',
       totalLiquidity: {
@@ -249,10 +238,6 @@ describe('poolpair info', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
-      },
-      volume: {
-        d30: 0,
-        h24: 0
       }
     })
   })
@@ -282,8 +267,7 @@ describe('poolpair info', () => {
       },
       apr: {
         reward: 0,
-        total: 0,
-        commission: 0
+        total: 0
       },
       commission: '0',
       totalLiquidity: {
@@ -300,10 +284,6 @@ describe('poolpair info', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
-      },
-      volume: {
-        d30: 0,
-        h24: 0
       }
     })
   })
@@ -342,7 +322,7 @@ describe('poolpair info', () => {
 })
 
 describe('poolswap', () => {
-  it('should show volume and swaps', async () => {
+  it('should show swaps', async () => {
     await poolSwap(container, {
       from: await testing.address('swap'),
       tokenFrom: 'A',
@@ -402,8 +382,7 @@ describe('poolswap', () => {
       },
       apr: {
         reward: 0,
-        total: 0,
-        commission: 0
+        total: 0
       },
       commission: '0',
       totalLiquidity: {
@@ -420,10 +399,6 @@ describe('poolswap', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
-      },
-      volume: {
-        d30: 113.50667410636073,
-        h24: 113.50667410636073
       }
     })
 
@@ -450,8 +425,7 @@ describe('poolswap', () => {
       },
       apr: {
         reward: 0,
-        total: 0.12174783188792529,
-        commission: 0.12174783188792529
+        total: 0
       },
       commission: '0.002',
       totalLiquidity: {
@@ -468,169 +442,6 @@ describe('poolswap', () => {
       creation: {
         tx: expect.any(String),
         height: expect.any(Number)
-      },
-      volume: {
-        d30: 22.25188151100734,
-        h24: 22.25188151100734
-      }
-    })
-  })
-})
-
-describe('poolswap 24h', () => {
-  it('should show volume and swaps for 24h', async () => {
-    await testing.generate(1)
-
-    {
-      const oneHour = 60 * 60
-      const dateNow = new Date()
-      dateNow.setUTCSeconds(0)
-      dateNow.setUTCMinutes(2)
-      dateNow.setUTCHours(0)
-      dateNow.setUTCDate(dateNow.getUTCDate() + 2)
-      const timeNow = Math.floor(dateNow.getTime() / 1000)
-      for (let i = 0; i <= 24; i++) {
-        const mockTime = timeNow + i * oneHour
-        await testing.rpc.misc.setMockTime(mockTime)
-
-        await testing.poolpair.swap({
-          from: await testing.address('swap'),
-          tokenFrom: 'A',
-          amountFrom: 0.1,
-          to: await testing.address('swap'),
-          tokenTo: 'DFI'
-        })
-
-        await testing.generate(1)
-      }
-
-      const height = await container.getBlockCount()
-      await testing.generate(1)
-      await service.waitForIndexedHeight(height)
-      await testing.generate(1)
-    }
-
-    const poolPair: PoolPairData = await client.poolpairs.get('9')
-    expect(poolPair).toStrictEqual({
-      id: '9',
-      symbol: 'A-DFI',
-      displaySymbol: 'dA-DFI',
-      name: 'A-Default Defi token',
-      status: true,
-      tokenA: {
-        id: expect.any(String),
-        symbol: 'A',
-        reserve: '102.5',
-        blockCommission: '0',
-        displaySymbol: 'dA'
-      },
-      tokenB: {
-        id: '0',
-        symbol: 'DFI',
-        reserve: '195.12195134',
-        blockCommission: '0',
-        displaySymbol: 'DFI'
-      },
-      apr: {
-        reward: 0,
-        total: 0,
-        commission: 0
-      },
-      commission: '0',
-      totalLiquidity: {
-        token: '141.42135623',
-        usd: '904.36211934160574766567579176'
-      },
-      tradeEnabled: true,
-      ownerAddress: expect.any(String),
-      priceRatio: {
-        ab: '0.52531249',
-        ba: '1.90362879'
-      },
-      rewardPct: '0',
-      creation: {
-        tx: expect.any(String),
-        height: expect.any(Number)
-      },
-      volume: {
-        d30: 11.028806333434215,
-        h24: 11.028806333434215
-      }
-    })
-  })
-})
-
-describe('poolswap 30d', () => {
-  it('should show volume and swaps for 30d', async () => {
-    {
-      const fiveMinutes = 60 * 5
-      const numBlocks = 24 * 16 // 1.333 days
-      const timeNow = Math.floor(Date.now() / 1000)
-      for (let i = 0; i <= numBlocks; i++) {
-        const mockTime = timeNow + i * fiveMinutes
-        await testing.rpc.misc.setMockTime(mockTime)
-
-        await testing.poolpair.swap({
-          from: await testing.address('swap'),
-          tokenFrom: 'B',
-          amountFrom: 0.1,
-          to: await testing.address('swap'),
-          tokenTo: 'DFI'
-        })
-
-        await testing.generate(1)
-      }
-
-      const height = await container.getBlockCount()
-      await container.generate(1)
-      await service.waitForIndexedHeight(height)
-    }
-
-    const poolPair30d: PoolPairData = await client.poolpairs.get('10')
-    expect(poolPair30d).toStrictEqual({
-      id: '10',
-      symbol: 'B-DFI',
-      displaySymbol: 'dB-DFI',
-      name: 'B-Default Defi token',
-      status: true,
-      tokenA: {
-        id: expect.any(String),
-        symbol: 'B',
-        reserve: '88.5',
-        blockCommission: '0',
-        displaySymbol: 'dB'
-      },
-      tokenB: {
-        id: '0',
-        symbol: 'DFI',
-        reserve: '169.49152696',
-        blockCommission: '0',
-        displaySymbol: 'DFI'
-      },
-      apr: {
-        reward: 0,
-        total: 0,
-        commission: 0
-      },
-      commission: '0',
-      totalLiquidity: {
-        token: '122.47448713',
-        usd: '785.56879674136262166681878944'
-      },
-      tradeEnabled: true,
-      ownerAddress: expect.any(String),
-      priceRatio: {
-        ab: '0.52214999',
-        ba: '1.91515849'
-      },
-      rewardPct: '0',
-      creation: {
-        tx: expect.any(String),
-        height: expect.any(Number)
-      },
-      volume: {
-        d30: 170.87230889572012,
-        h24: 135.36637457972637
       }
     })
   })
