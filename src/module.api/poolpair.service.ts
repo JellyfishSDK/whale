@@ -294,15 +294,15 @@ export class PoolPairService {
 
     const yearlyUSD = customUSD.plus(pctUSD).plus(loanUSD)
     // 1 == 100%, 0.1 = 10%
-    const apr = yearlyUSD.div(totalLiquidityUSD)
+    const reward = yearlyUSD.div(totalLiquidityUSD)
 
     const volume = await this.getUSDVolume(id)
     const commission = info.commission.times(volume?.h24 ?? 0).times(365).div(totalLiquidityUSD)
 
     return {
-      reward: apr.toNumber(),
+      reward: reward.toNumber(),
       commission: commission.toNumber(),
-      total: apr.plus(commission).toNumber()
+      total: reward.plus(commission).toNumber()
     }
   }
 }
