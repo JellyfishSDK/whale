@@ -348,7 +348,7 @@ describe('poolswap 30d', () => {
 
     {
       const fiveMinutes = 60 * 5
-      const numBlocks = 24 * 2 * 12
+      const numBlocks = 24 * 2 * 11
 
       // Explicitly set minutes to 0 to avoid interval
       // inconsistency based on local time
@@ -388,10 +388,10 @@ describe('poolswap 30d', () => {
       {
         id: expect.any(String),
         key: '2-86400',
-        bucket: expect.any(Number),
+        bucket: 1645401600,
         aggregated: {
           amounts: {
-            1: '28.60000000'
+            1: '23.90000000'
           }
         },
         block: expect.any(Object)
@@ -399,10 +399,10 @@ describe('poolswap 30d', () => {
       {
         id: expect.any(String),
         key: '2-86400',
-        bucket: expect.any(Number),
+        bucket: 1645315200,
         aggregated: {
           amounts: {
-            1: '29.10000000'
+            1: '29.00000000'
           }
         },
         block: expect.any(Object)
@@ -475,7 +475,7 @@ describe('poolswap invalidate', () => {
         bucket: expect.any(Number),
         aggregated: {
           amounts: {
-            1: '0.30000000'
+            1: '0.40000000'
           }
         },
         block: expect.any(Object)
@@ -486,7 +486,7 @@ describe('poolswap invalidate', () => {
         bucket: expect.any(Number),
         aggregated: {
           amounts: {
-            1: '0.70000000'
+            1: '0.60000000'
           }
         },
         block: expect.any(Object)
