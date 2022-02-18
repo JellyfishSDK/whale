@@ -1,5 +1,5 @@
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
-import { CCompositeSwap, CompositeSwap, PoolId, PoolSwap } from '@defichain/jellyfish-transaction'
+import { CCompositeSwap, CompositeSwap, PoolId } from '@defichain/jellyfish-transaction'
 import { RawBlock } from '@src/module.indexer/model/_abstract'
 import { Inject, Injectable } from '@nestjs/common'
 import { PoolSwapIndexer } from './pool.swap'
