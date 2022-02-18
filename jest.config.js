@@ -5,7 +5,7 @@ module.exports = {
   preset: 'ts-jest',
   testRegex: '.*\\.(spec|e2e|test)\\.ts$',
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' }),
-  testTimeout: 180000,
+  testTimeout: 300000,
   coveragePathIgnorePatterns: [
     '/node_modules/',
     '.*/.*.spec/.*',
