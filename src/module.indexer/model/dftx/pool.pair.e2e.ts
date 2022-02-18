@@ -16,7 +16,6 @@ let testing: Testing
 
 beforeEach(async () => {
   await container.start()
-  await container.waitForReady()
   await container.waitForWalletCoinbaseMaturity()
 
   app = await createTestingApp(container)
@@ -50,7 +49,7 @@ describe('index poolpair', () => {
 
 describe('index poolswap', () => {
   it('should index poolswap', async () => {
-    const ownerAddress = await getNewAddress(container)
+    const ownerAddress = await testing.container.getNewAddress()
     const tokens = ['A', 'B']
 
     for (const token of tokens) {
@@ -200,7 +199,7 @@ describe('index poolswap', () => {
         block: expect.any(Object),
         id: expect.any(String),
         key: '3-3600',
-        sort: expect.any(String)
+        bucket: expect.any(Number)
       }
     )
   })
@@ -316,7 +315,7 @@ describe('index composite swap', () => {
         block: expect.any(Object),
         id: expect.any(String),
         key: '3-3600',
-        sort: expect.any(String)
+        bucket: expect.any(Number)
       }
     )
   })
@@ -389,7 +388,7 @@ describe('poolswap 30d', () => {
       {
         id: expect.any(String),
         key: '2-86400',
-        sort: expect.any(String),
+        bucket: expect.any(Number),
         aggregated: {
           amounts: {
             1: '28.60000000'
@@ -400,7 +399,7 @@ describe('poolswap 30d', () => {
       {
         id: expect.any(String),
         key: '2-86400',
-        sort: expect.any(String),
+        bucket: expect.any(Number),
         aggregated: {
           amounts: {
             1: '29.10000000'
@@ -473,7 +472,7 @@ describe('poolswap invalidate', () => {
       {
         id: expect.any(String),
         key: '2-3600',
-        sort: expect.any(String),
+        bucket: expect.any(Number),
         aggregated: {
           amounts: {
             1: '0.30000000'
@@ -484,7 +483,7 @@ describe('poolswap invalidate', () => {
       {
         id: expect.any(String),
         key: '2-3600',
-        sort: expect.any(String),
+        bucket: expect.any(Number),
         aggregated: {
           amounts: {
             1: '0.70000000'
@@ -495,7 +494,7 @@ describe('poolswap invalidate', () => {
       {
         id: expect.any(String),
         key: '2-3600',
-        sort: expect.any(String),
+        bucket: expect.any(Number),
         aggregated: {
           amounts: {
             1: '0.20000000'
@@ -519,7 +518,7 @@ describe('poolswap invalidate', () => {
         {
           id: expect.any(String),
           key: '2-3600',
-          sort: expect.any(String),
+          bucket: expect.any(Number),
           aggregated: {
             amounts: {
               1: '0.10000000'
@@ -530,7 +529,7 @@ describe('poolswap invalidate', () => {
         {
           id: expect.any(String),
           key: '2-3600',
-          sort: expect.any(String),
+          bucket: expect.any(Number),
           aggregated: {
             amounts: {
               1: '0.70000000'
@@ -541,7 +540,7 @@ describe('poolswap invalidate', () => {
         {
           id: expect.any(String),
           key: '2-3600',
-          sort: expect.any(String),
+          bucket: expect.any(Number),
           aggregated: {
             amounts: {
               1: '0.20000000'
@@ -564,7 +563,7 @@ describe('poolswap invalidate', () => {
         {
           id: expect.any(String),
           key: '2-3600',
-          sort: expect.any(String),
+          bucket: expect.any(Number),
           aggregated: {
             amounts: {}
           },
@@ -573,7 +572,7 @@ describe('poolswap invalidate', () => {
         {
           id: expect.any(String),
           key: '2-3600',
-          sort: expect.any(String),
+          bucket: expect.any(Number),
           aggregated: {
             amounts: {}
           },
