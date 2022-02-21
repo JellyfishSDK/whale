@@ -124,7 +124,7 @@ export class PoolPairService {
     })
   }
 
-  private async getPriceForToken (id: number): Promise<BigNumber | undefined> {
+  private async getTokenUSDValue (id: number): Promise<BigNumber | undefined> {
     return await this.cache.get<BigNumber>(`PRICE_FOR_TOKEN_${id}`, async () => {
       const tokenInfo = await this.tokenMapper.getByTokenId(id)
       const token = tokenInfo?.symbol
@@ -149,11 +149,11 @@ export class PoolPairService {
 
       const dfiPair = await this.getPoolPair(token, 'DFI')
       if (dfiPair !== undefined) {
-        const dfiPrice = await this.getUSD_PER_DFI() ?? 0
+        const usdPerDFI = await this.getUSD_PER_DFI() ?? 0
         if (dfiPair.idTokenA === '0') {
-          return dfiPair.reserveA.div(dfiPair.reserveB).times(dfiPrice)
+          return dfiPair.reserveA.div(dfiPair.reserveB).times(usdPerDFI)
         }
-        return dfiPair.reserveB.div(dfiPair.reserveA).times(dfiPrice)
+        return dfiPair.reserveB.div(dfiPair.reserveA).times(usdPerDFI)
       }
     }, {
       ttl: 3600 // 60 minutes
@@ -176,7 +176,7 @@ export class PoolPairService {
 
         let volume = 0
         for (const tokenId in aggregated) {
-          const tokenPrice = await this.getPriceForToken(parseInt(tokenId)) ?? new BigNumber(0)
+          const tokenPrice = await this.getTokenUSDValue(parseInt(tokenId)) ?? new BigNumber(0)
           volume += tokenPrice.toNumber() * aggregated[tokenId]
         }
 
@@ -282,6 +282,14 @@ export class PoolPairService {
       .times(dfiPriceUSD)
   }
 
+  /**
+   * Estimate yearly commission rate by taking 24 hour commission x 365 days
+   */
+  private async getYearlyCommissionEstimate (id: string, info: PoolPairInfo): Promise<BigNumber> {
+    const volume = await this.getUSDVolume(id)
+    return info.commission.times(volume?.h24 ?? 0).times(365)
+  }
+
   async getAPR (id: string, info: PoolPairInfo): Promise<PoolPairData['apr'] | undefined> {
     const customUSD = await this.getYearlyCustomRewardUSD(info)
     const pctUSD = await this.getYearlyRewardPCTUSD(info)
@@ -294,15 +302,15 @@ export class PoolPairService {
 
     const yearlyUSD = customUSD.plus(pctUSD).plus(loanUSD)
     // 1 == 100%, 0.1 = 10%
-    const apr = yearlyUSD.div(totalLiquidityUSD)
+    const reward = yearlyUSD.div(totalLiquidityUSD)
 
-    const volume = await this.getUSDVolume(id)
-    const commission = info.commission.times(volume?.h24 ?? 0).times(365).div(totalLiquidityUSD)
+    const yearlyCommission = await this.getYearlyCommissionEstimate(id, info)
+    const commission = yearlyCommission.div(totalLiquidityUSD)
 
     return {
-      reward: apr.toNumber(),
+      reward: reward.toNumber(),
       commission: commission.toNumber(),
-      total: apr.plus(commission).toNumber()
+      total: reward.plus(commission).toNumber()
     }
   }
 }
