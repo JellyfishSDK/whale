@@ -35,7 +35,8 @@ export class PoolSwapAggregatedIndexer extends DfTxIndexer<PoolSwap> {
         const bucket = getBucket(block, interval)
 
         if (previous.length === 1 && previous[0].bucket >= bucket) {
-          continue
+          // Going from a desc-ing order, we can just check if the most recent PoolSwap Aggregation Bucket is added.
+          return
         }
 
         await this.createNewBucket(block, poolPair.poolPairId, interval)
