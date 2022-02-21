@@ -15,7 +15,7 @@ import {
   LoanVaultState,
   LoanVaultTokenAmount
 } from '@whale-api-client/api/loan'
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common'
+import { Inject, BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
@@ -31,7 +31,7 @@ export class LoanVaultService {
   NUM_AUCTION_EXP_BLOCKS: number = this.network === 'regtest' ? 36 : 720
 
   constructor (
-    private readonly network: NetworkName,
+    @Inject('NETWORK') private readonly network: NetworkName,
     private readonly client: JsonRpcClient,
     private readonly deFiDCache: DeFiDCache,
     private readonly vaultAuctionHistoryMapper: VaultAuctionHistoryMapper,
@@ -159,7 +159,7 @@ export class LoanVaultService {
       const bid = await this.vaultAuctionHistoryMapper.get(`${data.vaultId}-${batch.index}`)
       const froms: string[] = []
       if (bid !== undefined &&
-        // check if the bidder block is bidded within the auction period
+        // check if the bidder block is within the auction period
         bid.block.height >= start && bid.block.height <= end &&
         // check if not exists then push to prevent dup element
         froms.some(fr => fr !== bid.from)) {
