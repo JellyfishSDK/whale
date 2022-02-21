@@ -25,6 +25,7 @@ import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { RpcApiError } from '@defichain/jellyfish-api-core'
 import { VaultAuctionHistoryMapper } from '@src/module.model/vault.auction.batch.history'
 import { NetworkName } from '@defichain/jellyfish-network'
+import { HexEncoder } from '@src/module.model/_hex.encoder'
 
 @Injectable()
 export class LoanVaultService {
@@ -156,21 +157,15 @@ export class LoanVaultService {
     const start = end - this.NUM_AUCTION_EXP_BLOCKS
 
     const items = data.batches.map(async batch => {
-      const bid = await this.vaultAuctionHistoryMapper.get(`${data.vaultId}-${batch.index}`)
-      const froms: string[] = []
-      if (bid !== undefined &&
-        // check if the bidder block is within the auction period
-        bid.block.height >= start && bid.block.height <= end &&
-        // check if not exists then push to prevent dup element
-        froms.some(fr => fr !== bid.from)) {
-        froms.push(bid.from)
-      }
+      const lt = `${HexEncoder.encodeHeight(end)}-${'f'.repeat(64)}`
+      const gt = `${HexEncoder.encodeHeight(start)}-${'0'.repeat(64)}`
+      const bids = await this.vaultAuctionHistoryMapper.query(`${data.vaultId}-${batch.index}`, Number.MAX_SAFE_INTEGER, lt, gt)
 
       return {
         index: batch.index,
         collaterals: await this.mapTokenAmounts(batch.collaterals),
         loan: (await this.mapTokenAmounts([batch.loan]))[0],
-        froms: froms,
+        froms: bids.length > 0 ? bids.map(b => b.from) : [],
         highestBid: batch.highestBid !== undefined
           ? {
               owner: batch.highestBid.owner,
