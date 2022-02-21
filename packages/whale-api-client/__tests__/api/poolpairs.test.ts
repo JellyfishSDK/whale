@@ -3,7 +3,7 @@ import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
 import { ApiPagedResponse, WhaleApiClient, WhaleApiException } from '../../src'
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens, poolSwap } from '@defichain/testing'
-import { PoolPairData, PoolSwap } from '../../src/api/poolpairs'
+import { PoolPairData, PoolSwap, PoolSwapAggregated, PoolSwapAggregatedInterval } from '../../src/api/poolpairs'
 import { Testing } from '@defichain/jellyfish-testing'
 
 let container: MasterNodeRegTestContainer
@@ -444,5 +444,47 @@ describe('poolswap', () => {
         height: expect.any(Number)
       }
     })
+  })
+})
+
+describe('poolswap aggregated', () => {
+  it('should show aggregated swaps for 24h and 30d', async () => {
+    {
+      const fiveMinutes = 60 * 5
+      const numBlocks = 24 * 16 // 1.333 days
+      const dateNow = new Date()
+      dateNow.setUTCSeconds(0)
+      dateNow.setUTCMinutes(2)
+      dateNow.setUTCHours(0)
+      dateNow.setUTCDate(dateNow.getUTCDate() + 2)
+      const timeNow = Math.floor(dateNow.getTime() / 1000)
+      await testing.rpc.misc.setMockTime(timeNow)
+      await testing.generate(10)
+
+      for (let i = 0; i <= numBlocks; i++) {
+        const mockTime = timeNow + i * fiveMinutes
+        await testing.rpc.misc.setMockTime(mockTime)
+
+        await testing.rpc.poolpair.poolSwap({
+          from: await testing.address('swap'),
+          tokenFrom: 'B',
+          amountFrom: 0.1,
+          to: await testing.address('swap'),
+          tokenTo: 'DFI'
+        })
+
+        await testing.generate(1)
+      }
+
+      const height = await container.getBlockCount()
+      await container.generate(1)
+      await service.waitForIndexedHeight(height)
+    }
+
+    const dayAggregated: ApiPagedResponse<PoolSwapAggregated> = await client.poolpairs.listPoolSwapAggregates('10', PoolSwapAggregatedInterval.ONE_DAY, 1)
+    expect(dayAggregated).toStrictEqual([])
+
+    const hourAggregated: ApiPagedResponse<PoolSwapAggregated> = await client.poolpairs.listPoolSwapAggregates('10', PoolSwapAggregatedInterval.ONE_HOUR, 1)
+    expect(hourAggregated).toStrictEqual([])
   })
 })
