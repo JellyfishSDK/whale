@@ -23,7 +23,6 @@ import { PoolSwapAggregatedMapper } from './pool.swap.aggregated'
 import { PoolSwapMapper } from './pool.swap'
 import { OraclePriceActiveMapper } from './oracle.price.active'
 import { VaultAuctionHistoryMapper } from './vault.auction.batch.history'
-import { VaultAuctionBatchBidMapper } from './vault.auction.batch.bid'
 
 @Global()
 @Module({
@@ -51,8 +50,7 @@ import { VaultAuctionBatchBidMapper } from './vault.auction.batch.bid'
     PoolPairTokenMapper,
     PoolSwapMapper,
     PoolSwapAggregatedMapper,
-    VaultAuctionHistoryMapper,
-    VaultAuctionBatchBidMapper
+    VaultAuctionHistoryMapper
   ],
   exports: [
     ModelProbeIndicator,
@@ -78,8 +76,7 @@ import { VaultAuctionBatchBidMapper } from './vault.auction.batch.bid'
     PoolPairTokenMapper,
     PoolSwapMapper,
     PoolSwapAggregatedMapper,
-    VaultAuctionHistoryMapper,
-    VaultAuctionBatchBidMapper
+    VaultAuctionHistoryMapper
   ]
 })
 export class ModelModule {

@@ -3,7 +3,6 @@ import {
   AuctionPagination,
   VaultActive,
   VaultLiquidation,
-  VaultLiquidationBatch,
   VaultPagination,
   VaultState
 } from '@defichain/jellyfish-api-core/dist/category/loan'
@@ -24,14 +23,18 @@ import { parseDisplaySymbol } from '@src/module.api/token.controller'
 import { ActivePrice } from '@whale-api-client/api/prices'
 import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { RpcApiError } from '@defichain/jellyfish-api-core'
-import { VaultAuctionBatchBidMapper } from '@src/module.model/vault.auction.batch.bid'
+import { VaultAuctionHistoryMapper } from '@src/module.model/vault.auction.batch.history'
+import { NetworkName } from '@defichain/jellyfish-network'
 
 @Injectable()
 export class LoanVaultService {
+  NUM_AUCTION_EXP_BLOCKS: number = this.network === 'regtest' ? 36 : 720
+
   constructor (
+    private readonly network: NetworkName,
     private readonly client: JsonRpcClient,
     private readonly deFiDCache: DeFiDCache,
-    private readonly vaultAuctionBatchBidderMapper: VaultAuctionBatchBidMapper,
+    private readonly vaultAuctionHistoryMapper: VaultAuctionHistoryMapper,
     private readonly activePriceMapper: OraclePriceActiveMapper
   ) {
   }
@@ -131,8 +134,7 @@ export class LoanVaultService {
     }
   }
 
-  private async mapLoanAuction (details: VaultLiquidation): Promise<LoanVaultLiquidated> {
-    const data = details
+  private async mapLoanAuction (data: VaultLiquidation): Promise<LoanVaultLiquidated> {
     return {
       vaultId: data.vaultId,
       loanScheme: await this.mapLoanScheme(data.loanSchemeId),
@@ -141,23 +143,34 @@ export class LoanVaultService {
       batchCount: data.batchCount,
       liquidationHeight: data.liquidationHeight,
       liquidationPenalty: data.liquidationPenalty,
-      batches: await this.mapLiquidationBatches(data.vaultId, data.batches)
+      batches: await this.mapLiquidationBatches(data)
     }
   }
 
-  private async mapLiquidationBatches (vaultId: string, batches: VaultLiquidationBatch[]): Promise<LoanVaultLiquidationBatch[]> {
-    if (batches.length === 0) {
+  private async mapLiquidationBatches (data: VaultLiquidation): Promise<LoanVaultLiquidationBatch[]> {
+    if (data.batches.length === 0) {
       return []
     }
 
-    const items = batches.map(async batch => {
-      const bid = await this.vaultAuctionBatchBidderMapper.get(`${vaultId}-${batch.index}`)
+    const end = data.liquidationHeight
+    const start = end - this.NUM_AUCTION_EXP_BLOCKS
+
+    const items = data.batches.map(async batch => {
+      const bid = await this.vaultAuctionHistoryMapper.get(`${data.vaultId}-${batch.index}`)
+      const froms: string[] = []
+      if (bid !== undefined &&
+        // check if the bidder block is bidded within the auction period
+        bid.block.height >= start && bid.block.height <= end &&
+        // check if not exists then push to prevent dup element
+        froms.some(fr => fr !== bid.from)) {
+        froms.push(bid.from)
+      }
 
       return {
         index: batch.index,
         collaterals: await this.mapTokenAmounts(batch.collaterals),
         loan: (await this.mapTokenAmounts([batch.loan]))[0],
-        froms: bid !== undefined ? bid.froms : [],
+        froms: froms,
         highestBid: batch.highestBid !== undefined
           ? {
               owner: batch.highestBid.owner,
