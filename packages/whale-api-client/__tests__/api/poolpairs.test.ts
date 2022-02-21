@@ -571,11 +571,14 @@ describe('poolswap 30d', () => {
       dateNow.setUTCHours(0)
       dateNow.setUTCDate(dateNow.getUTCDate() + 2)
       const timeNow = Math.floor(dateNow.getTime() / 1000)
+      await testing.rpc.misc.setMockTime(timeNow)
+      await testing.generate(10)
+
       for (let i = 0; i <= numBlocks; i++) {
         const mockTime = timeNow + i * fiveMinutes
         await testing.rpc.misc.setMockTime(mockTime)
 
-        await testing.poolpair.swap({
+        await testing.rpc.poolpair.poolSwap({
           from: await testing.address('swap'),
           tokenFrom: 'B',
           amountFrom: 0.1,
@@ -635,7 +638,7 @@ describe('poolswap 30d', () => {
       },
       volume: {
         d30: 170.87230889572012,
-        h24: 135.36637457972637
+        h24: 127.37753935862767
       }
     })
   })
