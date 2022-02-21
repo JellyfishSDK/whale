@@ -481,10 +481,65 @@ describe('poolswap aggregated', () => {
       await service.waitForIndexedHeight(height)
     }
 
-    const dayAggregated: ApiPagedResponse<PoolSwapAggregated> = await client.poolpairs.listPoolSwapAggregates('10', PoolSwapAggregatedInterval.ONE_DAY, 1)
-    expect(dayAggregated).toStrictEqual([])
+    const dayAggregated: ApiPagedResponse<PoolSwapAggregated> = await client.poolpairs.listPoolSwapAggregates('10', PoolSwapAggregatedInterval.ONE_DAY, 10)
+    expect([...dayAggregated]).toStrictEqual([
+      {
+        aggregated: {
+          amounts: { 2: '9.50000000' }
+        },
+        block: expect.any(Object),
+        bucket: 1645660800,
+        id: expect.any(String),
+        key:
+        '10-86400'
+      },
+      {
+        aggregated: {
+          amounts: {
+            2: '29.00000000'
+          }
+        },
+        block: expect.any(Object),
+        bucket: 1645574400,
+        id: expect.any(String),
+        key: '10-86400'
+      },
+      {
+        aggregated: {
+          amounts: {}
+        },
+        block: expect.any(Object),
+        bucket: 1645401600,
+        id: expect.any(String),
+        key: '10-86400'
+      }
 
-    const hourAggregated: ApiPagedResponse<PoolSwapAggregated> = await client.poolpairs.listPoolSwapAggregates('10', PoolSwapAggregatedInterval.ONE_HOUR, 1)
-    expect(hourAggregated).toStrictEqual([])
+    ])
+
+    const hourAggregated: ApiPagedResponse<PoolSwapAggregated> = await client.poolpairs.listPoolSwapAggregates('10', PoolSwapAggregatedInterval.ONE_HOUR, 10)
+    expect([...hourAggregated]).toStrictEqual([
+      {
+        aggregated: { amounts: { 2: '9.50000000' } },
+        block: expect.any(Object),
+        bucket: 1645660800,
+        id: expect.any(String),
+        key: '10-3600'
+      },
+      {
+        aggregated: { amounts: { 2: '29.00000000' } },
+        block: expect.any(Object),
+        bucket: 1645574400,
+        id: expect.any(String),
+        key: '10-3600'
+      },
+      {
+        aggregated: { amounts: {} },
+        block: expect.any(Object),
+        bucket: 1645444800,
+        id: expect.any(String),
+        key: '10-3600'
+      }
+
+    ])
   })
 })
