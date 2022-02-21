@@ -156,7 +156,7 @@ export class PoolPairService {
         return dfiPair.reserveB.div(dfiPair.reserveA).times(usdPerDFI)
       }
     }, {
-      ttl: 3600 // 60 minutes
+      ttl: 300 // 5 minutes
     })
   }
 
@@ -188,7 +188,7 @@ export class PoolPairService {
         d30: await gatherAmount(PoolSwapAggregatedInterval.ONE_DAY, 30)
       }
     }, {
-      ttl: 3600 // 60 minutes
+      ttl: 900 // 15 minutes
     })
   }
 
