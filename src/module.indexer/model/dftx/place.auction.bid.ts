@@ -37,10 +37,14 @@ export class PlaceAuctionBidIndexer extends DfTxIndexer<PlaceAuctionBid> {
 
     // TODO(canonbrother): due to the reason WIP on loanScheme and loan ops indexing
     // currently provides a temp solution first
-    // FE req is to label, eg: Bid Lost, on auction listing page
+    // FE requirement is to label, eg: Bid Lost, on auction listing page
     const batchBid = await this.vaultAuctionBatchBidMapper.get(`${data.vaultId}-${data.index}`)
     const froms = batchBid !== undefined ? batchBid.froms : []
-    froms.push(from)
+
+    // if not exists then push to prevent duplicate elements
+    if (froms.some(fr => fr !== from)) {
+      froms.push(from)
+    }
     await this.vaultAuctionBatchBidMapper.put({
       id: `${data.vaultId}-${data.index}`,
       froms: froms,
