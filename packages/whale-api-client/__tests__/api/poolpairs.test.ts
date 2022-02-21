@@ -2,17 +2,20 @@ import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
 import { ApiPagedResponse, WhaleApiClient, WhaleApiException } from '../../src'
-import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens } from '@defichain/testing'
-import { PoolPairData } from '../../src/api/poolpairs'
+import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens, poolSwap } from '@defichain/testing'
+import { PoolPairData, PoolSwap } from '../../src/api/poolpairs'
+import { Testing } from '@defichain/jellyfish-testing'
 
 let container: MasterNodeRegTestContainer
 let service: StubService
 let client: WhaleApiClient
+let testing: Testing
 
-beforeAll(async () => {
+beforeEach(async () => {
   container = new MasterNodeRegTestContainer()
   service = new StubService(container)
   client = new StubWhaleApiClient(service)
+  testing = Testing.create(container)
 
   await container.start()
   await container.waitForWalletCoinbaseMaturity()
@@ -21,7 +24,7 @@ beforeAll(async () => {
   await setup()
 })
 
-afterAll(async () => {
+afterEach(async () => {
   try {
     await service.stop()
   } finally {
@@ -34,8 +37,12 @@ async function setup (): Promise<void> {
 
   for (const token of tokens) {
     await container.waitForWalletBalanceGTE(110)
-    await createToken(container, token)
-    await mintTokens(container, token)
+    await createToken(container, token, {
+      collateralAddress: await testing.address('swap')
+    })
+    await mintTokens(container, token, {
+      mintAmount: 10000
+    })
   }
   await createPoolPair(container, 'A', 'DFI')
   await createPoolPair(container, 'B', 'DFI')
@@ -90,13 +97,30 @@ async function setup (): Promise<void> {
     amountB: 31.51288,
     shareAddress: await getNewAddress(container)
   })
+
+  await createToken(container, 'DUSD')
+  await createToken(container, 'TEST', {
+    collateralAddress: await testing.address('swap')
+  })
+  await createPoolPair(container, 'TEST', 'DUSD', {
+    commission: 0.002
+  })
+  await mintTokens(container, 'DUSD')
+  await mintTokens(container, 'TEST')
+  await addPoolLiquidity(container, {
+    tokenA: 'TEST',
+    amountA: 20,
+    tokenB: 'DUSD',
+    amountB: 100,
+    shareAddress: await getNewAddress(container)
+  })
 }
 
-describe('list', () => {
+describe('poolpair info', () => {
   it('should list', async () => {
     const response: ApiPagedResponse<PoolPairData> = await client.poolpairs.list(30)
 
-    expect(response.length).toStrictEqual(10)
+    expect(response.length).toStrictEqual(11)
     expect(response.hasNext).toStrictEqual(false)
 
     expect(response[1]).toStrictEqual({
@@ -164,16 +188,14 @@ describe('list', () => {
     expect(next[3].symbol).toStrictEqual('H-DFI')
 
     const last = await client.paginate(next)
-    expect(last.length).toStrictEqual(2)
+    expect(last.length).toStrictEqual(3)
     expect(last.hasNext).toStrictEqual(false)
     expect(last.nextToken).toBeUndefined()
 
     expect(last[0].symbol).toStrictEqual('USDT-DFI')
     expect(last[1].symbol).toStrictEqual('USDC-H')
   })
-})
 
-describe('get', () => {
   it('should get 9', async () => {
     const response: PoolPairData = await client.poolpairs.get('9')
 
@@ -296,5 +318,131 @@ describe('get', () => {
         url: '/v0.0/regtest/poolpairs/999'
       })
     }
+  })
+})
+
+describe('poolswap', () => {
+  it('should show swaps', async () => {
+    await poolSwap(container, {
+      from: await testing.address('swap'),
+      tokenFrom: 'A',
+      amountFrom: 25,
+      to: await testing.address('swap'),
+      tokenTo: 'DFI'
+    })
+
+    await poolSwap(container, {
+      from: await testing.address('swap'),
+      tokenFrom: 'A',
+      amountFrom: 50,
+      to: await testing.address('swap'),
+      tokenTo: 'DFI'
+    })
+
+    await poolSwap(container, {
+      from: await testing.address('swap'),
+      tokenFrom: 'TEST',
+      amountFrom: 10,
+      to: await testing.address('swap'),
+      tokenTo: 'DUSD'
+    })
+
+    const height = await container.getBlockCount()
+    await container.generate(1)
+    await service.waitForIndexedHeight(height)
+
+    const response: ApiPagedResponse<PoolSwap> = await client.poolpairs.listPoolSwaps('9')
+    expect(response.length).toStrictEqual(2)
+    expect(response.hasNext).toStrictEqual(false)
+    expect(response[0].fromAmount).toStrictEqual('50.00000000')
+    expect(response[1].fromAmount).toStrictEqual('25.00000000')
+    expect(response[0].fromTokenId).toStrictEqual(1)
+    expect(response[1].fromTokenId).toStrictEqual(1)
+
+    const poolPair: PoolPairData = await client.poolpairs.get('9')
+    expect(poolPair).toStrictEqual({
+      id: '9',
+      symbol: 'A-DFI',
+      displaySymbol: 'dA-DFI',
+      name: 'A-Default Defi token',
+      status: true,
+      tokenA: {
+        id: expect.any(String),
+        symbol: 'A',
+        reserve: '175',
+        blockCommission: '0',
+        displaySymbol: 'dA'
+      },
+      tokenB: {
+        id: '0',
+        symbol: 'DFI',
+        reserve: '114.2857143',
+        blockCommission: '0',
+        displaySymbol: 'DFI'
+      },
+      apr: {
+        reward: 0,
+        total: 0
+      },
+      commission: '0',
+      totalLiquidity: {
+        token: '141.42135623',
+        usd: '529.6978124963500510109100852'
+      },
+      tradeEnabled: true,
+      ownerAddress: expect.any(String),
+      priceRatio: {
+        ab: '1.53124999',
+        ba: '0.65306122'
+      },
+      rewardPct: '0',
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(Number)
+      }
+    })
+
+    const dusdPoolPair: PoolPairData = await client.poolpairs.get('23')
+    expect(dusdPoolPair).toStrictEqual({
+      id: '23',
+      symbol: 'TEST-DUSD',
+      displaySymbol: 'dTEST-DUSD',
+      name: 'TEST-DUSD',
+      status: true,
+      tokenA: {
+        id: expect.any(String),
+        symbol: 'TEST',
+        reserve: '29.98',
+        blockCommission: '0',
+        displaySymbol: 'dTEST'
+      },
+      tokenB: {
+        id: expect.any(String),
+        symbol: 'DUSD',
+        reserve: '66.71114077',
+        blockCommission: '0',
+        displaySymbol: 'DUSD'
+      },
+      apr: {
+        reward: 0,
+        total: 0
+      },
+      commission: '0.002',
+      totalLiquidity: {
+        token: '44.72135954',
+        usd: '133.42228154'
+      },
+      tradeEnabled: true,
+      ownerAddress: expect.any(String),
+      priceRatio: {
+        ab: '0.44940019',
+        ba: '2.22518815'
+      },
+      rewardPct: '0',
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(Number)
+      }
+    })
   })
 })

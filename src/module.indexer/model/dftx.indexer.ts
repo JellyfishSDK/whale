@@ -10,8 +10,15 @@ import { CreateMasternodeIndexer } from '@src/module.indexer/model/dftx/create.m
 import { ResignMasternodeIndexer } from '@src/module.indexer/model/dftx/resign.masternode'
 import { Injectable, Logger } from '@nestjs/common'
 import { DfTxIndexer, DfTxTransaction } from '@src/module.indexer/model/dftx/_abstract'
+import { CreatePoolPairIndexer } from './dftx/create.pool.pair'
+import { CreateTokenIndexer } from './dftx/create.token'
+import { PoolSwapIndexer } from './dftx/pool.swap'
+import { SetLoanTokenIndexer } from './dftx/set.loan.token'
+import { UpdatePoolPairIndexer } from './dftx/update.pool.pair'
+import { CompositeSwapIndexer } from './dftx/composite.swap'
 import { ActivePriceIndexer } from './dftx/active.price'
 import { PlaceAuctionBidIndexer } from './dftx/place.auction.bid'
+import { PoolSwapAggregatedIndexer } from './dftx/pool.swap.aggregated'
 
 @Injectable()
 export class MainDfTxIndexer extends Indexer {
@@ -19,14 +26,21 @@ export class MainDfTxIndexer extends Indexer {
   private readonly indexers: Array<DfTxIndexer<any>>
 
   constructor (
-    private readonly appointOracle: AppointOracleIndexer,
-    private readonly removeOracle: RemoveOracleIndexer,
-    private readonly updateOracle: UpdateOracleIndexer,
-    private readonly setOracleData: SetOracleDataIndexer,
-    private readonly createMasternode: CreateMasternodeIndexer,
-    private readonly resignMasternode: ResignMasternodeIndexer,
-    private readonly activePriceIndexer: ActivePriceIndexer,
-    private readonly placeAuctionBidIndexer: PlaceAuctionBidIndexer
+    appointOracle: AppointOracleIndexer,
+    removeOracle: RemoveOracleIndexer,
+    updateOracle: UpdateOracleIndexer,
+    setOracleData: SetOracleDataIndexer,
+    createMasternode: CreateMasternodeIndexer,
+    resignMasternode: ResignMasternodeIndexer,
+    createToken: CreateTokenIndexer,
+    createPoolPair: CreatePoolPairIndexer,
+    updatePoolPair: UpdatePoolPairIndexer,
+    poolSwapIndexer: PoolSwapIndexer,
+    compositeSwapIndexer: CompositeSwapIndexer,
+    poolSwapIntervalIndexer: PoolSwapAggregatedIndexer,
+    setLoanToken: SetLoanTokenIndexer,
+    activePriceIndexer: ActivePriceIndexer,
+    placeAuctionBidIndexer: PlaceAuctionBidIndexer
   ) {
     super()
     this.indexers = [
@@ -36,6 +50,13 @@ export class MainDfTxIndexer extends Indexer {
       setOracleData,
       createMasternode,
       resignMasternode,
+      createToken,
+      createPoolPair,
+      updatePoolPair,
+      poolSwapIndexer,
+      compositeSwapIndexer,
+      poolSwapIntervalIndexer,
+      setLoanToken,
       activePriceIndexer,
       placeAuctionBidIndexer
     ]
@@ -82,7 +103,8 @@ export class MainDfTxIndexer extends Indexer {
   private getDfTxTransactions (block: RawBlock): Array<DfTxTransaction<any>> {
     const transactions: Array<DfTxTransaction<any>> = []
 
-    for (const txn of block.tx) {
+    for (let i = 0; i < block.tx.length; i++) {
+      const txn = block.tx[i]
       for (const vout of txn.vout) {
         if (!vout.scriptPubKey.asm.startsWith('OP_RETURN 44665478')) {
           continue
@@ -93,7 +115,11 @@ export class MainDfTxIndexer extends Indexer {
           if (stack[1].type !== 'OP_DEFI_TX') {
             continue
           }
-          transactions.push({ txn: txn, dftx: (stack[1] as OP_DEFI_TX).tx })
+          transactions.push({
+            txn: txn,
+            txnNo: i,
+            dftx: (stack[1] as OP_DEFI_TX).tx
+          })
         } catch (err) {
           // TODO(fuxingloh): we can improve on this design by having separated indexing pipeline where
           //  a failed pipeline won't affect another indexer pipeline.

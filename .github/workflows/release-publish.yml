@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: 16
 
-      - uses: actions/github-script@e3cbab99d3a9b271e1b79fc96d103a4a5534998c
+      - uses: actions/github-script@9ac08808f993958e9de277fe43a64532a609130e
         id: version
         with:
           script: |
@@ -37,7 +37,7 @@ jobs:
         uses: docker/setup-buildx-action@94ab11c41e45d028884a99163086648e898eed25
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@42d299face0c5c43a0487c477f595ac9cf22f1a7
+        uses: docker/login-action@6af3c118c8376c675363897acf1757f7a9be6583
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -66,7 +66,7 @@ jobs:
         with:
           node-version: 16
 
-      - uses: actions/github-script@e3cbab99d3a9b271e1b79fc96d103a4a5534998c
+      - uses: actions/github-script@9ac08808f993958e9de277fe43a64532a609130e
         id: version
         with:
           script: |
