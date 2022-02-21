@@ -89,6 +89,9 @@ export class PoolPairController {
   }
 
   /**
+   * Get a list of pool swap aggregated of an interval bucket.
+   * Using query.next (also known as less than or max) as unix time seconds to pagination across interval time slices.
+   *
    * @param {string} id poolpair id
    * @param {string} interval interval
    * @param {PaginationQuery} query
@@ -102,8 +105,8 @@ export class PoolPairController {
       @Param('interval', ParseIntPipe) interval: string,
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<PoolSwapAggregated>> {
-    const result = await this.poolSwapAggregatedMapper.query(`${id}-${interval}`, query.size,
-      query.next === undefined ? undefined : parseInt(query.next))
+    const lt = query.next === undefined ? undefined : parseInt(query.next)
+    const result = await this.poolSwapAggregatedMapper.query(`${id}-${interval}`, query.size, lt)
     return ApiPagedResponse.of(result, query.size, item => {
       return `${item.bucket}`
     })
