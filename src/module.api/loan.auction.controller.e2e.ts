@@ -389,10 +389,10 @@ describe('list', () => {
         if (auction.vaultId === vaultId4) {
           expect(batch.froms.length).toStrictEqual(0)
         } else {
+          expect(batch.froms.length).toBeGreaterThan(0)
           expect(batch.froms).toStrictEqual(
             expect.arrayContaining([expect.any(String)])
           )
-          expect(batch.froms.length).toBeGreaterThan(0)
         }
         expect(typeof batch.highestBid === 'object' || batch.highestBid === undefined).toBe(true)
       }
