@@ -165,7 +165,7 @@ export class LoanVaultService {
         index: batch.index,
         collaterals: await this.mapTokenAmounts(batch.collaterals),
         loan: (await this.mapTokenAmounts([batch.loan]))[0],
-        froms: bids.length > 0 ? bids.map(b => b.from) : [],
+        froms: bids.map(b => b.from),
         highestBid: batch.highestBid !== undefined
           ? {
               owner: batch.highestBid.owner,

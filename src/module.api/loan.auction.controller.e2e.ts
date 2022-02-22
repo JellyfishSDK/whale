@@ -231,7 +231,6 @@ beforeAll(async () => {
   }
 
   {
-    // If there is no liquidation, return an empty array object
     const auctions = await alice.rpc.loan.listAuctions()
     expect(auctions).toStrictEqual([])
   }
@@ -387,7 +386,14 @@ describe('list', () => {
         expect(typeof batch.index).toBe('number')
         expect(typeof batch.collaterals).toBe('object')
         expect(typeof batch.loan).toBe('object')
-        expect(typeof batch.froms).toBe('object')
+        if (auction.vaultId === vaultId4) {
+          expect(batch.froms.length).toStrictEqual(0)
+        } else {
+          expect(batch.froms).toStrictEqual(
+            expect.arrayContaining([expect.any(String)])
+          )
+          expect(batch.froms.length).toBeGreaterThan(0)
+        }
         expect(typeof batch.highestBid === 'object' || batch.highestBid === undefined).toBe(true)
       }
     }
