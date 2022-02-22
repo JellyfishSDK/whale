@@ -601,7 +601,7 @@ describe('poolswap aggregated', () => {
           amounts: { 2: '9.50000000' }
         },
         block: expect.any(Object),
-        bucket: 1645747200,
+        bucket: expect.any(Number),
         id: expect.any(String),
         key:
         '10-86400'
@@ -613,7 +613,7 @@ describe('poolswap aggregated', () => {
           }
         },
         block: expect.any(Object),
-        bucket: 1645660800,
+        bucket: expect.any(Number),
         id: expect.any(String),
         key: '10-86400'
       },
@@ -622,128 +622,33 @@ describe('poolswap aggregated', () => {
           amounts: {}
         },
         block: expect.any(Object),
-        bucket: 1645488000,
+        bucket: expect.any(Number),
         id: expect.any(String),
         key: '10-86400'
       }
 
     ])
 
-    const hourAggregated: ApiPagedResponse<PoolSwapAggregated> = await client.poolpairs.listPoolSwapAggregates('10', PoolSwapAggregatedInterval.ONE_HOUR, 10)
+    const hourAggregated: ApiPagedResponse<PoolSwapAggregated> = await client.poolpairs.listPoolSwapAggregates('10', PoolSwapAggregatedInterval.ONE_HOUR, 3)
     expect([...hourAggregated]).toStrictEqual([
       {
         aggregated: { amounts: { 2: '1.10000000' } },
         block: expect.any(Object),
-        bucket: 1645772400,
+        bucket: expect.any(Number),
         id: expect.any(String),
         key: '10-3600'
       },
       {
         aggregated: { amounts: { 2: '1.20000000' } },
         block: expect.any(Object),
-        bucket: 1645768800,
+        bucket: expect.any(Number),
         id: expect.any(String),
         key: '10-3600'
       },
       {
-        aggregated: {
-          amounts: {
-            2: '1.20000000'
-          }
-        },
+        aggregated: { amounts: { 2: '1.20000000' } },
         block: expect.any(Object),
-        bucket: 1645765200,
-        id: expect.any(String),
-        key: '10-3600'
-      },
-      {
-        aggregated: {
-          amounts: {
-            2: '1.20000000'
-          }
-        },
-        block: {
-          medianTime: 1645761720
-        },
-        bucket: 1645761600,
-        id: expect.any(String),
-        key: '10-3600'
-      },
-      {
-        aggregated: {
-          amounts: {
-            2: '1.20000000'
-          }
-        },
-        block: {
-          medianTime: 1645758120
-        },
-        bucket: 1645758000,
-        id: expect.any(String),
-        key: '10-3600'
-      },
-      {
-        aggregated: {
-          amounts: {
-            2: '1.20000000'
-          }
-        },
-        block: {
-          medianTime: 1645754520
-        },
-        bucket: 1645754400,
-        id: expect.any(String),
-        key: '10-3600'
-      },
-      {
-        aggregated: {
-          amounts: {
-            2: '1.20000000'
-          }
-        },
-        block: {
-          medianTime: 1645750920
-        },
-        bucket: 1645750800,
-        id: expect.any(String),
-        key: '10-3600'
-      },
-      {
-        aggregated: {
-          amounts: {
-            2: '1.20000000'
-          }
-        },
-        block: {
-          medianTime: 1645747320
-        },
-        bucket: 1645747200,
-        id: expect.any(String),
-        key: '10-3600'
-      },
-      {
-        aggregated: {
-          amounts: {
-            2: '1.20000000'
-          }
-        },
-        block: {
-          medianTime: 1645743720
-        },
-        bucket: 1645743600,
-        id: expect.any(String),
-        key: '10-3600'
-      },
-      {
-        aggregated: {
-          amounts: {
-            2: '1.20000000'
-          }
-        },
-        block: {
-          medianTime: 1645740120
-        },
-        bucket: 1645740000,
+        bucket: expect.any(Number),
         id: expect.any(String),
         key: '10-3600'
       }
