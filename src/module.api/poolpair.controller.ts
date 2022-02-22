@@ -2,13 +2,14 @@ import { Controller, Get, NotFoundException, Param, ParseIntPipe, Query } from '
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
-import { PoolPairData, PoolSwap } from '@whale-api-client/api/poolpairs'
+import { PoolPairData, PoolSwap, PoolSwapAggregated } from '@whale-api-client/api/poolpairs'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { PoolPairService } from './poolpair.service'
 import BigNumber from 'bignumber.js'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import { parseDATSymbol } from '@src/module.api/token.controller'
 import { PoolSwapMapper } from '@src/module.model/pool.swap'
+import { PoolSwapAggregatedMapper } from '@src/module.model/pool.swap.aggregated'
 
 @Controller('/poolpairs')
 export class PoolPairController {
@@ -16,7 +17,8 @@ export class PoolPairController {
     protected readonly rpcClient: JsonRpcClient,
     protected readonly deFiDCache: DeFiDCache,
     private readonly poolPairService: PoolPairService,
-    private readonly poolSwapMapper: PoolSwapMapper
+    private readonly poolSwapMapper: PoolSwapMapper,
+    private readonly poolSwapAggregatedMapper: PoolSwapAggregatedMapper
   ) {
   }
 
@@ -44,7 +46,8 @@ export class PoolPairController {
 
       const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
       const apr = await this.poolPairService.getAPR(id, info)
-      items.push(mapPoolPair(id, info, totalLiquidityUsd, apr))
+      const volume = await this.poolPairService.getUSDVolume(id)
+      items.push(mapPoolPair(id, info, totalLiquidityUsd, apr, volume))
     }
 
     return ApiPagedResponse.of(items, query.size, item => {
@@ -65,7 +68,8 @@ export class PoolPairController {
 
     const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
     const apr = await this.poolPairService.getAPR(id, info)
-    return mapPoolPair(String(id), info, totalLiquidityUsd, apr)
+    const volume = await this.poolPairService.getUSDVolume(id)
+    return mapPoolPair(String(id), info, totalLiquidityUsd, apr, volume)
   }
 
   /**
@@ -85,9 +89,34 @@ export class PoolPairController {
       return item.sort
     })
   }
+
+  /**
+   * Get a list of pool swap aggregated of an interval bucket.
+   * Using query.next (also known as less than or max) as unix time seconds to pagination across interval time slices.
+   *
+   * @param {string} id poolpair id
+   * @param {string} interval interval
+   * @param {PaginationQuery} query
+   * @param {number} query.size
+   * @param {string} [query.next]
+   * @return {Promise<ApiPagedResponse<PoolPairData>>}
+   */
+  @Get('/:id/swaps/aggregate/:interval')
+  async listPoolSwapAggregates (
+    @Param('id', ParseIntPipe) id: string,
+      @Param('interval', ParseIntPipe) interval: string,
+      @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<PoolSwapAggregated>> {
+    const lt = query.next === undefined ? undefined : parseInt(query.next)
+    const result = await this.poolSwapAggregatedMapper.query(`${id}-${interval}`, query.size, lt)
+    return ApiPagedResponse.of(result, query.size, item => {
+      return `${item.bucket}`
+    })
+  }
 }
 
-function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr']): PoolPairData {
+function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr'],
+  volume?: PoolPairData['volume']): PoolPairData {
   const [symbolA, symbolB] = info.symbol.split('-')
 
   return {
@@ -127,6 +156,7 @@ function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNum
       tx: info.creationTx,
       height: info.creationHeight.toNumber()
     },
-    apr: apr
+    apr: apr,
+    volume: volume
   }
 }
