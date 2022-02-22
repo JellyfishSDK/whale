@@ -308,7 +308,7 @@ describe('poolpair info', () => {
     expect.assertions(2)
     try {
       await client.poolpairs.get('999')
-    } catch (err) {
+    } catch (err: any) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
         code: 404,
