@@ -312,7 +312,7 @@ describe('poolpair info', () => {
     expect.assertions(2)
     try {
       await client.poolpairs.get('A-DFI')
-    } catch (err) {
+    } catch (err: any) {
       expect(err).toBeInstanceOf(WhaleApiException)
       expect(err.error).toStrictEqual({
         code: 400,
@@ -554,7 +554,7 @@ describe('poolswap 24h', () => {
       },
       volume: {
         d30: 11.028806333434215,
-        h24: 11.028806333434215
+        h24: 10.146501826759481
       }
     })
   })
@@ -601,7 +601,7 @@ describe('poolswap aggregated', () => {
           amounts: { 2: '9.50000000' }
         },
         block: expect.any(Object),
-        bucket: 1645660800,
+        bucket: 1645747200,
         id: expect.any(String),
         key:
         '10-86400'
@@ -613,7 +613,7 @@ describe('poolswap aggregated', () => {
           }
         },
         block: expect.any(Object),
-        bucket: 1645574400,
+        bucket: 1645660800,
         id: expect.any(String),
         key: '10-86400'
       },
@@ -622,7 +622,7 @@ describe('poolswap aggregated', () => {
           amounts: {}
         },
         block: expect.any(Object),
-        bucket: 1645401600,
+        bucket: 1645488000,
         id: expect.any(String),
         key: '10-86400'
       }
@@ -632,27 +632,121 @@ describe('poolswap aggregated', () => {
     const hourAggregated: ApiPagedResponse<PoolSwapAggregated> = await client.poolpairs.listPoolSwapAggregates('10', PoolSwapAggregatedInterval.ONE_HOUR, 10)
     expect([...hourAggregated]).toStrictEqual([
       {
-        aggregated: { amounts: { 2: '9.50000000' } },
+        aggregated: { amounts: { 2: '1.10000000' } },
         block: expect.any(Object),
-        bucket: 1645660800,
+        bucket: 1645772400,
         id: expect.any(String),
         key: '10-3600'
       },
       {
-        aggregated: { amounts: { 2: '29.00000000' } },
+        aggregated: { amounts: { 2: '1.20000000' } },
         block: expect.any(Object),
-        bucket: 1645574400,
+        bucket: 1645768800,
         id: expect.any(String),
         key: '10-3600'
       },
       {
-        aggregated: { amounts: {} },
+        aggregated: {
+          amounts: {
+            2: '1.20000000'
+          }
+        },
         block: expect.any(Object),
-        bucket: 1645444800,
+        bucket: 1645765200,
+        id: expect.any(String),
+        key: '10-3600'
+      },
+      {
+        aggregated: {
+          amounts: {
+            2: '1.20000000'
+          }
+        },
+        block: {
+          medianTime: 1645761720
+        },
+        bucket: 1645761600,
+        id: expect.any(String),
+        key: '10-3600'
+      },
+      {
+        aggregated: {
+          amounts: {
+            2: '1.20000000'
+          }
+        },
+        block: {
+          medianTime: 1645758120
+        },
+        bucket: 1645758000,
+        id: expect.any(String),
+        key: '10-3600'
+      },
+      {
+        aggregated: {
+          amounts: {
+            2: '1.20000000'
+          }
+        },
+        block: {
+          medianTime: 1645754520
+        },
+        bucket: 1645754400,
+        id: expect.any(String),
+        key: '10-3600'
+      },
+      {
+        aggregated: {
+          amounts: {
+            2: '1.20000000'
+          }
+        },
+        block: {
+          medianTime: 1645750920
+        },
+        bucket: 1645750800,
+        id: expect.any(String),
+        key: '10-3600'
+      },
+      {
+        aggregated: {
+          amounts: {
+            2: '1.20000000'
+          }
+        },
+        block: {
+          medianTime: 1645747320
+        },
+        bucket: 1645747200,
+        id: expect.any(String),
+        key: '10-3600'
+      },
+      {
+        aggregated: {
+          amounts: {
+            2: '1.20000000'
+          }
+        },
+        block: {
+          medianTime: 1645743720
+        },
+        bucket: 1645743600,
+        id: expect.any(String),
+        key: '10-3600'
+      },
+      {
+        aggregated: {
+          amounts: {
+            2: '1.20000000'
+          }
+        },
+        block: {
+          medianTime: 1645740120
+        },
+        bucket: 1645740000,
         id: expect.any(String),
         key: '10-3600'
       }
-
     ])
   })
 })
