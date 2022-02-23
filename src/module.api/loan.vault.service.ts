@@ -23,6 +23,7 @@ import { parseDisplaySymbol } from '@src/module.api/token.controller'
 import { ActivePrice } from '@whale-api-client/api/prices'
 import { OraclePriceActiveMapper } from '@src/module.model/oracle.price.active'
 import { RpcApiError } from '@defichain/jellyfish-api-core'
+import { fromScriptHex } from '@defichain/jellyfish-address'
 import { VaultAuctionHistoryMapper } from '@src/module.model/vault.auction.batch.history'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { HexEncoder } from '@src/module.model/_hex.encoder'
@@ -165,7 +166,7 @@ export class LoanVaultService {
         index: batch.index,
         collaterals: await this.mapTokenAmounts(batch.collaterals),
         loan: (await this.mapTokenAmounts([batch.loan]))[0],
-        froms: bids.map(b => b.from),
+        froms: bids.map(b => fromScriptHex(b.from, this.network)?.address as string),
         highestBid: batch.highestBid !== undefined
           ? {
               owner: batch.highestBid.owner,
