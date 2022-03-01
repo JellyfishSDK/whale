@@ -51,6 +51,7 @@
       <w>fullstackninja</w>
       <w>fuxingloh</w>
       <w>generatetoaddress</w>
+      <w>getaccounthistory</w>
       <w>getaddressinfo</w>
       <w>getbalance</w>
       <w>getblock</w>
@@ -98,6 +99,7 @@
       <w>listaccounthistory</w>
       <w>listaccounts</w>
       <w>listaddressgroupings</w>
+      <w>listcommunitybalances</w>
       <w>listpoolpairs</w>
       <w>listpoolshares</w>
       <w>listtokens</w>
@@ -185,6 +187,7 @@
       <w>utxo</w>
       <w>utxos</w>
       <w>utxostoaccount</w>
+      <w>validateaddress</w>
       <w>varint</w>
       <w>verif</w>
       <w>verificationprogress</w>
