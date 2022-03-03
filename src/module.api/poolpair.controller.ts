@@ -84,7 +84,18 @@ export class PoolPairController {
     @Param('id', ParseIntPipe) id: string,
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<PoolSwap>> {
-    const result = await this.poolSwapMapper.query(id, query.size, query.next)
+    const items = await this.poolSwapMapper.query(id, query.size, query.next)
+    const mapped: Array<Promise<PoolSwap>> = items.map(async swap => {
+      const fromTo = await this.poolPairService.findSwapFromTo(swap.block.height, swap.txid, swap.txno)
+
+      return {
+        ...swap,
+        from: fromTo?.from,
+        to: fromTo?.to
+      }
+    })
+
+    const result = await Promise.all(mapped)
     return ApiPagedResponse.of(result, query.size, item => {
       return item.sort
     })

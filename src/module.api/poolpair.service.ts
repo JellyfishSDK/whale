@@ -1,21 +1,36 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import BigNumber from 'bignumber.js'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
-import { PoolPairData } from '@whale-api-client/api/poolpairs'
+import { PoolPairData, PoolSwapFromTo } from '@whale-api-client/api/poolpairs'
 import { getBlockSubsidy } from '@src/module.api/subsidy'
 import { BlockMapper } from '@src/module.model/block'
 import { TokenMapper } from '@src/module.model/token'
 import { PoolSwapAggregated, PoolSwapAggregatedMapper } from '@src/module.model/pool.swap.aggregated'
 import { PoolSwapAggregatedInterval } from '@src/module.indexer/model/dftx/pool.swap.aggregated'
+import { TransactionVout, TransactionVoutMapper } from '@src/module.model/transaction.vout'
+import { SmartBuffer } from 'smart-buffer'
+import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
+import {
+  CCompositeSwap,
+  CompositeSwap,
+  CPoolSwap,
+  OP_DEFI_TX,
+  PoolSwap as PoolSwapDfTx
+} from '@defichain/jellyfish-transaction'
+import { fromScript } from '@defichain/jellyfish-address'
+import { NetworkName } from '@defichain/jellyfish-network'
+import { AccountHistory } from '@defichain/jellyfish-api-core/dist/category/account'
 
 @Injectable()
 export class PoolPairService {
   constructor (
+    @Inject('NETWORK') protected readonly network: NetworkName,
     protected readonly rpcClient: JsonRpcClient,
     protected readonly cache: SemaphoreCache,
     protected readonly poolSwapAggregatedMapper: PoolSwapAggregatedMapper,
+    protected readonly voutMapper: TransactionVoutMapper,
     protected readonly tokenMapper: TokenMapper,
     protected readonly blockMapper: BlockMapper
   ) {
@@ -202,6 +217,35 @@ export class PoolPairService {
     return value
   }
 
+  public async findSwapFromTo (height: number, txid: string, txno: number): Promise<{ from?: PoolSwapFromTo, to?: PoolSwapFromTo } | undefined> {
+    const vouts = await this.voutMapper.query(txid, 1)
+    const dftx = findPoolSwapDfTx(vouts)
+    if (dftx === undefined) {
+      return undefined
+    }
+
+    const fromAddress = fromScript(dftx.fromScript, this.network)?.address
+    const toAddress = fromScript(dftx.toScript, this.network)?.address
+    if (fromAddress === undefined || toAddress === undefined) {
+      return undefined
+    }
+
+    const histories = await this.getAddressHistory([fromAddress, toAddress], height, txno)
+
+    return {
+      from: findPoolSwapFromTo(histories[fromAddress], true),
+      to: findPoolSwapFromTo(histories[toAddress], false)
+    }
+  }
+
+  private async getAddressHistory (addresses: string[], height: number, txno: number): Promise<{ [address: string]: AccountHistory }> {
+    const histories: { [address: string]: AccountHistory } = {}
+    for (const address of new Set(addresses)) {
+      histories[address] = await this.rpcClient.account.getAccountHistory(address, height, txno)
+    }
+    return histories
+  }
+
   private async getLoanTokenSplits (): Promise<Record<string, number> | undefined> {
     return await this.cache.get<Record<string, number>>('LP_LOAN_TOKEN_SPLITS', async () => {
       const result = await this.rpcClient.masternode.getGov('LP_LOAN_TOKEN_SPLITS')
@@ -323,4 +367,54 @@ export class PoolPairService {
       total: reward.plus(commission).toNumber()
     }
   }
+}
+
+function findPoolSwapDfTx (vouts: TransactionVout[]): PoolSwapDfTx | undefined {
+  const hex = vouts[0].script.hex
+  const buffer = SmartBuffer.fromBuffer(Buffer.from(hex, 'hex'))
+  const stack = toOPCodes(buffer)
+  if (stack.length !== 2 || stack[1].type !== 'OP_DEFI_TX') {
+    return undefined
+  }
+
+  const dftx = (stack[1] as OP_DEFI_TX).tx
+  if (dftx === undefined) {
+    return undefined
+  }
+
+  switch (dftx.name) {
+    case CPoolSwap.OP_NAME:
+      return (dftx.data as PoolSwapDfTx)
+
+    case CCompositeSwap.OP_NAME:
+      return (dftx.data as CompositeSwap).poolSwap
+
+    default:
+      return undefined
+  }
+}
+
+function findPoolSwapFromTo (history: AccountHistory, from: boolean): PoolSwapFromTo | undefined {
+  for (const amount of history.amounts) {
+    const [value, symbol] = amount.split('@')
+    const isNegative = value.startsWith('-')
+
+    if (isNegative && from) {
+      return {
+        address: history.owner,
+        amount: new BigNumber(value).absoluteValue().toFixed(8),
+        symbol: symbol
+      }
+    }
+
+    if (!isNegative && !from) {
+      return {
+        address: history.owner,
+        amount: new BigNumber(value).absoluteValue().toFixed(8),
+        symbol: symbol
+      }
+    }
+  }
+
+  return undefined
 }

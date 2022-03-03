@@ -113,12 +113,27 @@ export interface PoolSwap {
   fromAmount: string
   fromTokenId: number
 
+  /**
+   * To handle for optional value as Whale service might fail to resolve when indexing
+   */
+  from?: PoolSwapFromTo
+  /**
+   * To handle for optional value as Whale service might fail to resolve when indexing
+   */
+  to?: PoolSwapFromTo
+
   block: {
     hash: string
     height: number
     time: number
     medianTime: number
   }
+}
+
+export interface PoolSwapFromTo {
+  address: string
+  amount: string
+  symbol: string
 }
 
 export interface PoolSwapAggregated {
