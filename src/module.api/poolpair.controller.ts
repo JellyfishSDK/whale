@@ -2,7 +2,7 @@ import { Controller, Get, NotFoundException, Param, ParseIntPipe, Query } from '
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
-import { PoolPairData, PoolSwap, PoolSwapAggregated } from '@whale-api-client/api/poolpairs'
+import { PoolPairData, PoolSwapData, PoolSwapAggregatedData } from '@whale-api-client/api/poolpairs'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { PoolPairService } from './poolpair.service'
 import BigNumber from 'bignumber.js'
@@ -83,9 +83,9 @@ export class PoolPairController {
   async listPoolSwaps (
     @Param('id', ParseIntPipe) id: string,
       @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<PoolSwap>> {
+  ): Promise<ApiPagedResponse<PoolSwapData>> {
     const items = await this.poolSwapMapper.query(id, query.size, query.next)
-    const mapped: Array<Promise<PoolSwap>> = items.map(async swap => {
+    const mapped: Array<Promise<PoolSwapData>> = items.map(async swap => {
       const fromTo = await this.poolPairService.findSwapFromTo(swap.block.height, swap.txid, swap.txno)
 
       return {
@@ -117,10 +117,10 @@ export class PoolPairController {
     @Param('id', ParseIntPipe) id: string,
       @Param('interval', ParseIntPipe) interval: string,
       @Query() query: PaginationQuery
-  ): Promise<ApiPagedResponse<PoolSwapAggregated>> {
+  ): Promise<ApiPagedResponse<PoolSwapAggregatedData>> {
     const lt = query.next === undefined ? undefined : parseInt(query.next)
     const aggregates = await this.poolSwapAggregatedMapper.query(`${id}-${interval}`, query.size, lt)
-    const mapped: Array<Promise<PoolSwapAggregated>> = aggregates.map(async value => {
+    const mapped: Array<Promise<PoolSwapAggregatedData>> = aggregates.map(async value => {
       return {
         ...value,
         aggregated: {

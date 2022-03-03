@@ -3,7 +3,7 @@ import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
 import { ApiPagedResponse, WhaleApiClient, WhaleApiException } from '../../src'
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens, poolSwap } from '@defichain/testing'
-import { PoolPairData, PoolSwap, PoolSwapAggregated, PoolSwapAggregatedInterval } from '../../src/api/poolpairs'
+import { PoolPairData, PoolSwapData, PoolSwapAggregatedData, PoolSwapAggregatedInterval } from '../../src/api/poolpairs'
 import { Testing } from '@defichain/jellyfish-testing'
 
 let container: MasterNodeRegTestContainer
@@ -371,7 +371,7 @@ describe('poolswap', () => {
     await container.generate(1)
     await service.waitForIndexedHeight(height)
 
-    const response: ApiPagedResponse<PoolSwap> = await client.poolpairs.listPoolSwaps('9')
+    const response: ApiPagedResponse<PoolSwapData> = await client.poolpairs.listPoolSwaps('9')
     expect(response.length).toStrictEqual(2)
     expect(response.hasNext).toStrictEqual(false)
     expect(response[0].fromAmount).toStrictEqual('50.00000000')
@@ -594,7 +594,7 @@ describe('poolswap aggregated', () => {
       await service.waitForIndexedHeight(height)
     }
 
-    const dayAggregated: ApiPagedResponse<PoolSwapAggregated> = await client.poolpairs.listPoolSwapAggregates('10', PoolSwapAggregatedInterval.ONE_DAY, 10)
+    const dayAggregated: ApiPagedResponse<PoolSwapAggregatedData> = await client.poolpairs.listPoolSwapAggregates('10', PoolSwapAggregatedInterval.ONE_DAY, 10)
     expect([...dayAggregated]).toStrictEqual([
       {
         aggregated: {
@@ -631,7 +631,7 @@ describe('poolswap aggregated', () => {
 
     ])
 
-    const hourAggregated: ApiPagedResponse<PoolSwapAggregated> = await client.poolpairs.listPoolSwapAggregates('10', PoolSwapAggregatedInterval.ONE_HOUR, 3)
+    const hourAggregated: ApiPagedResponse<PoolSwapAggregatedData> = await client.poolpairs.listPoolSwapAggregates('10', PoolSwapAggregatedInterval.ONE_HOUR, 3)
     expect([...hourAggregated]).toStrictEqual([
       {
         aggregated: {

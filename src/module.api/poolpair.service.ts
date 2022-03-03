@@ -3,7 +3,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import BigNumber from 'bignumber.js'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
-import { PoolPairData, PoolSwapFromTo } from '@whale-api-client/api/poolpairs'
+import { PoolPairData, PoolSwapFromToData } from '@whale-api-client/api/poolpairs'
 import { getBlockSubsidy } from '@src/module.api/subsidy'
 import { BlockMapper } from '@src/module.model/block'
 import { TokenMapper } from '@src/module.model/token'
@@ -217,7 +217,7 @@ export class PoolPairService {
     return value
   }
 
-  public async findSwapFromTo (height: number, txid: string, txno: number): Promise<{ from?: PoolSwapFromTo, to?: PoolSwapFromTo } | undefined> {
+  public async findSwapFromTo (height: number, txid: string, txno: number): Promise<{ from?: PoolSwapFromToData, to?: PoolSwapFromToData } | undefined> {
     const vouts = await this.voutMapper.query(txid, 1)
     const dftx = findPoolSwapDfTx(vouts)
     if (dftx === undefined) {
@@ -394,7 +394,7 @@ function findPoolSwapDfTx (vouts: TransactionVout[]): PoolSwapDfTx | undefined {
   }
 }
 
-function findPoolSwapFromTo (history: AccountHistory, from: boolean): PoolSwapFromTo | undefined {
+function findPoolSwapFromTo (history: AccountHistory, from: boolean): PoolSwapFromToData | undefined {
   for (const amount of history.amounts) {
     const [value, symbol] = amount.split('@')
     const isNegative = value.startsWith('-')

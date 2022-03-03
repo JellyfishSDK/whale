@@ -35,9 +35,9 @@ export class PoolPairs {
    * @param {string} id poolpair id
    * @param {number} size of PoolSwap to query
    * @param {string} next set of PoolSwap
-   * @return {Promise<ApiPagedResponse<PoolSwap>>}
+   * @return {Promise<ApiPagedResponse<PoolSwapData>>}
    */
-  async listPoolSwaps (id: string, size: number = 30, next?: string): Promise<ApiPagedResponse<PoolSwap>> {
+  async listPoolSwaps (id: string, size: number = 30, next?: string): Promise<ApiPagedResponse<PoolSwapData>> {
     return await this.client.requestList('GET', `poolpairs/${id}/swaps`, size, next)
   }
 
@@ -48,9 +48,9 @@ export class PoolPairs {
    * @param {PoolSwapAggregatedInterval} interval interval
    * @param {number} size of PoolSwap to query
    * @param {string} next set of PoolSwap
-   * @return {Promise<ApiPagedResponse<PoolSwapAggregated>>}
+   * @return {Promise<ApiPagedResponse<PoolSwapAggregatedData>>}
    */
-  async listPoolSwapAggregates (id: string, interval: PoolSwapAggregatedInterval, size: number = 30, next?: string): Promise<ApiPagedResponse<PoolSwapAggregated>> {
+  async listPoolSwapAggregates (id: string, interval: PoolSwapAggregatedInterval, size: number = 30, next?: string): Promise<ApiPagedResponse<PoolSwapAggregatedData>> {
     return await this.client.requestList('GET', `poolpairs/${id}/swaps/aggregate/${interval as number}`, size, next)
   }
 }
@@ -103,7 +103,17 @@ export interface PoolPairData {
   }
 }
 
-export interface PoolSwap {
+/**
+ * @deprecated use PoolSwapData instead
+ */
+export type PoolSwap = PoolSwapData
+
+/**
+ * @deprecated use PoolSwapAggregatedData instead
+ */
+export type PoolSwapAggregated = PoolSwapAggregatedData
+
+export interface PoolSwapData {
   id: string
   sort: string
   txid: string
@@ -116,11 +126,11 @@ export interface PoolSwap {
   /**
    * To handle for optional value as Whale service might fail to resolve when indexing
    */
-  from?: PoolSwapFromTo
+  from?: PoolSwapFromToData
   /**
    * To handle for optional value as Whale service might fail to resolve when indexing
    */
-  to?: PoolSwapFromTo
+  to?: PoolSwapFromToData
 
   block: {
     hash: string
@@ -130,13 +140,13 @@ export interface PoolSwap {
   }
 }
 
-export interface PoolSwapFromTo {
+export interface PoolSwapFromToData {
   address: string
   amount: string
   symbol: string
 }
 
-export interface PoolSwapAggregated {
+export interface PoolSwapAggregatedData {
   id: string
   key: string
   bucket: number
