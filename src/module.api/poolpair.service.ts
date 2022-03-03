@@ -11,12 +11,12 @@ import { PoolSwapAggregated, PoolSwapAggregatedMapper } from '@src/module.model/
 import { PoolSwapAggregatedInterval } from '@src/module.indexer/model/dftx/pool.swap.aggregated'
 import { TransactionVout, TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { SmartBuffer } from 'smart-buffer'
-import { toOPCodes } from '@defichain/jellyfish-transaction/dist/script/_buffer'
 import {
   CCompositeSwap,
   CompositeSwap,
   CPoolSwap,
   OP_DEFI_TX,
+  toOPCodes,
   PoolSwap as PoolSwapDfTx
 } from '@defichain/jellyfish-transaction'
 import { fromScript } from '@defichain/jellyfish-address'
