@@ -42,6 +42,18 @@ export class PoolPairs {
   }
 
   /**
+   * List pool swaps with from/to
+   *
+   * @param {string} id poolpair id
+   * @param {number} [size=10] of PoolSwap to query, max of 20 per page
+   * @param {string} next set of PoolSwap
+   * @return {Promise<ApiPagedResponse<PoolSwapData>>}
+   */
+  async listPoolSwapsVerbose (id: string, size: number = 10, next?: string): Promise<ApiPagedResponse<PoolSwapData>> {
+    return await this.client.requestList('GET', `poolpairs/${id}/swaps/verbose`, size, next)
+  }
+
+  /**
    * List pool swap aggregates
    *
    * @param {string} id poolpair id

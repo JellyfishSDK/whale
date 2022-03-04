@@ -2,7 +2,7 @@ import { Controller, Get, NotFoundException, Param, ParseIntPipe, Query } from '
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
-import { PoolPairData, PoolSwapData, PoolSwapAggregatedData } from '@whale-api-client/api/poolpairs'
+import { PoolPairData, PoolSwapAggregatedData, PoolSwapData } from '@whale-api-client/api/poolpairs'
 import { PaginationQuery } from '@src/module.api/_core/api.query'
 import { PoolPairService } from './poolpair.service'
 import BigNumber from 'bignumber.js'
@@ -85,18 +85,33 @@ export class PoolPairController {
       @Query() query: PaginationQuery
   ): Promise<ApiPagedResponse<PoolSwapData>> {
     const items = await this.poolSwapMapper.query(id, query.size, query.next)
-    const mapped: Array<Promise<PoolSwapData>> = items.map(async swap => {
-      const fromTo = await this.poolPairService.findSwapFromTo(swap.block.height, swap.txid, swap.txno)
-
-      return {
-        ...swap,
-        from: fromTo?.from,
-        to: fromTo?.to
-      }
+    return ApiPagedResponse.of(items, query.size, item => {
+      return item.sort
     })
+  }
 
-    const result = await Promise.all(mapped)
-    return ApiPagedResponse.of(result, query.size, item => {
+  /**
+   * @param {string} id poolpair id
+   * @param {PaginationQuery} query with size restricted to 20
+   * @param {number} query.size
+   * @param {string} [query.next]
+   * @return {Promise<ApiPagedResponse<PoolPairData>>}
+   */
+  @Get('/:id/swaps/verbose')
+  async listPoolSwapsVerbose (
+    @Param('id', ParseIntPipe) id: string,
+      @Query() query: PaginationQuery
+  ): Promise<ApiPagedResponse<PoolSwapData>> {
+    query.size = query.size > 20 ? 20 : query.size
+    const items: PoolSwapData[] = await this.poolSwapMapper.query(id, query.size, query.next)
+
+    for (const swap of items) {
+      const fromTo = await this.poolPairService.findSwapFromTo(swap.block.height, swap.txid, swap.txno)
+      swap.from = fromTo?.from
+      swap.to = fromTo?.to
+    }
+
+    return ApiPagedResponse.of(items, query.size, item => {
       return item.sort
     })
   }
@@ -137,8 +152,7 @@ export class PoolPairController {
   }
 }
 
-function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr'],
-  volume?: PoolPairData['volume']): PoolPairData {
+function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr'], volume?: PoolPairData['volume']): PoolPairData {
   const [symbolA, symbolB] = info.symbol.split('-')
 
   return {
