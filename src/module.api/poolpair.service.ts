@@ -16,18 +16,20 @@ import {
   CompositeSwap,
   CPoolSwap,
   OP_DEFI_TX,
-  toOPCodes,
-  PoolSwap as PoolSwapDfTx
+  PoolSwap as PoolSwapDfTx,
+  toOPCodes
 } from '@defichain/jellyfish-transaction'
 import { fromScript } from '@defichain/jellyfish-address'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { AccountHistory } from '@defichain/jellyfish-api-core/dist/category/account'
+import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 
 @Injectable()
 export class PoolPairService {
   constructor (
     @Inject('NETWORK') protected readonly network: NetworkName,
     protected readonly rpcClient: JsonRpcClient,
+    protected readonly deFiDCache: DeFiDCache,
     protected readonly cache: SemaphoreCache,
     protected readonly poolSwapAggregatedMapper: PoolSwapAggregatedMapper,
     protected readonly voutMapper: TransactionVoutMapper,
@@ -225,25 +227,30 @@ export class PoolPairService {
     }
 
     const fromAddress = fromScript(dftx.fromScript, this.network)?.address
+    const fromToken = await this.deFiDCache.getTokenInfo(dftx.fromTokenId.toString())
+
     const toAddress = fromScript(dftx.toScript, this.network)?.address
-    if (fromAddress === undefined || toAddress === undefined) {
+    if (fromAddress === undefined || toAddress === undefined || fromToken === undefined) {
       return undefined
     }
 
-    const histories = await this.getAddressHistory([fromAddress, toAddress], height, txno)
+    const history = await this.getAccountHistory(toAddress, height, txno)
+    if (history === undefined) {
+      return undefined
+    }
 
     return {
-      from: findPoolSwapFromTo(histories[fromAddress], true),
-      to: findPoolSwapFromTo(histories[toAddress], false)
+      from: {
+        address: fromAddress,
+        symbol: fromToken.symbol,
+        amount: dftx.fromAmount.toFixed(8)
+      },
+      to: findPoolSwapFromTo(history, false)
     }
   }
 
-  private async getAddressHistory (addresses: string[], height: number, txno: number): Promise<{ [address: string]: AccountHistory }> {
-    const histories: { [address: string]: AccountHistory } = {}
-    for (const address of new Set(addresses)) {
-      histories[address] = await this.rpcClient.account.getAccountHistory(address, height, txno)
-    }
-    return histories
+  private async getAccountHistory (address: string, height: number, txno: number): Promise<AccountHistory> {
+    return await this.rpcClient.account.getAccountHistory(address, height, txno)
   }
 
   private async getLoanTokenSplits (): Promise<Record<string, number> | undefined> {

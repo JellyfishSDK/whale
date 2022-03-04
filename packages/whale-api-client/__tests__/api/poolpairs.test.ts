@@ -372,6 +372,9 @@ describe('poolswap', () => {
     await service.waitForIndexedHeight(height)
 
     const response: ApiPagedResponse<PoolSwapData> = await client.poolpairs.listPoolSwaps('9')
+
+    // TODO(fuxingloh):
+    console.log(response)
     expect(response.length).toStrictEqual(2)
     expect(response.hasNext).toStrictEqual(false)
     expect(response[0].fromAmount).toStrictEqual('50.00000000')
