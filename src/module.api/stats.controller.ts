@@ -68,7 +68,7 @@ export class StatsController {
   async getBurn (): Promise<BurnInfo> {
     return await this.cachedGet('Controller.burn.getBurnInfo', async () => {
       return await this.rpcClient.account.getBurnInfo()
-    }, 67)
+    }, 123)
   }
 
   private async cachedGet<T> (field: string, fetch: () => Promise<T>, ttl: number): Promise<T> {
