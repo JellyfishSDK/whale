@@ -58,9 +58,9 @@ export abstract class LevelUpDatabase extends Database {
     })
   }
 
-  get<M extends Model> (index: ModelIndex<M>, partitionKey: ModelKey, sortKey?: ModelKey): Promise<M | undefined>;
+  get<M extends Model> (index: ModelIndex<M>, partitionKey: ModelKey, sortKey?: ModelKey): Promise<M | undefined>
 
-  get<M extends Model> (mapping: ModelMapping<M>, id: string): Promise<M | undefined>;
+  get<M extends Model> (mapping: ModelMapping<M>, id: string): Promise<M | undefined>
 
   async get<M extends Model> (indexOrMapping: ModelIndex<M> | ModelMapping<M>, partitionKey: ModelKey | string, sortKey?: ModelKey): Promise<M | undefined> {
     try {
