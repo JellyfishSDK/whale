@@ -27,7 +27,14 @@ afterAll(async () => {
 })
 
 async function setup (): Promise<void> {
-  const tokens = ['A', 'B', 'C', 'D', 'E', 'F']
+  const tokens = [
+    'A', 'B', 'C', 'D', 'E', 'F',
+
+    // For testing swap paths
+    'G', // bridged via A to the rest
+    'H', // isolated - no associated poolpair
+    'I', 'J', 'K', 'L' // isolated from the rest - only swappable with one another
+  ]
 
   for (const token of tokens) {
     await container.waitForWalletBalanceGTE(110)
@@ -41,49 +48,11 @@ async function setup (): Promise<void> {
   await createPoolPair(container, 'E', 'DFI')
   await createPoolPair(container, 'F', 'DFI')
 
-  { // For testing swap paths
-    const tokens = [
-      'G', // bridged via A to the rest
-      'H', // isolated - no associated poolpair
-      'I', 'J', 'K', 'L' // on an island, isolated from the rest. Only swappable with one another.
-    ]
-    for (const token of tokens) {
-      await container.waitForWalletBalanceGTE(110)
-      await createToken(container, token)
-      await mintTokens(container, token)
-    }
-
-    await createPoolPair(container, 'G', 'A')
-    await createPoolPair(container, 'I', 'J')
-    await createPoolPair(container, 'J', 'K')
-    await createPoolPair(container, 'J', 'L')
-    await createPoolPair(container, 'L', 'K')
-
-    // 1 J = 7 K
-    await addPoolLiquidity(container, {
-      tokenA: 'J',
-      amountA: 10,
-      tokenB: 'K',
-      amountB: 70,
-      shareAddress: await getNewAddress(container)
-    })
-
-    // 1 J = 2 L = 8 K
-    await addPoolLiquidity(container, {
-      tokenA: 'J',
-      amountA: 4,
-      tokenB: 'L',
-      amountB: 8,
-      shareAddress: await getNewAddress(container)
-    })
-    await addPoolLiquidity(container, {
-      tokenA: 'L',
-      amountA: 5,
-      tokenB: 'K',
-      amountB: 20,
-      shareAddress: await getNewAddress(container)
-    })
-  }
+  await createPoolPair(container, 'G', 'A')
+  await createPoolPair(container, 'I', 'J')
+  await createPoolPair(container, 'J', 'K')
+  await createPoolPair(container, 'J', 'L')
+  await createPoolPair(container, 'L', 'K')
 
   await addPoolLiquidity(container, {
     tokenA: 'A',
@@ -107,6 +76,31 @@ async function setup (): Promise<void> {
     shareAddress: await getNewAddress(container)
   })
 
+  // 1 J = 7 K
+  await addPoolLiquidity(container, {
+    tokenA: 'J',
+    amountA: 10,
+    tokenB: 'K',
+    amountB: 70,
+    shareAddress: await getNewAddress(container)
+  })
+
+  // 1 J = 2 L = 8 K
+  await addPoolLiquidity(container, {
+    tokenA: 'J',
+    amountA: 4,
+    tokenB: 'L',
+    amountB: 8,
+    shareAddress: await getNewAddress(container)
+  })
+  await addPoolLiquidity(container, {
+    tokenA: 'L',
+    amountA: 5,
+    tokenB: 'K',
+    amountB: 20,
+    shareAddress: await getNewAddress(container)
+  })
+
   // dexUsdtDfi setup
   await createToken(container, 'USDT')
   await createPoolPair(container, 'USDT', 'DFI')
@@ -119,7 +113,7 @@ async function setup (): Promise<void> {
     shareAddress: await getNewAddress(container)
   })
 
-  await container.call('setgov', [{ LP_SPLITS: { 8: 1.0 } }])
+  await container.call('setgov', [{ LP_SPLITS: { 14: 1.0 } }])
   await container.generate(1)
 }
 
@@ -133,7 +127,7 @@ describe('list', () => {
     expect(response.page).toBeUndefined()
 
     expect(response.data[1]).toStrictEqual({
-      id: '8',
+      id: '14',
       symbol: 'B-DFI',
       displaySymbol: 'dB-DFI',
       name: 'B-Default Defi token',
@@ -186,7 +180,7 @@ describe('list', () => {
       size: 2
     })
     expect(first.data.length).toStrictEqual(2)
-    expect(first.page?.next).toStrictEqual('8')
+    expect(first.page?.next).toStrictEqual('14')
     expect(first.data[0].symbol).toStrictEqual('A-DFI')
     expect(first.data[1].symbol).toStrictEqual('B-DFI')
 
@@ -210,16 +204,16 @@ describe('list', () => {
     })
 
     expect(first.data.length).toStrictEqual(2)
-    expect(first.page?.next).toStrictEqual('8')
+    expect(first.page?.next).toStrictEqual('14')
   })
 })
 
 describe('get', () => {
   it('should get', async () => {
-    const response = await controller.get('7')
+    const response = await controller.get('13')
 
     expect(response).toStrictEqual({
-      id: '7',
+      id: '13',
       symbol: 'A-DFI',
       displaySymbol: 'dA-DFI',
       name: 'A-Default Defi token',
@@ -298,7 +292,7 @@ describe('get best path', () => {
       bestPath: [
         {
           symbol: 'A-DFI',
-          poolPairId: '7',
+          poolPairId: '13',
           priceRatio: { ab: '0.50000000', ba: '2.00000000' },
           tokenA: { id: '1', symbol: 'A' },
           tokenB: { id: '0', symbol: 'DFI' }
@@ -323,14 +317,14 @@ describe('get best path', () => {
       bestPath: [
         {
           symbol: 'A-DFI',
-          poolPairId: '7',
+          poolPairId: '13',
           priceRatio: { ab: '0.50000000', ba: '2.00000000' },
           tokenA: { id: '1', symbol: 'A' },
           tokenB: { id: '0', symbol: 'DFI' }
         },
         {
           symbol: 'C-DFI',
-          poolPairId: '9',
+          poolPairId: '15',
           priceRatio: { ab: '0.25000000', ba: '4.00000000' },
           tokenA: { id: '3', symbol: 'C' },
           tokenB: { id: '0', symbol: 'DFI' }
@@ -341,10 +335,10 @@ describe('get best path', () => {
   })
 
   it('should get correct swap path - 3 legs', async () => {
-    const response = await controller.getBestPath('13', '3') // G to C
+    const response = await controller.getBestPath('7', '3') // G to C
     expect(response).toStrictEqual({
       fromToken: {
-        id: '13',
+        id: '7',
         symbol: 'G'
       },
       toToken: {
@@ -356,19 +350,19 @@ describe('get best path', () => {
           symbol: 'G-A',
           poolPairId: '19',
           priceRatio: { ab: '0.00000000', ba: '0.00000000' },
-          tokenA: { id: '13', symbol: 'G' },
+          tokenA: { id: '7', symbol: 'G' },
           tokenB: { id: '1', symbol: 'A' }
         },
         {
           symbol: 'A-DFI',
-          poolPairId: '7',
+          poolPairId: '13',
           priceRatio: { ab: '0.50000000', ba: '2.00000000' },
           tokenA: { id: '1', symbol: 'A' },
           tokenB: { id: '0', symbol: 'DFI' }
         },
         {
           symbol: 'C-DFI',
-          poolPairId: '9',
+          poolPairId: '15',
           priceRatio: { ab: '0.25000000', ba: '4.00000000' },
           tokenA: { id: '3', symbol: 'C' },
           tokenB: { id: '0', symbol: 'DFI' }
@@ -381,14 +375,14 @@ describe('get best path', () => {
   it('should get best of two possible swap paths', async () => {
     // 1 J = 7 K
     // 1 J = 2 L = 8 K
-    const response = await controller.getBestPath('16', '17')
+    const response = await controller.getBestPath('10', '11')
     expect(response).toStrictEqual({
       fromToken: {
-        id: '16',
+        id: '10',
         symbol: 'J'
       },
       toToken: {
-        id: '17',
+        id: '11',
         symbol: 'K'
       },
       bestPath: [
@@ -396,15 +390,15 @@ describe('get best path', () => {
           symbol: 'J-L',
           poolPairId: '22',
           priceRatio: { ab: '0.50000000', ba: '2.00000000' },
-          tokenA: { id: '16', symbol: 'J' },
-          tokenB: { id: '18', symbol: 'L' }
+          tokenA: { id: '10', symbol: 'J' },
+          tokenB: { id: '12', symbol: 'L' }
         },
         {
           symbol: 'L-K',
           poolPairId: '23',
           priceRatio: { ab: '0.25000000', ba: '4.00000000' },
-          tokenA: { id: '18', symbol: 'L' },
-          tokenB: { id: '17', symbol: 'K' }
+          tokenA: { id: '12', symbol: 'L' },
+          tokenB: { id: '11', symbol: 'K' }
         }
       ],
       estimatedReturn: '8.00000000'
@@ -412,10 +406,10 @@ describe('get best path', () => {
   })
 
   it('should have no swap path - isolated token H', async () => {
-    const response = await controller.getBestPath('14', '1') // H to A impossible
+    const response = await controller.getBestPath('8', '1') // H to A impossible
     expect(response).toStrictEqual({
       fromToken: {
-        id: '14',
+        id: '8',
         symbol: 'H'
       },
       toToken: {
@@ -452,7 +446,7 @@ describe('get all paths', () => {
       paths: [
         [
           {
-            poolPairId: '7',
+            poolPairId: '13',
             symbol: 'A-DFI',
             tokenA: { id: '1', symbol: 'A' },
             tokenB: { id: '0', symbol: 'DFI' },
@@ -479,14 +473,14 @@ describe('get all paths', () => {
         [
           {
             symbol: 'A-DFI',
-            poolPairId: '7',
+            poolPairId: '13',
             priceRatio: { ab: '0.50000000', ba: '2.00000000' },
             tokenA: { id: '1', symbol: 'A' },
             tokenB: { id: '0', symbol: 'DFI' }
           },
           {
             symbol: 'C-DFI',
-            poolPairId: '9',
+            poolPairId: '15',
             priceRatio: { ab: '0.25000000', ba: '4.00000000' },
             tokenA: { id: '3', symbol: 'C' },
             tokenB: { id: '0', symbol: 'DFI' }
@@ -497,10 +491,10 @@ describe('get all paths', () => {
   })
 
   it('should get correct swap path - 3 legs', async () => {
-    const response = await controller.listPaths('13', '3') // G to C
+    const response = await controller.listPaths('7', '3') // G to C
     expect(response).toStrictEqual({
       fromToken: {
-        id: '13',
+        id: '7',
         symbol: 'G'
       },
       toToken: {
@@ -513,19 +507,19 @@ describe('get all paths', () => {
             symbol: 'G-A',
             poolPairId: '19',
             priceRatio: { ab: '0.00000000', ba: '0.00000000' },
-            tokenA: { id: '13', symbol: 'G' },
+            tokenA: { id: '7', symbol: 'G' },
             tokenB: { id: '1', symbol: 'A' }
           },
           {
             symbol: 'A-DFI',
-            poolPairId: '7',
+            poolPairId: '13',
             priceRatio: { ab: '0.50000000', ba: '2.00000000' },
             tokenA: { id: '1', symbol: 'A' },
             tokenB: { id: '0', symbol: 'DFI' }
           },
           {
             symbol: 'C-DFI',
-            poolPairId: '9',
+            poolPairId: '15',
             priceRatio: { ab: '0.25000000', ba: '4.00000000' },
             tokenA: { id: '3', symbol: 'C' },
             tokenB: { id: '0', symbol: 'DFI' }
@@ -536,14 +530,14 @@ describe('get all paths', () => {
   })
 
   it('should get multiple swap paths', async () => {
-    const response = await controller.listPaths('15', '17') // I to K
+    const response = await controller.listPaths('9', '11') // I to K
     expect(response).toStrictEqual({
       fromToken: {
-        id: '15',
+        id: '9',
         symbol: 'I'
       },
       toToken: {
-        id: '17',
+        id: '11',
         symbol: 'K'
       },
       paths: [
@@ -552,22 +546,22 @@ describe('get all paths', () => {
             symbol: 'I-J',
             poolPairId: '20',
             priceRatio: { ab: '0.00000000', ba: '0.00000000' },
-            tokenA: { id: '15', symbol: 'I' },
-            tokenB: { id: '16', symbol: 'J' }
+            tokenA: { id: '9', symbol: 'I' },
+            tokenB: { id: '10', symbol: 'J' }
           },
           {
             symbol: 'J-L',
             poolPairId: '22',
             priceRatio: { ab: '0.50000000', ba: '2.00000000' },
-            tokenA: { id: '16', symbol: 'J' },
-            tokenB: { id: '18', symbol: 'L' }
+            tokenA: { id: '10', symbol: 'J' },
+            tokenB: { id: '12', symbol: 'L' }
           },
           {
             symbol: 'L-K',
             poolPairId: '23',
             priceRatio: { ab: '0.25000000', ba: '4.00000000' },
-            tokenA: { id: '18', symbol: 'L' },
-            tokenB: { id: '17', symbol: 'K' }
+            tokenA: { id: '12', symbol: 'L' },
+            tokenB: { id: '11', symbol: 'K' }
           }
         ],
         [
@@ -575,15 +569,15 @@ describe('get all paths', () => {
             symbol: 'I-J',
             poolPairId: '20',
             priceRatio: { ab: '0.00000000', ba: '0.00000000' },
-            tokenA: { id: '15', symbol: 'I' },
-            tokenB: { id: '16', symbol: 'J' }
+            tokenA: { id: '9', symbol: 'I' },
+            tokenB: { id: '10', symbol: 'J' }
           },
           {
             symbol: 'J-K',
             poolPairId: '21',
             priceRatio: { ab: '0.14285714', ba: '7.00000000' },
-            tokenA: { id: '16', symbol: 'J' },
-            tokenB: { id: '17', symbol: 'K' }
+            tokenA: { id: '10', symbol: 'J' },
+            tokenB: { id: '11', symbol: 'K' }
           }
         ]
       ]
@@ -591,14 +585,14 @@ describe('get all paths', () => {
   })
 
   it('should handle cyclic swap paths', async () => {
-    const response = await controller.listPaths('16', '17') // J to K
+    const response = await controller.listPaths('10', '11') // J to K
     expect(response).toStrictEqual({
       fromToken: {
-        id: '16',
+        id: '10',
         symbol: 'J'
       },
       toToken: {
-        id: '17',
+        id: '11',
         symbol: 'K'
       },
       paths: [
@@ -607,15 +601,15 @@ describe('get all paths', () => {
             symbol: 'J-L',
             poolPairId: '22',
             priceRatio: { ab: '0.50000000', ba: '2.00000000' },
-            tokenA: { id: '16', symbol: 'J' },
-            tokenB: { id: '18', symbol: 'L' }
+            tokenA: { id: '10', symbol: 'J' },
+            tokenB: { id: '12', symbol: 'L' }
           },
           {
             symbol: 'L-K',
             poolPairId: '23',
             priceRatio: { ab: '0.25000000', ba: '4.00000000' },
-            tokenA: { id: '18', symbol: 'L' },
-            tokenB: { id: '17', symbol: 'K' }
+            tokenA: { id: '12', symbol: 'L' },
+            tokenB: { id: '11', symbol: 'K' }
           }
         ],
         [
@@ -623,8 +617,8 @@ describe('get all paths', () => {
             symbol: 'J-K',
             poolPairId: '21',
             priceRatio: { ab: '0.14285714', ba: '7.00000000' },
-            tokenA: { id: '16', symbol: 'J' },
-            tokenB: { id: '17', symbol: 'K' }
+            tokenA: { id: '10', symbol: 'J' },
+            tokenB: { id: '11', symbol: 'K' }
           }
         ]
       ]
@@ -632,10 +626,10 @@ describe('get all paths', () => {
   })
 
   it('should have no swap path - isolated token H', async () => {
-    const response = await controller.listPaths('14', '1') // H to A impossible
+    const response = await controller.listPaths('8', '1') // H to A impossible
     expect(response).toStrictEqual({
       fromToken: {
-        id: '14',
+        id: '8',
         symbol: 'H'
       },
       toToken: {
