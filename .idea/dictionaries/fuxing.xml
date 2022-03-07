@@ -5,6 +5,7 @@
       <w>acindex</w>
       <w>amkheight</w>
       <w>anyonecanpay</w>
+      <w>auctionburn</w>
       <w>bayfrontgardensheight</w>
       <w>bayfrontheight</w>
       <w>bayfrontmarinaheight</w>
@@ -39,14 +40,19 @@
       <w>defichain</w>
       <w>defid</w>
       <w>devnet</w>
+      <w>dexfeetokens</w>
+      <w>dfipaybackfee</w>
+      <w>dfipaybacktokens</w>
       <w>dftx</w>
       <w>dockerode</w>
       <w>dogfooding</w>
       <w>dummypos</w>
       <w>dumpprivkey</w>
       <w>dusd</w>
+      <w>emissionburn</w>
       <w>equalverify</w>
       <w>eunos</w>
+      <w>feeburn</w>
       <w>fromaltstack</w>
       <w>fullstackninja</w>
       <w>fuxingloh</w>
@@ -131,6 +137,7 @@
       <w>numequal</w>
       <w>numequalverify</w>
       <w>numnotequal</w>
+      <w>paybackburn</w>
       <w>paytxfee</w>
       <w>pooledtx</w>
       <w>poolpair</w>
