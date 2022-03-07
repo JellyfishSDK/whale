@@ -67,6 +67,18 @@ async function createTestingModule (url: string): Promise<TestingModule> {
 
 /**
  * @param {NestFastifyApplication} app to get indexer
+ * @param {MasterNodeRegTestContainer} container
+ * @param {number} [timeout=30000]
+ */
+export async function waitForIndexedHeightLatest (app: NestFastifyApplication, container: MasterNodeRegTestContainer, timeout: number = 30000): Promise<void> {
+  await container.generate(1)
+  const height = await container.getBlockCount()
+  await container.generate(1)
+  await waitForIndexedHeight(app, height)
+}
+
+/**
+ * @param {NestFastifyApplication} app to get indexer
  * @param {number} height to wait for
  * @param {number} [timeout=30000]
  */
@@ -108,8 +120,11 @@ export async function invalidateFromHeight (app: NestFastifyApplication, contain
   const invalidateBlockHash = await container.call('getblockhash', [invalidateHeight])
   await container.call('invalidateblock', [invalidateBlockHash])
   await container.call('clearmempool')
-  await container.generate(height - invalidateHeight + 1)
+  // +1 more so that RPCBlockProvider.synchronize can update to next block.
+  // New behavior where RPCBlockProvider won't invalidate block on the same height as itself
+  await container.generate(height - invalidateHeight + 2)
   const blockMapper = app.get(BlockMapper)
+
   await waitForExpect(async () => {
     const block = await blockMapper.getByHeight(height)
     expect(block).not.toStrictEqual(undefined)

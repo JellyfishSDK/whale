@@ -1,16 +1,40 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import BigNumber from 'bignumber.js'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
-import { PoolPairData } from '@whale-api-client/api/poolpairs'
+import { PoolPairData, PoolSwapFromToData } from '@whale-api-client/api/poolpairs'
 import { getBlockSubsidy } from '@src/module.api/subsidy'
+import { BlockMapper } from '@src/module.model/block'
+import { TokenMapper } from '@src/module.model/token'
+import { PoolSwapAggregated, PoolSwapAggregatedMapper } from '@src/module.model/pool.swap.aggregated'
+import { PoolSwapAggregatedInterval } from '@src/module.indexer/model/dftx/pool.swap.aggregated'
+import { TransactionVout, TransactionVoutMapper } from '@src/module.model/transaction.vout'
+import { SmartBuffer } from 'smart-buffer'
+import {
+  CCompositeSwap,
+  CompositeSwap,
+  CPoolSwap,
+  OP_DEFI_TX,
+  PoolSwap as PoolSwapDfTx,
+  toOPCodes
+} from '@defichain/jellyfish-transaction'
+import { fromScript } from '@defichain/jellyfish-address'
+import { NetworkName } from '@defichain/jellyfish-network'
+import { AccountHistory } from '@defichain/jellyfish-api-core/dist/category/account'
+import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 
 @Injectable()
 export class PoolPairService {
   constructor (
+    @Inject('NETWORK') protected readonly network: NetworkName,
     protected readonly rpcClient: JsonRpcClient,
-    protected readonly cache: SemaphoreCache
+    protected readonly deFiDCache: DeFiDCache,
+    protected readonly cache: SemaphoreCache,
+    protected readonly poolSwapAggregatedMapper: PoolSwapAggregatedMapper,
+    protected readonly voutMapper: TransactionVoutMapper,
+    protected readonly tokenMapper: TokenMapper,
+    protected readonly blockMapper: BlockMapper
   ) {
   }
 
@@ -117,6 +141,118 @@ export class PoolPairService {
     })
   }
 
+  private async getTokenUSDValue (id: number): Promise<BigNumber | undefined> {
+    return await this.cache.get<BigNumber>(`PRICE_FOR_TOKEN_${id}`, async () => {
+      const tokenInfo = await this.tokenMapper.getByTokenId(id)
+      const token = tokenInfo?.symbol
+
+      if (token === undefined) {
+        throw new NotFoundException('Unable to find token symbol')
+      }
+
+      if (['DUSD', 'USDT', 'USDC'].includes(token)) {
+        return new BigNumber(1)
+      }
+
+      const dusdPair = await this.getPoolPair(token, 'DUSD')
+      if (dusdPair !== undefined) {
+        // Intentionally only checking against first symbol, to avoid issues
+        // with symbol name truncation
+        if (dusdPair.symbol.split('-')[0] !== 'DUSD') {
+          return dusdPair.reserveB.div(dusdPair.reserveA)
+        }
+        return dusdPair.reserveA.div(dusdPair.reserveB)
+      }
+
+      const dfiPair = await this.getPoolPair(token, 'DFI')
+      if (dfiPair !== undefined) {
+        const usdPerDFI = await this.getUSD_PER_DFI() ?? 0
+        if (dfiPair.idTokenA === '0') {
+          return dfiPair.reserveA.div(dfiPair.reserveB).times(usdPerDFI)
+        }
+        return dfiPair.reserveB.div(dfiPair.reserveA).times(usdPerDFI)
+      }
+    }, {
+      ttl: 300 // 5 minutes
+    })
+  }
+
+  public async getUSDVolume (id: string): Promise<PoolPairData['volume'] | undefined> {
+    return await this.cache.get<PoolPairData['volume']>(`POOLPAIR_VOLUME_${id}`, async () => {
+      const gatherAmount = async (interval: PoolSwapAggregatedInterval, count: number): Promise<number> => {
+        const aggregated: Record<string, number> = {}
+        const swaps = await this.poolSwapAggregatedMapper.query(`${id}-${interval as number}`, count)
+        for (const swap of swaps) {
+          for (const tokenId in swap.aggregated.amounts) {
+            const fromAmount = new BigNumber(swap.aggregated.amounts[tokenId])
+            aggregated[tokenId] = aggregated[tokenId] === undefined
+              ? fromAmount.toNumber()
+              : aggregated[tokenId] + fromAmount.toNumber()
+          }
+        }
+
+        let volume = 0
+        for (const tokenId in aggregated) {
+          const tokenPrice = await this.getTokenUSDValue(parseInt(tokenId)) ?? new BigNumber(0)
+          volume += tokenPrice.toNumber() * aggregated[tokenId]
+        }
+
+        return volume
+      }
+
+      return {
+        h24: await gatherAmount(PoolSwapAggregatedInterval.ONE_HOUR, 24),
+        d30: await gatherAmount(PoolSwapAggregatedInterval.ONE_DAY, 30)
+      }
+    }, {
+      ttl: 900 // 15 minutes
+    })
+  }
+
+  public async getAggregatedInUSD ({ aggregated: { amounts } }: PoolSwapAggregated): Promise<number> {
+    let value = 0
+
+    for (const tokenId in amounts) {
+      const tokenPrice = await this.getTokenUSDValue(parseInt(tokenId)) ?? new BigNumber(0)
+      value += tokenPrice.toNumber() * Number.parseFloat(amounts[tokenId])
+    }
+    return value
+  }
+
+  public async findSwapFromTo (height: number, txid: string, txno: number): Promise<{ from?: PoolSwapFromToData, to?: PoolSwapFromToData } | undefined> {
+    const vouts = await this.voutMapper.query(txid, 1)
+    const dftx = findPoolSwapDfTx(vouts)
+    if (dftx === undefined) {
+      return undefined
+    }
+
+    const fromAddress = fromScript(dftx.fromScript, this.network)?.address
+    const fromToken = await this.deFiDCache.getTokenInfo(dftx.fromTokenId.toString())
+
+    const toAddress = fromScript(dftx.toScript, this.network)?.address
+    if (fromAddress === undefined || toAddress === undefined || fromToken === undefined) {
+      return undefined
+    }
+
+    const history = await this.getAccountHistory(toAddress, height, txno)
+    if (history === undefined) {
+      return undefined
+    }
+
+    return {
+      from: {
+        address: fromAddress,
+        symbol: fromToken.symbol,
+        amount: dftx.fromAmount.toFixed(8)
+      },
+      to: findPoolSwapFromTo(history, false)
+    }
+  }
+
+  private async getAccountHistory (address: string, height: number, txno: number): Promise<AccountHistory> {
+    return await this.rpcClient.account.getAccountHistory(address, height, txno)
+  }
+
   private async getLoanTokenSplits (): Promise<Record<string, number> | undefined> {
     return await this.cache.get<Record<string, number>>('LP_LOAN_TOKEN_SPLITS', async () => {
       const result = await this.rpcClient.masternode.getGov('LP_LOAN_TOKEN_SPLITS')
@@ -207,6 +343,14 @@ export class PoolPairService {
       .times(dfiPriceUSD)
   }
 
+  /**
+   * Estimate yearly commission rate by taking 24 hour commission x 365 days
+   */
+  private async getYearlyCommissionEstimate (id: string, info: PoolPairInfo): Promise<BigNumber> {
+    const volume = await this.getUSDVolume(id)
+    return info.commission.times(volume?.h24 ?? 0).times(365)
+  }
+
   async getAPR (id: string, info: PoolPairInfo): Promise<PoolPairData['apr'] | undefined> {
     const customUSD = await this.getYearlyCustomRewardUSD(info)
     const pctUSD = await this.getYearlyRewardPCTUSD(info)
@@ -219,11 +363,65 @@ export class PoolPairService {
 
     const yearlyUSD = customUSD.plus(pctUSD).plus(loanUSD)
     // 1 == 100%, 0.1 = 10%
-    const apr = yearlyUSD.div(totalLiquidityUSD).toNumber()
+    const reward = yearlyUSD.div(totalLiquidityUSD)
+
+    const yearlyCommission = await this.getYearlyCommissionEstimate(id, info)
+    const commission = yearlyCommission.div(totalLiquidityUSD)
 
     return {
-      reward: apr,
-      total: apr
+      reward: reward.toNumber(),
+      commission: commission.toNumber(),
+      total: reward.plus(commission).toNumber()
     }
   }
+}
+
+function findPoolSwapDfTx (vouts: TransactionVout[]): PoolSwapDfTx | undefined {
+  const hex = vouts[0].script.hex
+  const buffer = SmartBuffer.fromBuffer(Buffer.from(hex, 'hex'))
+  const stack = toOPCodes(buffer)
+  if (stack.length !== 2 || stack[1].type !== 'OP_DEFI_TX') {
+    return undefined
+  }
+
+  const dftx = (stack[1] as OP_DEFI_TX).tx
+  if (dftx === undefined) {
+    return undefined
+  }
+
+  switch (dftx.name) {
+    case CPoolSwap.OP_NAME:
+      return (dftx.data as PoolSwapDfTx)
+
+    case CCompositeSwap.OP_NAME:
+      return (dftx.data as CompositeSwap).poolSwap
+
+    default:
+      return undefined
+  }
+}
+
+function findPoolSwapFromTo (history: AccountHistory, from: boolean): PoolSwapFromToData | undefined {
+  for (const amount of history.amounts) {
+    const [value, symbol] = amount.split('@')
+    const isNegative = value.startsWith('-')
+
+    if (isNegative && from) {
+      return {
+        address: history.owner,
+        amount: new BigNumber(value).absoluteValue().toFixed(8),
+        symbol: symbol
+      }
+    }
+
+    if (!isNegative && !from) {
+      return {
+        address: history.owner,
+        amount: new BigNumber(value).absoluteValue().toFixed(8),
+        symbol: symbol
+      }
+    }
+  }
+
+  return undefined
 }

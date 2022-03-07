@@ -1,4 +1,4 @@
-import { LoanMasterNodeRegTestContainer, MasterNodeRegTestContainer } from '@defichain/testcontainers'
+import { MasterNodeRegTestContainer } from '@defichain/testcontainers'
 import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
 import { WhaleApiClient } from '../../src'
@@ -86,8 +86,10 @@ describe('stats', () => {
       },
       burned: {
         address: 0,
+        auction: 0,
         emission: 7323.58,
         fee: 4,
+        payback: 0,
         total: 7327.58
       },
       tvl: {
@@ -140,10 +142,36 @@ describe('stats', () => {
       }
     })
   })
+
+  it('should get stat supply', async () => {
+    const data = await client.stats.getSupply()
+    expect(data).toStrictEqual({
+      max: 1200000000,
+      total: expect.any(Number),
+      burned: expect.any(Number),
+      circulating: expect.any(Number)
+    })
+  })
+
+  it('should get stat burn', async () => {
+    const data = await client.stats.getBurn()
+    expect(data).toStrictEqual({
+      address: 'mfburnZSAM7Gs1hpDeNaMotJXSGA7edosG',
+      amount: 0,
+      auctionburn: 0,
+      dexfeetokens: [],
+      dfipaybackfee: 0,
+      dfipaybacktokens: [],
+      emissionburn: expect.any(Number),
+      feeburn: expect.any(Number),
+      paybackburn: 0,
+      tokens: []
+    })
+  })
 })
 
 describe('loan - stats', () => {
-  const container = new LoanMasterNodeRegTestContainer()
+  const container = new MasterNodeRegTestContainer()
   const service = new StubService(container)
   const client = new StubWhaleApiClient(service)
   const testing = Testing.create(container)
@@ -162,12 +190,24 @@ describe('loan - stats', () => {
 
     { // DEX setup
       await testing.fixture.createPoolPair({
-        a: { amount: 2000, symbol: 'DUSD' },
-        b: { amount: 2000, symbol: 'DFI' }
+        a: {
+          amount: 2000,
+          symbol: 'DUSD'
+        },
+        b: {
+          amount: 2000,
+          symbol: 'DFI'
+        }
       })
       await testing.fixture.createPoolPair({
-        a: { amount: 1000, symbol: 'USDT' },
-        b: { amount: 2000, symbol: 'DFI' }
+        a: {
+          amount: 1000,
+          symbol: 'USDT'
+        },
+        b: {
+          amount: 2000,
+          symbol: 'DFI'
+        }
       })
     }
 
@@ -191,52 +231,100 @@ describe('loan - stats', () => {
     { // Oracle 1
       const oracleAddress = await testing.generateAddress()
       const priceFeeds = [
-        { token: 'DFI', currency: 'USD' },
-        { token: 'TSLA', currency: 'USD' },
-        { token: 'AAPL', currency: 'USD' },
-        { token: 'GOOGL', currency: 'USD' }
+        {
+          token: 'DFI',
+          currency: 'USD'
+        },
+        {
+          token: 'TSLA',
+          currency: 'USD'
+        },
+        {
+          token: 'AAPL',
+          currency: 'USD'
+        },
+        {
+          token: 'GOOGL',
+          currency: 'USD'
+        }
       ]
       oracleId = await testing.rpc.oracle.appointOracle(oracleAddress, priceFeeds, { weightage: 1 })
       await testing.generate(1)
 
       const timestamp = Math.floor(new Date().getTime() / 1000)
       await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
-        prices: [{ tokenAmount: '1@DFI', currency: 'USD' }]
+        prices: [{
+          tokenAmount: '1@DFI',
+          currency: 'USD'
+        }]
       })
       await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
-        prices: [{ tokenAmount: '2@TSLA', currency: 'USD' }]
+        prices: [{
+          tokenAmount: '2@TSLA',
+          currency: 'USD'
+        }]
       })
       await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
-        prices: [{ tokenAmount: '2@AAPL', currency: 'USD' }]
+        prices: [{
+          tokenAmount: '2@AAPL',
+          currency: 'USD'
+        }]
       })
       await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
-        prices: [{ tokenAmount: '4@GOOGL', currency: 'USD' }]
+        prices: [{
+          tokenAmount: '4@GOOGL',
+          currency: 'USD'
+        }]
       })
       await testing.generate(1)
     }
 
     { // Oracle 2
       const priceFeeds = [
-        { token: 'DFI', currency: 'USD' },
-        { token: 'TSLA', currency: 'USD' },
-        { token: 'AAPL', currency: 'USD' },
-        { token: 'GOOGL', currency: 'USD' }
+        {
+          token: 'DFI',
+          currency: 'USD'
+        },
+        {
+          token: 'TSLA',
+          currency: 'USD'
+        },
+        {
+          token: 'AAPL',
+          currency: 'USD'
+        },
+        {
+          token: 'GOOGL',
+          currency: 'USD'
+        }
       ]
       const oracleId = await testing.rpc.oracle.appointOracle(await testing.generateAddress(), priceFeeds, { weightage: 1 })
       await testing.generate(1)
 
       const timestamp = Math.floor(new Date().getTime() / 1000)
       await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
-        prices: [{ tokenAmount: '1@DFI', currency: 'USD' }]
+        prices: [{
+          tokenAmount: '1@DFI',
+          currency: 'USD'
+        }]
       })
       await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
-        prices: [{ tokenAmount: '2@TSLA', currency: 'USD' }]
+        prices: [{
+          tokenAmount: '2@TSLA',
+          currency: 'USD'
+        }]
       })
       await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
-        prices: [{ tokenAmount: '2@AAPL', currency: 'USD' }]
+        prices: [{
+          tokenAmount: '2@AAPL',
+          currency: 'USD'
+        }]
       })
       await testing.rpc.oracle.setOracleData(oracleId, timestamp, {
-        prices: [{ tokenAmount: '4@GOOGL', currency: 'USD' }]
+        prices: [{
+          tokenAmount: '4@GOOGL',
+          currency: 'USD'
+        }]
       })
       await testing.generate(1)
     }
@@ -331,7 +419,10 @@ describe('loan - stats', () => {
       // Make vault enter under liquidation state by a price hike of the loan token
       const timestamp2 = Math.floor(new Date().getTime() / 1000)
       await testing.rpc.oracle.setOracleData(oracleId, timestamp2, {
-        prices: [{ tokenAmount: '1000@AAPL', currency: 'USD' }]
+        prices: [{
+          tokenAmount: '1000@AAPL',
+          currency: 'USD'
+        }]
       })
 
       // Wait for 12 blocks which are equivalent to 2 hours (1 block = 10 minutes in regtest) in order to liquidate the vault
@@ -385,7 +476,7 @@ describe('loan - stats', () => {
         },
         value: {
           collateral: 20000,
-          loan: 60.00018272
+          loan: 60.00018266
         }
       },
       blockchain: {
@@ -396,6 +487,16 @@ describe('loan - stats', () => {
         subversion: expect.any(String),
         version: expect.any(Number)
       }
+    })
+  })
+
+  it('should get stat supply', async () => {
+    const data = await client.stats.getSupply()
+    expect(data).toStrictEqual({
+      max: 1200000000,
+      total: expect.any(Number),
+      burned: expect.any(Number),
+      circulating: expect.any(Number)
     })
   })
 })

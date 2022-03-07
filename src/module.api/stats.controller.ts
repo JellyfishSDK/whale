@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common'
-import { StatsData } from '@whale-api-client/api/stats'
+import { StatsData, SupplyData } from '@whale-api-client/api/stats'
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { BlockMapper } from '@src/module.model/block'
@@ -9,6 +9,8 @@ import { PriceTickerMapper } from '@src/module.model/price.ticker'
 import { MasternodeStats, MasternodeStatsMapper } from '@src/module.model/masternode.stats'
 import { BlockchainInfo } from '@defichain/jellyfish-api-core/dist/category/blockchain'
 import { getBlockSubsidy } from '@src/module.api/subsidy'
+import { BlockSubsidy } from '@defichain/jellyfish-network'
+import { BurnInfo } from '@defichain/jellyfish-api-core/dist/category/account'
 
 @Controller('/stats')
 export class StatsController {
@@ -18,7 +20,8 @@ export class StatsController {
     protected readonly masternodeStatsMapper: MasternodeStatsMapper,
     protected readonly poolPairService: PoolPairService,
     protected readonly rpcClient: JsonRpcClient,
-    protected readonly cache: SemaphoreCache
+    protected readonly cache: SemaphoreCache,
+    protected readonly blockSubsidy: BlockSubsidy
   ) {
   }
 
@@ -28,20 +31,44 @@ export class StatsController {
 
     return {
       count: {
-        ...await this.cachedGet('count', this.getCount.bind(this), 1800),
+        ...await this.cachedGet('count', this.getCount.bind(this), 1801),
         blocks: block.height
       },
-      burned: await this.cachedGet('burned', this.getBurned.bind(this), 1800),
-      tvl: await this.cachedGet('tvl', this.getTVL.bind(this), 300),
-      price: await this.cachedGet('price', this.getPrice.bind(this), 240),
-      masternodes: await this.cachedGet('masternodes', this.getMasternodes.bind(this), 300),
-      loan: await this.cachedGet('loan', this.getLoan.bind(this), 300),
-      emission: await this.cachedGet('emission', this.getEmission.bind(this), 1800),
-      net: await this.cachedGet('net', this.getNet.bind(this), 1800),
+      burned: await this.cachedGet('burned', this.getBurned.bind(this), 1700),
+      tvl: await this.cachedGet('tvl', this.getTVL.bind(this), 310),
+      price: await this.cachedGet('price', this.getPrice.bind(this), 220),
+      masternodes: await this.cachedGet('masternodes', this.getMasternodes.bind(this), 325),
+      loan: await this.cachedGet('loan', this.getLoan.bind(this), 299),
+      emission: await this.cachedGet('emission', this.getEmission.bind(this), 1750),
+      net: await this.cachedGet('net', this.getNet.bind(this), 1830),
       blockchain: {
         difficulty: block.difficulty
       }
     }
+  }
+
+  @Get('/supply')
+  async getSupply (): Promise<SupplyData> {
+    const height = requireValue(await this.blockMapper.getHighest(), 'block').height
+
+    const max = 1200000000
+    const total = this.blockSubsidy.getSupply(height).div(100000000)
+    const burned = await this.cachedGet('Controller.supply.getBurnedTotal', this.getBurnedTotal.bind(this), 1806)
+    const circulating = total.minus(burned)
+
+    return {
+      max: max,
+      total: total.gt(max) ? max : total.toNumber(), // as emission burn is taken into the 1.2b calculation post eunos
+      burned: burned.toNumber(),
+      circulating: circulating.toNumber()
+    }
+  }
+
+  @Get('/burn')
+  async getBurn (): Promise<BurnInfo> {
+    return await this.cachedGet('Controller.burn.getBurnInfo', async () => {
+      return await this.rpcClient.account.getBurnInfo()
+    }, 123)
   }
 
   private async cachedGet<T> (field: string, fetch: () => Promise<T>, ttl: number): Promise<T> {
@@ -86,7 +113,7 @@ export class StatsController {
     const masternodeTvl = requireValue(masternodes?.stats?.tvl, 'masternodes.stats.tvl')
     const masternodeTvlUSD = new BigNumber(masternodeTvl).times(usd).toNumber()
 
-    const loan = await this.cachedGet('loan', this.getLoan.bind(this), 1800)
+    const loan = await this.cachedGet('loan', this.getLoan.bind(this), 1810)
 
     return {
       dex: dex.toNumber(),
@@ -97,17 +124,40 @@ export class StatsController {
   }
 
   private async getBurned (): Promise<StatsData['burned']> {
-    const {
-      emissionburn,
-      amount,
-      feeburn
-    } = await this.rpcClient.account.getBurnInfo()
+    const burnInfo = await this.rpcClient.account.getBurnInfo()
+
+    const utxo = burnInfo.amount
+    const account = findTokenBalance(burnInfo.tokens, 'DFI')
+    const address = utxo.plus(account)
+
     return {
-      address: amount.toNumber(),
-      emission: emissionburn.toNumber(),
-      fee: feeburn.toNumber(),
-      total: amount.plus(emissionburn).plus(feeburn).toNumber()
+      address: address.toNumber(),
+      fee: burnInfo.feeburn.toNumber(),
+      auction: burnInfo.auctionburn.toNumber(),
+      payback: burnInfo.paybackburn.toNumber(),
+      emission: burnInfo.emissionburn.toNumber(),
+      total: address
+        .plus(burnInfo.feeburn)
+        .plus(burnInfo.auctionburn)
+        .plus(burnInfo.paybackburn)
+        .plus(burnInfo.emissionburn)
+        .toNumber()
     }
+  }
+
+  /**
+   * '76a914f7874e8821097615ec345f74c7e5bcf61b12e2ee88ac' is '8defichainBurnAddressXXXXXXXdRQkSm'
+   * using the hex representation as it's applicable in all network
+   */
+  private async getBurnedTotal (): Promise<BigNumber> {
+    const address = '76a914f7874e8821097615ec345f74c7e5bcf61b12e2ee88ac'
+    const tokens = await this.rpcClient.account.getAccount(address)
+    const burnInfo = await this.rpcClient.account.getBurnInfo()
+
+    const utxo = burnInfo.amount
+    const account = findTokenBalance(tokens, 'DFI')
+    const emission = burnInfo.emissionburn
+    return utxo.plus(account).plus(emission)
   }
 
   private async getPrice (): Promise<StatsData['price']> {
@@ -199,6 +249,16 @@ export function getEmission (eunosHeight: number, height: number): StatsData['em
     burned: burned.toNumber(),
     total: total.toNumber()
   }
+}
+
+function findTokenBalance (tokens: string[], symbol: string): BigNumber {
+  for (const token of tokens) {
+    const [amount, s] = token.split('@')
+    if (s === symbol) {
+      return new BigNumber(amount)
+    }
+  }
+  return new BigNumber(0)
 }
 
 function requireValue<T> (value: T | undefined, name: string): T {

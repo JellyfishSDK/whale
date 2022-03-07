@@ -28,6 +28,43 @@ export class PoolPairs {
   async get (id: string): Promise<PoolPairData> {
     return await this.client.requestData('GET', `poolpairs/${id}`)
   }
+
+  /**
+   * List pool swaps
+   *
+   * @param {string} id poolpair id
+   * @param {number} size of PoolSwap to query
+   * @param {string} next set of PoolSwap
+   * @return {Promise<ApiPagedResponse<PoolSwapData>>}
+   */
+  async listPoolSwaps (id: string, size: number = 30, next?: string): Promise<ApiPagedResponse<PoolSwapData>> {
+    return await this.client.requestList('GET', `poolpairs/${id}/swaps`, size, next)
+  }
+
+  /**
+   * List pool swaps with from/to
+   *
+   * @param {string} id poolpair id
+   * @param {number} [size=10] of PoolSwap to query, max of 20 per page
+   * @param {string} next set of PoolSwap
+   * @return {Promise<ApiPagedResponse<PoolSwapData>>}
+   */
+  async listPoolSwapsVerbose (id: string, size: number = 10, next?: string): Promise<ApiPagedResponse<PoolSwapData>> {
+    return await this.client.requestList('GET', `poolpairs/${id}/swaps/verbose`, size, next)
+  }
+
+  /**
+   * List pool swap aggregates
+   *
+   * @param {string} id poolpair id
+   * @param {PoolSwapAggregatedInterval} interval interval
+   * @param {number} size of PoolSwap to query
+   * @param {string} next set of PoolSwap
+   * @return {Promise<ApiPagedResponse<PoolSwapAggregatedData>>}
+   */
+  async listPoolSwapAggregates (id: string, interval: PoolSwapAggregatedInterval, size: number = 30, next?: string): Promise<ApiPagedResponse<PoolSwapAggregatedData>> {
+    return await this.client.requestList('GET', `poolpairs/${id}/swaps/aggregate/${interval as number}`, size, next)
+  }
 }
 
 export interface PoolPairData {
@@ -70,5 +107,76 @@ export interface PoolPairData {
   apr?: {
     total: number // fractional number
     reward: number // fractional number
+    commission: number // fractional number
   }
+  volume?: {
+    d30: number // 30d volume in usd
+    h24: number // 24h volume in usd
+  }
+}
+
+/**
+ * @deprecated use PoolSwapData instead
+ */
+export type PoolSwap = PoolSwapData
+
+/**
+ * @deprecated use PoolSwapAggregatedData instead
+ */
+export type PoolSwapAggregated = PoolSwapAggregatedData
+
+export interface PoolSwapData {
+  id: string
+  sort: string
+  txid: string
+  txno: number
+
+  poolPairId: string
+  fromAmount: string
+  fromTokenId: number
+
+  /**
+   * To handle for optional value as Whale service might fail to resolve when indexing
+   */
+  from?: PoolSwapFromToData
+  /**
+   * To handle for optional value as Whale service might fail to resolve when indexing
+   */
+  to?: PoolSwapFromToData
+
+  block: {
+    hash: string
+    height: number
+    time: number
+    medianTime: number
+  }
+}
+
+export interface PoolSwapFromToData {
+  address: string
+  amount: string
+  symbol: string
+}
+
+export interface PoolSwapAggregatedData {
+  id: string
+  key: string
+  bucket: number
+
+  aggregated: {
+    amounts: Record<string, string>
+    /**
+     * aggregated value in USD at current dex prices
+     */
+    usd: number
+  }
+
+  block: {
+    medianTime: number
+  }
+}
+
+export enum PoolSwapAggregatedInterval {
+  ONE_HOUR = 60 * 60,
+  ONE_DAY = ONE_HOUR * 24
 }

@@ -1,4 +1,7 @@
 import { WhaleApiClient } from '../whale.api.client'
+import { account } from '@defichain/jellyfish-api-core'
+
+export type BurnData = account.BurnInfo
 
 export class Stats {
   constructor (private readonly client: WhaleApiClient) {
@@ -11,6 +14,24 @@ export class Stats {
    */
   async get (): Promise<StatsData> {
     return await this.client.requestData('GET', 'stats')
+  }
+
+  /**
+   * Get supply of DeFi Blockchain
+   *
+   * @return {Promise<SupplyData}
+   */
+  async getSupply (): Promise<SupplyData> {
+    return await this.client.requestData('GET', 'stats/supply')
+  }
+
+  /**
+   * Get burn info of DeFi Blockchain
+   *
+   * @return {Promise<BurnData}
+   */
+  async getBurn (): Promise<BurnData> {
+    return await this.client.requestData('GET', 'stats/burn')
   }
 }
 
@@ -32,9 +53,11 @@ export interface StatsData {
   }
   burned: {
     total: number
-    fee: number
-    emission: number
     address: number
+    fee: number
+    auction: number
+    payback: number
+    emission: number
   }
   price: {
     usd: number
@@ -75,4 +98,28 @@ export interface StatsData {
     subversion: string
     protocolversion: number
   }
+}
+
+export interface SupplyData {
+  /**
+   * The maximum supply of DFI that is allowed to exist at anytime.
+   * 1,200,000,000 as written in the white paper. Circulating amount will never be higher than this amount.
+   */
+  max: number
+
+  /**
+   * The total amount of DFI minted.
+   */
+  total: number
+
+  /**
+   * The total amount of all DFI that are burned.
+   */
+  burned: number
+
+  /**
+   * The amount of DFI that are publicly available and circulating in the market.
+   * Total - Burned = Circulating
+   */
+  circulating: number
 }
