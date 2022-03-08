@@ -447,7 +447,7 @@ export class PoolSwapPathFindingService {
   }
 
   async getBestPath (fromTokenId: string, toTokenId: string): Promise<BestSwapPathResult> {
-    const { paths } = await this.getAllSwapPaths(fromTokenId, toTokenId)
+    const { fromToken, toToken, paths } = await this.getAllSwapPaths(fromTokenId, toTokenId)
 
     let bestPath: SwapPathPoolPair[] = []
     let bestReturn = new BigNumber(-1)
@@ -460,14 +460,8 @@ export class PoolSwapPathFindingService {
       }
     }
     return {
-      fromToken: {
-        id: fromTokenId,
-        symbol: await this.getTokenSymbol(fromTokenId)
-      },
-      toToken: {
-        id: toTokenId,
-        symbol: await this.getTokenSymbol(toTokenId)
-      },
+      fromToken: fromToken,
+      toToken: toToken,
       bestPath: bestPath,
       estimatedReturn: bestReturn.eq(-1)
         ? '0'
