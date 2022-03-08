@@ -440,7 +440,7 @@ export class PoolSwapPathFindingService {
   ) {
   }
 
-  @Interval(10_000) // 10s
+  @Interval(120_000) // 120s
   async syncTokenGraph (): Promise<void> {
     const poolPairTokens = await this.poolPairTokenMapper.list(200)
     await this.addTokensAndConnectionsToGraph(poolPairTokens)
