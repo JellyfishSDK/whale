@@ -432,7 +432,8 @@ describe('poolswap', () => {
           address: expect.any(String),
           amount: '45.71428571',
           symbol: 'DFI'
-        }
+        },
+        isSell: true
       },
       {
         id: expect.any(String),
@@ -457,7 +458,8 @@ describe('poolswap', () => {
           address: expect.any(String),
           amount: '39.99999999',
           symbol: 'DFI'
-        }
+        },
+        isSell:true
       }
     ])
 
