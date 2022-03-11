@@ -11,10 +11,10 @@ import { mapPriceFeeds } from './set.oracle.data'
 export class SetOracleDataIntervalIndexer extends DfTxIndexer<SetOracleData> {
   OP_CODE: number = CSetOracleData.OP_CODE
   intervals: OracleIntervalSeconds[] = [
-    OracleIntervalSeconds.FIVE_MINUTES,
-    OracleIntervalSeconds.TEN_MINUTES,
     OracleIntervalSeconds.ONE_HOUR,
-    OracleIntervalSeconds.ONE_DAY
+    OracleIntervalSeconds.ONE_DAY,
+    OracleIntervalSeconds.ONE_WEEK,
+    OracleIntervalSeconds.ONE_MONTH
   ]
 
   constructor (

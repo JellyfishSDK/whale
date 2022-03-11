@@ -4,10 +4,10 @@ import { Model, ModelMapping } from '@src/module.database/model'
 import { OraclePriceAggregatedMapper } from './oracle.price.aggregated'
 
 export enum OracleIntervalSeconds {
-  FIVE_MINUTES = 5 * 60,
-  TEN_MINUTES = 10 * 60,
   ONE_HOUR = 60 * 60,
-  ONE_DAY = 24 * 60 * 60
+  ONE_DAY = 24 * 60 * 60,
+  ONE_WEEK = 24 * 60 * 60 * 7,
+  ONE_MONTH = 24 * 60 * 60 * 7 * 30
 }
 
 const OraclePriceAggregatedIntervalMapping: ModelMapping<OraclePriceAggregatedInterval> = {
