@@ -219,7 +219,7 @@ export class PoolPairService {
     return value
   }
 
-  public async findSwapFromTo (height: number, txid: string, txno: number): Promise<{ from?: PoolSwapFromToData, to?: PoolSwapFromToData } | undefined> {
+  public async findSwapFromTo (height: number, txid: string, txno: number): Promise<{ from?: PoolSwapFromToData, to?: PoolSwapFromToData, isSell: boolean } | undefined> {
     const vouts = await this.voutMapper.query(txid, 1)
     const dftx = findPoolSwapDfTx(vouts)
     if (dftx === undefined) {
@@ -245,7 +245,8 @@ export class PoolPairService {
         symbol: fromToken.symbol,
         amount: dftx.fromAmount.toFixed(8)
       },
-      to: findPoolSwapFromTo(history, false)
+      to: findPoolSwapFromTo(history, false),
+      isSell: findPoolSwapIsSell(history, fromToken.symbol)
     }
   }
 
@@ -424,4 +425,17 @@ function findPoolSwapFromTo (history: AccountHistory, from: boolean): PoolSwapFr
   }
 
   return undefined
+}
+
+function findPoolSwapIsSell (history: AccountHistory, fromSymbol: string): boolean {
+  for (const amount of history.amounts) {
+    const [value, symbol] = amount.split('@')
+    const isNegative = value.startsWith('-')
+
+    if (isNegative && fromSymbol === symbol) {
+      return true
+    }
+  }
+
+  return false
 }
