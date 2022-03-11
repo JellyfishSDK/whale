@@ -459,7 +459,7 @@ describe('poolswap', () => {
           amount: '39.99999999',
           symbol: 'DFI'
         },
-        isSell:true
+        isSell: true
       }
     ])
 
