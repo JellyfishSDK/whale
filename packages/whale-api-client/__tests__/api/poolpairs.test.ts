@@ -377,7 +377,7 @@ describe('poolswap', () => {
       {
         id: expect.any(String),
         txid: expect.stringMatching(/[0-f]{64}/),
-        txno: 1,
+        txno: expect.any(Number),
         poolPairId: '9',
         sort: expect.any(String),
         fromAmount: '50.00000000',
@@ -392,7 +392,7 @@ describe('poolswap', () => {
       {
         id: expect.any(String),
         txid: expect.stringMatching(/[0-f]{64}/),
-        txno: 3,
+        txno: expect.any(Number),
         poolPairId: '9',
         sort: expect.any(String),
         fromAmount: '25.00000000',
@@ -412,7 +412,7 @@ describe('poolswap', () => {
       {
         id: expect.any(String),
         txid: expect.stringMatching(/[0-f]{64}/),
-        txno: 1,
+        txno: expect.any(Number),
         poolPairId: '9',
         sort: expect.any(String),
         fromAmount: '50.00000000',
@@ -438,7 +438,7 @@ describe('poolswap', () => {
       {
         id: expect.any(String),
         txid: expect.stringMatching(/[0-f]{64}/),
-        txno: 3,
+        txno: expect.any(Number),
         poolPairId: '9',
         sort: expect.any(String),
         fromAmount: '25.00000000',
