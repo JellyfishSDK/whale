@@ -655,7 +655,6 @@ describe('get list swappable tokens', () => {
     expect(result).toStrictEqual({
       fromToken: { id: '1', symbol: 'A' },
       swappableTokens: [
-        { id: '1', symbol: 'A' },
         { id: '7', symbol: 'G' },
         { id: '0', symbol: 'DFI' },
         { id: '24', symbol: 'USDT' },

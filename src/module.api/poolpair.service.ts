@@ -645,7 +645,10 @@ export class PoolSwapPathFindingService {
 
       // index each token to their swappable tokens
       for (const token of tokens) {
-        this.tokensToSwappableTokens.set(token.id, tokens)
+        this.tokensToSwappableTokens.set(
+          token.id,
+          tokens.filter(tk => tk.id !== token.id) // exclude tokens from their own 'swappables' list
+        )
       }
     }
   }
