@@ -648,3 +648,37 @@ describe('get all paths', () => {
     await expect(controller.listPaths('-1', '100')).rejects.toThrowError('Unable to find token -1')
   })
 })
+
+describe('get list swappable tokens', () => {
+  it('should list correct swappable tokens', async () => {
+    const result = await controller.listSwappableTokens('1') // A
+    expect(result).toStrictEqual({
+      fromToken: { id: '1', symbol: 'A' },
+      swappableTokens: [
+        { id: '1', symbol: 'A' },
+        { id: '7', symbol: 'G' },
+        { id: '0', symbol: 'DFI' },
+        { id: '24', symbol: 'USDT' },
+        { id: '6', symbol: 'F' },
+        { id: '5', symbol: 'E' },
+        { id: '4', symbol: 'D' },
+        { id: '3', symbol: 'C' },
+        { id: '2', symbol: 'B' }
+      ]
+    })
+  })
+
+  it('should list no tokens for token that is not swappable with any', async () => {
+    const result = await controller.listSwappableTokens('8') // H
+    expect(result).toStrictEqual({
+      fromToken: { id: '8', symbol: 'H' },
+      swappableTokens: []
+    })
+  })
+
+  it('should throw error for invalid / non-existent tokenId', async () => {
+    await expect(controller.listSwappableTokens('-1')).rejects.toThrowError('Unable to find token -1')
+    await expect(controller.listSwappableTokens('100')).rejects.toThrowError('Unable to find token 100')
+    await expect(controller.listSwappableTokens('a')).rejects.toThrowError('Unable to find token a')
+  })
+})
