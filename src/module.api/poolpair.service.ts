@@ -224,7 +224,7 @@ export class PoolPairService {
     return value
   }
 
-  public async findSwapFromTo (height: number, txid: string, txno: number, id: string): Promise<{ from?: PoolSwapFromToData, to?: PoolSwapFromToData, displaySymbols: PoolSwapDisplaySymbols } | undefined> {
+  public async findSwapFromTo (height: number, txid: string, txno: number, id: string): Promise<{ from?: PoolSwapFromToData, to?: PoolSwapFromToData } | undefined> {
     const vouts = await this.voutMapper.query(txid, 1)
     const dftx = findPoolSwapDfTx(vouts)
     if (dftx === undefined) {
@@ -262,7 +262,7 @@ export class PoolPairService {
     }
   }
 
-  private async getPairDisplaySymbols (poolPairInfo: PoolPairInfo): Promise<PoolSwapDisplaySymbols | undefined> {
+  private async getPairDisplaySymbols (poolPairInfo: PoolPairInfo): Promise<{displaySymbolA: string, displaySymbolB: string } | undefined> {
     const tokenA = await this.deFiDCache.getTokenInfo(poolPairInfo.idTokenA)
     const tokenB = await this.deFiDCache.getTokenInfo(poolPairInfo.idTokenB)
     if (tokenA === undefined || tokenB === undefined) {
@@ -429,7 +429,7 @@ function findPoolSwapDfTx (vouts: TransactionVout[]): PoolSwapDfTx | undefined {
   }
 }
 
-function findPoolSwapFromTo (history: AccountHistory, from: boolean, displaySymbol: string): PoolSwapFromToData | undefined {
+function findPoolSwapFromTo (history: AccountHistory | undefined, from: boolean, displaySymbol: string): PoolSwapFromToData | undefined {
   if (history?.amounts === undefined) {
     return undefined
   }

@@ -110,7 +110,6 @@ export class PoolPairController {
       const fromTo = await this.poolPairService.findSwapFromTo(swap.block.height, swap.txid, swap.txno, id)
       swap.from = fromTo?.from
       swap.to = fromTo?.to
-      swap.displaySymbols = fromTo?.displaySymbols
     }
 
     return ApiPagedResponse.of(items, query.size, item => {
