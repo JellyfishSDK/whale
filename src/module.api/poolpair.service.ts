@@ -240,8 +240,6 @@ export class PoolPairService {
     if (fromAddress === undefined || toAddress === undefined || fromToken === undefined || toToken === undefined) {
       return undefined
     }
-    const fromDisplaySymbol = parseDisplaySymbol(fromToken)
-    const toDisplaySymbol = parseDisplaySymbol(toToken)
 
     const history = await this.getAccountHistory(toAddress, height, txno)
 
@@ -250,9 +248,9 @@ export class PoolPairService {
         address: fromAddress,
         symbol: fromToken.symbol,
         amount: dftx.fromAmount.toFixed(8),
-        displaySymbol: fromDisplaySymbol
+        displaySymbol: parseDisplaySymbol(fromToken)
       },
-      to: findPoolSwapFromTo(history, false, toDisplaySymbol)
+      to: findPoolSwapFromTo(history, false, parseDisplaySymbol(toToken))
     }
   }
 
