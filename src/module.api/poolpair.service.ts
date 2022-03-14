@@ -224,7 +224,7 @@ export class PoolPairService {
     return value
   }
 
-  public async findSwapFromTo (height: number, txid: string, txno: number, id: string): Promise<{ from?: PoolSwapFromToData, to?: PoolSwapFromToData } | undefined> {
+  public async findSwapFromTo (height: number, txid: string, txno: number): Promise<{ from?: PoolSwapFromToData, to?: PoolSwapFromToData } | undefined> {
     const vouts = await this.voutMapper.query(txid, 1)
     const dftx = findPoolSwapDfTx(vouts)
     if (dftx === undefined) {
@@ -235,46 +235,25 @@ export class PoolPairService {
     const fromToken = await this.deFiDCache.getTokenInfo(dftx.fromTokenId.toString())
 
     const toAddress = fromScript(dftx.toScript, this.network)?.address
-    if (fromAddress === undefined || toAddress === undefined || fromToken === undefined) {
+    const toToken = await this.deFiDCache.getTokenInfo(dftx.toTokenId.toString())
+
+    if (fromAddress === undefined || toAddress === undefined || fromToken === undefined || toToken === undefined) {
       return undefined
     }
+    const fromDisplaySymbol = parseDisplaySymbol(fromToken)
+    const toDisplaySymbol = parseDisplaySymbol(toToken)
 
     const history = await this.getAccountHistory(toAddress, height, txno)
-
-    const poolPairInfo = await this.deFiDCache.getPoolPairInfo(id)
-    if (poolPairInfo === undefined) {
-      return undefined
-    }
-
-    const displaySymbols = await this.getPairDisplaySymbols(poolPairInfo)
-    if (displaySymbols === undefined) {
-      return undefined
-    }
 
     return {
       from: {
         address: fromAddress,
         symbol: fromToken.symbol,
         amount: dftx.fromAmount.toFixed(8),
-        displaySymbol: displaySymbols.displaySymbolA
+        displaySymbol: fromDisplaySymbol
       },
-      to: findPoolSwapFromTo(history, false, displaySymbols.displaySymbolB)
+      to: findPoolSwapFromTo(history, false, toDisplaySymbol)
     }
-  }
-
-  private async getPairDisplaySymbols (poolPairInfo: PoolPairInfo): Promise<{displaySymbolA: string, displaySymbolB: string } | undefined> {
-    const tokenA = await this.deFiDCache.getTokenInfo(poolPairInfo.idTokenA)
-    const tokenB = await this.deFiDCache.getTokenInfo(poolPairInfo.idTokenB)
-    if (tokenA === undefined || tokenB === undefined) {
-      return undefined
-    }
-    const displaySymbolA = parseDisplaySymbol(tokenA)
-    const displaySymbolB = parseDisplaySymbol(tokenB)
-
-    return ({
-      displaySymbolA: displaySymbolA,
-      displaySymbolB: displaySymbolB
-    })
   }
 
   private async getAccountHistory (address: string, height: number, txno: number): Promise<AccountHistory> {

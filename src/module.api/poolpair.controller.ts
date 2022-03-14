@@ -107,7 +107,7 @@ export class PoolPairController {
     const items: PoolSwapData[] = await this.poolSwapMapper.query(id, query.size, query.next)
 
     for (const swap of items) {
-      const fromTo = await this.poolPairService.findSwapFromTo(swap.block.height, swap.txid, swap.txno, id)
+      const fromTo = await this.poolPairService.findSwapFromTo(swap.block.height, swap.txid, swap.txno)
       swap.from = fromTo?.from
       swap.to = fromTo?.to
     }

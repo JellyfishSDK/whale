@@ -449,12 +449,14 @@ describe('poolswap', () => {
         from: {
           address: expect.any(String),
           symbol: 'A',
-          amount: '123.00000000'
+          amount: '123.00000000',
+          displaySymbol: 'dA'
         },
         to: {
           address: expect.any(String),
           amount: '10.42667420',
-          symbol: 'C'
+          symbol: 'C',
+          displaySymbol: 'dC'
         }
       },
       {
