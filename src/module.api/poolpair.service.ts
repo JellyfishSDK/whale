@@ -3,7 +3,7 @@ import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import BigNumber from 'bignumber.js'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
-import { BestSwapPathResult, PoolPairData, PoolSwapFromToData, SwapPathPoolPair, SwapPathsResult } from '@whale-api-client/api/poolpairs'
+import { BestSwapPathResult, PoolSwapDisplaySymbols, PoolPairData, PoolSwapFromToData, SwapPathPoolPair, SwapPathsResult } from '@whale-api-client/api/poolpairs'
 import { getBlockSubsidy } from '@src/module.api/subsidy'
 import { BlockMapper } from '@src/module.model/block'
 import { TokenMapper } from '@src/module.model/token'
@@ -23,6 +23,7 @@ import { fromScript } from '@defichain/jellyfish-address'
 import { NetworkName } from '@defichain/jellyfish-network'
 import { AccountHistory } from '@defichain/jellyfish-api-core/dist/category/account'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
+import { parseDisplaySymbol } from '@src/module.api/token.controller'
 import { UndirectedGraph } from 'graphology'
 import { PoolPairToken, PoolPairTokenMapper } from '@src/module.model/pool.pair.token'
 import { Interval } from '@nestjs/schedule'
@@ -223,7 +224,7 @@ export class PoolPairService {
     return value
   }
 
-  public async findSwapFromTo (height: number, txid: string, txno: number): Promise<{ from?: PoolSwapFromToData, to?: PoolSwapFromToData } | undefined> {
+  public async findSwapFromTo (height: number, txid: string, txno: number, id: string): Promise<{ from?: PoolSwapFromToData, to?: PoolSwapFromToData, displaySymbols: PoolSwapDisplaySymbols } | undefined> {
     const vouts = await this.voutMapper.query(txid, 1)
     const dftx = findPoolSwapDfTx(vouts)
     if (dftx === undefined) {
@@ -240,14 +241,40 @@ export class PoolPairService {
 
     const history = await this.getAccountHistory(toAddress, height, txno)
 
+    const poolPairInfo = await this.deFiDCache.getPoolPairInfo(id)
+    if (poolPairInfo === undefined) {
+      return undefined
+    }
+
+    const displaySymbols = await this.getPairDisplaySymbols(poolPairInfo)
+    if (displaySymbols === undefined) {
+      return undefined
+    }
+
     return {
       from: {
         address: fromAddress,
         symbol: fromToken.symbol,
         amount: dftx.fromAmount.toFixed(8)
       },
-      to: findPoolSwapFromTo(history, false)
+      to: findPoolSwapFromTo(history, false),
+      displaySymbols: displaySymbols
     }
+  }
+
+  private async getPairDisplaySymbols (poolPairInfo: PoolPairInfo): Promise<PoolSwapDisplaySymbols | undefined> {
+    const tokenA = await this.deFiDCache.getTokenInfo(poolPairInfo.idTokenA)
+    const tokenB = await this.deFiDCache.getTokenInfo(poolPairInfo.idTokenB)
+    if (tokenA === undefined || tokenB === undefined) {
+      return undefined
+    }
+    const displaySymbolA = parseDisplaySymbol(tokenA)
+    const displaySymbolB = parseDisplaySymbol(tokenB)
+
+    return ({
+      displaySymbolA: displaySymbolA,
+      displaySymbolB: displaySymbolB
+    })
   }
 
   private async getAccountHistory (address: string, height: number, txno: number): Promise<AccountHistory> {
