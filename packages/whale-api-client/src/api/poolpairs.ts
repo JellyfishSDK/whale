@@ -134,7 +134,6 @@ export interface PoolSwapData {
   poolPairId: string
   fromAmount: string
   fromTokenId: number
-  displaySymbols?: PoolSwapDisplaySymbols
 
   /**
    * To handle for optional value as Whale service might fail to resolve when indexing
@@ -157,6 +156,7 @@ export interface PoolSwapFromToData {
   address: string
   amount: string
   symbol: string
+  displaySymbol: string
 }
 
 export interface PoolSwapAggregatedData {
@@ -180,11 +180,6 @@ export interface PoolSwapAggregatedData {
 export enum PoolSwapAggregatedInterval {
   ONE_HOUR = 60 * 60,
   ONE_DAY = ONE_HOUR * 24
-}
-
-export interface PoolSwapDisplaySymbols {
-  displaySymbolA: string
-  displaySymbolB: string
 }
 
 export interface BestSwapPathResult {

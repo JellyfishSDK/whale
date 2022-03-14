@@ -474,16 +474,14 @@ describe('poolswap', () => {
         from: {
           address: expect.any(String),
           symbol: 'A',
-          amount: '50.00000000'
+          amount: '50.00000000',
+          displaySymbol: 'dA'
         },
         to: {
           address: expect.any(String),
           amount: '45.71428571',
-          symbol: 'DFI'
-        },
-        displaySymbols: {
-          displaySymbolA: 'dA',
-          displaySymbolB: 'DFI'
+          symbol: 'DFI',
+          displaySymbol: 'DFI'
         }
       },
       {
@@ -503,16 +501,14 @@ describe('poolswap', () => {
         from: {
           address: expect.any(String),
           symbol: 'A',
-          amount: '25.00000000'
+          amount: '25.00000000',
+          displaySymbol: 'dA'
         },
         to: {
           address: expect.any(String),
           amount: '39.99999999',
-          symbol: 'DFI'
-        },
-        displaySymbols: {
-          displaySymbolA: 'dA',
-          displaySymbolB: 'DFI'
+          symbol: 'DFI',
+          displaySymbol: 'DFI'
         }
       }
     ])
