@@ -271,59 +271,41 @@ describe('pricefeed with interval', () => {
     await container.generate(1)
 
     const oneMinute = 60
-    const timeNow = Math.floor(new Date().getTime() / 1000)
-    for (let i = 0; i < 60; i++) {
-      const mockTime = timeNow + i * oneMinute
-      const price = (i + 1).toFixed(2)
-      await client.oracle.setOracleData(oracleId, timeNow + 5 * 60 - 1, {
-        prices: [
-          { tokenAmount: `${price}@S1`, currency: 'USD' }
-        ]
-      })
-      await client.misc.setMockTime(mockTime)
-      await container.generate(1)
+    let mockTime = Math.floor(new Date().getTime() / 1000)
+    for (let h = 0; h < 24; h++) {
+      for (let z = 0; z < 4; z++) {
+        mockTime += (15 * oneMinute) + 1 // +1 sec to fall into the next 15 mins bucket```
+        await client.misc.setMockTime(mockTime)
+        await container.generate(2)
+
+        const price = (h + 1).toFixed(2)
+        await client.oracle.setOracleData(oracleId, mockTime - 1, {
+          prices: [
+            {
+              tokenAmount: `${price}@S1`,
+              currency: 'USD'
+            }
+          ]
+        })
+        await container.generate(1)
+      }
     }
 
-    {
-      const height = await container.getBlockCount()
-      await container.generate(1)
-      await service.waitForIndexedHeight(height)
-    }
+    const height = await container.getBlockCount()
+    await container.generate(1)
+    await service.waitForIndexedHeight(height)
 
-    const noInterval = await apiClient.prices.getFeed('S1', 'USD', 60)
-    expect(noInterval.length).toStrictEqual(60)
+    const noInterval = await apiClient.prices.getFeed('S1', 'USD', height)
+    expect(noInterval.length).toStrictEqual(96)
 
-    const interval5Minutes = await apiClient.prices.getFeedWithInterval('S1', 'USD', PriceFeedTimeInterval.FIVE_MINUTES, 60)
-    expect(interval5Minutes.length).toStrictEqual(11)
-    expect(interval5Minutes.map(x => x.aggregated.amount)).toStrictEqual(
-      [
-        '58.50000000',
-        '53.50000000',
-        '47.50000000',
-        '41.50000000',
-        '35.50000000',
-        '29.50000000',
-        '23.50000000',
-        '17.50000000',
-        '11.50000000',
-        '5.00000000',
-        '1.00000000'
-      ]
-    )
+    const interval15Mins = await apiClient.prices.getFeedWithInterval('S1', 'USD', PriceFeedTimeInterval.FIFTEEN_MINUTES, height)
+    expect(interval15Mins.length).toStrictEqual(96)
 
-    const interval10Minutes = await apiClient.prices.getFeedWithInterval('S1', 'USD', PriceFeedTimeInterval.TEN_MINUTES, 60)
-    expect(interval10Minutes.length).toStrictEqual(7)
-    expect(interval10Minutes.map(x => x.aggregated.amount)).toStrictEqual(
-      [
-        '59.00000000',
-        '52.00000000',
-        '41.00000000',
-        '30.00000000',
-        '19.00000000',
-        '7.50000000',
-        '1.00000000'
-      ]
-    )
+    const interval1Hour = await apiClient.prices.getFeedWithInterval('S1', 'USD', PriceFeedTimeInterval.ONE_HOUR, height)
+    expect(interval1Hour.length).toStrictEqual(24)
+
+    const interval1Day = await apiClient.prices.getFeedWithInterval('S1', 'USD', PriceFeedTimeInterval.ONE_DAY, height)
+    expect(interval1Day.length).toStrictEqual(1)
   })
 })
 

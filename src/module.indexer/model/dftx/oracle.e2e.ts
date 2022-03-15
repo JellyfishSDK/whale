@@ -401,9 +401,9 @@ describe('interval set oracle data', () => {
     let mockTime = Math.floor(new Date().getTime() / 1000)
     for (let h = 0; h < 24; h++) {
       for (let z = 0; z < 4; z++) {
-        mockTime += (z * 15) * oneMinute
+        mockTime += (15 * oneMinute) + 1 // +1 sec to fall into the next 15 mins bucket```
         await client.misc.setMockTime(mockTime)
-        await container.generate(1)
+        await container.generate(2)
 
         const price = (h + 1).toFixed(2)
         await client.oracle.setOracleData(oracleId, mockTime - 1, {
