@@ -65,6 +65,22 @@ export class PoolPairs {
   async listPoolSwapAggregates (id: string, interval: PoolSwapAggregatedInterval, size: number = 30, next?: string): Promise<ApiPagedResponse<PoolSwapAggregatedData>> {
     return await this.client.requestList('GET', `poolpairs/${id}/swaps/aggregate/${interval as number}`, size, next)
   }
+
+  /**
+   * List all swappable tokens for a given token
+   * @param {string} tokenId
+   */
+  async getSwappableTokens (tokenId: string): Promise<AllSwappableTokensResult> {
+    return await this.client.requestData('GET', `poolpairs/paths/swappable/${tokenId}`)
+  }
+
+  async getBestPath (fromTokenId: string, toTokenId: string): Promise<SwapPathsResult> {
+    return await this.client.requestData('GET', `poolpairs/paths/best/from/${fromTokenId}/to/${toTokenId}`)
+  }
+
+  async getAllPaths (fromTokenId: string, toTokenId: string): Promise<SwapPathsResult> {
+    return await this.client.requestData('GET', `poolpairs/paths/from/${fromTokenId}/to/${toTokenId}`)
+  }
 }
 
 export interface PoolPairData {
