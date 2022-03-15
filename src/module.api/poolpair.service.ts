@@ -465,11 +465,9 @@ export class PoolSwapPathFindingService {
 
   async getAllSwappableTokens (tokenId: string): Promise<AllSwappableTokensResult> {
     await this.syncTokenGraphIfEmpty()
+
     return {
-      fromToken: {
-        id: tokenId,
-        symbol: await this.getTokenSymbol(tokenId)
-      },
+      fromToken: await this.getTokenIdentifier(tokenId),
       swappableTokens: this.tokensToSwappableTokens.get(tokenId) ?? []
     }
   }
@@ -505,18 +503,9 @@ export class PoolSwapPathFindingService {
   async getAllSwapPaths (fromTokenId: string, toTokenId: string): Promise<SwapPathsResult> {
     await this.syncTokenGraphIfEmpty()
 
-    const fromTokenSymbol = await this.getTokenSymbol(fromTokenId)
-    const toTokenSymbol = await this.getTokenSymbol(toTokenId)
-
     const result: SwapPathsResult = {
-      fromToken: {
-        id: fromTokenId,
-        symbol: fromTokenSymbol
-      },
-      toToken: {
-        id: toTokenId,
-        symbol: toTokenSymbol
-      },
+      fromToken: await this.getTokenIdentifier(fromTokenId),
+      toToken: await this.getTokenIdentifier(toTokenId),
       paths: []
     }
 
@@ -566,14 +555,8 @@ export class PoolSwapPathFindingService {
         poolPairs.push({
           poolPairId: poolPairId,
           symbol: poolPair.symbol,
-          tokenA: {
-            id: poolPair.idTokenA,
-            symbol: await this.getTokenSymbol(poolPair.idTokenA)
-          },
-          tokenB: {
-            id: poolPair.idTokenB,
-            symbol: await this.getTokenSymbol(poolPair.idTokenB)
-          },
+          tokenA: await this.getTokenIdentifier(poolPair.idTokenA),
+          tokenB: await this.getTokenIdentifier(poolPair.idTokenB),
           priceRatio: {
             ab: new BigNumber(poolPair['reserveA/reserveB']).toFixed(8),
             ba: new BigNumber(poolPair['reserveB/reserveA']).toFixed(8)
@@ -610,12 +593,16 @@ export class PoolSwapPathFindingService {
     }
   }
 
-  private async getTokenSymbol (tokenId: string): Promise<string> {
+  private async getTokenIdentifier (tokenId: string): Promise<TokenIdentifier> {
     const tokenInfo = await this.deFiDCache.getTokenInfo(tokenId)
     if (tokenInfo === undefined) {
       throw new NotFoundException(`Unable to find token ${tokenId}`)
     }
-    return tokenInfo.symbol
+    return {
+      id: tokenId,
+      symbol: tokenInfo.symbol,
+      displaySymbol: parseDisplaySymbol(tokenInfo)
+    }
   }
 
   private async getPoolPairInfo (poolPairId: string): Promise<PoolPairInfo> {
@@ -635,12 +622,9 @@ export class PoolSwapPathFindingService {
     const components = connectedComponents(this.tokenGraph)
     for (const component of components) {
       // enrich with symbol
-      const tokens = []
+      const tokens: TokenIdentifier[] = []
       for (const tokenId of component) {
-        tokens.push({
-          id: tokenId,
-          symbol: await this.getTokenSymbol(tokenId)
-        })
+        tokens.push(await this.getTokenIdentifier(tokenId))
       }
 
       // index each token to their swappable tokens
