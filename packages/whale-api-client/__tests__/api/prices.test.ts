@@ -5,6 +5,7 @@ import { StubWhaleApiClient } from '../stub.client'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { PriceFeedTimeInterval } from '@whale-api-client/api/prices'
 import { Testing } from '@defichain/jellyfish-testing'
+import { OracleIntervalSeconds } from '../../../../src/module.model/oracle.price.aggregated.interval'
 
 describe('oracles', () => {
   let container: MasterNodeRegTestContainer
@@ -271,18 +272,18 @@ describe('pricefeed with interval', () => {
     await container.generate(1)
 
     const oneMinute = 60
+    let price = 0
     let mockTime = Math.floor(new Date().getTime() / 1000)
-    for (let h = 0; h < 24; h++) {
-      for (let z = 0; z < 4; z++) {
-        mockTime += (15 * oneMinute) + 1 // +1 sec to fall into the next 15 mins bucket```
+    for (let h = 0; h < 24; h++) { // loop for 24 hours to make a day
+      for (let z = 0; z < 4; z++) { // loop for 4 x 15 mins interval to make an hour
+        mockTime += (15 * oneMinute) + 1 // +1 sec to fall into the next 15 mins bucket
         await client.misc.setMockTime(mockTime)
         await container.generate(2)
 
-        const price = (h + 1).toFixed(2)
-        await client.oracle.setOracleData(oracleId, mockTime - 1, {
+        await client.oracle.setOracleData(oracleId, mockTime, {
           prices: [
             {
-              tokenAmount: `${price}@S1`,
+              tokenAmount: `${(++price).toFixed(2)}@S1`,
               currency: 'USD'
             }
           ]
@@ -300,12 +301,69 @@ describe('pricefeed with interval', () => {
 
     const interval15Mins = await apiClient.prices.getFeedWithInterval('S1', 'USD', PriceFeedTimeInterval.FIFTEEN_MINUTES, height)
     expect(interval15Mins.length).toStrictEqual(96)
+    let prevMedianTime = 0
+    let checkPrice = price
+    interval15Mins.forEach(value => {
+      expect(value.aggregated.amount).toStrictEqual(checkPrice.toFixed(8)) // check if price is descending in intervals of 1
+      checkPrice--
+      if (prevMedianTime !== 0) { // check if time interval is in 15 mins block
+        expect(prevMedianTime - value.block.medianTime - 1).toStrictEqual(OracleIntervalSeconds.FIFTEEN_MINUTES) // account for +1 in mock time
+      }
+      prevMedianTime = value.block.medianTime
+    })
 
     const interval1Hour = await apiClient.prices.getFeedWithInterval('S1', 'USD', PriceFeedTimeInterval.ONE_HOUR, height)
     expect(interval1Hour.length).toStrictEqual(24)
+    prevMedianTime = 0
+    interval1Hour.forEach(value => { // check if time interval is in 1-hour block
+      if (prevMedianTime !== 0) {
+        expect(prevMedianTime - value.block.medianTime - 4).toStrictEqual(OracleIntervalSeconds.ONE_HOUR) // account for + 1 per block in mock time
+      }
+      prevMedianTime = value.block.medianTime
+    })
+    expect(interval1Hour.map(x => x.aggregated.amount)).toStrictEqual(
+      [
+        '94.50000000',
+        '90.50000000',
+        '86.50000000',
+        '82.50000000',
+        '78.50000000',
+        '74.50000000',
+        '70.50000000',
+        '66.50000000',
+        '62.50000000',
+        '58.50000000',
+        '54.50000000',
+        '50.50000000',
+        '46.50000000',
+        '42.50000000',
+        '38.50000000',
+        '34.50000000',
+        '30.50000000',
+        '26.50000000',
+        '22.50000000',
+        '18.50000000',
+        '14.50000000',
+        '10.50000000',
+        '6.50000000',
+        '2.50000000'
+      ]
+    )
 
     const interval1Day = await apiClient.prices.getFeedWithInterval('S1', 'USD', PriceFeedTimeInterval.ONE_DAY, height)
     expect(interval1Day.length).toStrictEqual(1)
+    prevMedianTime = 0
+    interval1Day.forEach(value => { // check if time interval is in 1-day block
+      if (prevMedianTime !== 0) {
+        expect(prevMedianTime - value.block.medianTime - 96).toStrictEqual(OracleIntervalSeconds.ONE_DAY) // account for + 1 per block in mock time
+      }
+      prevMedianTime = value.block.medianTime
+    })
+    expect(interval1Day.map(x => x.aggregated.amount)).toStrictEqual(
+      [
+        '48.50000000'
+      ]
+    )
   })
 })
 
