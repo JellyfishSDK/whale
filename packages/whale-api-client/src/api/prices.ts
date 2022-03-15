@@ -6,8 +6,7 @@ import { OraclePriceFeed } from './oracles'
  * Time interval for graphing
  */
 export enum PriceFeedTimeInterval {
-  FIVE_MINUTES = 5 * 60,
-  TEN_MINUTES = 10 * 60,
+  FIFTEEN_MINUTES = 15 * 60,
   ONE_HOUR = 60 * 60,
   ONE_DAY = 24 * 60 * 60
 }
