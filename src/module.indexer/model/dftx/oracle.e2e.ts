@@ -7,7 +7,10 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, invalidateFromHeight, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { OraclePriceFeedMapper } from '@src/module.model/oracle.price.feed'
 import { OraclePriceAggregatedMapper } from '@src/module.model/oracle.price.aggregated'
-import { OracleIntervalSeconds, OraclePriceAggregatedIntervalMapper } from '@src/module.model/oracle.price.aggregated.interval'
+import {
+  OracleIntervalSeconds,
+  OraclePriceAggregatedIntervalMapper
+} from '@src/module.model/oracle.price.aggregated.interval'
 
 describe('invalidate appoint/remove/update oracle', () => {
   const container = new MasterNodeRegTestContainer()
@@ -30,8 +33,14 @@ describe('invalidate appoint/remove/update oracle', () => {
   it('should appoint and invalidate', async () => {
     const address = await container.getNewAddress()
     const oracleId = await client.oracle.appointOracle(address, [
-      { token: 'TA', currency: 'USD1' },
-      { token: 'TB', currency: 'USD1' }
+      {
+        token: 'TA',
+        currency: 'USD1'
+      },
+      {
+        token: 'TB',
+        currency: 'USD1'
+      }
     ], {
       weightage: 1
     })
@@ -71,24 +80,42 @@ describe('invalidate appoint/remove/update oracle', () => {
 
   it('should appoint update and invalidate with existing token currency', async () => {
     await client.oracle.appointOracle(await container.getNewAddress(), [
-      { token: 'TA', currency: 'USD2' },
-      { token: 'TB', currency: 'USD2' }
+      {
+        token: 'TA',
+        currency: 'USD2'
+      },
+      {
+        token: 'TB',
+        currency: 'USD2'
+      }
     ], {
       weightage: 1
     })
     await container.generate(1)
     const address = await container.getNewAddress()
     const oracleId = await client.oracle.appointOracle(address, [
-      { token: 'TA', currency: 'USD2' },
-      { token: 'TB', currency: 'USD2' }
+      {
+        token: 'TA',
+        currency: 'USD2'
+      },
+      {
+        token: 'TB',
+        currency: 'USD2'
+      }
     ], {
       weightage: 1
     })
     await container.generate(1)
     await client.oracle.updateOracle(oracleId, address, {
       priceFeeds: [
-        { token: 'TB', currency: 'USD2' },
-        { token: 'TC', currency: 'USD2' }
+        {
+          token: 'TB',
+          currency: 'USD2'
+        },
+        {
+          token: 'TC',
+          currency: 'USD2'
+        }
       ],
       weightage: 1
     })
@@ -131,24 +158,42 @@ describe('invalidate appoint/remove/update oracle', () => {
   it('should appoint update update and invalidate', async () => {
     const address = await container.getNewAddress()
     const oracleId = await client.oracle.appointOracle(address, [
-      { token: 'TA', currency: 'USD3' },
-      { token: 'TB', currency: 'USD3' }
+      {
+        token: 'TA',
+        currency: 'USD3'
+      },
+      {
+        token: 'TB',
+        currency: 'USD3'
+      }
     ], {
       weightage: 1
     })
     await container.generate(1)
     await client.oracle.updateOracle(oracleId, address, {
       priceFeeds: [
-        { token: 'TB', currency: 'USD3' },
-        { token: 'TC', currency: 'USD3' }
+        {
+          token: 'TB',
+          currency: 'USD3'
+        },
+        {
+          token: 'TC',
+          currency: 'USD3'
+        }
       ],
       weightage: 1
     })
     // Notice there isn't any block generate
     await client.oracle.updateOracle(oracleId, address, {
       priceFeeds: [
-        { token: 'TC', currency: 'USD3' },
-        { token: 'TD', currency: 'USD3' }
+        {
+          token: 'TC',
+          currency: 'USD3'
+        },
+        {
+          token: 'TD',
+          currency: 'USD3'
+        }
       ],
       weightage: 1
     })
@@ -196,8 +241,14 @@ describe('invalidate appoint/remove/update oracle', () => {
   it('should appoint remove and invalidate', async () => {
     const address = await container.getNewAddress()
     const oracleId = await client.oracle.appointOracle(address, [
-      { token: 'TA', currency: 'USD4' },
-      { token: 'TB', currency: 'USD4' }
+      {
+        token: 'TA',
+        currency: 'USD4'
+      },
+      {
+        token: 'TB',
+        currency: 'USD4'
+      }
     ], {
       weightage: 1
     })
@@ -260,8 +311,14 @@ describe('invalidate set oracle data', () => {
   it('should set and invalidate', async () => {
     const address = await container.getNewAddress()
     const oracleId = await client.oracle.appointOracle(address, [
-      { token: 'S1', currency: 'USD1' },
-      { token: 'S2', currency: 'USD1' }
+      {
+        token: 'S1',
+        currency: 'USD1'
+      },
+      {
+        token: 'S2',
+        currency: 'USD1'
+      }
     ], {
       weightage: 1
     })
@@ -269,8 +326,14 @@ describe('invalidate set oracle data', () => {
 
     await client.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
       prices: [
-        { tokenAmount: '1.1@S1', currency: 'USD1' },
-        { tokenAmount: '1.2@S2', currency: 'USD1' }
+        {
+          tokenAmount: '1.1@S1',
+          currency: 'USD1'
+        },
+        {
+          tokenAmount: '1.2@S2',
+          currency: 'USD1'
+        }
       ]
     })
     await container.generate(1)
@@ -311,8 +374,14 @@ describe('invalidate set oracle data', () => {
   it('should set set and invalidate', async () => {
     const address = await container.getNewAddress()
     const oracleId = await client.oracle.appointOracle(address, [
-      { token: 'S1', currency: 'USD2' },
-      { token: 'S2', currency: 'USD2' }
+      {
+        token: 'S1',
+        currency: 'USD2'
+      },
+      {
+        token: 'S2',
+        currency: 'USD2'
+      }
     ], {
       weightage: 1
     })
@@ -320,16 +389,28 @@ describe('invalidate set oracle data', () => {
 
     await client.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
       prices: [
-        { tokenAmount: '1.54@S1', currency: 'USD2' },
-        { tokenAmount: '5.34@S2', currency: 'USD2' }
+        {
+          tokenAmount: '1.54@S1',
+          currency: 'USD2'
+        },
+        {
+          tokenAmount: '5.34@S2',
+          currency: 'USD2'
+        }
       ]
     })
     await container.generate(1)
 
     await client.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
       prices: [
-        { tokenAmount: '1.54@S1', currency: 'USD2' },
-        { tokenAmount: '5.34@S2', currency: 'USD2' }
+        {
+          tokenAmount: '1.54@S1',
+          currency: 'USD2'
+        },
+        {
+          tokenAmount: '5.34@S2',
+          currency: 'USD2'
+        }
       ]
     })
     await container.generate(1)
@@ -388,24 +469,35 @@ describe('interval set oracle data', () => {
   it('should get interval', async () => {
     const address = await container.getNewAddress()
     const oracleId = await client.oracle.appointOracle(address, [
-      { token: 'S1', currency: 'USD' }
+      {
+        token: 'S1',
+        currency: 'USD'
+      }
     ], {
       weightage: 1
     })
     await container.generate(1)
 
     const oneMinute = 60
-    const timeNow = Math.floor(new Date().getTime() / 1000)
-    for (let i = 0; i < 60; i++) {
-      const mockTime = timeNow + i * oneMinute
-      const price = (i + 1).toFixed(2)
-      await client.oracle.setOracleData(oracleId, timeNow + 5 * 60 - 1, {
-        prices: [
-          { tokenAmount: `${price}@S1`, currency: 'USD' }
-        ]
-      })
-      await client.misc.setMockTime(mockTime)
-      await container.generate(1)
+
+    let mockTime = Math.floor(new Date().getTime() / 1000)
+    for (let h = 0; h < 24; h++) {
+      for (let z = 0; z < 4; z++) {
+        mockTime += (z * 15) * oneMinute
+        await client.misc.setMockTime(mockTime)
+        await container.generate(1)
+
+        const price = (h + 1).toFixed(2)
+        await client.oracle.setOracleData(oracleId, mockTime - 1, {
+          prices: [
+            {
+              tokenAmount: `${price}@S1`,
+              currency: 'USD'
+            }
+          ]
+        })
+        await container.generate(1)
+      }
     }
 
     const height = await container.getBlockCount()
@@ -413,38 +505,13 @@ describe('interval set oracle data', () => {
     await waitForIndexedHeight(app, height)
 
     const noInterval = await app.get(OraclePriceAggregatedMapper).query('S1-USD', Number.MAX_SAFE_INTEGER)
-    expect(noInterval.length).toStrictEqual(60)
+    expect(noInterval.length).toStrictEqual(96)
 
-    const interval5Minutes = await app.get(OraclePriceAggregatedIntervalMapper).query(`S1-USD-${OracleIntervalSeconds.FIVE_MINUTES}`, Number.MAX_SAFE_INTEGER)
-    expect(interval5Minutes.length).toStrictEqual(11)
-    expect(interval5Minutes.map(x => x.aggregated.amount)).toStrictEqual(
-      [
-        '58.50000000',
-        '53.50000000',
-        '47.50000000',
-        '41.50000000',
-        '35.50000000',
-        '29.50000000',
-        '23.50000000',
-        '17.50000000',
-        '11.50000000',
-        '5.00000000',
-        '1.00000000'
-      ]
-    )
+    const interval15Mins = await app.get(OraclePriceAggregatedIntervalMapper).query(`S1-USD-${OracleIntervalSeconds.FIFTEEN_MINS}`, Number.MAX_SAFE_INTEGER)
+    console.log(interval15Mins)
+    expect(interval15Mins.length).toStrictEqual(96)
 
-    const interval10Minutes = await app.get(OraclePriceAggregatedIntervalMapper).query(`S1-USD-${OracleIntervalSeconds.TEN_MINUTES}`, Number.MAX_SAFE_INTEGER)
-    expect(interval10Minutes.length).toStrictEqual(7)
-    expect(interval10Minutes.map(x => x.aggregated.amount)).toStrictEqual(
-      [
-        '59.00000000',
-        '52.00000000',
-        '41.00000000',
-        '30.00000000',
-        '19.00000000',
-        '7.50000000',
-        '1.00000000'
-      ]
-    )
+    const interval1Day = await app.get(OraclePriceAggregatedIntervalMapper).query(`S1-USD-${OracleIntervalSeconds.ONE_DAY}`, Number.MAX_SAFE_INTEGER)
+    expect(interval1Day.length).toStrictEqual(1)
   })
 })
