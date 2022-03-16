@@ -37,9 +37,9 @@ beforeAll(async () => {
   await container.generate(1)
   await testing.poolpair.add({ a: { symbol: 'A', amount: 100 }, b: { symbol: 'B', amount: 200 } })
 
-  await testing.poolpair.create({ tokenA: 'B', tokenB: 'C' })
+  await testing.poolpair.create({ tokenA: 'C', tokenB: 'B' })
   await container.generate(1)
-  await testing.poolpair.add({ a: { symbol: 'B', amount: 100 }, b: { symbol: 'C', amount: 200 } })
+  await testing.poolpair.add({ a: { symbol: 'C', amount: 100 }, b: { symbol: 'B', amount: 200 } })
 
   await testing.poolpair.create({ tokenA: 'DFI', tokenB: 'C' })
   await container.generate(1)
@@ -94,7 +94,7 @@ describe('poolswap buy-sell indicator', () => {
         },
         to: {
           address: expect.any(String),
-          amount: '19.99999999',
+          amount: '6.66666666',
           symbol: 'DFI',
           displaySymbol: 'DFI'
         },
@@ -127,11 +127,11 @@ describe('poolswap buy-sell indicator', () => {
         },
         to: {
           address: expect.any(String),
-          amount: '19.99999999',
+          amount: '6.66666666',
           symbol: 'DFI',
           displaySymbol: 'DFI'
         },
-        isSell: true
+        isSell: false
       }
     ])
 
@@ -160,7 +160,7 @@ describe('poolswap buy-sell indicator', () => {
         },
         to: {
           address: expect.any(String),
-          amount: '19.99999999',
+          amount: '6.66666666',
           symbol: 'DFI',
           displaySymbol: 'DFI'
         },
