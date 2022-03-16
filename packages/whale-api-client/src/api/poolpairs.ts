@@ -172,6 +172,10 @@ export interface PoolSwapData {
    * To handle for optional value as Whale service might fail to resolve when indexing
    */
   to?: PoolSwapFromToData
+  /**
+   * To handle for optional value as Whale service might fail to resolve when indexing
+   */
+  isSell?: boolean
 
   block: {
     hash: string

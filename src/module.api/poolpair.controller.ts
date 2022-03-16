@@ -118,6 +118,7 @@ export class PoolPairController {
       const fromTo = await this.poolPairService.findSwapFromTo(swap.block.height, swap.txid, swap.txno)
       swap.from = fromTo?.from
       swap.to = fromTo?.to
+      swap.isSell = await this.poolPairService.checkSwapIsSell(swap)
     }
 
     return ApiPagedResponse.of(items, query.size, item => {

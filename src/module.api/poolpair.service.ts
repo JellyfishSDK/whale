@@ -6,7 +6,7 @@ import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 import {
   AllSwappableTokensResult,
   BestSwapPathResult,
-  PoolPairData,
+  PoolPairData, PoolSwapData,
   PoolSwapFromToData,
   SwapPathPoolPair,
   SwapPathsResult, TokenIdentifier
@@ -232,6 +232,43 @@ export class PoolPairService {
     return value
   }
 
+  public async checkSwapIsSell (swap: PoolSwapData): Promise<boolean | undefined> {
+    const vouts = await this.voutMapper.query(swap.txid, 1)
+    const dftx = findCompositeSwapDfTx(vouts)
+    // if dftx is undefined, no composite swap is returned so check for swap
+    if (dftx === undefined) {
+      const poolPairInfo = await this.deFiDCache.getPoolPairInfo(swap.poolPairId)
+      if (poolPairInfo === undefined) {
+        return undefined
+      }
+      const [,symbolB] = poolPairInfo.symbol.split('-')
+      return swap.to?.symbol === symbolB
+    }
+
+    const pools = dftx.pools
+    let prev = swap.fromTokenId.toString()
+    for (const poolId of pools) {
+      const id = poolId.id.toString()
+      const poolPair = await this.deFiDCache.getPoolPairInfo(id)
+      if (poolPair === undefined) {
+        break
+      }
+      const idTokenA = poolPair.idTokenA
+      const idTokenB = poolPair.idTokenB
+
+      // if this is current pool pair, if previous token is primary token, indicator = sell
+      if (id === swap.poolPairId) {
+        return idTokenA === prev
+      }
+      // set previous token as pair swapped out token
+      if (prev === idTokenA) {
+        prev = idTokenB
+      } else {
+        prev = idTokenA
+      }
+    }
+  }
+
   public async findSwapFromTo (height: number, txid: string, txno: number): Promise<{ from?: PoolSwapFromToData, to?: PoolSwapFromToData } | undefined> {
     const vouts = await this.voutMapper.query(txid, 1)
     const dftx = findPoolSwapDfTx(vouts)
@@ -386,6 +423,26 @@ export class PoolPairService {
       commission: commission.toNumber(),
       total: reward.plus(commission).toNumber()
     }
+  }
+}
+
+function findCompositeSwapDfTx (vouts: TransactionVout[]): CompositeSwap | undefined {
+  const hex = vouts[0].script.hex
+  const buffer = SmartBuffer.fromBuffer(Buffer.from(hex, 'hex'))
+  const stack = toOPCodes(buffer)
+  if (stack.length !== 2 || stack[1].type !== 'OP_DEFI_TX') {
+    return undefined
+  }
+
+  const dftx = (stack[1] as OP_DEFI_TX).tx
+  if (dftx === undefined) {
+    return undefined
+  }
+  switch (dftx.name) {
+    case CCompositeSwap.OP_NAME:
+      return dftx.data as CompositeSwap
+    default:
+      return undefined
   }
 }
 
