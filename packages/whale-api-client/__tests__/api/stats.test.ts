@@ -90,7 +90,7 @@ describe('stats', () => {
         emission: 7323.58,
         fee: 4,
         payback: 0,
-        total: 7327.58
+        total: 7323.58
       },
       tvl: {
         dex: 5853.942343505482,
