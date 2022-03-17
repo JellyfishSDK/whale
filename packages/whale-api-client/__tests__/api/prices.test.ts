@@ -529,7 +529,7 @@ describe('pricefeed with interval', () => {
       for (let i = 1; i < interval1Hour.length; i++) {
         const interval = interval1Hour[i]
         expect(interval.aggregated.time.end).toStrictEqual(prevStart)
-        prevStart = interval.aggregated.time.end
+        prevStart = interval.aggregated.time.start
       }
     }
 
