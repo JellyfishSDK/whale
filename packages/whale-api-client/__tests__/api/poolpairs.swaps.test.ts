@@ -10,7 +10,7 @@ let service: StubService
 let client: WhaleApiClient
 let testing: Testing
 
-beforeAll(async () => {
+beforeEach(async () => {
   container = new MasterNodeRegTestContainer()
   service = new StubService(container)
   client = new StubWhaleApiClient(service)
@@ -47,7 +47,7 @@ beforeAll(async () => {
   await testing.generate(1)
 })
 
-afterAll(async () => {
+afterEach(async () => {
   try {
     await service.stop()
   } finally {
@@ -56,19 +56,138 @@ afterAll(async () => {
 })
 
 describe('poolswap buy-sell indicator', () => {
-  it('should get swap poolpair buy or sell details', async () => {
-    await testing.rpc.poolpair.compositeSwap({
-      from: await testing.address('swap'),
-      tokenFrom: 'A',
-      amountFrom: 20,
-      to: await testing.address('swap'),
-      tokenTo: 'DFI'
-    })
-
+  it('should get pool swap details', async () => {
     await testing.rpc.poolpair.poolSwap({
       from: await testing.address('swap'),
       tokenFrom: 'C',
       amountFrom: 15,
+      to: await testing.address('swap'),
+      tokenTo: 'DFI'
+    })
+
+    const height = await container.getBlockCount()
+    await container.generate(1)
+    await service.waitForIndexedHeight(height)
+
+    const verbose: ApiPagedResponse<PoolSwapData> = await client.poolpairs.listPoolSwapsVerbose('6')
+    expect(verbose.hasNext).toStrictEqual(false)
+    expect([...verbose]).toStrictEqual([
+      {
+        id: expect.any(String),
+        txid: expect.stringMatching(/[0-f]{64}/),
+        txno: expect.any(Number),
+        poolPairId: '6',
+        sort: expect.any(String),
+        fromAmount: '15.00000000',
+        fromTokenId: 3,
+        block: {
+          hash: expect.stringMatching(/[0-f]{64}/),
+          height: expect.any(Number),
+          time: expect.any(Number),
+          medianTime: expect.any(Number)
+        },
+        from: {
+          address: expect.any(String),
+          symbol: 'C',
+          amount: '15.00000000',
+          displaySymbol: 'dC'
+        },
+        to: {
+          address: expect.any(String),
+          amount: '6.97674418',
+          symbol: 'DFI',
+          displaySymbol: 'DFI'
+        },
+        type: 'BUY'
+      }
+    ])
+  })
+
+  it('should get composite pool swap for 2 jumps', async () => {
+    await testing.rpc.poolpair.compositeSwap({
+      from: await testing.address('swap'),
+      tokenFrom: 'B',
+      amountFrom: 10,
+      to: await testing.address('swap'),
+      tokenTo: 'DFI'
+    })
+
+    const height = await container.getBlockCount()
+    await container.generate(1)
+    await service.waitForIndexedHeight(height)
+
+    const verbose5: ApiPagedResponse<PoolSwapData> = await client.poolpairs.listPoolSwapsVerbose('5')
+    expect(verbose5.hasNext).toStrictEqual(false)
+    expect([...verbose5]).toStrictEqual([
+      {
+        id: expect.any(String),
+        txid: expect.stringMatching(/[0-f]{64}/),
+        txno: expect.any(Number),
+        poolPairId: '5',
+        sort: expect.any(String),
+        fromAmount: '10.00000000',
+        fromTokenId: 2,
+        block: {
+          hash: expect.stringMatching(/[0-f]{64}/),
+          height: expect.any(Number),
+          time: expect.any(Number),
+          medianTime: expect.any(Number)
+        },
+        from: {
+          address: expect.any(String),
+          symbol: 'B',
+          amount: '10.00000000',
+          displaySymbol: 'dB'
+        },
+        to: {
+          address: expect.any(String),
+          amount: '2.32558139',
+          symbol: 'DFI',
+          displaySymbol: 'DFI'
+        },
+        type: 'BUY'
+      }
+    ])
+
+    const verbose6: ApiPagedResponse<PoolSwapData> = await client.poolpairs.listPoolSwapsVerbose('6')
+    expect(verbose6.hasNext).toStrictEqual(false)
+    expect([...verbose6]).toStrictEqual([
+      {
+        id: expect.any(String),
+        txid: expect.stringMatching(/[0-f]{64}/),
+        txno: expect.any(Number),
+        poolPairId: '6',
+        sort: expect.any(String),
+        fromAmount: '10.00000000',
+        fromTokenId: 2,
+        block: {
+          hash: expect.stringMatching(/[0-f]{64}/),
+          height: expect.any(Number),
+          time: expect.any(Number),
+          medianTime: expect.any(Number)
+        },
+        from: {
+          address: expect.any(String),
+          symbol: 'B',
+          amount: '10.00000000',
+          displaySymbol: 'dB'
+        },
+        to: {
+          address: expect.any(String),
+          amount: '2.32558139',
+          symbol: 'DFI',
+          displaySymbol: 'DFI'
+        },
+        type: 'BUY'
+      }
+    ])
+  })
+
+  it('should get composite pool swap for 3 jumps', async () => {
+    await testing.rpc.poolpair.compositeSwap({
+      from: await testing.address('swap'),
+      tokenFrom: 'A',
+      amountFrom: 20,
       to: await testing.address('swap'),
       tokenTo: 'DFI'
     })
@@ -146,34 +265,6 @@ describe('poolswap buy-sell indicator', () => {
     const verbose6: ApiPagedResponse<PoolSwapData> = await client.poolpairs.listPoolSwapsVerbose('6')
     expect(verbose6.hasNext).toStrictEqual(false)
     expect([...verbose6]).toStrictEqual([
-      {
-        id: expect.any(String),
-        txid: expect.stringMatching(/[0-f]{64}/),
-        txno: expect.any(Number),
-        poolPairId: '6',
-        sort: expect.any(String),
-        fromAmount: '15.00000000',
-        fromTokenId: 3,
-        block: {
-          hash: expect.stringMatching(/[0-f]{64}/),
-          height: expect.any(Number),
-          time: expect.any(Number),
-          medianTime: expect.any(Number)
-        },
-        from: {
-          address: expect.any(String),
-          symbol: 'C',
-          amount: '15.00000000',
-          displaySymbol: 'dC'
-        },
-        to: {
-          address: expect.any(String),
-          amount: '6.10591900',
-          symbol: 'DFI',
-          displaySymbol: 'DFI'
-        },
-        type: 'BUY'
-      },
       {
         id: expect.any(String),
         txid: expect.stringMatching(/[0-f]{64}/),
