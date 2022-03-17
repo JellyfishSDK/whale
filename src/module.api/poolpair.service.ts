@@ -244,8 +244,8 @@ export class PoolPairService {
       if (poolPairInfo === undefined) {
         return undefined
       }
-      const [, symbolB] = poolPairInfo.symbol.split('-')
-      if (swap.to?.symbol === symbolB) {
+      const idTokenA = parseInt(poolPairInfo.idTokenA)
+      if (swap.fromTokenId === idTokenA) {
         return SwapType.SELL
       }
       return SwapType.BUY
