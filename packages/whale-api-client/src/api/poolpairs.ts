@@ -154,6 +154,11 @@ export type PoolSwap = PoolSwapData
  */
 export type PoolSwapAggregated = PoolSwapAggregatedData
 
+export enum SwapType {
+  BUY = 'BUY',
+  SELL = 'SELL'
+}
+
 export interface PoolSwapData {
   id: string
   sort: string
@@ -175,7 +180,7 @@ export interface PoolSwapData {
   /**
    * To handle for optional value as Whale service might fail to resolve when indexing
    */
-  isSell?: boolean
+  type?: SwapType
 
   block: {
     hash: string

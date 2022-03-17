@@ -459,7 +459,7 @@ describe('poolswap', () => {
           symbol: 'C',
           displaySymbol: 'dC'
         },
-        isSell: true
+        type: 'SELL'
       },
       {
         id: expect.any(String),
@@ -487,7 +487,7 @@ describe('poolswap', () => {
           symbol: 'DFI',
           displaySymbol: 'DFI'
         },
-        isSell: true
+        type: 'SELL'
       },
       {
         id: expect.any(String),
@@ -515,7 +515,7 @@ describe('poolswap', () => {
           symbol: 'DFI',
           displaySymbol: 'DFI'
         },
-        isSell: true
+        type: 'SELL'
       }
     ])
 

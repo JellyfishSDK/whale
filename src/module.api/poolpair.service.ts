@@ -6,10 +6,13 @@ import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 import {
   AllSwappableTokensResult,
   BestSwapPathResult,
-  PoolPairData, PoolSwapData,
+  PoolPairData,
+  PoolSwapData,
   PoolSwapFromToData,
   SwapPathPoolPair,
-  SwapPathsResult, TokenIdentifier
+  SwapPathsResult,
+  SwapType,
+  TokenIdentifier
 } from '@whale-api-client/api/poolpairs'
 import { getBlockSubsidy } from '@src/module.api/subsidy'
 import { BlockMapper } from '@src/module.model/block'
@@ -232,7 +235,7 @@ export class PoolPairService {
     return value
   }
 
-  public async checkSwapIsSell (swap: PoolSwapData): Promise<boolean | undefined> {
+  public async checkSwapIsSell (swap: PoolSwapData): Promise<SwapType | undefined> {
     const vouts = await this.voutMapper.query(swap.txid, 1)
     const dftx = findCompositeSwapDfTx(vouts)
     // if dftx is undefined, no composite swap is returned so check for swap
@@ -242,7 +245,10 @@ export class PoolPairService {
         return undefined
       }
       const [,symbolB] = poolPairInfo.symbol.split('-')
-      return swap.to?.symbol === symbolB
+      if (swap.to?.symbol === symbolB) {
+        return SwapType.SELL
+      }
+      return SwapType.BUY
     }
 
     const pools = dftx.pools
@@ -258,7 +264,10 @@ export class PoolPairService {
 
       // if this is current pool pair, if previous token is primary token, indicator = sell
       if (id === swap.poolPairId) {
-        return idTokenA === prev
+        if (idTokenA === prev) {
+          return SwapType.SELL
+        }
+        return SwapType.BUY
       }
       // set previous token as pair swapped out token
       if (prev === idTokenA) {

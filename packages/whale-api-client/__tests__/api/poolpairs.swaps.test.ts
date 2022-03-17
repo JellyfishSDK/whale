@@ -65,6 +65,14 @@ describe('poolswap buy-sell indicator', () => {
       tokenTo: 'DFI'
     })
 
+    await testing.rpc.poolpair.poolSwap({
+      from: await testing.address('swap'),
+      tokenFrom: 'C',
+      amountFrom: 15,
+      to: await testing.address('swap'),
+      tokenTo: 'DFI'
+    })
+
     const height = await container.getBlockCount()
     await container.generate(1)
     await service.waitForIndexedHeight(height)
@@ -98,7 +106,7 @@ describe('poolswap buy-sell indicator', () => {
           symbol: 'DFI',
           displaySymbol: 'DFI'
         },
-        isSell: true
+        type: 'SELL'
       }
     ])
 
@@ -131,13 +139,41 @@ describe('poolswap buy-sell indicator', () => {
           symbol: 'DFI',
           displaySymbol: 'DFI'
         },
-        isSell: false
+        type: 'BUY'
       }
     ])
 
     const verbose6: ApiPagedResponse<PoolSwapData> = await client.poolpairs.listPoolSwapsVerbose('6')
     expect(verbose6.hasNext).toStrictEqual(false)
     expect([...verbose6]).toStrictEqual([
+      {
+        id: expect.any(String),
+        txid: expect.stringMatching(/[0-f]{64}/),
+        txno: expect.any(Number),
+        poolPairId: '6',
+        sort: expect.any(String),
+        fromAmount: '15.00000000',
+        fromTokenId: 3,
+        block: {
+          hash: expect.stringMatching(/[0-f]{64}/),
+          height: expect.any(Number),
+          time: expect.any(Number),
+          medianTime: expect.any(Number)
+        },
+        from: {
+          address: expect.any(String),
+          symbol: 'C',
+          amount: '15.00000000',
+          displaySymbol: 'dC'
+        },
+        to: {
+          address: expect.any(String),
+          amount: '6.10591900',
+          symbol: 'DFI',
+          displaySymbol: 'DFI'
+        },
+        type: 'BUY'
+      },
       {
         id: expect.any(String),
         txid: expect.stringMatching(/[0-f]{64}/),
@@ -164,7 +200,7 @@ describe('poolswap buy-sell indicator', () => {
           symbol: 'DFI',
           displaySymbol: 'DFI'
         },
-        isSell: false
+        type: 'BUY'
       }
     ])
   })
