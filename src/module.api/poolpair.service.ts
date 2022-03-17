@@ -19,7 +19,7 @@ import { BlockMapper } from '@src/module.model/block'
 import { TokenMapper } from '@src/module.model/token'
 import { PoolSwapAggregated, PoolSwapAggregatedMapper } from '@src/module.model/pool.swap.aggregated'
 import { PoolSwapAggregatedInterval } from '@src/module.indexer/model/dftx/pool.swap.aggregated'
-import { TransactionVout, TransactionVoutMapper } from '@src/module.model/transaction.vout'
+import { TransactionVoutMapper } from '@src/module.model/transaction.vout'
 import { SmartBuffer } from 'smart-buffer'
 import {
   CCompositeSwap,
@@ -39,6 +39,7 @@ import { PoolPairToken, PoolPairTokenMapper } from '@src/module.model/pool.pair.
 import { Interval } from '@nestjs/schedule'
 import { allSimplePaths } from 'graphology-simple-path'
 import { connectedComponents } from 'graphology-components'
+import { DfTx } from '@defichain/jellyfish-transaction/dist/script/dftx/dftx'
 
 @Injectable()
 export class PoolPairService {
@@ -235,16 +236,15 @@ export class PoolPairService {
     return value
   }
 
-  public async checkSwapIsSell (swap: PoolSwapData): Promise<SwapType | undefined> {
-    const vouts = await this.voutMapper.query(swap.txid, 1)
-    const dftx = findCompositeSwapDfTx(vouts)
+  public async checkSwapType (swap: PoolSwapData): Promise<SwapType | undefined> {
+    const dftx = await this.findCompositeSwapDfTx(swap.txid)
     // if dftx is undefined, no composite swap is returned so check for swap
     if (dftx === undefined) {
       const poolPairInfo = await this.deFiDCache.getPoolPairInfo(swap.poolPairId)
       if (poolPairInfo === undefined) {
         return undefined
       }
-      const [,symbolB] = poolPairInfo.symbol.split('-')
+      const [, symbolB] = poolPairInfo.symbol.split('-')
       if (swap.to?.symbol === symbolB) {
         return SwapType.SELL
       }
@@ -279,8 +279,7 @@ export class PoolPairService {
   }
 
   public async findSwapFromTo (height: number, txid: string, txno: number): Promise<{ from?: PoolSwapFromToData, to?: PoolSwapFromToData } | undefined> {
-    const vouts = await this.voutMapper.query(txid, 1)
-    const dftx = findPoolSwapDfTx(vouts)
+    const dftx = await this.findPoolSwapDfTx(txid)
     if (dftx === undefined) {
       return undefined
     }
@@ -306,6 +305,42 @@ export class PoolPairService {
       },
       to: findPoolSwapFromTo(history, false, parseDisplaySymbol(toToken))
     }
+  }
+
+  private async findCompositeSwapDfTx (txid: string): Promise<CompositeSwap | undefined> {
+    const dftx = await this.callDftx(txid)
+    if (dftx === undefined || dftx.name !== CCompositeSwap.OP_NAME) {
+      return undefined
+    }
+    return dftx.data as CompositeSwap
+  }
+
+  private async findPoolSwapDfTx (txid: string): Promise<PoolSwapDfTx | undefined> {
+    const dftx = await this.callDftx(txid)
+    if (dftx === undefined) {
+      return undefined
+    }
+    switch (dftx.name) {
+      case CPoolSwap.OP_NAME:
+        return (dftx.data as PoolSwapDfTx)
+
+      case CCompositeSwap.OP_NAME:
+        return (dftx.data as CompositeSwap).poolSwap
+
+      default:
+        return undefined
+    }
+  }
+
+  private async callDftx (txid: string): Promise<DfTx<any> | undefined> {
+    const vouts = await this.voutMapper.query(txid, 1)
+    const hex = vouts[0].script.hex
+    const buffer = SmartBuffer.fromBuffer(Buffer.from(hex, 'hex'))
+    const stack = toOPCodes(buffer)
+    if (stack.length !== 2 || stack[1].type !== 'OP_DEFI_TX') {
+      return undefined
+    }
+    return (stack[1] as OP_DEFI_TX).tx
   }
 
   private async getAccountHistory (address: string, height: number, txno: number): Promise<AccountHistory> {
@@ -432,51 +467,6 @@ export class PoolPairService {
       commission: commission.toNumber(),
       total: reward.plus(commission).toNumber()
     }
-  }
-}
-
-function findCompositeSwapDfTx (vouts: TransactionVout[]): CompositeSwap | undefined {
-  const hex = vouts[0].script.hex
-  const buffer = SmartBuffer.fromBuffer(Buffer.from(hex, 'hex'))
-  const stack = toOPCodes(buffer)
-  if (stack.length !== 2 || stack[1].type !== 'OP_DEFI_TX') {
-    return undefined
-  }
-
-  const dftx = (stack[1] as OP_DEFI_TX).tx
-  if (dftx === undefined) {
-    return undefined
-  }
-  switch (dftx.name) {
-    case CCompositeSwap.OP_NAME:
-      return dftx.data as CompositeSwap
-    default:
-      return undefined
-  }
-}
-
-function findPoolSwapDfTx (vouts: TransactionVout[]): PoolSwapDfTx | undefined {
-  const hex = vouts[0].script.hex
-  const buffer = SmartBuffer.fromBuffer(Buffer.from(hex, 'hex'))
-  const stack = toOPCodes(buffer)
-  if (stack.length !== 2 || stack[1].type !== 'OP_DEFI_TX') {
-    return undefined
-  }
-
-  const dftx = (stack[1] as OP_DEFI_TX).tx
-  if (dftx === undefined) {
-    return undefined
-  }
-
-  switch (dftx.name) {
-    case CPoolSwap.OP_NAME:
-      return (dftx.data as PoolSwapDfTx)
-
-    case CCompositeSwap.OP_NAME:
-      return (dftx.data as CompositeSwap).poolSwap
-
-    default:
-      return undefined
   }
 }
 
