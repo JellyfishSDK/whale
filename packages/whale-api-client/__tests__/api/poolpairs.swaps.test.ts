@@ -22,7 +22,8 @@ beforeEach(async () => {
 
   const tokens = ['A', 'B', 'C']
 
-  await testing.token.dfi({ amount: 10000 })
+  await testing.token.dfi({ address: await testing.address('swap'), amount: 10000 })
+  await container.generate(1)
 
   for (const token of tokens) {
     await container.waitForWalletBalanceGTE(110)
@@ -179,6 +180,86 @@ describe('poolswap buy-sell indicator', () => {
           displaySymbol: 'DFI'
         },
         type: 'BUY'
+      }
+    ])
+  })
+
+  it('should get composite pool swap for 2 jumps scenario 2', async () => {
+    await testing.rpc.poolpair.compositeSwap({
+      from: await testing.address('swap'),
+      tokenFrom: 'DFI',
+      amountFrom: 5,
+      to: await testing.address('swap'),
+      tokenTo: 'B'
+    })
+
+    const height = await container.getBlockCount()
+    await container.generate(1)
+    await service.waitForIndexedHeight(height)
+
+    const verbose5: ApiPagedResponse<PoolSwapData> = await client.poolpairs.listPoolSwapsVerbose('5')
+    expect(verbose5.hasNext).toStrictEqual(false)
+    expect([...verbose5]).toStrictEqual([
+      {
+        id: expect.any(String),
+        txid: expect.stringMatching(/[0-f]{64}/),
+        txno: expect.any(Number),
+        poolPairId: '5',
+        sort: expect.any(String),
+        fromAmount: '5.00000000',
+        fromTokenId: 0,
+        block: {
+          hash: expect.stringMatching(/[0-f]{64}/),
+          height: expect.any(Number),
+          time: expect.any(Number),
+          medianTime: expect.any(Number)
+        },
+        from: {
+          address: expect.any(String),
+          symbol: 'DFI',
+          amount: '5.00000000',
+          displaySymbol: 'DFI'
+        },
+        to: {
+          address: expect.any(String),
+          amount: '17.39130434',
+          symbol: 'B',
+          displaySymbol: 'dB'
+        },
+        type: 'SELL'
+      }
+    ])
+
+    const verbose6: ApiPagedResponse<PoolSwapData> = await client.poolpairs.listPoolSwapsVerbose('6')
+    expect(verbose6.hasNext).toStrictEqual(false)
+    expect([...verbose6]).toStrictEqual([
+      {
+        id: expect.any(String),
+        txid: expect.stringMatching(/[0-f]{64}/),
+        txno: expect.any(Number),
+        poolPairId: '6',
+        sort: expect.any(String),
+        fromAmount: '5.00000000',
+        fromTokenId: 0,
+        block: {
+          hash: expect.stringMatching(/[0-f]{64}/),
+          height: expect.any(Number),
+          time: expect.any(Number),
+          medianTime: expect.any(Number)
+        },
+        from: {
+          address: expect.any(String),
+          symbol: 'DFI',
+          amount: '5.00000000',
+          displaySymbol: 'DFI'
+        },
+        to: {
+          address: expect.any(String),
+          amount: '17.39130434',
+          symbol: 'B',
+          displaySymbol: 'dB'
+        },
+        type: 'SELL'
       }
     ])
   })
