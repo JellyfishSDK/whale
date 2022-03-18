@@ -245,16 +245,13 @@ export class PoolPairService {
         return undefined
       }
       const idTokenA = parseInt(poolPairInfo.idTokenA)
-      if (swap.fromTokenId === idTokenA) {
-        return SwapType.SELL
-      }
-      return SwapType.BUY
+      return idTokenA === swap.fromTokenId ? SwapType.SELL : SwapType.BUY
     }
 
     const pools = dftx.pools
     let prev = swap.fromTokenId.toString()
-    for (const poolId of pools) {
-      const id = poolId.id.toString()
+    for (const pool of pools) {
+      const id = pool.id.toString()
       const poolPair = await this.deFiDCache.getPoolPairInfo(id)
       if (poolPair === undefined) {
         break
@@ -264,17 +261,10 @@ export class PoolPairService {
 
       // if this is current pool pair, if previous token is primary token, indicator = sell
       if (id === swap.poolPairId) {
-        if (idTokenA === prev) {
-          return SwapType.SELL
-        }
-        return SwapType.BUY
+        return idTokenA === prev ? SwapType.SELL : SwapType.BUY
       }
       // set previous token as pair swapped out token
-      if (prev === idTokenA) {
-        prev = idTokenB
-      } else {
-        prev = idTokenA
-      }
+      prev = prev === idTokenA ? idTokenB : idTokenA
     }
   }
 
