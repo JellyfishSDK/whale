@@ -161,7 +161,8 @@ export class StatsController {
     const utxo = burnInfo.amount
     const account = findTokenBalance(tokens, 'DFI')
     const emission = burnInfo.emissionburn
-    return utxo.plus(account).plus(emission)
+    const fee = burnInfo.feeburn
+    return utxo.plus(account).plus(emission).plus(fee)
   }
 
   private async getPrice (): Promise<StatsData['price']> {
