@@ -52,7 +52,8 @@ export class PoolPairController {
       const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
       const apr = await this.poolPairService.getAPR(id, info)
       const volume = await this.poolPairService.getUSDVolume(id)
-      items.push(mapPoolPair(id, info, totalLiquidityUsd, apr, volume))
+      const rewardPct = await this.poolPairService.getRewardPct(id, info)
+      items.push(mapPoolPair(id, info, totalLiquidityUsd, apr, volume, rewardPct))
     }
 
     const response = ApiPagedResponse.of(items, query.size, item => {
@@ -78,7 +79,8 @@ export class PoolPairController {
     const totalLiquidityUsd = await this.poolPairService.getTotalLiquidityUsd(info)
     const apr = await this.poolPairService.getAPR(id, info)
     const volume = await this.poolPairService.getUSDVolume(id)
-    return mapPoolPair(String(id), info, totalLiquidityUsd, apr, volume)
+    const rewardPct = await this.poolPairService.getRewardPct(id, info)
+    return mapPoolPair(String(id), info, totalLiquidityUsd, apr, volume, rewardPct)
   }
 
   /**
@@ -184,7 +186,7 @@ export class PoolPairController {
   }
 }
 
-function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr'], volume?: PoolPairData['volume']): PoolPairData {
+function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNumber, apr?: PoolPairData['apr'], volume?: PoolPairData['volume'], rewardPct?: BigNumber): PoolPairData {
   const [symbolA, symbolB] = info.symbol.split('-')
 
   return {
@@ -218,7 +220,7 @@ function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNum
     },
     tradeEnabled: info.tradeEnabled,
     ownerAddress: info.ownerAddress,
-    rewardPct: info.rewardPct.toFixed(),
+    rewardPct: rewardPct?.toFixed() ?? info.rewardPct.toFixed(),
     customRewards: info.customRewards,
     creation: {
       tx: info.creationTx,

@@ -4,6 +4,8 @@ import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { createTestingApp, stopTestingApp, waitForIndexedHeight } from '@src/e2e.module'
 import { addPoolLiquidity, createPoolPair, createToken, getNewAddress, mintTokens } from '@defichain/testing'
 import { NotFoundException } from '@nestjs/common'
+import { Testing } from '@defichain/jellyfish-testing'
+import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -115,6 +117,49 @@ async function setup (): Promise<void> {
 
   await container.call('setgov', [{ LP_SPLITS: { 14: 1.0 } }])
   await container.generate(1)
+
+  // loan token LP setup
+  const testing = Testing.create(container)
+  const loanTokens = ['lA', 'lB', 'lC']
+  const oracleId = await container.call('appointoracle', [await testing.generateAddress(), [
+    { token: 'lA', currency: 'USD' },
+    { token: 'lB', currency: 'USD' },
+    { token: 'lC', currency: 'USD' }
+  ], 1])
+  await testing.generate(1)
+
+  await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
+    prices: [
+      { tokenAmount: '1@lA', currency: 'USD' },
+      { tokenAmount: '2@lB', currency: 'USD' },
+      { tokenAmount: '3@lC', currency: 'USD' }
+    ]
+  })
+  await testing.generate(1)
+
+  for (const lt of loanTokens) {
+    await testing.container.call('setloantoken', [{
+      symbol: lt,
+      fixedIntervalPriceId: `${lt}/USD`,
+      mintable: false,
+      interest: new BigNumber(0.02)
+    }])
+    await testing.generate(1)
+  }
+
+  for (const lt of loanTokens) {
+    await testing.poolpair.create({ tokenA: lt, tokenB: 'DFI' })
+    await testing.generate(1)
+  }
+
+  await container.call('setgov', [{
+    LP_LOAN_TOKEN_SPLITS: {
+      // 29: 0,
+      30: 0.4,
+      31: 0.6
+    }
+  }])
+  await testing.generate(1)
 }
 
 describe('list', () => {
@@ -123,7 +168,7 @@ describe('list', () => {
       size: 30
     })
 
-    expect(response.data.length).toStrictEqual(12)
+    expect(response.data.length).toStrictEqual(15)
     expect(response.page).toBeUndefined()
 
     expect(response.data[1]).toStrictEqual({
@@ -173,6 +218,13 @@ describe('list', () => {
         h24: 0
       }
     })
+
+    expect(response.data[12].symbol).toStrictEqual('lA-DFI')
+    expect(response.data[12].rewardPct).toStrictEqual('0')
+    expect(response.data[13].symbol).toStrictEqual('lB-DFI')
+    expect(response.data[13].rewardPct).toStrictEqual('0.4')
+    expect(response.data[14].symbol).toStrictEqual('lC-DFI')
+    expect(response.data[14].rewardPct).toStrictEqual('0.6')
   })
 
   it('should list with pagination', async () => {
@@ -185,11 +237,11 @@ describe('list', () => {
     expect(first.data[1].symbol).toStrictEqual('B-DFI')
 
     const next = await controller.list({
-      size: 11,
+      size: 14,
       next: first.page?.next
     })
 
-    expect(next.data.length).toStrictEqual(10)
+    expect(next.data.length).toStrictEqual(13)
     expect(next.page?.next).toBeUndefined()
     expect(next.data[0].symbol).toStrictEqual('C-DFI')
     expect(next.data[1].symbol).toStrictEqual('D-DFI')
@@ -261,11 +313,64 @@ describe('get', () => {
     })
   })
 
+  it('loan token pool "rewardPct" should use gov value', async () => {
+    const response = await controller.get('31')
+
+    expect(response).toStrictEqual({
+      id: '31',
+      symbol: 'lC-DFI',
+      displaySymbol: 'dlC-DFI',
+      name: '-Default Defi token',
+      status: true,
+      tokenA: {
+        id: expect.any(String),
+        symbol: 'lC',
+        reserve: '0',
+        blockCommission: '0',
+        displaySymbol: 'dlC'
+      },
+      tokenB: {
+        id: '0',
+        symbol: 'DFI',
+        reserve: '0',
+        blockCommission: '0',
+        displaySymbol: 'DFI'
+      },
+      apr: {
+        // legit empty pool value
+        reward: Infinity,
+        total: NaN,
+        commission: NaN
+      },
+      commission: '0',
+      totalLiquidity: {
+        token: '0',
+        usd: '0'
+      },
+      tradeEnabled: false,
+      ownerAddress: expect.any(String),
+      priceRatio: {
+        ab: '0',
+        ba: '0'
+      },
+      rewardPct: '0.6',
+      customRewards: undefined,
+      creation: {
+        tx: expect.any(String),
+        height: expect.any(Number)
+      },
+      volume: {
+        d30: 0,
+        h24: 0
+      }
+    })
+  })
+
   it('should throw error while getting non-existent poolpair', async () => {
     expect.assertions(2)
     try {
       await controller.get('999')
-    } catch (err) {
+    } catch (err: any) {
       expect(err).toBeInstanceOf(NotFoundException)
       expect(err.response).toStrictEqual({
         statusCode: 404,
@@ -679,6 +784,8 @@ describe('get list swappable tokens', () => {
       swappableTokens: [
         { id: '7', symbol: 'G', displaySymbol: 'dG' },
         { id: '0', symbol: 'DFI', displaySymbol: 'DFI' },
+        { id: '27', symbol: 'lB', displaySymbol: 'dlB' },
+        { id: '26', symbol: 'lA', displaySymbol: 'dlA' },
         { id: '24', symbol: 'USDT', displaySymbol: 'dUSDT' },
         { id: '6', symbol: 'F', displaySymbol: 'dF' },
         { id: '5', symbol: 'E', displaySymbol: 'dE' },

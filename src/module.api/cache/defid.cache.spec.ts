@@ -8,6 +8,8 @@ import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpa
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import { Cache } from 'cache-manager'
 import { CachePrefix } from '@src/module.api/cache/global.cache'
+import { Testing } from '@defichain/jellyfish-testing'
+import BigNumber from 'bignumber.js'
 
 const container = new MasterNodeRegTestContainer()
 let client: JsonRpcClient
@@ -176,5 +178,82 @@ describe('getTokenInfo', () => {
     const dfiKey = `${CachePrefix.TOKEN_INFO} 0`
     const dfi = await cache.get<TokenInfo>(dfiKey)
     expect(dfi).toBeUndefined()
+  })
+})
+
+describe('getStockLpRewardPct', () => {
+  beforeAll(async () => {
+    await container.start()
+    await container.waitForReady()
+    await container.waitForWalletCoinbaseMaturity()
+    client = new JsonRpcClient(await container.getCachedRpcUrl())
+
+    testingModule = await Test.createTestingModule({
+      imports: [CacheModule.register()],
+      providers: [
+        { provide: JsonRpcClient, useValue: client },
+        DeFiDCache
+      ]
+    }).compile()
+
+    cache = testingModule.get<Cache>(CACHE_MANAGER)
+    defiCache = testingModule.get(DeFiDCache)
+
+    await container.waitForWalletBalanceGTE(110)
+
+    await createToken(container, 'BAT') // 1
+    await container.generate(1)
+
+    await createPoolPair(container, 'BAT', 'DFI') // 2
+    await container.generate(1)
+
+    // loan pool pair setup
+    const testing = Testing.create(container)
+    const oracleId = await container.call('appointoracle', [await testing.generateAddress(), [
+      { token: 'lA', currency: 'USD' }, // 3
+      { token: 'lB', currency: 'USD' } // 4
+    ], 1])
+    await testing.generate(1)
+
+    await testing.rpc.oracle.setOracleData(oracleId, Math.floor(new Date().getTime() / 1000), {
+      prices: [
+        { tokenAmount: '1@lA', currency: 'USD' }, // 5
+        { tokenAmount: '2@lB', currency: 'USD' } // 6
+      ]
+    })
+    await testing.generate(1)
+
+    const loanTokens = ['lA', 'lB']
+    for (const lt of loanTokens) {
+      await testing.container.call('setloantoken', [{
+        symbol: lt,
+        fixedIntervalPriceId: `${lt}/USD`,
+        mintable: false,
+        interest: new BigNumber(0.02)
+      }])
+      await testing.generate(1)
+    }
+
+    for (const lt of loanTokens) {
+      await testing.poolpair.create({ tokenA: lt, tokenB: 'DFI' })
+      await testing.generate(1)
+    }
+
+    await container.call('setgov', [{ LP_LOAN_TOKEN_SPLITS: { 5: 1 } }])
+    await testing.generate(1)
+
+    // calling with non loan token pp returned with assumed zero %
+    const nonLoanLpPct = await defiCache.getStockLpRewardPct('3')
+    expect(nonLoanLpPct.toFixed()).toStrictEqual('0')
+
+    await container.stop()
+  })
+
+  it('should get from cache via get as container RPC is killed', async () => {
+    const lA = await defiCache.getStockLpRewardPct('5')
+    expect(lA.toFixed()).toStrictEqual('1')
+
+    const lB = await defiCache.getStockLpRewardPct('6')
+    expect(lB.toFixed()).toStrictEqual('0') // naturally zero when govvar have no value for this id
   })
 })
