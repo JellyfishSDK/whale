@@ -78,7 +78,7 @@ export class PoolPairPricesService {
    * @return {Promise<TokensBySymbol>}
    */
   private async getAllTokens (): Promise<TokensBySymbol> {
-    const tokens = await this.tokenMapper.query(200)
+    const tokens = await this.tokenMapper.query(Number.MAX_SAFE_INTEGER)
     const allTokenInfo: TokensBySymbol = {}
 
     for (const token of tokens) {
