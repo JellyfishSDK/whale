@@ -5,6 +5,7 @@ import { DeFiDCache } from '@src/module.api/cache/defid.cache'
 import { TokenInfo } from '@defichain/jellyfish-api-core/dist/category/token'
 import { DexPricesResult, TokenIdentifier } from '@whale-api-client/api/poolpairs'
 import { parseDisplaySymbol } from '@src/module.api/token.controller'
+import { SemaphoreCache } from '@src/module.api/cache/semaphore.cache'
 
 @Injectable()
 export class PoolPairPricesService {
@@ -12,12 +13,27 @@ export class PoolPairPricesService {
 
   constructor (
     private readonly poolSwapPathfindingService: PoolSwapPathFindingService,
+    private readonly tokenMapper: TokenMapper,
     private readonly defidCache: DeFiDCache,
-    private readonly tokenMapper: TokenMapper
+    protected readonly cache: SemaphoreCache
   ) {
   }
 
   async listDexPrices (denominationSymbol: string): Promise<DexPricesResult> {
+    const cached = await this.cache.get<DexPricesResult>(
+      'LATEST_DEX_PRICES',
+      async () => await this._listDexPrices(denominationSymbol),
+      {
+        ttl: 30 // 30s
+      }
+    )
+    if (cached !== undefined) {
+      return cached
+    }
+    return await this._listDexPrices(denominationSymbol)
+  }
+
+  private async _listDexPrices (denominationSymbol: string): Promise<DexPricesResult> {
     const dexPrices: DexPricesResult['dexPrices'] = {}
 
     // Do a check first to ensure the symbol provided is valid, to save on calling getAllTokens
@@ -73,7 +89,7 @@ export class PoolPairPricesService {
 
       const tokenInfo = await this.defidCache.getTokenInfo(token.tokenId.toString())
       if (tokenInfo === undefined) {
-        this.logger.error(`Could not find tokenInfo for ${token.tokenId} in deFiDCache`)
+        this.logger.error(`Could not find token info for id: ${token.tokenId}`)
         continue
       }
 
