@@ -734,7 +734,7 @@ describe('get list swappable tokens', () => {
 
 describe('latest dex prices', () => {
   it('should get latest dex prices - denomination: DFI', async () => {
-    const result = await controller.listPrices('DFI')
+    const result = await controller.listDexPrices('DFI')
     expect(result).toStrictEqual({
       denomination: { displaySymbol: 'DFI', id: '0', symbol: 'DFI' },
       dexPrices: {
@@ -795,7 +795,7 @@ describe('latest dex prices', () => {
   })
 
   it('should get latest dex prices - denomination: USDT', async () => {
-    const result = await controller.listPrices('USDT')
+    const result = await controller.listDexPrices('USDT')
     expect(result).toStrictEqual({
       denomination: { displaySymbol: 'dUSDT', id: '24', symbol: 'USDT' },
       dexPrices: {
@@ -856,8 +856,8 @@ describe('latest dex prices', () => {
   })
 
   it('should get consistent, mathematically sound dex prices - USDT and DFI', async () => {
-    const pricesInUSDT = await controller.listPrices('USDT')
-    const pricesInDFI = await controller.listPrices('DFI')
+    const pricesInUSDT = await controller.listDexPrices('USDT')
+    const pricesInDFI = await controller.listDexPrices('DFI')
 
     // 1 DFI === x USDT
     // 1 USDT === 1/x DFI
@@ -876,9 +876,9 @@ describe('latest dex prices', () => {
     // 1 B = m DFI
     // 1 DFI = 1/m B
     // hence 1 A = n DFI = n/m B
-    const pricesInDFI = await controller.listPrices('DFI')
-    const pricesInA = await controller.listPrices('A')
-    const pricesInB = await controller.listPrices('B')
+    const pricesInDFI = await controller.listDexPrices('DFI')
+    const pricesInA = await controller.listDexPrices('A')
+    const pricesInB = await controller.listDexPrices('B')
 
     // 1 A = n DFI
     const AInDfi = new BigNumber(pricesInDFI.dexPrices.A.denominationPrice) // n
@@ -913,11 +913,11 @@ describe('latest dex prices', () => {
 
   describe('param validation - denomination', () => {
     it('should throw error for invalid denomination', async () => {
-      await expect(controller.listPrices('aaaaa')).rejects.toThrowError('Could not find token with symbol \'aaaaa\'')
-      await expect(controller.listPrices('-1')).rejects.toThrowError('Could not find token with symbol \'-1\'')
+      await expect(controller.listDexPrices('aaaaa')).rejects.toThrowError('Could not find token with symbol \'aaaaa\'')
+      await expect(controller.listDexPrices('-1')).rejects.toThrowError('Could not find token with symbol \'-1\'')
 
       // endpoint is case-sensitive
-      await expect(controller.listPrices('dfi')).rejects.toThrowError('Could not find token with symbol \'dfi\'')
+      await expect(controller.listDexPrices('dfi')).rejects.toThrowError('Could not find token with symbol \'dfi\'')
     })
   })
 })

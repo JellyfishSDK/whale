@@ -99,7 +99,7 @@ export class PoolPairs {
    * Get all dex prices denominated in a given token
    * @param {string} [denomination='dUSD'] denomination
    */
-  async getDexPrices (denomination: string): Promise<DexPricesResult> {
+  async listDexPrices (denomination: string): Promise<DexPricesResult> {
     return await this.client.requestData('GET', `poolpairs/dexprices?denomination=${denomination}`)
   }
 }

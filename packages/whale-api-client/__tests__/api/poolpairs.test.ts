@@ -991,7 +991,7 @@ describe('poolpair - get dex prices', () => {
     // Let indexer catch up
     await service.waitForIndexedHeight(await testing.container.getBlockCount() - 1)
 
-    const response = await client.poolpairs.getDexPrices('DFI')
+    const response = await client.poolpairs.listDexPrices('DFI')
     await waitForExpect(async () => {
       expect(response).toStrictEqual({
         denomination: {

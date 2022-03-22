@@ -188,7 +188,7 @@ export class PoolPairController {
   }
 
   @Get('/dexprices')
-  async listPrices (
+  async listDexPrices (
     @Query('denomination') denomination: string
   ): Promise<DexPricesResult> {
     return await this.poolPairPricesService.listDexPrices(denomination)
