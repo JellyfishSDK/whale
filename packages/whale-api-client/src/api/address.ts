@@ -17,7 +17,7 @@ export class Address {
    * @param {number} n order of txn
    * @return {Promise<AddressHistory | undefined>}
    */
-  async getAccountHistory (address: string, height: number, n: number): Promise<AddressHistory> {
+  async getAccountHistory (address: string, height: number, n: number): Promise<AddressHistory | undefined> {
     return await this.client.requestData('GET', `address/${address}/history/${height}-${n}`)
   }
 
