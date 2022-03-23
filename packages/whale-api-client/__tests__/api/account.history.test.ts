@@ -3,6 +3,7 @@ import { Testing } from '@defichain/jellyfish-testing'
 import { StubWhaleApiClient } from '../stub.client'
 import { StubService } from '../stub.service'
 import { WhaleApiClient, WhaleApiException } from '../../src'
+import { RegTestFoundationKeys } from '@defichain/jellyfish-network'
 
 let container: MasterNodeRegTestContainer
 let service: StubService
@@ -173,7 +174,7 @@ describe('getAccountHistory', () => {
   it('should getAccountHistory', async () => {
     const history = await client.address.listAccountHistory(colAddr, 30)
     for (const h of history) {
-      if (['sent', 'receive', 'blockReward'].includes(h.type)) {
+      if (['sent', 'receive'].includes(h.type)) {
         continue
       }
       const acc = await client.address.getAccountHistory(colAddr, h.block.height, h.txn)
@@ -184,7 +185,7 @@ describe('getAccountHistory', () => {
 
     const poolHistory = await client.address.listAccountHistory(poolAddr, 30)
     for (const h of poolHistory) {
-      if (['sent', 'receive', 'blockReward'].includes(h.type)) {
+      if (['sent', 'receive'].includes(h.type)) {
         continue
       }
       const acc = await client.address.getAccountHistory(poolAddr, h.block.height, h.txn)
@@ -197,8 +198,16 @@ describe('getAccountHistory', () => {
   it('should get undefined as getting unsupport tx type - sent, received, blockReward', async () => {
     const history = await client.address.listAccountHistory(colAddr, 30)
     for (const h of history) {
-      if (['sent', 'receive', 'blockReward'].includes(h.type)) {
+      if (['sent', 'receive'].includes(h.type)) {
         const acc = await client.address.getAccountHistory(colAddr, h.block.height, h.txn)
+        expect(acc).toBeUndefined()
+      }
+    }
+
+    const operatorAccHistory = await container.call('listaccounthistory', [RegTestFoundationKeys[0].operator.address])
+    for (const h of operatorAccHistory) {
+      if (['blockReward'].includes(h.type)) {
+        const acc = await client.address.getAccountHistory(RegTestFoundationKeys[0].operator.address, h.blockHeight, h.txn)
         expect(acc).toBeUndefined()
       }
     }

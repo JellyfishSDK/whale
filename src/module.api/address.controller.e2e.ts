@@ -8,6 +8,7 @@ import { RpcApiError } from '@defichain/jellyfish-api-core'
 import { Testing } from '@defichain/jellyfish-testing'
 import { ForbiddenException } from '@nestjs/common'
 import BigNumber from 'bignumber.js'
+import { RegTestFoundationKeys } from '@defichain/jellyfish-network'
 
 const container = new MasterNodeRegTestContainer()
 let app: NestFastifyApplication
@@ -304,7 +305,7 @@ describe('getAccount', () => {
   it('should getAccount', async () => {
     const history = await controller.listAccountHistory(colAddr, { size: 30 })
     for (const h of history.data) {
-      if (['sent', 'receive', 'blockReward'].includes(h.type)) {
+      if (['sent', 'receive'].includes(h.type)) {
         continue
       }
       const acc = await controller.getAccountHistory(colAddr, `${h.block.height}-${h.txn}`)
@@ -315,7 +316,7 @@ describe('getAccount', () => {
 
     const poolHistory = await controller.listAccountHistory(poolAddr, { size: 30 })
     for (const h of poolHistory.data) {
-      if (['sent', 'receive', 'blockReward'].includes(h.type)) {
+      if (['sent', 'receive'].includes(h.type)) {
         continue
       }
       const acc = await controller.getAccountHistory(poolAddr, `${h.block.height}-${h.txn}`)
@@ -333,8 +334,16 @@ describe('getAccount', () => {
   it('should get undefined as getting unsupport tx type - sent, received, blockReward', async () => {
     const history = await controller.listAccountHistory(colAddr, { size: 30 })
     for (const h of history.data) {
-      if (['sent', 'receive', 'blockReward'].includes(h.type)) {
+      if (['sent', 'receive'].includes(h.type)) {
         const acc = await controller.getAccountHistory(colAddr, `${h.block.height}-${h.txn}`)
+        expect(acc).toBeUndefined()
+      }
+    }
+
+    const operatorAccHistory = await container.call('listaccounthistory', [RegTestFoundationKeys[0].operator.address])
+    for (const h of operatorAccHistory) {
+      if (['blockReward'].includes(h.type)) {
+        const acc = await controller.getAccountHistory(RegTestFoundationKeys[0].operator.address, `${h.blockHeight as string}-${h.txn as string}`)
         expect(acc).toBeUndefined()
       }
     }
