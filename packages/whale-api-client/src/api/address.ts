@@ -10,6 +10,18 @@ export class Address {
   }
 
   /**
+   * Get account history
+   *
+   * @param {string} address to get account history
+   *  @param {number} height block height of the account history
+   * @param {number} n order of txn
+   * @return {Promise<AddressHistory | undefined>}
+   */
+  async getAccountHistory (address: string, height: number, n: number): Promise<AddressHistory> {
+    return await this.client.requestData('GET', `address/${address}/history/${height}-${n}`)
+  }
+
+  /**
    * List account history
    *
    * @param {string} address to list account history

@@ -31,6 +31,20 @@ export class AddressController {
   ) {
   }
 
+  @Get('/history/:hn')
+  async getAccountHistory (
+    @Param('address') address: string,
+      @Param('hn') hn: string // ${height}-${transaction_no}
+  ): Promise<AddressHistory | undefined> {
+    const h = Number(hn.split('-')[0])
+    const n = Number(hn.split('-')[1])
+    const accountHistory = await this.rpcClient.account.getAccountHistory(address, h, n)
+    if (Object.keys(accountHistory).length === 0) {
+      return undefined
+    }
+    return mapAddressHistory(accountHistory)
+  }
+
   /**
    * @param {string} address to list participate account history
    * @param {PaginationQuery} query
@@ -81,7 +95,7 @@ export class AddressController {
       })
     }
 
-    const history = mapAddressHistory(list)
+    const history = list.map(each => mapAddressHistory(each))
 
     return ApiPagedResponse.of(history, query.size, item => {
       return `${item.txid}-${item.type}-${item.block.height}`
@@ -195,19 +209,17 @@ function mapAddressToken (id: string, tokenInfo: TokenInfo, value: BigNumber): A
   }
 }
 
-function mapAddressHistory (list: AccountHistory[]): AddressHistory[] {
-  return list.map(each => {
-    return {
-      owner: each.owner,
-      txid: each.txid,
-      txn: each.txn,
-      type: each.type,
-      amounts: each.amounts,
-      block: {
-        height: each.blockHeight,
-        hash: each.blockHash,
-        time: each.blockTime
-      }
+function mapAddressHistory (history: AccountHistory): AddressHistory {
+  return {
+    owner: history.owner,
+    txid: history.txid,
+    txn: history.txn,
+    type: history.type,
+    amounts: history.amounts,
+    block: {
+      height: history.blockHeight,
+      hash: history.blockHash,
+      time: history.blockTime
     }
-  })
+  }
 }

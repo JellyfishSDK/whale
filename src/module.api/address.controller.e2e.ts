@@ -209,6 +209,138 @@ describe('listAccountHistory', () => {
   })
 })
 
+describe('getAccount', () => {
+  beforeAll(async () => {
+    await container.start()
+    await container.waitForReady()
+    await container.waitForWalletCoinbaseMaturity()
+
+    colAddr = await testing.generateAddress()
+    usdcAddr = await testing.generateAddress()
+    poolAddr = await testing.generateAddress()
+    emptyAddr = await testing.generateAddress()
+
+    await testing.token.dfi({ address: colAddr, amount: 20000 })
+    await testing.generate(1)
+
+    await testing.token.create({ symbol: 'USDC', collateralAddress: colAddr })
+    await testing.generate(1)
+
+    await testing.token.mint({ symbol: 'USDC', amount: 10000 })
+    await testing.generate(1)
+
+    await testing.rpc.account.accountToAccount(colAddr, { [usdcAddr]: '10000@USDC' })
+    await testing.generate(1)
+
+    await testing.rpc.poolpair.createPoolPair({
+      tokenA: 'DFI',
+      tokenB: 'USDC',
+      commission: 0,
+      status: true,
+      ownerAddress: poolAddr
+    })
+    await testing.generate(1)
+
+    const poolPairsKeys = Object.keys(await testing.rpc.poolpair.listPoolPairs())
+    expect(poolPairsKeys.length).toStrictEqual(1)
+    dfiUsdc = poolPairsKeys[0]
+
+    // set LP_SPLIT, make LM gain rewards, MANDATORY
+    // ensure `no_rewards` flag turned on
+    // ensure do not get response without txid
+    await testing.container.call('setgov', [{ LP_SPLITS: { [dfiUsdc]: 1.0 } }])
+    await container.generate(1)
+
+    await testing.rpc.poolpair.addPoolLiquidity({
+      [colAddr]: '5000@DFI',
+      [usdcAddr]: '5000@USDC'
+    }, poolAddr)
+    await testing.generate(1)
+
+    await testing.rpc.poolpair.poolSwap({
+      from: colAddr,
+      tokenFrom: 'DFI',
+      amountFrom: 555,
+      to: usdcAddr,
+      tokenTo: 'USDC'
+    })
+    await testing.generate(1)
+
+    await testing.rpc.poolpair.removePoolLiquidity(poolAddr, '2@DFI-USDC')
+    await testing.generate(1)
+
+    // for testing same block pagination
+    await testing.token.create({ symbol: 'APE', collateralAddress: colAddr })
+    await testing.generate(1)
+
+    await testing.token.create({ symbol: 'CAT', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'DOG', collateralAddress: colAddr })
+    await testing.generate(1)
+
+    await testing.token.create({ symbol: 'ELF', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'FOX', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'RAT', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'BEE', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'COW', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'OWL', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'ELK', collateralAddress: colAddr })
+    await testing.generate(1)
+
+    await testing.token.create({ symbol: 'PIG', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'KOI', collateralAddress: colAddr })
+    await testing.token.create({ symbol: 'FLY', collateralAddress: colAddr })
+    await testing.generate(1)
+
+    app = await createTestingApp(container)
+    controller = app.get(AddressController)
+
+    await testing.generate(1)
+  })
+
+  afterAll(async () => {
+    await stopTestingApp(container, app)
+  })
+
+  it('should getAccount', async () => {
+    const history = await controller.listAccountHistory(colAddr, { size: 30 })
+    for (const h of history.data) {
+      if (['sent', 'receive', 'blockReward'].includes(h.type)) {
+        continue
+      }
+      const acc = await controller.getAccountHistory(colAddr, `${h.block.height}-${h.txn}`)
+      expect(acc?.owner).toStrictEqual(h.owner)
+      expect(acc?.txid).toStrictEqual(h.txid)
+      expect(acc?.txn).toStrictEqual(h.txn)
+    }
+
+    const poolHistory = await controller.listAccountHistory(poolAddr, { size: 30 })
+    for (const h of poolHistory.data) {
+      if (['sent', 'receive', 'blockReward'].includes(h.type)) {
+        continue
+      }
+      const acc = await controller.getAccountHistory(poolAddr, `${h.block.height}-${h.txn}`)
+      expect(acc?.owner).toStrictEqual(h.owner)
+      expect(acc?.txid).toStrictEqual(h.txid)
+      expect(acc?.txn).toStrictEqual(h.txn)
+    }
+  })
+
+  it('should get undefined as invalid height', async () => {
+    const acc = await controller.getAccountHistory(await container.getNewAddress(), `${'0'.repeat(64)}-1`)
+    expect(acc).toBeUndefined()
+  })
+
+  it('should get undefined as getting unsupport tx type - sent, received, blockReward', async () => {
+    const history = await controller.listAccountHistory(colAddr, { size: 30 })
+    for (const h of history.data) {
+      if (['sent', 'receive', 'blockReward'].includes(h.type)) {
+        const acc = await controller.getAccountHistory(colAddr, `${h.block.height}-${h.txn}`)
+        expect(acc).toBeUndefined()
+      }
+    }
+  })
+})
+
 describe('getBalance', () => {
   beforeAll(async () => {
     await container.start()
