@@ -13,7 +13,7 @@ export class Address {
    * Get account history
    *
    * @param {string} address to get account history
-   *  @param {number} height block height of the account history
+   * @param {number} height block height of the account history
    * @param {number} n order of txn
    * @return {Promise<AddressHistory | undefined>}
    */
