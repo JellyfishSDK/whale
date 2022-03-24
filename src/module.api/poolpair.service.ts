@@ -64,7 +64,7 @@ export class PoolPairService {
       if (Object.values(result).length > 0) {
         return Object.values(result)[0]
       }
-    } catch (err) {
+    } catch (err: any) {
       if (err?.payload?.message !== 'Pool not found') {
         throw err
       }
@@ -75,7 +75,7 @@ export class PoolPairService {
       if (Object.values(result).length > 0) {
         return Object.values(result)[0]
       }
-    } catch (err) {
+    } catch (err: any) {
       if (err?.payload?.message !== 'Pool not found') {
         throw err
       }
@@ -457,6 +457,23 @@ export class PoolPairService {
       commission: commission.toNumber(),
       total: reward.plus(commission).toNumber()
     }
+  }
+
+  async getRewardPct (id: string, info: PoolPairInfo): Promise<BigNumber> {
+    if (!info.rewardPct.isZero()) {
+      return info.rewardPct
+    }
+
+    const token = await this.deFiDCache.getTokenInfo(info.idTokenA)
+    if (token === undefined) {
+      throw new Error(`Pool ${id} not found`)
+    }
+
+    if (!token.isLoanToken) {
+      return new BigNumber(0)
+    }
+
+    return await this.deFiDCache.getStockLpRewardPct(id)
   }
 }
 

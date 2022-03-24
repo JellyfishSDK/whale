@@ -5,6 +5,7 @@ import { TokenInfo, TokenResult } from '@defichain/jellyfish-api-core/dist/categ
 import { CachePrefix, GlobalCache } from '@src/module.api/cache/global.cache'
 import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import { GetLoanSchemeResult } from '@defichain/jellyfish-api-core/dist/category/loan'
+import BigNumber from 'bignumber.js'
 
 @Injectable()
 export class DeFiDCache extends GlobalCache {
@@ -75,5 +76,32 @@ export class DeFiDCache extends GlobalCache {
       }
       throw err
     }
+  }
+
+  async getStockLpRewardPct (poolId: string): Promise<BigNumber> {
+    const all = (await this.get<Record<string, BigNumber>>(
+      CachePrefix.GOVERNANCE,
+      'LP_LOAN_TOKEN_SPLITS',
+      this.fetchAllStockLpRewardPct.bind(this))
+    ) as Record<string, BigNumber>
+
+    const thisPool = all[poolId]
+    return thisPool === undefined ? new BigNumber(0) : new BigNumber(thisPool)
+  }
+
+  private async fetchAllStockLpRewardPct (): Promise<Record<string, BigNumber>> {
+    const { LP_LOAN_TOKEN_SPLITS: rewardPct } = await this.rpcClient.masternode.getGov('LP_LOAN_TOKEN_SPLITS')
+    if (rewardPct === undefined) {
+      // unexpected (absolutely existed in prod)
+      throw new Error('LP_LOAN_TOKEN_SPLITS govvar missing')
+    }
+
+    const tokenIds = Object.keys(rewardPct)
+    const result: Record<string, BigNumber> = {}
+    tokenIds.forEach(t => {
+      result[t] = new BigNumber(rewardPct[t])
+    })
+
+    return result
   }
 }
