@@ -22,7 +22,7 @@ jobs:
           npm i
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@dcd5fd746d53dd8de555c0f10bca6c35628be47a
+        uses: peter-evans/create-pull-request@d6d5519d05f5814158ef015b8448f2f74648c421
         with:
           token: ${{ secrets.DEFICHAIN_BOT_GITHUB_TOKEN }}
           labels: kind/dependencies
