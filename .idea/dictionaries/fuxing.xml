@@ -5,6 +5,7 @@
       <w>acindex</w>
       <w>amkheight</w>
       <w>anyonecanpay</w>
+      <w>auctionburn</w>
       <w>bayfrontgardensheight</w>
       <w>bayfrontheight</w>
       <w>bayfrontmarinaheight</w>
@@ -39,18 +40,24 @@
       <w>defichain</w>
       <w>defid</w>
       <w>devnet</w>
+      <w>dexfeetokens</w>
+      <w>dfipaybackfee</w>
+      <w>dfipaybacktokens</w>
       <w>dftx</w>
       <w>dockerode</w>
       <w>dogfooding</w>
       <w>dummypos</w>
       <w>dumpprivkey</w>
       <w>dusd</w>
+      <w>emissionburn</w>
       <w>equalverify</w>
       <w>eunos</w>
+      <w>feeburn</w>
       <w>fromaltstack</w>
       <w>fullstackninja</w>
       <w>fuxingloh</w>
       <w>generatetoaddress</w>
+      <w>getaccounthistory</w>
       <w>getaddressinfo</w>
       <w>getbalance</w>
       <w>getblock</w>
@@ -58,6 +65,7 @@
       <w>getblockcount</w>
       <w>getblockhash</w>
       <w>getblockstats</w>
+      <w>getburninfo</w>
       <w>getconnectioncount</w>
       <w>getgov</w>
       <w>getmintinginfo</w>
@@ -97,6 +105,7 @@
       <w>listaccounthistory</w>
       <w>listaccounts</w>
       <w>listaddressgroupings</w>
+      <w>listcommunitybalances</w>
       <w>listpoolpairs</w>
       <w>listpoolshares</w>
       <w>listtokens</w>
@@ -128,10 +137,12 @@
       <w>numequal</w>
       <w>numequalverify</w>
       <w>numnotequal</w>
+      <w>paybackburn</w>
       <w>paytxfee</w>
       <w>pooledtx</w>
       <w>poolpair</w>
       <w>poolpairs</w>
+      <w>poolswap</w>
       <w>previousblockhash</w>
       <w>prevout</w>
       <w>prevouts</w>
@@ -176,6 +187,7 @@
       <w>txid</w>
       <w>txindex</w>
       <w>txinwitness</w>
+      <w>txno</w>
       <w>txnotokens</w>
       <w>txns</w>
       <w>uacomment</w>
@@ -183,6 +195,7 @@
       <w>utxo</w>
       <w>utxos</w>
       <w>utxostoaccount</w>
+      <w>validateaddress</w>
       <w>varint</w>
       <w>verif</w>
       <w>verificationprogress</w>

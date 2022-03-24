@@ -16,7 +16,12 @@ import { TokenController } from '@src/module.api/token.controller'
 import { BlockController } from '@src/module.api/block.controller'
 import { MasternodeController } from '@src/module.api/masternode.controller'
 import { ConfigService } from '@nestjs/config'
-import { NetworkName } from '@defichain/jellyfish-network'
+import {
+  BlockSubsidy,
+  MainNetCoinbaseSubsidyOptions,
+  NetworkName,
+  TestNetCoinbaseSubsidyOptions
+} from '@defichain/jellyfish-network'
 import { OracleController } from '@src/module.api/oracle.controller'
 import { PriceController } from '@src/module.api/price.controller'
 import { StatsController } from '@src/module.api/stats.controller'
@@ -24,6 +29,8 @@ import { FeeController } from '@src/module.api/fee.controller'
 import { RawtxController } from '@src/module.api/rawtx.controller'
 import { LoanController } from '@src/module.api/loan.controller'
 import { LoanVaultService } from '@src/module.api/loan.vault.service'
+import { PoolSwapPathFindingService } from './poolswap.pathfinding.service'
+import { PoolPairPricesService } from '@src/module.api/poolpair.prices.service'
 
 /**
  * Exposed ApiModule for public interfacing
@@ -61,8 +68,22 @@ import { LoanVaultService } from '@src/module.api/loan.vault.service'
     DeFiDCache,
     SemaphoreCache,
     PoolPairService,
+    PoolSwapPathFindingService,
+    PoolPairPricesService,
     MasternodeService,
-    LoanVaultService
+    LoanVaultService,
+    {
+      provide: BlockSubsidy,
+      useFactory: (configService: ConfigService): BlockSubsidy => {
+        switch (configService.get<string>('network')) {
+          case 'mainnet':
+            return new BlockSubsidy(MainNetCoinbaseSubsidyOptions)
+          default:
+            return new BlockSubsidy(TestNetCoinbaseSubsidyOptions)
+        }
+      },
+      inject: [ConfigService]
+    }
   ]
 })
 export class ApiModule {
