@@ -308,7 +308,7 @@ describe('getAccount', () => {
       if (['sent', 'receive'].includes(h.type)) {
         continue
       }
-      const acc = await controller.getAccountHistory(colAddr, `${h.block.height}-${h.txn}`)
+      const acc = await controller.getAccountHistory(colAddr, h.block.height, h.txn)
       expect(acc?.owner).toStrictEqual(h.owner)
       expect(acc?.txid).toStrictEqual(h.txid)
       expect(acc?.txn).toStrictEqual(h.txn)
@@ -319,7 +319,7 @@ describe('getAccount', () => {
       if (['sent', 'receive'].includes(h.type)) {
         continue
       }
-      const acc = await controller.getAccountHistory(poolAddr, `${h.block.height}-${h.txn}`)
+      const acc = await controller.getAccountHistory(poolAddr, h.block.height, h.txn)
       expect(acc?.owner).toStrictEqual(h.owner)
       expect(acc?.txid).toStrictEqual(h.txid)
       expect(acc?.txn).toStrictEqual(h.txn)
@@ -327,7 +327,7 @@ describe('getAccount', () => {
   })
 
   it('should get undefined as invalid height', async () => {
-    const acc = await controller.getAccountHistory(await container.getNewAddress(), `${'0'.repeat(64)}-1`)
+    const acc = await controller.getAccountHistory(await container.getNewAddress(), Number(`${'0'.repeat(64)}`), 1)
     expect(acc).toBeUndefined()
   })
 
@@ -335,7 +335,7 @@ describe('getAccount', () => {
     const history = await controller.listAccountHistory(colAddr, { size: 30 })
     for (const h of history.data) {
       if (['sent', 'receive'].includes(h.type)) {
-        const acc = await controller.getAccountHistory(colAddr, `${h.block.height}-${h.txn}`)
+        const acc = await controller.getAccountHistory(colAddr, h.block.height, h.txn)
         expect(acc).toBeUndefined()
       }
     }
@@ -343,7 +343,7 @@ describe('getAccount', () => {
     const operatorAccHistory = await container.call('listaccounthistory', [RegTestFoundationKeys[0].operator.address])
     for (const h of operatorAccHistory) {
       if (['blockReward'].includes(h.type)) {
-        const acc = await controller.getAccountHistory(RegTestFoundationKeys[0].operator.address, `${h.blockHeight as string}-${h.txn as string}`)
+        const acc = await controller.getAccountHistory(RegTestFoundationKeys[0].operator.address, h.blockHeight, h.txn)
         expect(acc).toBeUndefined()
       }
     }

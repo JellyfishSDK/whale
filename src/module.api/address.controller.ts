@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js'
-import { ConflictException, Controller, ForbiddenException, Get, Inject, Param, Query } from '@nestjs/common'
+import { ConflictException, Controller, ForbiddenException, Get, Inject, Param, ParseIntPipe, Query } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
@@ -31,14 +31,13 @@ export class AddressController {
   ) {
   }
 
-  @Get('/history/:hn')
+  @Get('/history/:height/:txno')
   async getAccountHistory (
     @Param('address') address: string,
-      @Param('hn') hn: string // ${height}-${transaction_no}
+      @Param('height', ParseIntPipe) height: number,
+      @Param('txno', ParseIntPipe) txno: number
   ): Promise<AddressHistory | undefined> {
-    const h = Number(hn.split('-')[0])
-    const n = Number(hn.split('-')[1])
-    const accountHistory = await this.rpcClient.account.getAccountHistory(address, h, n)
+    const accountHistory = await this.rpcClient.account.getAccountHistory(address, height, txno)
     if (Object.keys(accountHistory).length === 0) {
       return undefined
     }
