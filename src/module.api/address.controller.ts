@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js'
-import { ConflictException, Controller, ForbiddenException, Get, Inject, Param, ParseIntPipe, Query } from '@nestjs/common'
+import { BadRequestException, ConflictException, Controller, ForbiddenException, Get, Inject, NotFoundException, Param, ParseIntPipe, Query } from '@nestjs/common'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { ApiPagedResponse } from '@src/module.api/_core/api.paged.response'
 import { DeFiDCache } from '@src/module.api/cache/defid.cache'
@@ -36,12 +36,19 @@ export class AddressController {
     @Param('address') address: string,
       @Param('height', ParseIntPipe) height: number,
       @Param('txno', ParseIntPipe) txno: number
-  ): Promise<AddressHistory | undefined> {
-    const accountHistory = await this.rpcClient.account.getAccountHistory(address, height, txno)
-    if (Object.keys(accountHistory).length === 0) {
-      return undefined
+  ): Promise<AddressHistory> {
+    try {
+      const accountHistory = await this.rpcClient.account.getAccountHistory(address, height, txno)
+      if (Object.keys(accountHistory).length === 0) {
+        throw new NotFoundException('Record not found')
+      }
+      return mapAddressHistory(accountHistory)
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err
+      }
+      throw new BadRequestException(err)
     }
-    return mapAddressHistory(accountHistory)
   }
 
   /**

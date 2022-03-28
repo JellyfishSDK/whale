@@ -213,7 +213,6 @@ describe('listAccountHistory', () => {
 describe('getAccount', () => {
   beforeAll(async () => {
     await container.start()
-    await container.waitForReady()
     await container.waitForWalletCoinbaseMaturity()
 
     colAddr = await testing.generateAddress()
@@ -326,25 +325,37 @@ describe('getAccount', () => {
     }
   })
 
-  it('should get undefined as invalid height', async () => {
-    const acc = await controller.getAccountHistory(await container.getNewAddress(), Number(`${'0'.repeat(64)}`), 1)
-    expect(acc).toBeUndefined()
+  it('should be failed for non-existence data', async () => {
+    const promise = controller.getAccountHistory(await container.getNewAddress(), Number(`${'0'.repeat(64)}`), 1)
+    await expect(promise).rejects.toThrow('Record not found')
   })
 
-  it('should get undefined as getting unsupport tx type - sent, received, blockReward', async () => {
+  it('should be failed as invalid height', async () => {
+    { // NaN
+      const promise = controller.getAccountHistory(await container.getNewAddress(), Number('NotANumber'), 1)
+      await expect(promise).rejects.toThrow('JSON value is not an integer as expected')
+    }
+
+    { // negative height
+      const promise = controller.getAccountHistory(await container.getNewAddress(), -1, 1)
+      await expect(promise).rejects.toThrow('Record not found')
+    }
+  })
+
+  it('should be failed as getting unsupport tx type - sent, received, blockReward', async () => {
     const history = await controller.listAccountHistory(colAddr, { size: 30 })
     for (const h of history.data) {
       if (['sent', 'receive'].includes(h.type)) {
-        const acc = await controller.getAccountHistory(colAddr, h.block.height, h.txn)
-        expect(acc).toBeUndefined()
+        const promise = controller.getAccountHistory(colAddr, h.block.height, h.txn)
+        await expect(promise).rejects.toThrow('Record not found')
       }
     }
 
     const operatorAccHistory = await container.call('listaccounthistory', [RegTestFoundationKeys[0].operator.address])
     for (const h of operatorAccHistory) {
       if (['blockReward'].includes(h.type)) {
-        const acc = await controller.getAccountHistory(RegTestFoundationKeys[0].operator.address, h.blockHeight, h.txn)
-        expect(acc).toBeUndefined()
+        const promise = controller.getAccountHistory(RegTestFoundationKeys[0].operator.address, h.blockHeight, h.txn)
+        await expect(promise).rejects.toThrow('Record not found')
       }
     }
   })

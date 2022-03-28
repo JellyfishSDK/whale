@@ -195,20 +195,20 @@ describe('getAccountHistory', () => {
     }
   })
 
-  it('should get undefined as getting unsupport tx type - sent, received, blockReward', async () => {
+  it('should be failed as getting unsupport tx type - sent, received, blockReward', async () => {
     const history = await client.address.listAccountHistory(colAddr, 30)
     for (const h of history) {
       if (['sent', 'receive'].includes(h.type)) {
-        const acc = await client.address.getAccountHistory(colAddr, h.block.height, h.txn)
-        expect(acc).toBeUndefined()
+        const promise = client.address.getAccountHistory(colAddr, h.block.height, h.txn)
+        await expect(promise).rejects.toThrow('Record not found')
       }
     }
 
     const operatorAccHistory = await container.call('listaccounthistory', [RegTestFoundationKeys[0].operator.address])
     for (const h of operatorAccHistory) {
       if (['blockReward'].includes(h.type)) {
-        const acc = await client.address.getAccountHistory(RegTestFoundationKeys[0].operator.address, h.blockHeight, h.txn)
-        expect(acc).toBeUndefined()
+        const promise = client.address.getAccountHistory(RegTestFoundationKeys[0].operator.address, h.blockHeight, h.txn)
+        await expect(promise).rejects.toThrow('Record not found')
       }
     }
   })
