@@ -138,6 +138,8 @@
       <w>numequalverify</w>
       <w>numnotequal</w>
       <w>paybackburn</w>
+      <w>paybackfees</w>
+      <w>paybacktokens</w>
       <w>paytxfee</w>
       <w>pooledtx</w>
       <w>poolpair</w>
