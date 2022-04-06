@@ -120,6 +120,17 @@ async function setup (): Promise<void> {
     address: await testing.address('swap'),
     amount: 20
   })
+
+  await createToken(container, 'BURN')
+  await createPoolPair(container, 'BURN', 'DFI', { status: false })
+  await mintTokens(container, 'BURN', { mintAmount: 1 })
+  await addPoolLiquidity(container, {
+    tokenA: 'BURN',
+    amountA: 1,
+    tokenB: 'DFI',
+    amountB: 1,
+    shareAddress: await getNewAddress(container)
+  })
 }
 
 describe('poolpair info', () => {
