@@ -3,7 +3,7 @@ import { Cache } from 'cache-manager'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 import { TokenInfo, TokenResult } from '@defichain/jellyfish-api-core/dist/category/token'
 import { CachePrefix, GlobalCache } from '@src/module.api/cache/global.cache'
-import { PoolPairInfo } from '@defichain/jellyfish-api-core/dist/category/poolpair'
+import { PoolPairInfo, PoolPairsResult } from '@defichain/jellyfish-api-core/dist/category/poolpair'
 import { GetLoanSchemeResult } from '@defichain/jellyfish-api-core/dist/category/loan'
 
 @Injectable()
@@ -58,22 +58,47 @@ export class DeFiDCache extends GlobalCache {
   }
 
   async getPoolPairInfo (id: string): Promise<PoolPairInfo | undefined> {
-    return await this.get<PoolPairInfo>(CachePrefix.POOL_PAIR_INFO, id, this.fetchPoolPairInfo.bind(this))
+    const poolPairsById = await this.listPoolPairs()
+    if (poolPairsById === undefined) {
+      return undefined
+    }
+    return poolPairsById[id]
   }
 
-  private async fetchPoolPairInfo (id: string): Promise<PoolPairInfo | undefined> {
-    try {
-      const result = await this.rpcClient.poolpair.getPoolPair(id)
-      if (result[id] === undefined) {
-        return undefined
+  async listPoolPairs (): Promise<PoolPairsResult | undefined> {
+    return await this.get<PoolPairsResult>(CachePrefix.POOL_PAIRS, '*', this.fetchPoolPairs.bind(this),
+      {
+        ttl: 60
       }
-      return result[id]
-    } catch (err: any) {
-      /* istanbul ignore else */
-      if (err?.payload?.message === 'Pool not found') {
-        return undefined
+    )
+  }
+
+  private async fetchPoolPairs (): Promise<PoolPairsResult> {
+    const result: PoolPairsResult = {}
+    let next: number | null = 0
+
+    // Follow pagination chain until the end
+    while (true) {
+      const poolPairs: PoolPairsResult = await this.rpcClient.poolpair.listPoolPairs({
+        start: next,
+        including_start: next === 0, // only for the first
+        limit: 1000
+      }, true)
+
+      const poolPairIds: string[] = Object.keys(poolPairs)
+
+      // At the end of pagination chain - no more data to fetch
+      if (poolPairIds.length === 0) {
+        break
       }
-      throw err
+
+      // Add to results
+      for (const poolPairId of poolPairIds) {
+        result[poolPairId] = poolPairs[poolPairId]
+      }
+      next = Number(poolPairIds[poolPairIds.length - 1])
     }
+
+    return result
   }
 }
