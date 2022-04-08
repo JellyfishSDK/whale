@@ -15,7 +15,7 @@ let cache: Cache
 let defiCache: DeFiDCache
 let testingModule: TestingModule
 
-describe('getPoolPairInfo', () => {
+describe.skip('getPoolPairInfo', () => {
   beforeAll(async () => {
     await container.start()
     await container.waitForReady()
