@@ -58,19 +58,44 @@ export class DeFiDCache extends GlobalCache {
   }
 
   async getPoolPairInfo (id: string): Promise<PoolPairInfo | undefined> {
-    const poolPairsById = await this.listPoolPairs()
+    return await this.get<PoolPairInfo>(CachePrefix.POOL_PAIR_INFO, id, this.fetchPoolPairInfo.bind(this))
+  }
+
+  /**
+   * Retrieve poolPair info from cached list of poolPairs as getPoolPair rpc
+   * tends to be more expensive
+   * @param {string} id - id of the poolPair
+   */
+  async getPoolPairInfoFromPoolPairs (id: string): Promise<PoolPairInfo | undefined> {
+    const poolPairsById = await this.listPoolPairs(60)
     if (poolPairsById === undefined) {
       return undefined
     }
     return poolPairsById[id]
   }
 
-  async listPoolPairs (): Promise<PoolPairsResult | undefined> {
+  async listPoolPairs (ttlSeconds: number): Promise<PoolPairsResult | undefined> {
     return await this.get<PoolPairsResult>(CachePrefix.POOL_PAIRS, '*', this.fetchPoolPairs.bind(this),
       {
-        ttl: 60
+        ttl: ttlSeconds
       }
     )
+  }
+
+  private async fetchPoolPairInfo (id: string): Promise<PoolPairInfo | undefined> {
+    try {
+      const result = await this.rpcClient.poolpair.getPoolPair(id)
+      if (result[id] === undefined) {
+        return undefined
+      }
+      return result[id]
+    } catch (err: any) {
+      /* istanbul ignore else */
+      if (err?.payload?.message === 'Pool not found') {
+        return undefined
+      }
+      throw err
+    }
   }
 
   private async fetchPoolPairs (): Promise<PoolPairsResult> {
