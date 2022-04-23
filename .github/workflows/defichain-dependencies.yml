@@ -31,7 +31,7 @@ jobs:
           labels: kind/dependencies
           committer: DeFiChain Bot <github-bot@defichain.com>
           author: DeFiChain Bot <github-bot@defichain.com>
-          title: Bump @defichain/jellyfish dependencies
+          title: "bump(deps): @defichain/* dependencies"
           commit-message: Bump @defichain/jellyfish dependencies
           body: |
             #### What kind of PR is this?:
