@@ -85,7 +85,7 @@ jobs:
         with:
           push: false
           platforms: ${{ matrix.platform }}
-          tags: ghcr.io/defich/whale:latest
+          tags: ghcr.io/jellyfishsdk/whale:latest
 
   docker-sanity:
     needs: [ build, lint ]
