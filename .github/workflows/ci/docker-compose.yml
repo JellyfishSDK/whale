@@ -35,7 +35,7 @@ services:
 
   defi-whale:
     build: ../../..
-    image: ghcr.io/defich/whale:latest
+    image: ghcr.io/jellyfishsdk/whale:latest
     ports:
       - "3000:3000"
     depends_on:

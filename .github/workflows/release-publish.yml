@@ -52,8 +52,8 @@ jobs:
             linux/amd64
             linux/arm64
           tags: |
-            ghcr.io/defich/whale:latest
-            ghcr.io/defich/whale:${{ steps.version.outputs.result }}
+            ghcr.io/jellyfishsdk/whale:latest
+            ghcr.io/jellyfishsdk/whale:${{ steps.version.outputs.result }}
 
 
   npm:

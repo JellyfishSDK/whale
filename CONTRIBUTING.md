@@ -22,7 +22,7 @@ TODO comments should usually include the author's github username in parentheses
 
 ## Code of conduct
 
-Please follow the guidelines outlined at https://github.com/DeFiCh/.github/blob/main/CODE_OF_CONDUCT.md
+Please follow the guidelines outlined at https://github.com/JellyfishSDK/.github/blob/main/CODE_OF_CONDUCT.md
 
 ## Explicit over implicit
 
