@@ -70,7 +70,7 @@
     "@nestjs/schematics": "^8.0.8",
     "@nestjs/testing": "^8.4.2",
     "@types/cache-manager": "^3.4.2",
-    "@types/cron": "^1.7.3",
+    "@types/cron": "^2.0.0",
     "@types/jest": "^27.4.1",
     "@types/level": "^6.0.0",
     "@types/lossless-json": "^1.0.1",
