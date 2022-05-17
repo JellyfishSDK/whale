@@ -30,7 +30,7 @@ export class StatsController {
   async get (): Promise<StatsData> {
     const block = requireValue(await this.blockMapper.getHighest(), 'block')
     const burned = await this.cachedGet('burned', this.getBurned.bind(this), 1806)
-    const burnedTotal = await this.cachedGet('Controller.supply.getBurnedTotal', this.getBurnedTotal.bind(this), 1899)
+    const burnedTotal = await this.getCachedBurnTotal()
     return {
       count: {
         ...await this.cachedGet('count', this.getCount.bind(this), 1801),
@@ -58,13 +58,13 @@ export class StatsController {
 
     const max = 1200000000
     const total = this.blockSubsidy.getSupply(height).div(100000000)
-    const burned = await this.cachedGet('Controller.supply.getBurnedTotal', this.getBurnedTotal.bind(this), 1806)
-    const circulating = total.minus(burned)
+    const burnedTotal = await this.getCachedBurnTotal()
+    const circulating = total.minus(burnedTotal)
 
     return {
       max: max,
       total: total.gt(max) ? max : total.toNumber(), // as emission burn is taken into the 1.2b calculation post eunos
-      burned: burned.toNumber(),
+      burned: burnedTotal.toNumber(),
       circulating: circulating.toNumber()
     }
   }
@@ -76,10 +76,14 @@ export class StatsController {
     }, 666)
   }
 
-  async getLoanInfo (): Promise<GetLoanInfoResult> {
+  private async getLoanInfo (): Promise<GetLoanInfoResult> {
     return await this.cachedGet('Controller.stats.getLoanInfo', async () => {
       return await this.rpcClient.loan.getLoanInfo()
     }, 299)
+  }
+
+  private async getCachedBurnTotal (): Promise<BigNumber> {
+    return await this.cachedGet('Controller.supply.getBurnedTotal', this.getBurnedTotal.bind(this), 1899)
   }
 
   private async cachedGet<T> (field: string, fetch: () => Promise<T>, ttl: number): Promise<T> {
