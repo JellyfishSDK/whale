@@ -28,9 +28,10 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@f094b77505fb89581e68a1163fbd2fffece39da1
         with:
+          token: ${{ secrets.JELLYFISHSDK_BOT_GITHUB_TOKEN }}
           labels: kind/dependencies
-          committer: DeFiChain Bot <github-bot@defichain.com>
-          author: DeFiChain Bot <github-bot@defichain.com>
+          committer: Jellyfish Bot <bots+github-jellyfish@birthday.dev>
+          author: Jellyfish Bot <bots+github-jellyfish@birthday.dev>
           title: "bump(deps): @defichain/* dependencies"
           commit-message: Bump @defichain/jellyfish dependencies
           body: |
