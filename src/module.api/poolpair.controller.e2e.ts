@@ -167,7 +167,6 @@ describe('list', () => {
     const response = await controller.list({
       size: 30
     })
-    response.data.map(res => console.log(res.id, res.tokenA))
 
     expect(response.data.length).toStrictEqual(12)
     expect(response.page).toBeUndefined()
