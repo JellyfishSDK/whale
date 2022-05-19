@@ -118,8 +118,8 @@ export interface PoolPairData {
     blockCommission: string // BigNumber,
     fee?: {
       pct?: string // BigNumber
-      in?: string // BigNumber
-      out?: string // BigNumber
+      inPct?: string // BigNumber
+      outPct?: string // BigNumber
     }
   }
   tokenB: {
@@ -130,8 +130,8 @@ export interface PoolPairData {
     blockCommission: string // BigNumber
     fee?: {
       pct?: string // BigNumber
-      in?: string // BigNumber
-      out?: string // BigNumber
+      inPct?: string // BigNumber
+      outPct?: string // BigNumber
     }
   }
   priceRatio: {

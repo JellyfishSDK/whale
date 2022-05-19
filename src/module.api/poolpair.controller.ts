@@ -213,8 +213,8 @@ function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNum
       fee: info.dexFeePctTokenA !== undefined
         ? {
             pct: info.dexFeePctTokenA?.toFixed(),
-            in: info.dexFeeInPctTokenA?.toFixed(),
-            out: info.dexFeeOutPctTokenA?.toFixed()
+            inPct: info.dexFeeInPctTokenA?.toFixed(),
+            outPct: info.dexFeeOutPctTokenA?.toFixed()
           }
         : undefined
     },
@@ -227,8 +227,8 @@ function mapPoolPair (id: string, info: PoolPairInfo, totalLiquidityUsd?: BigNum
       fee: info.dexFeePctTokenB !== undefined
         ? {
             pct: info.dexFeePctTokenB?.toFixed(),
-            in: info.dexFeeInPctTokenB?.toFixed(),
-            out: info.dexFeeOutPctTokenB?.toFixed()
+            inPct: info.dexFeeInPctTokenB?.toFixed(),
+            outPct: info.dexFeeOutPctTokenB?.toFixed()
           }
         : undefined
     },

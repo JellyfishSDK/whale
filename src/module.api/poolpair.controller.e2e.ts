@@ -185,8 +185,8 @@ describe('list', () => {
         displaySymbol: 'dB',
         fee: {
           pct: '0.05',
-          in: '0.05',
-          out: '0.05'
+          inPct: '0.05',
+          outPct: '0.05'
         }
       },
       tokenB: {
@@ -197,8 +197,8 @@ describe('list', () => {
         displaySymbol: 'DFI',
         fee: {
           pct: '0.08',
-          in: '0.08',
-          out: '0.08'
+          inPct: '0.08',
+          outPct: '0.08'
         }
       },
       apr: {
@@ -322,7 +322,7 @@ describe('get', () => {
     expect.assertions(2)
     try {
       await controller.get('999')
-    } catch (err) {
+    } catch (err: any) {
       expect(err).toBeInstanceOf(NotFoundException)
       expect(err.response).toStrictEqual({
         statusCode: 404,
