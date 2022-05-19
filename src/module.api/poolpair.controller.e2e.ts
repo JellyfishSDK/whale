@@ -151,6 +151,15 @@ async function setup (): Promise<void> {
 
   await container.call('setgov', [{ LP_SPLITS: { 14: 1.0 } }])
   await container.generate(1)
+
+  // dex fee set up
+  await container.call('setgov', [{
+    ATTRIBUTES: {
+      'v0/poolpairs/14/token_a_fee_pct': '0.05',
+      'v0/poolpairs/14/token_b_fee_pct': '0.08'
+    }
+  }])
+  await container.generate(1)
 }
 
 describe('list', () => {
@@ -158,6 +167,7 @@ describe('list', () => {
     const response = await controller.list({
       size: 30
     })
+    response.data.map(res => console.log(res.id, res.tokenA))
 
     expect(response.data.length).toStrictEqual(12)
     expect(response.page).toBeUndefined()
@@ -173,14 +183,24 @@ describe('list', () => {
         symbol: 'B',
         reserve: '50',
         blockCommission: '0',
-        displaySymbol: 'dB'
+        displaySymbol: 'dB',
+        fee: {
+          pct: '0.05',
+          in: '0.05',
+          out: '0.05'
+        }
       },
       tokenB: {
         id: '0',
         symbol: 'DFI',
         reserve: '300',
         blockCommission: '0',
-        displaySymbol: 'DFI'
+        displaySymbol: 'DFI',
+        fee: {
+          pct: '0.08',
+          in: '0.08',
+          out: '0.08'
+        }
       },
       apr: {
         reward: 2229.42,
@@ -259,14 +279,16 @@ describe('get', () => {
         symbol: 'A',
         reserve: '100',
         blockCommission: '0',
-        displaySymbol: 'dA'
+        displaySymbol: 'dA',
+        fee: undefined
       },
       tokenB: {
         id: '0',
         symbol: 'DFI',
         reserve: '200',
         blockCommission: '0',
-        displaySymbol: 'DFI'
+        displaySymbol: 'DFI',
+        fee: undefined
       },
       apr: {
         reward: 0,
