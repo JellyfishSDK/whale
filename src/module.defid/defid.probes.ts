@@ -7,9 +7,7 @@ import { blockchain as bc } from '@defichain/jellyfish-api-core'
 export class DeFiDProbeIndicator extends ProbeIndicator {
   lastBlock: bc.Block<bc.Transaction> | undefined
 
-  constructor (
-    private readonly client: JsonRpcClient
-  ) {
+  constructor (private readonly client: JsonRpcClient) {
     super()
   }
 
