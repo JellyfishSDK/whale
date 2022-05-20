@@ -67,10 +67,12 @@
       <w>getblockstats</w>
       <w>getburninfo</w>
       <w>getconnectioncount</w>
+      <w>getfutureswapblock</w>
       <w>getgov</w>
       <w>getmintinginfo</w>
       <w>getnetworkhashps</w>
       <w>getnewaddress</w>
+      <w>getpendingfutureswaps</w>
       <w>getrawtransaction</w>
       <w>getreceivedbyaddress</w>
       <w>gettoken</w>
