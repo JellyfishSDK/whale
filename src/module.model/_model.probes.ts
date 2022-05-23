@@ -63,7 +63,7 @@ export class ModelProbeIndicator extends ProbeIndicator {
     }
 
     // index defid can experience rollback, so make sure the condition is only checked if `Model == DeFid`
-    if (index === defid && now() - highest.time >= 90 * 60) {
+    if (index === defid && secondsSince(highest.time) >= 90 * 60) {
       return this.withDead('model', 'defid chain is stale')
     }
 
@@ -71,6 +71,6 @@ export class ModelProbeIndicator extends ProbeIndicator {
   }
 }
 
-function now (): number {
-  return Math.floor(Date.now() / 1000)
+function secondsSince (timeInSeconds: number): number {
+  return (Math.floor(Date.now() / 1000)) - timeInSeconds
 }
