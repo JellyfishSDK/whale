@@ -1,7 +1,7 @@
 import { ProbeIndicator } from '@src/module.health/probe.indicator'
 import { Injectable } from '@nestjs/common'
 import { HealthIndicatorResult } from '@nestjs/terminus'
-import { BlockMapper } from '@src/module.model/block'
+import { Block, BlockMapper } from '@src/module.model/block'
 import { JsonRpcClient } from '@defichain/jellyfish-api-jsonrpc'
 
 @Injectable()
@@ -32,13 +32,15 @@ export class ModelProbeIndicator extends ProbeIndicator {
    * - unable to get the latest block
    * - synced blocks are undefined
    * - synced blocks are more than 2 blocks behind
+   * - synced highest block height is still more than defid after 90 mins
    */
   async readiness (): Promise<HealthIndicatorResult> {
+    let highest: Block
     let index: number | undefined
     let defid: number | undefined
 
     try {
-      index = (await this.block.getHighest())?.height
+      highest = await this.block.getHighest() as Block
       defid = await this.client.blockchain.getBlockCount()
     } catch (err) {
       return this.withDead('model', 'unable to get the latest block')
@@ -59,6 +61,14 @@ export class ModelProbeIndicator extends ProbeIndicator {
       return this.withDead('model', 'synced blocks are more than 2 blocks behind', details)
     }
 
+    if (now() - highest.time >= 90 * 60 && index >= defid) {
+      return this.withDead('model', 'defid chain is stale')
+    }
+
     return this.withAlive('model', details)
   }
+}
+
+function now (): number {
+  return Math.floor(new Date().getTime() / 1000)
 }
