@@ -203,7 +203,7 @@ describe('with peers', () => {
 
   it('/_actuator/probes/readiness stale', async () => {
     // Time travel 100 mins
-    Date.now = jest.fn(() => new Date().getTime() + 6000_000)
+    const mockTime = jest.spyOn(Date, 'now').mockImplementation(() => new Date().getTime() + 6000_000)
 
     const res = await app.inject({
       method: 'GET',
@@ -239,5 +239,7 @@ describe('with peers', () => {
       },
       status: 'error'
     })
+
+    mockTime.mockRestore()
   })
 })
