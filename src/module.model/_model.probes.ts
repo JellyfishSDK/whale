@@ -32,7 +32,7 @@ export class ModelProbeIndicator extends ProbeIndicator {
    * - unable to get the latest block
    * - synced blocks are undefined
    * - synced blocks are more than 2 blocks behind
-   * - synced highest block height is still more than defid after 90 mins
+   * - synced latest block height is not more than 90 mins old
    */
   async readiness (): Promise<HealthIndicatorResult> {
     let highest: Block
@@ -62,7 +62,8 @@ export class ModelProbeIndicator extends ProbeIndicator {
       return this.withDead('model', 'synced blocks are more than 2 blocks behind', details)
     }
 
-    if (now() - highest.time >= 90 * 60 && index >= defid) {
+    // index defid can experience rollback, so make sure the condition is only checked if `Model == DeFid`
+    if (index === defid && now() - highest.time >= 90 * 60) {
       return this.withDead('model', 'defid chain is stale')
     }
 
@@ -71,5 +72,5 @@ export class ModelProbeIndicator extends ProbeIndicator {
 }
 
 function now (): number {
-  return Math.floor(new Date().getTime() / 1000)
+  return Math.floor(Date.now() / 1000)
 }
