@@ -41,6 +41,7 @@ export class ModelProbeIndicator extends ProbeIndicator {
 
     try {
       highest = await this.block.getHighest() as Block
+      index = highest.height
       defid = await this.client.blockchain.getBlockCount()
     } catch (err) {
       return this.withDead('model', 'unable to get the latest block')
