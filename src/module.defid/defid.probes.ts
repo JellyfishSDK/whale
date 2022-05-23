@@ -5,8 +5,6 @@ import { blockchain as bc } from '@defichain/jellyfish-api-core'
 
 @Injectable()
 export class DeFiDProbeIndicator extends ProbeIndicator {
-  lastBlock: bc.Block<bc.Transaction> | undefined
-
   constructor (private readonly client: JsonRpcClient) {
     super()
   }
@@ -29,7 +27,6 @@ export class DeFiDProbeIndicator extends ProbeIndicator {
    * Readiness of DeFiD.
    * - defid is not in initial block download
    * - defid is connected to only count<5 peers
-   * - defid checks stale tip by checking coming block after 90 mins
    */
   async readiness (): Promise<HealthIndicatorResult> {
     let info: bc.BlockchainInfo
