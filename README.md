@@ -2,6 +2,12 @@
 [![codecov](https://codecov.io/gh/JellyfishSDK/whale/branch/main/graph/badge.svg?token=kBCC9qSRrA)](https://codecov.io/gh/JellyfishSDK/whale)
 [![npm](https://img.shields.io/npm/v/@defichain/whale-api-client)](https://www.npmjs.com/package/@defichain/whale-api-client)
 
+## Following the migration path outlined in [jellyfish#580](https://github.com/JellyfishSDK/jellyfish/issues/580), this repository has been consolidated into [JellyfishSDK/jellyfish/apps/whale-api](https://github.com/JellyfishSDK/jellyfish/tree/main/apps/whale-api).
+
+The docker artifact will be renamed
+to [ghcr.io/jellyfishsdk/whale-api](https://github.com/JellyfishSDK/jellyfish/pkgs/container/whale-api). The versions
+of the published npm packages will be bumped to follow jellyfish's release cycle.
+
 # DeFi Whale
 
 The super index for DeFi Blockchain to simplify DeFi light implementation.
